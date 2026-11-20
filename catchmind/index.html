@@ -212,7 +212,7 @@
       </div>
 
       <!-- 우측 하단 제작 정보 표기 -->
-      <div class="flex flex-col items-end gap-0.5 pt-2 text-slate-400 text-xs">
+      <div class="flex flex-col items-end gap-2 pt-2 text-slate-400 text-xs">
         <div class="flex items-center gap-1.5">
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none">
             <defs>
@@ -249,6 +249,12 @@
         <div class="text-slate-400 font-bold">@huklevery26</div>
       </div>
     </section>
+
+    <!-- 메인 화면 배경 우측 하단 오둥게임즈 바로가기 버튼 -->
+    <a id="home-odung-btn" href="https://odunggames.github.io/" target="_blank" rel="noopener noreferrer" class="fixed bottom-5 right-5 sm:bottom-8 sm:right-8 z-30 inline-flex items-center gap-2.5 px-6 py-3 bg-[#234d2b] hover:bg-[#1a3a20] active:scale-95 text-white rounded-full text-base sm:text-lg font-bold shadow-xl border-b-4 border-[#122916] transition">
+      <span class="text-xl sm:text-2xl">🎮</span>
+      <span>오둥게임즈</span>
+    </a>
 
     <!-- 2. 교사 대기실 -->
     <section id="screen-teacher-lobby" class="hidden w-full max-w-6xl bg-[#fffdf7] border-4 border-[#e5d7c3] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-slide-up">
@@ -356,7 +362,11 @@
               <div id="preset-categories-box" class="flex flex-wrap gap-2">
                 <label class="flex items-center space-x-1.5 px-3 py-1.5 bg-[#fdfbf7] rounded-xl border border-[#d9c4a5] cursor-pointer text-xs font-bold text-slate-700">
                   <input type="checkbox" name="quiz-category" value="animal" checked onchange="updateSettings()" class="w-4 h-4 accent-[#ff7a38]">
-                  <span>동물/식물</span>
+                  <span>동물</span>
+                </label>
+                <label class="flex items-center space-x-1.5 px-3 py-1.5 bg-[#fdfbf7] rounded-xl border border-[#d9c4a5] cursor-pointer text-xs font-bold text-slate-700">
+                  <input type="checkbox" name="quiz-category" value="plant" checked onchange="updateSettings()" class="w-4 h-4 accent-[#ff7a38]">
+                  <span>식물/자연</span>
                 </label>
                 <label class="flex items-center space-x-1.5 px-3 py-1.5 bg-[#fdfbf7] rounded-xl border border-[#d9c4a5] cursor-pointer text-xs font-bold text-slate-700">
                   <input type="checkbox" name="quiz-category" value="object" checked onchange="updateSettings()" class="w-4 h-4 accent-[#ff7a38]">
@@ -381,10 +391,6 @@
                 <label class="flex items-center space-x-1.5 px-3 py-1.5 bg-[#fdfbf7] rounded-xl border border-[#d9c4a5] cursor-pointer text-xs font-bold text-slate-700">
                   <input type="checkbox" name="quiz-category" value="places" onchange="updateSettings()" class="w-4 h-4 accent-[#ff7a38]">
                   <span>장소/건물</span>
-                </label>
-                <label class="flex items-center space-x-1.5 px-3 py-1.5 bg-[#fdfbf7] rounded-xl border border-[#d9c4a5] cursor-pointer text-xs font-bold text-slate-700">
-                  <input type="checkbox" name="quiz-category" value="nature" onchange="updateSettings()" class="w-4 h-4 accent-[#ff7a38]">
-                  <span>자연/우주</span>
                 </label>
                 <label id="secret-category-6-2" class="hidden flex items-center space-x-1.5 px-3 py-1.5 bg-amber-50 rounded-xl border-2 border-amber-400 cursor-pointer text-xs font-black text-amber-800 shadow-sm">
                   <input type="checkbox" name="quiz-category" value="class62" onchange="updateSettings()" class="w-4 h-4 accent-[#ff7a38]">
@@ -727,25 +733,22 @@
           </svg>
         </button>
 
-        <!-- 안내 이미지 (파일이 없는 환경에서도 동일하게 보이도록 폴백 카드 포함) -->
-        <img id="launch-notice-img" src="image_e0e8dd.png" alt="오둥캐치마인드 v1.1 업데이트 내역 안내" onerror="this.classList.add('hidden'); document.getElementById('launch-notice-fallback').classList.remove('hidden');" class="w-full h-auto rounded-3xl shadow-2xl border-4 border-[#dfd2bd]">
-
-        <div id="launch-notice-fallback" class="hidden bg-[#fcfaf2] border-4 border-[#dfd2bd] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
+        <div id="launch-notice-fallback" class="bg-[#fcfaf2] border-4 border-[#dfd2bd] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
           <div class="bg-[#dfd2bd] rounded-full py-3 px-6 text-center mx-auto max-w-lg">
-            <h3 class="text-xl sm:text-3xl text-[#234d2b] font-black tracking-wide">오둥캐치마인드 v1.1 업데이트 내역 안내</h3>
+            <h3 class="text-xl sm:text-3xl text-[#234d2b] font-black tracking-wide">오둥캐치마인드 v1.2 업데이트 내역 안내</h3>
           </div>
-          <div class="bg-[#1c4223] border-4 border-[#dfd2bd] rounded-2xl p-5 sm:p-7 text-white text-sm sm:text-lg space-y-4 leading-relaxed shadow-inner">
-            <p class="flex items-start gap-2">
+          <div class="bg-[#1c4223] border-4 border-[#dfd2bd] rounded-2xl p-6 sm:p-8 text-white text-lg sm:text-2xl space-y-4 leading-relaxed shadow-inner">
+            <p class="flex items-start gap-2.5 text-[#ffee58] font-black">
               <span>·</span>
-              <span>테스트 해본 결과 정답 화면에서 채팅이 작성되어 답을 맞춘 사람도 점수를 얻는 오류를 수정하였습니다</span>
+              <span>선생님 이름 적는 칸에 특정 이름을 적으면 <span class="underline decoration-2 underline-offset-4">숨겨진 카테고리</span>가 보여집니다!</span>
             </p>
-            <p class="flex items-start gap-2">
+            <p class="flex items-start gap-2.5">
               <span>·</span>
-              <span>채팅창 도배를 유발하는 학생이 있습니다. 도배를 막기 위해 똑같은 말 3번 이상 시 자동 추방되게 했습니다.</span>
+              <span>오둥게임즈 사이트가 출시되었습니다! 오른쪽 밑 버튼을 눌러 만나보세요.</span>
             </p>
-            <p class="flex items-start gap-2">
+            <p class="flex items-start gap-2.5">
               <span>·</span>
-              <span>선생님 이름 적는 칸에 특정 이름을 적으면 숨겨진 카테고리가 보여집니다!</span>
+              <span>힌트가 깔짝깔짝 거리는 오류를 수정했습니다.</span>
             </p>
           </div>
         </div>
@@ -785,7 +788,7 @@
       nextRoundMode: 'manual', 
       hintMode: 'always', 
       keywordMode: 'preset',
-      categories: ["animal", "object"] 
+      categories: ["animal", "plant", "object"] 
     };
 
     let selectedDrawerQueue = [];
@@ -807,6 +810,11 @@
     let selectingSoundPlayedForRound = null;
     let correctSoundPlayedForRound = null;
 
+    // 라운드 힌트 깜빡임 방지용 상태
+    let hintRevealTimeout = null;
+    let hintScheduledRoundKey = null;
+    let hintRevealedRoundKey = null;
+
     // 첨부된 MP3 파일 직접 연결 및 자동재생 잠금 해제 엔진
     const gameAudioFiles = {
       roundStart: new Audio(encodeURI('라운드가_시작되었습니다!.MP3')),
@@ -822,26 +830,19 @@
     let audioUnlocked = false;
     function unlockAudioEngine() {
       if (audioUnlocked) return;
-      audioUnlocked = true;
       Object.values(gameAudioFiles).forEach(audio => {
         try {
-          const p = audio.play();
-          if (p !== undefined) {
-            p.then(() => {
-              audio.pause();
-              audio.currentTime = 0;
-            }).catch(() => {
-              audioUnlocked = false;
-            });
-          }
-        } catch (e) {
-          audioUnlocked = false;
-        }
+          audio.play().then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audioUnlocked = true;
+          }).catch(() => {});
+        } catch (e) {}
       });
     }
 
     ['pointerdown', 'touchstart', 'keydown', 'click'].forEach(evt => {
-      window.addEventListener(evt, unlockAudioEngine, { passive: true });
+      window.addEventListener(evt, unlockAudioEngine, { passive: true, once: true });
     });
 
     function playGameSound(soundKey) {
@@ -849,12 +850,10 @@
       if (!targetAudio) return;
 
       try {
-        targetAudio.pause();
         targetAudio.currentTime = 0;
         const playPromise = targetAudio.play();
         if (playPromise !== undefined) {
           playPromise.catch(() => {
-            // 파일명 대소문자(.mp3 / .MP3) 차이 폴백 시도
             const fallbackMap = {
               roundStart: '라운드가_시작되었습니다!.mp3',
               selectingRandom: '선생님이 그릴 친구를 선택하고 있습니다!.mp3',
@@ -862,18 +861,26 @@
             };
             const fallbackAudio = new Audio(encodeURI(fallbackMap[soundKey]));
             fallbackAudio.volume = 1.0;
-            fallbackAudio.play().catch(() => {});
+            fallbackAudio.play().catch(err => console.warn("Audio play blocked:", err));
           });
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Audio error:", e);
+      }
     }
 
     const keywordPresets = {
       animal: [
-        "호랑이", "사자", "토끼", "강아지", "고양이", "코끼리", "기린", "펭귄", "장미", "해바라기",
+        "호랑이", "사자", "토끼", "강아지", "고양이", "코끼리", "기린", "펭귄",
         "다람쥐", "얼룩말", "하늘소", "독수리", "올빼미", "캥거루", "돌고래", "상어", "문어", "오징어",
-        "개구리", "카멜레온", "공룡", "선인장", "민들레", "튤립", "소나무", "단풍잎", "나비", "꿀벌",
-        "여우", "늑대", "낙타", "북극곰", "플라밍고", "수달", "치타", "하마", "코뿔소", "고슴도치"
+        "개구리", "카멜레온", "공룡", "나비", "꿀벌", "여우", "늑대", "낙타", "북극곰", "플라밍고",
+        "수달", "치타", "하마", "코뿔소", "고슴도치"
+      ],
+      plant: [
+        "장미", "해바라기", "선인장", "민들레", "튤립", "소나무", "단풍잎", "벚꽃", "대나무", "화산",
+        "지진", "번개", "무지개", "오로라", "태풍", "빙하", "사막", "동굴", "폭포", "태양",
+        "달", "지구", "토성", "목성", "혜성", "블랙홀", "은하수", "인공위성", "우주선", "남극",
+        "북극", "밀림", "열대우림", "산맥", "섬", "해구", "갯벌", "눈사람"
       ],
       object: [
         "연필", "지우개", "공책", "책상", "의자", "시계", "가방", "가위", "필통", "자",
@@ -907,15 +914,46 @@
         "수족관", "동물원", "영화관", "백화점", "마트", "우체국", "은행", "공원", "해수욕장", "캠핑장",
         "경기장", "수영장", "카페", "식당", "제과점", "약국", "전망대", "등대", "주유소", "남산타워"
       ],
-      nature: [
-        "화산", "지진", "번개", "무지개", "오로라", "태풍", "빙하", "사막", "동굴", "폭포",
-        "태양", "달", "지구", "토성", "목성", "혜성", "블랙홀", "은하수", "인공위성", "우주선",
-        "남극", "북극", "밀림", "열대우림", "산맥", "섬", "해구", "갯벌", "단풍", "눈사람"
-      ],
       class62: [
         "권호", "나윤설", "심효준", "양민재", "유보현", "유윤재", "윤서온", "이은진", "임도연", "전연서", "조재윤", "황현재"
       ]
     };
+
+    const categoryLabelMap = {
+      animal: "동물",
+      plant: "식물/자연",
+      object: "학용품/사물",
+      history: "역사/문화재",
+      food: "음식/간식",
+      sports: "스포츠/운동",
+      jobs: "직업/인물",
+      places: "장소/건물",
+      class62: "6-2반 학생들"
+    };
+
+    function clearHintTimers() {
+      if (hintRevealTimeout) {
+        clearTimeout(hintRevealTimeout);
+        hintRevealTimeout = null;
+      }
+      hintScheduledRoundKey = null;
+      hintRevealedRoundKey = null;
+    }
+
+    function getCategoryForKeyword(keyword, fallbackCategory) {
+      if (fallbackCategory && Object.values(categoryLabelMap).includes(fallbackCategory)) {
+        const matchedEntries = Object.entries(keywordPresets).filter(([, list]) => list.includes(keyword));
+        if (matchedEntries.some(([, list]) => list.includes(keyword) && categoryLabelMap[matchedEntries.find(([k]) => list.includes(keyword))[0]] === fallbackCategory)) {
+          return fallbackCategory;
+        }
+      }
+      for (const [catKey, list] of Object.entries(keywordPresets)) {
+        if (list.includes(keyword)) {
+          return categoryLabelMap[catKey] || fallbackCategory || "일반";
+        }
+      }
+      return fallbackCategory || "일반";
+    }
 
     function getCanvasCoordinates(e) {
       if (!canvas) return { x: 0, y: 0 };
@@ -1054,7 +1092,7 @@
       renderTimerOptions();
 
       try {
-        if (localStorage.getItem('catchmind_hide_launch_notice_v1') !== 'true') {
+        if (localStorage.getItem('catchmind_hide_launch_notice_v1_2') !== 'true') {
           const launchModal = document.getElementById('launch-notice-modal');
           if (launchModal) launchModal.classList.remove('hidden');
         }
@@ -1103,6 +1141,7 @@
         roomUnsubscribe();
         roomUnsubscribe = null;
       }
+      clearHintTimers();
 
       const headerUserTag = document.getElementById('header-user-tag');
       if (headerUserTag) headerUserTag.classList.add('hidden');
@@ -1130,6 +1169,15 @@
       });
       const target = document.getElementById(screenId);
       if (target) target.classList.remove('hidden');
+
+      const odungBtn = document.getElementById('home-odung-btn');
+      if (odungBtn) {
+        if (screenId === 'screen-home') {
+          odungBtn.classList.remove('hidden');
+        } else {
+          odungBtn.classList.add('hidden');
+        }
+      }
     }
 
     function selectRounds(count) {
@@ -1191,9 +1239,9 @@
     function handleDontShowNoticeChange(isChecked) {
       try {
         if (isChecked) {
-          localStorage.setItem('catchmind_hide_launch_notice_v1', 'true');
+          localStorage.setItem('catchmind_hide_launch_notice_v1_2', 'true');
         } else {
-          localStorage.removeItem('catchmind_hide_launch_notice_v1');
+          localStorage.removeItem('catchmind_hide_launch_notice_v1_2');
         }
       } catch (e) {}
     }
@@ -1202,7 +1250,7 @@
       const checkbox = document.getElementById('dont-show-launch-notice');
       if (checkbox && checkbox.checked) {
         try {
-          localStorage.setItem('catchmind_hide_launch_notice_v1', 'true');
+          localStorage.setItem('catchmind_hide_launch_notice_v1_2', 'true');
         } catch (e) {}
       }
       const modal = document.getElementById('launch-notice-modal');
@@ -1243,26 +1291,20 @@
       teacherName = nameInput;
       roomCode = String(Math.floor(1000 + Math.random() * 9000));
 
+      const secretCatEl = document.getElementById('secret-category-6-2');
+      if (secretCatEl) {
+        if (teacherName.replace(/\s+/g, '') === '이태양선생님') {
+          secretCatEl.classList.remove('hidden');
+        } else {
+          secretCatEl.classList.add('hidden');
+        }
+      }
+
       document.getElementById('header-user-tag').classList.remove('hidden');
       document.getElementById('user-role-label').innerText = '교사';
       document.getElementById('user-name-label').innerText = teacherName;
       document.getElementById('teacher-room-code').innerText = roomCode;
       document.getElementById('modal-room-code').innerText = roomCode;
-
-      const normalizedTeacher = nameInput.replace(/\s+/g, '');
-      const secretCatLabel = document.getElementById('secret-category-6-2');
-      if (secretCatLabel) {
-        if (normalizedTeacher === '어르신티쳐') {
-          secretCatLabel.classList.remove('hidden');
-        } else {
-          secretCatLabel.classList.add('hidden');
-          const secretInput = secretCatLabel.querySelector('input');
-          if (secretInput) secretInput.checked = false;
-          updateSettings();
-        }
-      }
-
-      drawnStudentsCycle = [];
 
       showScreen('screen-teacher-lobby');
 
@@ -1279,8 +1321,8 @@
         scores: initialScores,
         currentRound: 1,
         strokes: [],
-        keyword: '대한민국',
-        categoryName: '동물/식물',
+        keyword: '호랑이',
+        categoryName: '동물',
         drawer: '',
         chat: [],
         correctSolvers: [],
@@ -1320,7 +1362,6 @@
       lastSentMessage = '';
       sameMessageCount = 0;
       hasAnsweredCorrectlyThisRound = false;
-      renderedChatIds.clear();
 
       document.getElementById('header-user-tag').classList.remove('hidden');
       document.getElementById('user-role-label').innerText = '학생';
@@ -1382,7 +1423,7 @@
       showFinalRankModal(roomData?.scores || {});
     }
 
-    async function leaveRoom(customNoticeText = "방을 나가셨습니다.", spamKickMessage = null) {
+    async function leaveRoom(customNoticeText = "방을 나가셨습니다.", systemChatMessage = null) {
       if (roomUnsubscribe) {
         roomUnsubscribe();
         roomUnsubscribe = null;
@@ -1395,21 +1436,18 @@
           const snap = await getDoc(roomRef);
           if (snap.exists()) {
             const snapData = snap.data();
-            let list = snapData.students || [];
-            list = list.filter(s => s !== studentName);
-
+            let list = (snapData.students || []).filter(s => s !== studentName);
             const updatePayload = { students: list };
-            if (spamKickMessage) {
+            if (systemChatMessage) {
               const chatList = snapData.chat || [];
               chatList.push({
                 sender: '시스템',
-                text: spamKickMessage,
+                text: systemChatMessage,
                 isSystemWarning: true,
                 id: Date.now()
               });
               updatePayload.chat = chatList;
             }
-
             await updateDoc(roomRef, updatePayload);
           }
         } catch (err) {
@@ -1476,6 +1514,7 @@
       if (data.status === 'lobby') {
         if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
         if (turnSwitchTimeout) { clearTimeout(turnSwitchTimeout); turnSwitchTimeout = null; }
+        clearHintTimers();
         timerStarted = false;
         isLastSpurt = false;
         lastSetupRoundNum = null;
@@ -1538,7 +1577,6 @@
         const resultModal = document.getElementById('round-result-modal');
         if (resultModal) resultModal.classList.add('hidden');
 
-        // "선생님이 선택" 모드에서 매 라운드 그릴 친구를 선택할 때만 사운드 재생
         const roundNum = data.currentRound || 1;
         const teacherSelectKey = `teacher_select_round_${roundNum}`;
         if (selectingSoundPlayedForRound !== teacherSelectKey) {
@@ -1575,8 +1613,8 @@
     }
 
     function pickKeywordAndCategory() {
-      let selectedKeyword = "대한민국";
-      let categoryName = "기본";
+      let selectedKeyword = "호랑이";
+      let categoryName = "동물";
 
       if (gameSettings.keywordMode === 'custom') {
         const raw = document.getElementById('custom-keywords-input').value.trim();
@@ -1590,15 +1628,9 @@
       } else {
         const cats = (gameSettings.categories && gameSettings.categories.length > 0) ? gameSettings.categories : ["animal"];
         const catKey = cats[Math.floor(Math.random() * cats.length)];
-        const pool = keywordPresets[catKey] || ["사과"];
+        const pool = keywordPresets[catKey] || keywordPresets.animal;
         selectedKeyword = pool[Math.floor(Math.random() * pool.length)];
-
-        const catNames = {
-          animal: "동물/식물", object: "학용품/사물", history: "역사/문화재", food: "음식/간식",
-          sports: "스포츠/운동", jobs: "직업/인물", places: "장소/건물", nature: "자연/우주",
-          class62: "6-2반 학생들"
-        };
-        categoryName = catNames[catKey] || "일반";
+        categoryName = categoryLabelMap[catKey] || getCategoryForKeyword(selectedKeyword, "일반");
       }
       return { selectedKeyword, categoryName };
     }
@@ -1885,6 +1917,7 @@
           clearTimeout(turnSwitchTimeout);
           turnSwitchTimeout = null;
         }
+        clearHintTimers();
         timerStarted = false;
         isLastSpurt = false;
         const lastSpurtEl = document.getElementById('last-spurt-overlay');
@@ -1952,17 +1985,36 @@
       }
 
       const hintBox = document.getElementById('game-hint-box');
-      if (data.settings?.hintMode === 'always') {
-        hintBox.innerHTML = `힌트 : ${data.categoryName || '카테고리'}`;
+      const accurateCategory = getCategoryForKeyword(data.keyword, data.categoryName || '카테고리');
+      const roundHintKey = `${roundNum}_${drawerName}_${data.drawerTurnIndex || 0}_${data.keyword || ''}`;
+      const hintMode = data.settings?.hintMode || 'always';
+
+      if (hintMode === 'always') {
+        hintBox.innerHTML = `힌트 : ${accurateCategory}`;
         hintBox.classList.remove('hidden');
-      } else if (data.settings?.hintMode === 'middle') {
-        hintBox.innerHTML = `힌트 : ??? (10초 후 공개)`;
+      } else if (hintMode === 'middle') {
         hintBox.classList.remove('hidden');
-        setTimeout(() => {
-          if (roomData && roomData.status === 'playing') {
-            hintBox.innerHTML = `힌트 : ${data.categoryName || '카테고리'}`;
+        if (hintRevealedRoundKey === roundHintKey) {
+          hintBox.innerHTML = `힌트 : ${accurateCategory}`;
+        } else {
+          hintBox.innerHTML = `힌트 : ??? (10초 후 공개)`;
+          if (hintScheduledRoundKey !== roundHintKey) {
+            if (hintRevealTimeout) clearTimeout(hintRevealTimeout);
+            hintScheduledRoundKey = roundHintKey;
+            hintRevealTimeout = setTimeout(() => {
+              hintRevealedRoundKey = roundHintKey;
+              hintRevealTimeout = null;
+              if (roomData && roomData.status === 'playing' && (roomData.currentRound || 1) === roundNum) {
+                const currentHintBox = document.getElementById('game-hint-box');
+                const latestCat = getCategoryForKeyword(roomData.keyword, roomData.categoryName || accurateCategory);
+                if (currentHintBox) {
+                  currentHintBox.innerHTML = `힌트 : ${latestCat}`;
+                  currentHintBox.classList.remove('hidden');
+                }
+              }
+            }, 10000);
           }
-        }, 10000);
+        }
       } else {
         hintBox.classList.add('hidden');
       }
@@ -2007,7 +2059,6 @@
           }
           overlay.classList.remove('hidden');
 
-          // "(참여자 이름)님이 그릴 수 있어요!" / "내가 그려야 해요!" 메시지 등장 시 사운드 재생
           playGameSound('roundStart');
 
           setTimeout(() => {
@@ -2236,6 +2287,7 @@
         clearInterval(timerInterval);
         timerInterval = null;
       }
+      clearHintTimers();
       timerStarted = false;
       isLastSpurt = false;
       const lastSpurtEl = document.getElementById('last-spurt-overlay');
@@ -2278,6 +2330,7 @@
         clearInterval(timerInterval);
         timerInterval = null;
       }
+      clearHintTimers();
       timerStarted = false;
       isLastSpurt = false;
       const lastSpurtEl = document.getElementById('last-spurt-overlay');
@@ -2309,7 +2362,6 @@
         earnedScore.innerText = `+${data.earnedPoints || 0}점 획득!`;
         earnedScore.classList.remove('hidden');
 
-        // 정답을 맞췄을 때 정답 효과음 재생 (라운드당 1회)
         const roundNum = data.currentRound || 1;
         const correctKey = `correct_round_${roundNum}_${data.solver}`;
         if (correctSoundPlayedForRound !== correctKey) {
@@ -2381,6 +2433,7 @@
     async function skipRoundByTeacher() {
       if (!isTeacher) return;
       if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      clearHintTimers();
       
       const updateData = {
         status: 'round_ended',
@@ -2409,6 +2462,7 @@
         clearInterval(timerInterval);
         timerInterval = null;
       }
+      clearHintTimers();
       timerStarted = false;
       isLastSpurt = false;
       const lastSpurtEl = document.getElementById('last-spurt-overlay');
