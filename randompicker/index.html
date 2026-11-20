@@ -9,16 +9,17 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css');
+
         @font-face {
-            font-family: 'BMJUA';
-            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
+            font-family: 'Galmuri11';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2506-1@1.0/Galmuri11-Bold.woff2') format('woff2');
+            font-weight: 700;
             font-display: swap;
         }
 
         body {
-            font-family: 'BMJUA', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Galmuri11', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #2c1608;
             background-image: 
                 linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
@@ -745,19 +746,19 @@
             let instantRankedList = [];
 
             if (isInstant) {
-                // [한 번에 뽑기] 명단 순서대로 1~N번(N명)을 가져온 뒤, 1등~N등 순위를 랜덤으로 배정
-                const selectedStudents = eligible.slice(0, actualCount);
-                const ranks = Array.from({ length: actualCount }, (_, idx) => idx + 1);
-                for (let i = ranks.length - 1; i > 0; i--) {
+                // [한 번에 뽑기] 인원수만큼 랜덤으로 뽑아 1등부터 순서대로 배정 (일반 뽑기와 동일한 추첨 방식)
+                const shuffled = [...eligible];
+                for (let i = shuffled.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
-                    [ranks[i], ranks[j]] = [ranks[j], ranks[i]];
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
                 }
+                const selectedStudents = shuffled.slice(0, actualCount);
 
                 instantRankedList = selectedStudents.map((stu, idx) => {
                     if (noRepeat) {
                         stu.picked = true;
                     }
-                    return { student: stu, rank: ranks[idx] };
+                    return { student: stu, rank: idx + 1 };
                 });
                 saveState();
 
