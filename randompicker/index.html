@@ -9,17 +9,16 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css');
-
         @font-face {
-            font-family: 'Galmuri11';
-            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2506-1@1.0/Galmuri11-Bold.woff2') format('woff2');
-            font-weight: 700;
+            font-family: 'BMJUA';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
             font-display: swap;
         }
 
         body {
-            font-family: 'Galmuri11', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'BMJUA', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #2c1608;
             background-image: 
                 linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
@@ -227,7 +226,7 @@
                         <button onclick="setDrawCount(5)" class="draw-cnt-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer" data-cnt="5">5명</button>
                         <div class="flex items-center gap-1.5 ml-auto">
                             <span class="text-xs text-slate-400 font-bold">직접:</span>
-                            <input type="number" id="custom-draw-count" min="1" max="50" value="1" onchange="setDrawCount(this.value)" class="w-14 px-2 py-1.5 bg-[#120e24] border-2 border-[#3b3363] text-amber-300 text-xs sm:text-sm font-bold text-center focus:outline-none focus:border-amber-400" title="직접 입력">
+                            <input type="number" id="custom-draw-count" min="1" max="50" value="1" oninput="setDrawCount(this.value, true)" onchange="setDrawCount(this.value, false)" class="w-14 px-2 py-1.5 bg-[#120e24] border-2 border-[#3b3363] text-amber-300 text-xs sm:text-sm font-bold text-center focus:outline-none focus:border-amber-400" title="직접 입력">
                             <span class="text-xs text-slate-300 font-bold">명</span>
                         </div>
                     </div>
@@ -585,22 +584,27 @@
             return `(${num})`;
         }
 
-        function setDrawCount(cnt) {
+        function setDrawCount(cnt, isTyping = false) {
             if (isAnimating) return;
+            const inputEl = document.getElementById('custom-draw-count');
+            if (isTyping && cnt === '') return;
+
             let parsed = parseInt(cnt, 10);
             if (isNaN(parsed) || parsed < 1) parsed = 1;
             if (parsed > 50) parsed = 50;
             drawCount = parsed;
 
-            document.getElementById('custom-draw-count').value = drawCount;
+            if (!isTyping) {
+                inputEl.value = drawCount;
+            }
             document.getElementById('drop-counter-badge').textContent = `0 / ${drawCount}`;
 
             document.querySelectorAll('.draw-cnt-btn').forEach(btn => {
                 const btnCnt = parseInt(btn.dataset.cnt, 10);
                 if (btnCnt === drawCount) {
-                    btn.className = 'draw-cnt-btn px-3 py-1.5 text-xs font-bold border-2 border-amber-400 bg-amber-400 text-[#121629] cursor-pointer';
+                    btn.className = 'draw-cnt-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold border-2 border-amber-400 bg-amber-400 text-[#121629] cursor-pointer';
                 } else {
-                    btn.className = 'draw-cnt-btn px-3 py-1.5 text-xs font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer';
+                    btn.className = 'draw-cnt-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer';
                 }
             });
         }
@@ -682,6 +686,12 @@
         async function startClawSequence(isInstant = false) {
             if (isAnimating) return;
 
+            // 뽑기 시작 직전 직접 입력 칸의 최신 숫자를 한 번 더 확실하게 동기화
+            const customVal = parseInt(document.getElementById('custom-draw-count').value, 10);
+            if (!isNaN(customVal) && customVal >= 1) {
+                drawCount = Math.min(customVal, 50);
+            }
+
             const eligible = getEligibleStudents();
             if (eligible.length === 0) {
                 showToast('뽑을 수 있는 학생이 없습니다! 초기화 또는 출석을 확인해 주세요.');
@@ -732,18 +742,23 @@
             const noRepeat = document.getElementById('no-repeat-checkbox').checked;
 
             const turnWinners = [];
+            let instantRankedList = [];
 
             if (isInstant) {
-                // [한 번에 뽑기] N명을 미리 추첨한 뒤 집게가 1회만 왕복하며 한꺼번에 투하
-                for (let i = 0; i < actualCount; i++) {
-                    const currentPool = getEligibleStudents();
-                    if (currentPool.length === 0) break;
-                    const chosen = currentPool[Math.floor(Math.random() * currentPool.length)];
-                    turnWinners.push(chosen);
-                    if (noRepeat) {
-                        chosen.picked = true;
-                    }
+                // [한 번에 뽑기] 명단 순서대로 1~N번(N명)을 가져온 뒤, 1등~N등 순위를 랜덤으로 배정
+                const selectedStudents = eligible.slice(0, actualCount);
+                const ranks = Array.from({ length: actualCount }, (_, idx) => idx + 1);
+                for (let i = ranks.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [ranks[i], ranks[j]] = [ranks[j], ranks[i]];
                 }
+
+                instantRankedList = selectedStudents.map((stu, idx) => {
+                    if (noRepeat) {
+                        stu.picked = true;
+                    }
+                    return { student: stu, rank: ranks[idx] };
+                });
                 saveState();
 
                 carriage.style.left = '55%';
@@ -778,7 +793,7 @@
                 clawHead.classList.remove('claw-closed');
                 clawHead.classList.add('claw-open');
                 grabbedCapsule.classList.add('hidden');
-                document.getElementById('drop-counter-badge').textContent = `${turnWinners.length} / ${actualCount}`;
+                document.getElementById('drop-counter-badge').textContent = `${instantRankedList.length} / ${actualCount}`;
                 await sleep(100);
             } else {
                 // [뽑기 시작!] N번 왕복 애니메이션 (인원이 많을수록 더 빠르게 동작)
@@ -851,37 +866,54 @@
             carriage.style.left = '50%';
             windowBox.classList.remove('crane-fast');
             statusText.textContent = 'COMPLETE!';
-            progressBadge.textContent = isInstant ? `1등 ~ ${turnWinners.length}등 발표!` : `총 ${turnWinners.length}명 당첨!`;
 
-            const cardsHtml = turnWinners.map((w, idx) => {
-                const rankLabel = isInstant ? `${idx + 1}등` : getCircledNumber(idx + 1);
-                const cardStyle = (isInstant && idx === 0)
-                    ? 'from-yellow-300 via-amber-400 to-orange-400'
-                    : 'from-amber-300 to-amber-400';
+            if (isInstant) {
+                progressBadge.textContent = `1~${instantRankedList.length}번 랜덤 등수!`;
 
-                return `
-                    <div class="animate-pop-in px-2.5 py-2 bg-gradient-to-r ${cardStyle} text-[#121629] border-2 border-black shadow-[3px_3px_0px_#000] flex items-center gap-1.5 text-left" style="animation-delay: ${idx * 0.04}s;">
-                        <span class="text-xs sm:text-sm font-bold shrink-0 px-1.5 py-0.5 bg-black text-amber-300 rounded-sm">${rankLabel}</span>
+                winnersBox.innerHTML = instantRankedList.map((item, idx) => {
+                    const isFirst = item.rank === 1;
+                    const cardStyle = isFirst
+                        ? 'from-yellow-300 via-amber-400 to-orange-400'
+                        : 'from-amber-300 to-amber-400';
+
+                    return `
+                        <div class="animate-pop-in px-2.5 py-2 bg-gradient-to-r ${cardStyle} text-[#121629] border-2 border-black shadow-[3px_3px_0px_#000] flex items-center justify-between gap-1.5 text-left" style="animation-delay: ${idx * 0.03}s;">
+                            <span class="text-xs sm:text-sm font-bold truncate">${escapeHtml(item.student.name)}</span>
+                            <span class="text-xs sm:text-sm font-bold shrink-0 px-1.5 py-0.5 bg-black text-amber-300 rounded-sm">${item.rank}등</span>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('modal-winners-list').innerHTML = instantRankedList.map((item) => {
+                    const isFirst = item.rank === 1;
+                    const modalCardStyle = isFirst
+                        ? 'from-yellow-200 via-amber-400 to-orange-500'
+                        : 'from-amber-300 to-orange-400';
+
+                    return `
+                        <div class="px-3 py-2.5 bg-gradient-to-r ${modalCardStyle} text-[#121629] border-[3px] border-black shadow-[4px_4px_0px_#000] flex items-center justify-between gap-2 text-left">
+                            <span class="text-base sm:text-lg font-bold truncate">${escapeHtml(item.student.name)}</span>
+                            <span class="text-sm sm:text-base font-bold shrink-0 px-2 py-0.5 bg-black text-amber-300 rounded-sm">${item.rank}등</span>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                progressBadge.textContent = `총 ${turnWinners.length}명 당첨!`;
+
+                winnersBox.innerHTML = turnWinners.map((w, idx) => `
+                    <div class="animate-pop-in px-2.5 py-2 bg-gradient-to-r from-amber-300 to-amber-400 text-[#121629] border-2 border-black shadow-[3px_3px_0px_#000] flex items-center gap-1.5 text-left" style="animation-delay: ${idx * 0.04}s;">
+                        <span class="text-xs sm:text-sm font-bold shrink-0 px-1.5 py-0.5 bg-black text-amber-300 rounded-sm">${getCircledNumber(idx + 1)}</span>
                         <span class="text-xs sm:text-sm font-bold truncate">${escapeHtml(w.name)}</span>
                     </div>
-                `;
-            }).join('');
+                `).join('');
 
-            winnersBox.innerHTML = cardsHtml;
-
-            document.getElementById('modal-winners-list').innerHTML = turnWinners.map((w, idx) => {
-                const rankLabel = isInstant ? `${idx + 1}등` : getCircledNumber(idx + 1);
-                const modalCardStyle = (isInstant && idx === 0)
-                    ? 'from-yellow-200 via-amber-400 to-orange-500'
-                    : 'from-amber-300 to-orange-400';
-
-                return `
-                    <div class="px-3 py-2.5 bg-gradient-to-r ${modalCardStyle} text-[#121629] border-[3px] border-black shadow-[4px_4px_0px_#000] flex items-center gap-2 text-left">
-                        <span class="text-sm sm:text-base font-bold shrink-0 px-2 py-0.5 bg-black text-amber-300 rounded-sm">${rankLabel}</span>
+                document.getElementById('modal-winners-list').innerHTML = turnWinners.map((w, idx) => `
+                    <div class="px-3 py-2.5 bg-gradient-to-r from-amber-300 to-orange-400 text-[#121629] border-[3px] border-black shadow-[4px_4px_0px_#000] flex items-center gap-2 text-left">
+                        <span class="text-sm sm:text-base font-bold shrink-0 px-2 py-0.5 bg-black text-amber-300 rounded-sm">${getCircledNumber(idx + 1)}</span>
                         <span class="text-base sm:text-lg font-bold truncate">${escapeHtml(w.name)}</span>
                     </div>
-                `;
-            }).join('');
+                `).join('');
+            }
 
             updateStatusUI();
             sfxFanfare();
