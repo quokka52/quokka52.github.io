@@ -337,7 +337,8 @@
                 iconBg: 'from-sky-400 to-cyan-500',
                 icon: '🕹️',
                 actionLabel: '▶ 이동하기',
-                isReady: true
+                isReady: true,
+                openAsPopup: true
             },
             {
                 id: 'randomseat',
@@ -353,7 +354,8 @@
                 iconBg: 'from-pink-400 to-rose-500',
                 icon: '🪑',
                 actionLabel: '▶ 이동하기',
-                isReady: true
+                isReady: true,
+                openAsPopup: true
             }
         ];
 
@@ -490,11 +492,19 @@
             const actionContainer = document.getElementById('modal-action-container');
             if (game.isReady) {
                 const buttonText = game.actionLabel || '▶ 게임 시작';
-                actionContainer.innerHTML = `
-                    <a href="${game.url}" class="block w-full bg-amber-400 text-[#1e193b] text-center font-bold py-3.5 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_6px_0px_#000] active:translate-y-1 active:shadow-[0_0_0_#000] transition-all">
-                        ${buttonText}
-                    </a>
-                `;
+                if (game.openAsPopup) {
+                    actionContainer.innerHTML = `
+                        <button onclick="window.open('${game.url}', '_blank', 'width=1280,height=800,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes')" class="block w-full bg-amber-400 text-[#1e193b] text-center font-bold py-3.5 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_6px_0px_#000] active:translate-y-1 active:shadow-[0_0_0_#000] transition-all cursor-pointer">
+                            ${buttonText}
+                        </button>
+                    `;
+                } else {
+                    actionContainer.innerHTML = `
+                        <a href="${game.url}" class="block w-full bg-amber-400 text-[#1e193b] text-center font-bold py-3.5 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_6px_0px_#000] active:translate-y-1 active:shadow-[0_0_0_#000] transition-all">
+                            ${buttonText}
+                        </a>
+                    `;
+                }
             } else {
                 actionContainer.innerHTML = `
                     <button onclick="showToast('${game.title}은(는) 현재 열심히 개발 중입니다!')" class="w-full bg-[#120e24] border-2 border-amber-400 text-amber-400 text-center font-bold py-3 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[0_0_0_#000] transition-all cursor-pointer">
