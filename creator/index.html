@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odung Games - 제작자 관리실</title>
+    <!-- 파비콘 설정 -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='40' fill='%23FFA400'/%3E%3Cpath d='M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z' fill='%23FFFFFF' stroke='%23000000' stroke-width='9' stroke-linejoin='round'/%3E%3Cellipse cx='85' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='85' cy='95' r='4.5' fill='%23000000'/%3E%3Cellipse cx='115' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='115' cy='95' r='4.5' fill='%23000000'/%3E%3Cpath d='M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z' fill='%23FFA400' stroke='%23000000' stroke-width='6.5' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'Mona12';
+            src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/2611030023@color-1792-1712/color-1792-1712/Mona12.woff2') format('woff2');
+            font-weight: 400;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Mona12';
+            src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/2611030026@color-1792-1713/color-1792-1713/Mona12.woff2') format('woff2');
+            font-weight: 700;
+            font-display: swap;
+        }
+        body {
+            font-family: 'Mona12', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #161026;
+            background-image: 
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(139, 92, 246, 0.06) 1px, transparent 1px),
+                linear-gradient(rgba(139, 92, 246, 0.06) 1px, transparent 1px);
+            background-size: 100% 4px, 28px 28px, 28px 28px;
+            color: #ffffff;
+        }
+        .arcade-title {
+            background: linear-gradient(180deg, #ffe047 0%, #ff9900 55%, #ff5e00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0px 3px 0px #7c2d12);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 selection:bg-amber-400 selection:text-slate-950">
+
+    <!-- 1. 제작자 로그인 섹션 -->
+    <div id="login-section" class="w-full max-w-md bg-[#1c1738] border-[3px] border-[#4ade80] p-6 sm:p-8 shadow-[0_0_25px_rgba(74,222,128,0.2)]">
+        <div class="flex flex-col items-center text-center mb-6">
+            <div class="w-14 h-14 rounded-lg overflow-hidden bg-[#FFA400] border-2 border-black shadow-[3px_3px_0px_#000] mb-3">
+                <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="200" height="200" fill="#FFA400" />
+                    <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin="round" />
+                    <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
+                    <circle cx="85" cy="95" r="4.5" fill="#000000" />
+                    <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
+                    <circle cx="115" cy="95" r="4.5" fill="#000000" />
+                    <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="6.5" stroke-linejoin="round" />
+                </svg>
+            </div>
+            <h1 class="arcade-title text-2xl sm:text-3xl font-bold mb-1">CREATOR LOGIN</h1>
+            <p class="text-xs text-slate-400">제작자 계정으로 로그인해 서버를 관리하세요</p>
+        </div>
+
+        <form id="login-form" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-amber-300 mb-1.5">아이디 (ID)</label>
+                <input type="text" id="creator-id" required autocomplete="off"
+                       class="w-full px-3.5 py-2.5 bg-[#120e24] border-2 border-[#3b3363] focus:border-[#4ade80] outline-none text-sm text-white"
+                       placeholder="아이디 입력">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-amber-300 mb-1.5">비밀번호 (PASSWORD)</label>
+                <input type="password" id="creator-pw" required
+                       class="w-full px-3.5 py-2.5 bg-[#120e24] border-2 border-[#3b3363] focus:border-[#4ade80] outline-none text-sm text-white"
+                       placeholder="비밀번호 입력">
+            </div>
+
+            <p id="login-error" class="hidden text-xs text-rose-400 font-bold text-center pt-1">
+                ⚠️ 아이디 또는 비밀번호가 일치하지 않습니다.
+            </p>
+
+            <button type="submit" 
+                    class="w-full py-3 mt-2 bg-[#4ade80] hover:brightness-110 text-[#121629] font-bold text-sm tracking-wider shadow-[0_4px_0_rgba(0,0,0,0.5)] cursor-pointer transition-transform active:translate-y-0.5">
+                ▶ 로그인
+            </button>
+        </form>
+    </div>
+
+    <!-- 2. 제작자 대시보드 (로그인 성공 시 표시) -->
+    <div id="dashboard-section" class="hidden w-full max-w-4xl">
+        <header class="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b-2 border-[#2a224d]">
+            <div class="flex items-center gap-3">
+                <span class="px-2.5 py-1 bg-amber-400 text-[#121629] text-xs font-bold">CREATOR MODE</span>
+                <h1 class="arcade-title text-2xl sm:text-3xl font-bold">오둥 오락실 서버 관리</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="../" class="px-3 py-1.5 bg-[#1e193b] border-2 border-[#3b3363] hover:border-white text-xs font-bold text-slate-300">
+                    메인으로 이동
+                </a>
+                <button id="logout-btn" class="px-3 py-1.5 bg-rose-950/60 border-2 border-rose-500/70 hover:bg-rose-600 hover:text-white text-xs font-bold text-rose-300 cursor-pointer">
+                    로그아웃
+                </button>
+            </div>
+        </header>
+
+        <!-- 상태 안내 알림 배너 -->
+        <div id="status-banner" class="hidden mb-6 p-4 bg-[#121629] border-2 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.25)] flex items-center gap-3">
+            <span class="text-xl">📢</span>
+            <p id="status-banner-text" class="text-xs sm:text-sm font-bold text-amber-300 leading-relaxed"></p>
+        </div>
+
+        <!-- 게임 목록 그리드 -->
+        <div id="creator-games-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 자바스크립트로 게임 카드 렌더링 -->
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_ID = 'huklevery26';
+        const ADMIN_PW = 'yso100400!!';
+        const SYNC_URL = 'https://kvdb.io/A2x9P7mK4vR8nL3qW5zT1/odunggames_server_status';
+
+        const gamesList = [
+            {
+                id: 'catchmind',
+                gameNumber: 'GAME 01',
+                title: '캐치마인드 (CatchMind)',
+                description: '제시어를 보고 그림을 그리면 친구들이 정답을 맞추는 실시간 그림 퀴즈 게임!',
+                themeColor: '#4ade80',
+                icon: '🎨',
+                isReady: true
+            },
+            {
+                id: 'coming-soon-1',
+                gameNumber: 'GAME 02',
+                title: '오둥이 피하기',
+                description: '하늘에서 떨어지는 장애물을 피해 최고 점수에 도전하는 아케이드 게임입니다.',
+                themeColor: '#a78bfa',
+                icon: '🏃',
+                isReady: false
+            },
+            {
+                id: 'coming-soon-2',
+                gameNumber: 'GAME 03',
+                title: '스피드 타자 왕',
+                description: '제한 시간 안에 떨어지는 단어들을 빠르게 입력해 방어하는 타자 게임입니다.',
+                themeColor: '#fbbf24',
+                icon: '⌨️',
+                isReady: false
+            }
+        ];
+
+        let closedStateMap = {};
+
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        const logoutBtn = document.getElementById('logout-btn');
+        const statusBanner = document.getElementById('status-banner');
+        const statusBannerText = document.getElementById('status-banner-text');
+        const creatorGamesGrid = document.getElementById('creator-games-grid');
+
+        // 클라우드에서 현재 서버 상태 불러오기
+        async function loadServerStatus() {
+            try {
+                const res = await fetch(SYNC_URL + '?t=' + Date.now(), { cache: 'no-store' });
+                if (res.ok) {
+                    closedStateMap = await res.json();
+                    localStorage.setItem('odung_server_status', JSON.stringify(closedStateMap));
+                    renderCreatorGames();
+                }
+            } catch (err) {
+                try {
+                    closedStateMap = JSON.parse(localStorage.getItem('odung_server_status') || '{}');
+                    renderCreatorGames();
+                } catch (e) {}
+            }
+        }
+
+        // 서버 닫기 / 열기 토글 처리
+        async function toggleGameServer(gameId, gameTitle) {
+            const currentlyClosed = Boolean(closedStateMap[gameId]);
+            const nextClosedState = !currentlyClosed;
+
+            closedStateMap[gameId] = nextClosedState;
+            localStorage.setItem('odung_server_status', JSON.stringify(closedStateMap));
+            renderCreatorGames();
+
+            // 안내 문구 표시
+            statusBanner.classList.remove('hidden');
+            if (nextClosedState) {
+                statusBannerText.textContent = `${gameTitle} 이 정상적으로 닫혔습니다. [ 게임 열기 ] 버튼을 눌러 다시 열 수 있어요.`;
+            } else {
+                statusBannerText.textContent = `${gameTitle} 이 정상적으로 열렸습니다.`;
+            }
+
+            // 클라우드 저장소에 저장하여 모든 유저에게 동기화
+            try {
+                await fetch(SYNC_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(closedStateMap)
+                });
+            } catch (err) {
+                console.error('클라우드 상태 저장 실패:', err);
+            }
+        }
+
+        // 대시보드 게임 카드 렌더링
+        function renderCreatorGames() {
+            creatorGamesGrid.innerHTML = '';
+
+            gamesList.forEach(game => {
+                const isClosed = Boolean(closedStateMap[game.id]);
+                const card = document.createElement('div');
+                card.className = 'bg-[#1c1738] border-[3px] p-5 pt-7 relative flex flex-col justify-between';
+                card.style.borderColor = game.isReady ? (isClosed ? '#f43f5e' : game.themeColor) : '#3b3363';
+
+                let actionButtonHtml = '';
+                if (game.isReady) {
+                    if (isClosed) {
+                        actionButtonHtml = `
+                            <button onclick="toggleGameServer('${game.id}', '${game.title}')" 
+                                    class="w-full py-2.5 px-4 bg-[#4ade80] hover:brightness-110 text-[#121629] font-bold text-xs sm:text-sm tracking-wider shadow-[0_4px_0_rgba(0,0,0,0.5)] cursor-pointer transition-transform active:translate-y-0.5">
+                                [ 게임 열기 ]
+                            </button>
+                        `;
+                    } else {
+                        actionButtonHtml = `
+                            <button onclick="toggleGameServer('${game.id}', '${game.title}')" 
+                                    class="w-full py-2.5 px-4 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs sm:text-sm tracking-wider shadow-[0_4px_0_rgba(0,0,0,0.5)] cursor-pointer transition-transform active:translate-y-0.5">
+                                게임 닫기
+                            </button>
+                        `;
+                    }
+                } else {
+                    actionButtonHtml = `
+                        <div class="w-full py-2.5 px-4 bg-[#120e24] border border-[#3b3363] text-slate-500 text-center font-bold text-xs">
+                            준비 중인 게임 (제어 불가)
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="absolute -top-3 left-4 px-2 py-0.5 text-[11px] font-bold text-[#121629]"
+                         style="background-color: ${game.isReady ? game.themeColor : '#64748b'};">
+                        ${game.gameNumber}
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-3xl">${game.icon}</span>
+                            ${game.isReady ? (
+                                isClosed 
+                                    ? '<span class="px-2 py-0.5 bg-rose-500/20 border border-rose-500 text-rose-400 text-[11px] font-bold">● 서버 닫힘</span>'
+                                    : '<span class="px-2 py-0.5 bg-emerald-500/20 border border-emerald-400 text-emerald-300 text-[11px] font-bold">● 정상 운영 중</span>'
+                            ) : '<span class="px-2 py-0.5 bg-slate-800 text-slate-400 text-[11px] font-bold">개발 중</span>'}
+                        </div>
+                        <h2 class="text-base sm:text-lg font-bold text-white mb-2">${game.title}</h2>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-5">${game.description}</p>
+                    </div>
+
+                    <div>
+                        ${actionButtonHtml}
+                    </div>
+                `;
+                creatorGamesGrid.appendChild(card);
+            });
+        }
+
+        // 로그인 폼 제출 처리
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputId = document.getElementById('creator-id').value.trim();
+            const inputPw = document.getElementById('creator-pw').value;
+
+            if (inputId === ADMIN_ID && inputPw === ADMIN_PW) {
+                loginError.classList.add('hidden');
+                loginSection.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+                loadServerStatus();
+            } else {
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        // 로그아웃 처리
+        logoutBtn.addEventListener('click', () => {
+            document.getElementById('creator-id').value = '';
+            document.getElementById('creator-pw').value = '';
+            statusBanner.classList.add('hidden');
+            dashboardSection.classList.add('hidden');
+            loginSection.classList.remove('hidden');
+        });
+
+        // 초기 상태 로드
+        loadServerStatus();
+    </script>
+</body>
+</html>
