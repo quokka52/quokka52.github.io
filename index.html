@@ -9,29 +9,39 @@
     <!-- Tailwind CSS 로드 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css');
+
         @font-face {
-            font-family: 'Mona12';
-            src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/2611030023@color-1792-1712/color-1792-1712/Mona12.woff2') format('woff2');
-            font-weight: 400;
-            font-display: swap;
-        }
-        @font-face {
-            font-family: 'Mona12';
-            src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/2611030026@color-1792-1713/color-1792-1713/Mona12.woff2') format('woff2');
+            font-family: 'Galmuri11';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2506-1@1.0/Galmuri11-Bold.woff2') format('woff2');
             font-weight: 700;
             font-display: swap;
         }
 
+        @font-face {
+            font-family: 'Galmuri11';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2506-1@1.0/Galmuri11-Condensed.woff2') format('woff2');
+            font-weight: normal;
+            font-display: swap;
+            font-stretch: 75%;
+        }
+
         body {
-            font-family: 'Mona12', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-            background-color: #161026;
-            /* 아케이드 그리드 + CRT 스캔라인 배경 패턴 */
+            font-family: 'Galmuri11', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #2c1608;
+            /* 모눈종이 격자 무늬를 앞에 배치하고 가을 느낌 그라데이션을 뒤에 배치 */
             background-image: 
-                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-                linear-gradient(90deg, rgba(139, 92, 246, 0.06) 1px, transparent 1px),
-                linear-gradient(rgba(139, 92, 246, 0.06) 1px, transparent 1px);
-            background-size: 100% 4px, 28px 28px, 28px 28px;
+                linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(22, 16, 38, 1) 0%, rgba(132, 53, 10, 0.9) 60%, rgba(217, 119, 6, 1) 100%);
+            background-size: 28px 28px, 28px 28px, 100% 100%;
+            background-attachment: fixed;
             color: #ffffff;
+        }
+
+        /* 장체 적용 유틸리티 클래스 */
+        .font-condensed {
+            font-stretch: 75%;
         }
 
         /* 레트로 3D 입체 타이틀 텍스트 */
@@ -206,6 +216,49 @@
         </div>
     </main>
 
+    <!-- 게임 상세 정보 팝업(모달) -->
+    <div id="game-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-300">
+        <div class="relative w-full max-w-sm bg-[#1e193b] border-[3px] border-amber-400 p-1.5 flex flex-col shadow-[0_0_30px_rgba(251,191,36,0.3)] transform scale-95 transition-transform duration-300" id="game-modal-content">
+            <div class="border border-amber-400/30 p-5 flex flex-col relative">
+                <!-- 닫기 버튼 / 게임 번호 -->
+                <div class="flex justify-between items-start mb-5">
+                    <div id="modal-game-number" class="bg-amber-400 text-[#1e193b] px-2.5 py-1 text-xs font-bold tracking-wider shadow-[2px_2px_0px_#000]">GAME 10</div>
+                    <button onclick="closeGameModal()" class="text-slate-400 hover:text-white border border-slate-500 hover:border-white px-2 py-0.5 text-sm bg-[#120e24] transition-colors shadow-[2px_2px_0px_#000]">✕</button>
+                </div>
+
+                <!-- 아이콘 & 제목 -->
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-24 h-24 mb-4 bg-[#120e24] border-2 border-[#3b3363] p-1.5 flex items-center justify-center shadow-inner">
+                        <div id="modal-icon-bg" class="w-full h-full bg-gradient-to-br flex items-center justify-center border border-black/40">
+                            <span id="modal-icon" class="text-4xl drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"></span>
+                        </div>
+                    </div>
+                    <h2 id="modal-title" class="text-2xl font-bold text-white mb-2 tracking-wide font-condensed drop-shadow-md">맞춤법 붕어빵 가게</h2>
+                    <p id="modal-category-text" class="text-amber-400 text-sm mb-3 font-bold">국어 · 타이쿤</p>
+                    
+                    <div class="border border-amber-400 px-3 py-1 mb-5 bg-[#120e24]">
+                        <span id="modal-badge" class="text-amber-400 text-xs font-bold">★ 1~6학년</span>
+                    </div>
+
+                    <!-- 설명 박스 -->
+                    <div class="w-full bg-[#120e24] border border-[#3b3363] p-4 text-slate-300 text-xs sm:text-sm leading-relaxed mb-5 text-left font-condensed h-32 overflow-y-auto shadow-inner">
+                        <p id="modal-desc">게임 설명 텍스트...</p>
+                    </div>
+
+                    <!-- 해시태그 -->
+                    <div id="modal-tags" class="flex flex-wrap justify-center gap-2 mb-6">
+                        <!-- JS로 동적 삽입됨 -->
+                    </div>
+
+                    <!-- 게임 시작 액션 버튼 -->
+                    <div id="modal-action-container" class="w-full">
+                        <!-- JS로 동적 삽입됨 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 레트로 알림 토스트 모달 (alert 대체용) -->
     <div id="toast-modal" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
         <div class="bg-[#121629] border-2 border-amber-400 text-white px-5 py-3 shadow-[0_0_20px_rgba(251,191,36,0.35)] flex items-center gap-3">
@@ -298,7 +351,7 @@
             });
         }
 
-        // 게임 카드 렌더링 함수 (첨부된 이미지의 GAME 01~04 네온 프레임 스타일)
+        // 게임 카드 렌더링 함수
         function renderGames(filterCategory = 'all') {
             gamesGrid.innerHTML = '';
 
@@ -308,9 +361,11 @@
 
             filteredGames.forEach(game => {
                 const card = document.createElement('div');
-                card.className = 'arcade-card relative border-[3px] p-6 pt-8 flex flex-col items-center text-center justify-between';
+                card.className = 'arcade-card relative border-[3px] p-6 pt-8 flex flex-col items-center text-center justify-between cursor-pointer group';
                 card.style.borderColor = game.themeColor;
                 card.style.boxShadow = `0 0 20px ${game.glowColor}, inset 0 0 15px rgba(0,0,0,0.4)`;
+                // 카드 전체 클릭 시 모달 열기 연결
+                card.onclick = () => openGameModal(game.id);
 
                 const tagsHtml = game.tags.map(tag => `
                     <span class="px-2 py-1 bg-[#130f26] border border-[#3b3363] text-slate-300 text-[11px] font-bold">
@@ -320,14 +375,14 @@
 
                 card.innerHTML = `
                     <!-- 좌측 상단 GAME 01 라벨 탭 -->
-                    <div class="absolute -top-3.5 left-4 px-2.5 py-0.5 text-xs font-bold tracking-wider text-[#121629]"
+                    <div class="absolute -top-3.5 left-4 px-2.5 py-0.5 text-xs font-bold tracking-wider text-[#121629] group-hover:-translate-y-1 transition-transform"
                          style="background-color: ${game.themeColor};">
                         ${game.gameNumber}
                     </div>
 
                     <div class="w-full flex flex-col items-center">
                         <!-- 중앙 픽셀 아이콘 프레임 -->
-                        <div class="w-24 h-24 mb-5 bg-[#120e24] border-2 border-[#3b3363] p-2 flex items-center justify-center shadow-inner">
+                        <div class="w-24 h-24 mb-5 bg-[#120e24] border-2 border-[#3b3363] p-2 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
                             <div class="w-full h-full bg-gradient-to-br ${game.iconBg} flex items-center justify-center border border-black/40">
                                 <span class="text-4xl drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
                                     ${game.icon}
@@ -336,7 +391,7 @@
                         </div>
 
                         <!-- 게임 제목 -->
-                        <h2 class="text-lg sm:text-xl font-bold text-white mb-2.5 tracking-wide">
+                        <h2 class="text-lg sm:text-xl font-bold text-white mb-2.5 tracking-wide font-condensed">
                             ${game.title}
                         </h2>
 
@@ -346,36 +401,100 @@
                         </div>
 
                         <!-- 게임 설명 -->
-                        <p class="text-slate-300 text-xs leading-relaxed mb-4 line-clamp-2 px-1">
+                        <p class="text-slate-300 text-xs leading-relaxed mb-4 line-clamp-2 px-1 font-condensed">
                             ${game.description}
                         </p>
 
                         <!-- 해시태그 박스 -->
-                        <div class="flex flex-wrap justify-center gap-1.5 mb-4">
+                        <div class="flex flex-wrap justify-center gap-1.5 mb-2">
                             ${tagsHtml}
                         </div>
-                    </div>
 
-                    <!-- 하단 중앙 돌출형 PLAY 버튼 (스크린샷의 하단 1P LOGIN 탭 스타일) -->
-                    <div class="w-full pt-1">
-                        ${game.isReady ? `
-                            <a href="${game.url}" 
-                               class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 text-xs sm:text-sm font-bold tracking-wider text-[#121629] transition-transform active:translate-y-0.5 hover:brightness-110"
-                               style="background-color: ${game.themeColor}; box-shadow: 0 4px 0 rgba(0,0,0,0.5);">
-                                <span>▶ GAME START</span>
-                            </a>
-                        ` : `
-                            <button onclick="showToast('${game.title}은(는) 현재 열심히 개발 중입니다!')" 
-                                    class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-[#120e24] border-2 text-xs sm:text-sm font-bold tracking-wider transition-colors hover:bg-white/5 cursor-pointer"
-                                    style="border-color: ${game.themeColor}; color: ${game.themeColor};">
-                                <span>COMING SOON</span>
-                            </button>
-                        `}
+                        <div class="mt-3 text-[10px] text-slate-500 group-hover:text-amber-300 transition-colors tracking-widest">
+                            [ 클릭해서 상세보기 ]
+                        </div>
                     </div>
                 `;
                 gamesGrid.appendChild(card);
             });
         }
+
+        // --- 팝업(모달) 제어 함수 ---
+        const gameModal = document.getElementById('game-modal');
+        const gameModalContent = document.getElementById('game-modal-content');
+
+        // 카테고리를 한글로 변환
+        function getCategoryText(cat) {
+            if (cat === 'multi') return '멀티 / 파티';
+            if (cat === 'arcade') return '아케이드 / 퍼즐';
+            return '기타';
+        }
+
+        function openGameModal(gameId) {
+            const game = gamesList.find(g => g.id === gameId);
+            if (!game) return;
+
+            // 데이터 채우기
+            document.getElementById('modal-game-number').textContent = game.gameNumber;
+            document.getElementById('modal-icon').textContent = game.icon;
+            document.getElementById('modal-icon-bg').className = `w-full h-full bg-gradient-to-br ${game.iconBg} flex items-center justify-center border border-black/40`;
+            document.getElementById('modal-title').textContent = game.title;
+            document.getElementById('modal-category-text').textContent = getCategoryText(game.category);
+            document.getElementById('modal-badge').textContent = game.subBadge;
+            document.getElementById('modal-desc').innerHTML = game.description;
+
+            // 태그 렌더링
+            const tagsHtml = game.tags.map(tag => `
+                <span class="px-2 py-1 bg-[#130f26] border border-[#3b3363] text-slate-300 text-[11px] font-bold">
+                    ${tag}
+                </span>
+            `).join('');
+            document.getElementById('modal-tags').innerHTML = tagsHtml;
+
+            // 게임 시작 버튼 렌더링 (준비 중인 경우 처리)
+            const actionContainer = document.getElementById('modal-action-container');
+            if (game.isReady) {
+                actionContainer.innerHTML = `
+                    <a href="${game.url}" class="block w-full bg-amber-400 text-[#1e193b] text-center font-bold py-3.5 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_6px_0px_#000] active:translate-y-1 active:shadow-[0_0_0_#000] transition-all">
+                        ▶ 게임 시작
+                    </a>
+                `;
+            } else {
+                actionContainer.innerHTML = `
+                    <button onclick="showToast('${game.title}은(는) 현재 열심히 개발 중입니다!')" class="w-full bg-[#120e24] border-2 border-amber-400 text-amber-400 text-center font-bold py-3 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[0_0_0_#000] transition-all cursor-pointer">
+                        ■ 개발 중 (COMING SOON)
+                    </button>
+                `;
+            }
+
+            // 모달 표시 (부드러운 애니메이션)
+            gameModal.classList.remove('hidden');
+            gameModal.classList.add('flex');
+            setTimeout(() => {
+                gameModal.classList.remove('opacity-0');
+                gameModalContent.classList.remove('scale-95');
+                gameModalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeGameModal() {
+            // 모달 숨기기 (부드러운 애니메이션)
+            gameModal.classList.add('opacity-0');
+            gameModalContent.classList.remove('scale-100');
+            gameModalContent.classList.add('scale-95');
+            
+            setTimeout(() => {
+                gameModal.classList.add('hidden');
+                gameModal.classList.remove('flex');
+            }, 300);
+        }
+
+        // 모달 바깥 어두운 배경 클릭 시 모달 닫기
+        gameModal.addEventListener('click', (e) => {
+            if (e.target === gameModal) {
+                closeGameModal();
+            }
+        });
 
         // 카테고리 필터 이벤트 연결
         filterBtns.forEach(btn => {
