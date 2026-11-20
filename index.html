@@ -118,7 +118,7 @@
         <span class="pixel-float absolute bottom-24 right-[14%] text-amber-300/60 text-base select-none" style="animation-delay: 0.7s;">✦</span>
     </div>
 
-    <!-- 상단 아케이드 상태바 (DOBBI 스타일 상단 바) -->
+    <!-- 상단 아케이드 상태바 -->
     <header class="relative z-20 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 pb-2 flex items-center justify-between">
         <!-- 좌측: 오둥게임즈 로고 & 브랜드명 -->
         <a href="/" class="flex items-center gap-3 group">
@@ -144,7 +144,7 @@
                 1P START
             </button>
             <div class="text-xs sm:text-sm tracking-wider text-slate-400 font-bold">
-                GAMES <span id="total-games-count" class="text-amber-400 text-sm sm:text-base ml-1">3</span>
+                GAMES <span id="total-games-count" class="text-amber-400 text-sm sm:text-base ml-1">4</span>
             </div>
         </div>
     </header>
@@ -152,7 +152,7 @@
     <!-- 히어로 섹션 (오락실 메인 간판 영역) -->
     <section class="relative z-10 pt-8 pb-10 sm:pt-10 sm:pb-12 px-4 sm:px-6 max-w-5xl w-full mx-auto text-center">
         
-        <!-- 좌측 상단 떠있는 오둥이 스티커 뱃지 (스크린샷의 꽥꽥 교실 스티커 오마주) -->
+        <!-- 좌측 상단 떠있는 오둥이 스티커 뱃지 -->
         <div class="hidden md:flex flex-col items-center absolute left-6 top-8 sticker-badge bg-white text-slate-900 p-2 rounded-md border-2 border-slate-900 select-none">
             <div class="w-11 h-11 rounded bg-[#FFA400] border-2 border-black overflow-hidden mb-1">
                 <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -179,7 +179,7 @@
             오둥 오락실
         </h1>
 
-        <!-- 서브 타이틀 (레트로 오락실 안내 문구 스타일 + 느린 깜빡임) -->
+        <!-- 서브 타이틀 -->
         <p class="arcade-blink text-amber-300 text-xs sm:text-base tracking-widest font-bold mb-8 flex items-center justify-center gap-2">
             <span>🕹️</span>
             <span>PRESS START · 궁금한 게임을 눌러 보세요</span>
@@ -189,7 +189,7 @@
         <!-- 레트로 사각 탭 버튼 (카테고리 필터) -->
         <div id="category-filters" class="flex flex-wrap justify-center gap-2 sm:gap-2.5">
             <button data-category="all" class="filter-btn active px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#4ade80] bg-[#4ade80] text-[#121629] shadow-[0_0_12px_rgba(74,222,128,0.4)] transition-all cursor-pointer">
-                전체 <span class="count-badge ml-1 opacity-80">3</span>
+                전체 <span class="count-badge ml-1 opacity-80">4</span>
             </button>
             <button data-category="multi" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
                 멀티 / 파티 <span class="count-badge ml-1 text-slate-400">1</span>
@@ -197,10 +197,13 @@
             <button data-category="arcade" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
                 아케이드 / 퍼즐 <span class="count-badge ml-1 text-slate-400">2</span>
             </button>
+            <button data-category="teacher" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
+                선생님용 <span class="count-badge ml-1 text-slate-400">1</span>
+            </button>
         </div>
     </section>
 
-    <!-- 게임 목록 그리드 (GAME 01, 02, 03 네온 프레임 카드) -->
+    <!-- 게임 목록 그리드 -->
     <main class="relative z-10 flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 pb-24">
         <div id="games-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7 pt-3">
             <!-- 자바스크립트를 통해 오락실 게임 카드가 동적으로 렌더링됩니다 -->
@@ -222,8 +225,8 @@
             <div class="border border-amber-400/30 p-5 flex flex-col relative">
                 <!-- 닫기 버튼 / 게임 번호 -->
                 <div class="flex justify-between items-start mb-5">
-                    <div id="modal-game-number" class="bg-amber-400 text-[#1e193b] px-2.5 py-1 text-xs font-bold tracking-wider shadow-[2px_2px_0px_#000]">GAME 10</div>
-                    <button onclick="closeGameModal()" class="text-slate-400 hover:text-white border border-slate-500 hover:border-white px-2 py-0.5 text-sm bg-[#120e24] transition-colors shadow-[2px_2px_0px_#000]">✕</button>
+                    <div id="modal-game-number" class="bg-amber-400 text-[#1e193b] px-2.5 py-1 text-xs font-bold tracking-wider shadow-[2px_2px_0px_#000]">GAME 01</div>
+                    <button onclick="closeGameModal()" class="text-slate-400 hover:text-white border border-slate-500 hover:border-white px-2 py-0.5 text-sm bg-[#120e24] transition-colors shadow-[2px_2px_0px_#000] cursor-pointer">✕</button>
                 </div>
 
                 <!-- 아이콘 & 제목 -->
@@ -233,11 +236,11 @@
                             <span id="modal-icon" class="text-4xl drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"></span>
                         </div>
                     </div>
-                    <h2 id="modal-title" class="text-2xl font-bold text-white mb-2 tracking-wide font-condensed drop-shadow-md">맞춤법 붕어빵 가게</h2>
-                    <p id="modal-category-text" class="text-amber-400 text-sm mb-3 font-bold">국어 · 타이쿤</p>
+                    <h2 id="modal-title" class="text-2xl font-bold text-white mb-2 tracking-wide font-condensed drop-shadow-md">게임 제목</h2>
+                    <p id="modal-category-text" class="text-amber-400 text-sm mb-3 font-bold">카테고리</p>
                     
                     <div class="border border-amber-400 px-3 py-1 mb-5 bg-[#120e24]">
-                        <span id="modal-badge" class="text-amber-400 text-xs font-bold">★ 1~6학년</span>
+                        <span id="modal-badge" class="text-amber-400 text-xs font-bold">★ 배지</span>
                     </div>
 
                     <!-- 설명 박스 -->
@@ -250,7 +253,7 @@
                         <!-- JS로 동적 삽입됨 -->
                     </div>
 
-                    <!-- 게임 시작 액션 버튼 -->
+                    <!-- 게임 시작 / 이동 액션 버튼 -->
                     <div id="modal-action-container" class="w-full">
                         <!-- JS로 동적 삽입됨 -->
                     </div>
@@ -273,14 +276,14 @@
     </footer>
 
     <script>
-        // 기존 게임 데이터 유지 + 레트로 오락실 카드 테마 속성 매핑
+        // 게임 및 도구 데이터 목록
         const gamesList = [
             {
                 id: 'catchmind',
                 gameNumber: 'GAME 01',
                 title: '캐치마인드 (CatchMind)',
                 description: '제시어를 보고 그림을 그리면 친구들이 정답을 맞추는 실시간 그림 퀴즈 게임!',
-                url: './catchmind/', // odunggames.github.io/catchmind 로 이동
+                url: './catchmind/',
                 category: 'multi',
                 subBadge: '★ 실시간 멀티',
                 tags: ['#그림퀴즈', '#인기게임'],
@@ -319,6 +322,22 @@
                 iconBg: 'from-blue-400 to-indigo-500',
                 icon: '⌨️',
                 isReady: false
+            },
+            {
+                id: 'randompicker',
+                gameNumber: 'TOOL 01',
+                title: '오둥이 번호 뽑기',
+                description: '선생님을 위한 수업용 아케이드 뽑기 도구! 인형뽑기 연출로 1~N명 랜덤 추첨, 결석생 제외, 중복 방지, 자동 모둠(조) 편성까지 한 번에 해결하세요.',
+                url: 'https://odunggames.github.io/randompicker/',
+                category: 'teacher',
+                subBadge: '★ 선생님용 도구',
+                tags: ['#랜덤뽑기', '#모둠편성', '#수업도구'],
+                themeColor: '#38bdf8', // 네온 스카이블루
+                glowColor: 'rgba(56, 189, 248, 0.25)',
+                iconBg: 'from-sky-400 to-cyan-500',
+                icon: '🕹️',
+                actionLabel: '▶ 이동하기',
+                isReady: true
             }
         ];
 
@@ -364,7 +383,6 @@
                 card.className = 'arcade-card relative border-[3px] p-6 pt-8 flex flex-col items-center text-center justify-between cursor-pointer group';
                 card.style.borderColor = game.themeColor;
                 card.style.boxShadow = `0 0 20px ${game.glowColor}, inset 0 0 15px rgba(0,0,0,0.4)`;
-                // 카드 전체 클릭 시 모달 열기 연결
                 card.onclick = () => openGameModal(game.id);
 
                 const tagsHtml = game.tags.map(tag => `
@@ -374,7 +392,7 @@
                 `).join('');
 
                 card.innerHTML = `
-                    <!-- 좌측 상단 GAME 01 라벨 탭 -->
+                    <!-- 좌측 상단 라벨 탭 -->
                     <div class="absolute -top-3.5 left-4 px-2.5 py-0.5 text-xs font-bold tracking-wider text-[#121629] group-hover:-translate-y-1 transition-transform"
                          style="background-color: ${game.themeColor};">
                         ${game.gameNumber}
@@ -395,7 +413,7 @@
                             ${game.title}
                         </h2>
 
-                        <!-- 노란색 등급/상태 뱃지 (★ 실시간 멀티 등) -->
+                        <!-- 노란색 등급/상태 뱃지 -->
                         <div class="inline-block px-3 py-0.5 mb-3 border border-amber-400/80 bg-amber-400/10 text-amber-300 text-xs font-bold">
                             ${game.subBadge}
                         </div>
@@ -427,6 +445,7 @@
         function getCategoryText(cat) {
             if (cat === 'multi') return '멀티 / 파티';
             if (cat === 'arcade') return '아케이드 / 퍼즐';
+            if (cat === 'teacher') return '선생님용 도구';
             return '기타';
         }
 
@@ -451,12 +470,13 @@
             `).join('');
             document.getElementById('modal-tags').innerHTML = tagsHtml;
 
-            // 게임 시작 버튼 렌더링 (준비 중인 경우 처리)
+            // 게임 시작 / 이동 버튼 렌더링
             const actionContainer = document.getElementById('modal-action-container');
             if (game.isReady) {
+                const buttonText = game.actionLabel || '▶ 게임 시작';
                 actionContainer.innerHTML = `
                     <a href="${game.url}" class="block w-full bg-amber-400 text-[#1e193b] text-center font-bold py-3.5 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_6px_0px_#000] active:translate-y-1 active:shadow-[0_0_0_#000] transition-all">
-                        ▶ 게임 시작
+                        ${buttonText}
                     </a>
                 `;
             } else {
@@ -467,7 +487,7 @@
                 `;
             }
 
-            // 모달 표시 (부드러운 애니메이션)
+            // 모달 표시
             gameModal.classList.remove('hidden');
             gameModal.classList.add('flex');
             setTimeout(() => {
@@ -478,7 +498,6 @@
         }
 
         function closeGameModal() {
-            // 모달 숨기기 (부드러운 애니메이션)
             gameModal.classList.add('opacity-0');
             gameModalContent.classList.remove('scale-100');
             gameModalContent.classList.add('scale-95');
@@ -499,7 +518,6 @@
         // 카테고리 필터 이벤트 연결
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                // 버튼 스타일 초기화
                 filterBtns.forEach(b => {
                     b.classList.remove('bg-[#4ade80]', 'text-[#121629]', 'border-[#4ade80]', 'shadow-[0_0_12px_rgba(74,222,128,0.4)]');
                     b.classList.add('bg-[#1e193b]', 'text-slate-300', 'border-[#3b3363]');
@@ -507,7 +525,6 @@
                     if (badge) badge.classList.add('text-slate-400');
                 });
 
-                // 활성화된 버튼 스타일 적용 (레트로 민트/그린 하이라이트)
                 btn.classList.remove('bg-[#1e193b]', 'text-slate-300', 'border-[#3b3363]');
                 btn.classList.add('bg-[#4ade80]', 'text-[#121629]', 'border-[#4ade80]', 'shadow-[0_0_12px_rgba(74,222,128,0.4)]');
                 const activeBadge = btn.querySelector('.count-badge');
