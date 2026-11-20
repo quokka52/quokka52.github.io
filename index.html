@@ -101,6 +101,14 @@
       animation: slideUp 0.4s ease-out forwards;
     }
 
+    @keyframes chatRise {
+      0% { opacity: 0; transform: translateY(16px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-chat-rise {
+      animation: chatRise 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
     @keyframes popIn {
       0% { opacity: 0; transform: scale(0.5) translateY(30px); }
       70% { transform: scale(1.1); }
@@ -236,8 +244,9 @@
             <path d="M12 24C12 17.3726 17.3726 12 24 12C17.3726 12 12 6.62742 12 0C12 6.62742 6.62742 12 0 12C6.62742 12 12 17.3726 12 24Z" fill="url(#gemini-glow-green)"/>
             <path d="M12 24C12 17.3726 17.3726 12 24 12C17.3726 12 12 6.62742 12 0C12 6.62742 6.62742 12 0 12C6.62742 12 12 17.3726 12 24Z" fill="url(#gemini-glow-blue)"/>
           </svg>
-          <span class="font-bold text-slate-500">이 프로젝트는 <span class="bg-gradient-to-r from-[#EA4335] via-[#FBBC04] via-[#34A853] to-[#4285F4] bg-clip-text text-transparent font-black">Gemini</span>와 함께 제작되었습니다.</span>
+          <span class="font-bold text-slate-500">이 프로젝트는 <span class="bg-gradient-to-r from-[#FF6B6B] via-[#FFA94D] via-[#4DABF7] to-[#5C7CFA] bg-clip-text text-transparent font-black">Gemini</span>와 함께 제작되었습니다.</span>
         </div>
+        <div class="text-slate-400 font-bold">@huklevery26</div>
       </div>
     </section>
 
@@ -376,6 +385,10 @@
                 <label class="flex items-center space-x-1.5 px-3 py-1.5 bg-[#fdfbf7] rounded-xl border border-[#d9c4a5] cursor-pointer text-xs font-bold text-slate-700">
                   <input type="checkbox" name="quiz-category" value="nature" onchange="updateSettings()" class="w-4 h-4 accent-[#ff7a38]">
                   <span>자연/우주</span>
+                </label>
+                <label id="secret-category-6-2" class="hidden flex items-center space-x-1.5 px-3 py-1.5 bg-amber-50 rounded-xl border-2 border-amber-400 cursor-pointer text-xs font-black text-amber-800 shadow-sm">
+                  <input type="checkbox" name="quiz-category" value="class62" onchange="updateSettings()" class="w-4 h-4 accent-[#ff7a38]">
+                  <span>🌟 6-2반 학생들</span>
                 </label>
               </div>
 
@@ -564,8 +577,9 @@
           🤔
         </div>
         <h3 class="text-xl sm:text-2xl text-[#234d2b] font-black leading-snug">
-          선생님이 그릴 친구를 고르고 있습니다!<br>잠시만 기다려 주세요.
+          선생님이 그릴 친구를 선택하는 중...
         </h3>
+        <p class="text-sm text-slate-500 font-bold">잠시만 기다려 주세요!</p>
       </div>
     </div>
 
@@ -597,14 +611,14 @@
         </div>
 
         <div id="next-round-btn-container" class="pt-1">
-        <button id="next-round-action-btn" onclick="nextRoundByTeacher()" class="w-full py-3.5 bg-[#ff7a38] hover:bg-[#e86624] text-white text-lg rounded-2xl shadow-lg border-b-4 border-[#c74c10] transition">
-          ➡️ 다음 라운드로 넘기기
-        </button>
+          <button id="next-round-action-btn" onclick="nextRoundByTeacher()" class="w-full py-3.5 bg-[#ff7a38] hover:bg-[#e86624] text-white text-lg rounded-2xl shadow-lg border-b-4 border-[#c74c10] transition">
+            ➡️ 다음 라운드로 넘기기
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- 🏆 최종 시상식 모달 -->
+    <!-- 🏆 최종 시상식 모달 -->
     <div id="final-rank-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4">
       <div class="bg-[#fffdf7] border-4 border-[#ff7a38] rounded-3xl p-6 sm:p-8 max-w-lg w-full text-center relative shadow-2xl space-y-6 animate-slide-up">
         <div>
@@ -669,15 +683,24 @@
     </div>
 
     <!-- QR 코드 확대 모달 -->
-    <div id="qr-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div class="bg-[#fffdf7] border-4 border-[#e5d7c3] rounded-3xl p-8 max-w-md w-full text-center relative shadow-2xl animate-slide-up space-y-4">
-        <button onclick="closeQrModal()" class="absolute top-4 right-4 text-2xl text-slate-400 hover:text-slate-600">✖</button>
-        <h3 class="text-2xl text-[#234d2b]">스마트폰으로 스캔하세요!</h3>
-        <div class="flex justify-center p-4 bg-white rounded-2xl border-2 border-[#d9c4a5] shadow-inner">
-          <div id="modal-qrcode"></div>
+    <div id="qr-modal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="if(event.target === this) closeQrModal()">
+      <div class="bg-[#fffdf7] border-4 border-[#e5d7c3] rounded-3xl p-6 sm:p-8 max-w-lg w-full text-center relative shadow-2xl animate-slide-up space-y-5">
+        <button type="button" onclick="closeQrModal()" aria-label="닫기" class="absolute top-4 right-4 w-11 h-11 flex items-center justify-center bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-full shadow-md border-2 border-rose-200 transition cursor-pointer">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+        <h3 class="text-2xl sm:text-3xl text-[#234d2b] font-black pt-1">스마트폰으로 스캔하세요!</h3>
+        <div class="flex justify-center p-5 bg-white rounded-3xl border-2 border-[#d9c4a5] shadow-inner">
+          <div id="modal-qrcode" class="flex items-center justify-center"></div>
         </div>
-        <div class="text-slate-600 text-sm">참여 방 코드</div>
-        <div id="modal-room-code" class="text-5xl text-[#ff7a38] tracking-widest font-black">----</div>
+        <div class="space-y-1">
+          <div class="text-slate-600 text-base font-bold">참여 방 코드</div>
+          <div id="modal-room-code" class="text-5xl sm:text-6xl text-[#ff7a38] tracking-widest font-black">----</div>
+        </div>
+        <button type="button" onclick="closeQrModal()" class="w-full py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 text-base font-bold rounded-2xl transition cursor-pointer">
+          닫기 (X)
+        </button>
       </div>
     </div>
 
@@ -693,6 +716,49 @@
         </button>
       </div>
     </div>
+
+    <!-- 📢 정식 출시 안내 팝업 모달 (접속 시 자동 표시, 다시 보지 않기 지원) -->
+    <div id="launch-notice-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="relative max-w-2xl w-full animate-slide-up">
+        <!-- 우측 상단 X 닫기 버튼 -->
+        <button type="button" onclick="closeLaunchNoticeModal()" aria-label="닫기" class="absolute -top-3 -right-3 sm:top-3 sm:right-3 z-20 w-10 h-10 flex items-center justify-center bg-[#234d2b] hover:bg-[#18361e] text-white rounded-full shadow-lg border-2 border-[#dfd2bd] transition cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+
+        <!-- 안내 이미지 (파일이 없는 환경에서도 동일하게 보이도록 폴백 카드 포함) -->
+        <img id="launch-notice-img" src="image_e0e8dd.png" alt="오둥캐치마인드 v1.1 업데이트 내역 안내" onerror="this.classList.add('hidden'); document.getElementById('launch-notice-fallback').classList.remove('hidden');" class="w-full h-auto rounded-3xl shadow-2xl border-4 border-[#dfd2bd]">
+
+        <div id="launch-notice-fallback" class="hidden bg-[#fcfaf2] border-4 border-[#dfd2bd] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
+          <div class="bg-[#dfd2bd] rounded-full py-3 px-6 text-center mx-auto max-w-lg">
+            <h3 class="text-xl sm:text-3xl text-[#234d2b] font-black tracking-wide">오둥캐치마인드 v1.1 업데이트 내역 안내</h3>
+          </div>
+          <div class="bg-[#1c4223] border-4 border-[#dfd2bd] rounded-2xl p-5 sm:p-7 text-white text-sm sm:text-lg space-y-4 leading-relaxed shadow-inner">
+            <p class="flex items-start gap-2">
+              <span>·</span>
+              <span>테스트 해본 결과 정답 화면에서 채팅이 작성되어 답을 맞춘 사람도 점수를 얻는 오류를 수정하였습니다</span>
+            </p>
+            <p class="flex items-start gap-2">
+              <span>·</span>
+              <span>채팅창 도배를 유발하는 학생이 있습니다. 도배를 막기 위해 똑같은 말 3번 이상 시 자동 추방되게 했습니다.</span>
+            </p>
+            <p class="flex items-start gap-2">
+              <span>·</span>
+              <span>선생님 이름 적는 칸에 특정 이름을 적으면 숨겨진 카테고리가 보여집니다!</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- 하단 작게 '다시 보지 않기' 체크박스 영역 -->
+        <div class="mt-2.5 flex justify-end px-2">
+          <label class="inline-flex items-center gap-1.5 bg-white/90 hover:bg-white px-3 py-1.5 rounded-full shadow border border-[#dfd2bd] cursor-pointer select-none">
+            <input type="checkbox" id="dont-show-launch-notice" onchange="handleDontShowNoticeChange(this.checked)" class="w-3.5 h-3.5 accent-[#234d2b] cursor-pointer">
+            <span class="text-xs text-slate-700 font-bold">다시 보지 않기</span>
+          </label>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script>
@@ -703,6 +769,13 @@
     let studentList = [];
     let roomUnsubscribe = null;
     let roomData = null;
+
+    // 도배 방지 및 정답자 채팅 금지 추적용 변수
+    let lastSentMessage = '';
+    let sameMessageCount = 0;
+    let hasAnsweredCorrectlyThisRound = false;
+    let renderedChatIds = new Set();
+    let drawnStudentsCycle = [];
 
     let gameSettings = { 
       totalRounds: 5, 
@@ -731,6 +804,69 @@
     let remainingTime = 30;
     let isLastSpurt = false;
     let introShownForRound = null;
+    let selectingSoundPlayedForRound = null;
+    let correctSoundPlayedForRound = null;
+
+    // 첨부된 MP3 파일 직접 연결 및 자동재생 잠금 해제 엔진
+    const gameAudioFiles = {
+      roundStart: new Audio(encodeURI('라운드가_시작되었습니다!.MP3')),
+      selectingRandom: new Audio(encodeURI('선생님이 그릴 친구를 선택하고 있습니다!.MP3')),
+      correctAnswer: new Audio(encodeURI('정답_효과음.MP3'))
+    };
+
+    Object.values(gameAudioFiles).forEach(audio => {
+      audio.preload = 'auto';
+      audio.volume = 1.0;
+    });
+
+    let audioUnlocked = false;
+    function unlockAudioEngine() {
+      if (audioUnlocked) return;
+      audioUnlocked = true;
+      Object.values(gameAudioFiles).forEach(audio => {
+        try {
+          const p = audio.play();
+          if (p !== undefined) {
+            p.then(() => {
+              audio.pause();
+              audio.currentTime = 0;
+            }).catch(() => {
+              audioUnlocked = false;
+            });
+          }
+        } catch (e) {
+          audioUnlocked = false;
+        }
+      });
+    }
+
+    ['pointerdown', 'touchstart', 'keydown', 'click'].forEach(evt => {
+      window.addEventListener(evt, unlockAudioEngine, { passive: true });
+    });
+
+    function playGameSound(soundKey) {
+      const targetAudio = gameAudioFiles[soundKey];
+      if (!targetAudio) return;
+
+      try {
+        targetAudio.pause();
+        targetAudio.currentTime = 0;
+        const playPromise = targetAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // 파일명 대소문자(.mp3 / .MP3) 차이 폴백 시도
+            const fallbackMap = {
+              roundStart: '라운드가_시작되었습니다!.mp3',
+              selectingRandom: '선생님이 그릴 친구를 선택하고 있습니다!.mp3',
+              correctAnswer: '정답_효과음.mp3'
+            };
+            const fallbackAudio = new Audio(encodeURI(fallbackMap[soundKey]));
+            fallbackAudio.volume = 1.0;
+            fallbackAudio.play().catch(() => {});
+          });
+        }
+      } catch (e) {}
+    }
 
     const keywordPresets = {
       animal: [
@@ -775,6 +911,9 @@
         "화산", "지진", "번개", "무지개", "오로라", "태풍", "빙하", "사막", "동굴", "폭포",
         "태양", "달", "지구", "토성", "목성", "혜성", "블랙홀", "은하수", "인공위성", "우주선",
         "남극", "북극", "밀림", "열대우림", "산맥", "섬", "해구", "갯벌", "단풍", "눈사람"
+      ],
+      class62: [
+        "권호", "나윤설", "심효준", "양민재", "유보현", "유윤재", "윤서온", "이은진", "임도연", "전연서", "조재윤", "황현재"
       ]
     };
 
@@ -914,6 +1053,16 @@
 
       renderTimerOptions();
 
+      try {
+        if (localStorage.getItem('catchmind_hide_launch_notice_v1') !== 'true') {
+          const launchModal = document.getElementById('launch-notice-modal');
+          if (launchModal) launchModal.classList.remove('hidden');
+        }
+      } catch (e) {
+        const launchModal = document.getElementById('launch-notice-modal');
+        if (launchModal) launchModal.classList.remove('hidden');
+      }
+
       const urlParams = new URLSearchParams(window.location.search);
       let roomParam = urlParams.get('room');
       
@@ -950,7 +1099,26 @@
     }
 
     function goHome() {
-      if (roomUnsubscribe) roomUnsubscribe();
+      if (roomUnsubscribe) {
+        roomUnsubscribe();
+        roomUnsubscribe = null;
+      }
+
+      const headerUserTag = document.getElementById('header-user-tag');
+      if (headerUserTag) headerUserTag.classList.add('hidden');
+      const forceEndBtn = document.getElementById('teacher-force-end-btn');
+      if (forceEndBtn) forceEndBtn.classList.add('hidden');
+
+      isTeacher = false;
+      teacherName = '';
+      studentName = '';
+      roomCode = '';
+      roomData = null;
+      lastSentMessage = '';
+      sameMessageCount = 0;
+      hasAnsweredCorrectlyThisRound = false;
+      renderedChatIds.clear();
+
       showScreen('screen-home');
       resetHomeForm();
     }
@@ -1020,6 +1188,27 @@
       if (modal) modal.classList.add('hidden');
     }
 
+    function handleDontShowNoticeChange(isChecked) {
+      try {
+        if (isChecked) {
+          localStorage.setItem('catchmind_hide_launch_notice_v1', 'true');
+        } else {
+          localStorage.removeItem('catchmind_hide_launch_notice_v1');
+        }
+      } catch (e) {}
+    }
+
+    function closeLaunchNoticeModal() {
+      const checkbox = document.getElementById('dont-show-launch-notice');
+      if (checkbox && checkbox.checked) {
+        try {
+          localStorage.setItem('catchmind_hide_launch_notice_v1', 'true');
+        } catch (e) {}
+      }
+      const modal = document.getElementById('launch-notice-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
     function renderQrCode(containerId, text, size = 140) {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -1060,6 +1249,21 @@
       document.getElementById('teacher-room-code').innerText = roomCode;
       document.getElementById('modal-room-code').innerText = roomCode;
 
+      const normalizedTeacher = nameInput.replace(/\s+/g, '');
+      const secretCatLabel = document.getElementById('secret-category-6-2');
+      if (secretCatLabel) {
+        if (normalizedTeacher === '어르신티쳐') {
+          secretCatLabel.classList.remove('hidden');
+        } else {
+          secretCatLabel.classList.add('hidden');
+          const secretInput = secretCatLabel.querySelector('input');
+          if (secretInput) secretInput.checked = false;
+          updateSettings();
+        }
+      }
+
+      drawnStudentsCycle = [];
+
       showScreen('screen-teacher-lobby');
 
       setTimeout(() => {
@@ -1079,6 +1283,7 @@
         categoryName: '동물/식물',
         drawer: '',
         chat: [],
+        correctSolvers: [],
         settings: gameSettings,
         showIntro: false
       };
@@ -1112,6 +1317,10 @@
       isTeacher = false;
       studentName = nameInput;
       roomCode = codeInput;
+      lastSentMessage = '';
+      sameMessageCount = 0;
+      hasAnsweredCorrectlyThisRound = false;
+      renderedChatIds.clear();
 
       document.getElementById('header-user-tag').classList.remove('hidden');
       document.getElementById('user-role-label').innerText = '학생';
@@ -1173,22 +1382,43 @@
       showFinalRankModal(roomData?.scores || {});
     }
 
-    async function leaveRoom() {
+    async function leaveRoom(customNoticeText = "방을 나가셨습니다.", spamKickMessage = null) {
+      if (roomUnsubscribe) {
+        roomUnsubscribe();
+        roomUnsubscribe = null;
+      }
+
       if (window.FirebaseApp && window.FirebaseApp.db && roomCode && studentName) {
         try {
           const { doc, getDoc, updateDoc } = window.FirebaseApp;
           const roomRef = doc(window.FirebaseApp.db, 'catchmind_rooms', roomCode);
           const snap = await getDoc(roomRef);
           if (snap.exists()) {
-            let list = snap.data().students || [];
+            const snapData = snap.data();
+            let list = snapData.students || [];
             list = list.filter(s => s !== studentName);
-            await updateDoc(roomRef, { students: list });
+
+            const updatePayload = { students: list };
+            if (spamKickMessage) {
+              const chatList = snapData.chat || [];
+              chatList.push({
+                sender: '시스템',
+                text: spamKickMessage,
+                isSystemWarning: true,
+                id: Date.now()
+              });
+              updatePayload.chat = chatList;
+            }
+
+            await updateDoc(roomRef, updatePayload);
           }
         } catch (err) {
           console.warn("방 나가기 오류:", err);
         }
       }
-      if (roomUnsubscribe) roomUnsubscribe();
+      if (customNoticeText) {
+        openCustomNoticeModal(customNoticeText);
+      }
       goHome();
     }
 
@@ -1230,7 +1460,7 @@
 
     function handleRoomDataUpdate(data, prevStrokesCount = 0) {
       if (data.status === 'closed') {
-        openCustomNoticeModal("선생님이 방을 종료하셨습니다.");
+        openCustomNoticeModal("방을 종료했어요.");
         if (roomUnsubscribe) roomUnsubscribe();
         goHome();
         return;
@@ -1243,7 +1473,6 @@
         return;
       }
 
-      // 대기실로 게임 재시작(status === 'lobby')을 한 경우 모든 결과 모달 닫기
       if (data.status === 'lobby') {
         if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
         if (turnSwitchTimeout) { clearTimeout(turnSwitchTimeout); turnSwitchTimeout = null; }
@@ -1252,6 +1481,12 @@
         lastSetupRoundNum = null;
         lastSetupDrawerName = null;
         introShownForRound = null;
+        selectingSoundPlayedForRound = null;
+        correctSoundPlayedForRound = null;
+        hasAnsweredCorrectlyThisRound = false;
+        lastSentMessage = '';
+        sameMessageCount = 0;
+        renderedChatIds.clear();
 
         ['final-rank-modal', 'round-result-modal', 'teacher-start-modal', 'teacher-select-drawer-modal', 'student-selecting-drawer-modal', 'last-spurt-overlay'].forEach(id => {
           const el = document.getElementById(id);
@@ -1300,6 +1535,9 @@
       }
 
       if (data.status === 'selecting_drawer') {
+        const resultModal = document.getElementById('round-result-modal');
+        if (resultModal) resultModal.classList.add('hidden');
+
         showScreen('screen-game');
         if (isTeacher) {
           document.getElementById('student-selecting-drawer-modal').classList.add('hidden');
@@ -1321,6 +1559,7 @@
           redrawStrokes();
         }
       } else if (data.status === 'round_ended') {
+        renderChatMessages(data.chat || []);
         showRoundResultModal(data);
       } else if (data.status === 'game_over') {
         showFinalRankModal(data.scores || {});
@@ -1348,7 +1587,8 @@
 
         const catNames = {
           animal: "동물/식물", object: "학용품/사물", history: "역사/문화재", food: "음식/간식",
-          sports: "스포츠/운동", jobs: "직업/인물", places: "장소/건물", nature: "자연/우주"
+          sports: "스포츠/운동", jobs: "직업/인물", places: "장소/건물", nature: "자연/우주",
+          class62: "6-2반 학생들"
         };
         categoryName = catNames[catKey] || "일반";
       }
@@ -1356,8 +1596,43 @@
     }
 
     function pickRandomDrawers(count) {
-      const shuffled = [...studentList].sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, Math.min(count, shuffled.length));
+      const needed = Math.min(count, studentList.length);
+      if (needed <= 0) return [];
+
+      // 현재 방에 남아있는 학생 중 아직 이번 순환에서 그리지 않은 친구 필터링
+      drawnStudentsCycle = drawnStudentsCycle.filter(s => studentList.includes(s));
+      let remainingPool = studentList.filter(s => !drawnStudentsCycle.includes(s));
+
+      const picked = [];
+      const lastPrevDrawer = roomData?.drawer || null;
+
+      // 남은 인원에서 먼저 뽑기
+      const shuffledRemaining = [...remainingPool].sort(() => Math.random() - 0.5);
+      while (picked.length < needed && shuffledRemaining.length > 0) {
+        picked.push(shuffledRemaining.shift());
+      }
+
+      // 한 바퀴를 다 돌아서 인원이 부족하면 새 순환 시작 (직전 출제자와 연속 중복 방지)
+      if (picked.length < needed) {
+        drawnStudentsCycle = [];
+        let freshPool = studentList.filter(s => !picked.includes(s));
+        freshPool.sort(() => Math.random() - 0.5);
+
+        // 새 바퀴 첫 번째 출제자가 직전 라운드 마지막 출제자와 겹치지 않도록 순서 조정
+        if (picked.length === 0 && freshPool.length > 1 && lastPrevDrawer && freshPool[0] === lastPrevDrawer) {
+          const swapIdx = freshPool.findIndex(s => s !== lastPrevDrawer);
+          if (swapIdx > 0) {
+            [freshPool[0], freshPool[swapIdx]] = [freshPool[swapIdx], freshPool[0]];
+          }
+        }
+
+        while (picked.length < needed && freshPool.length > 0) {
+          picked.push(freshPool.shift());
+        }
+      }
+
+      drawnStudentsCycle.push(...picked);
+      return picked;
     }
 
     function openTeacherSelectDrawerModal(requiredCount) {
@@ -1421,7 +1696,7 @@
       document.getElementById('teacher-select-drawer-modal').classList.add('hidden');
 
       const config = pendingRoundConfig || {
-        roundNum: 1,
+        roundNum: roomData?.currentRound || 1,
         scores: roomData?.scores || {},
         isFirstRound: true
       };
@@ -1440,6 +1715,7 @@
         categoryName: categoryName,
         strokes: [],
         chat: [],
+        correctSolvers: [],
         scores: config.scores,
         timerStarted: false,
         settings: gameSettings,
@@ -1467,8 +1743,8 @@
 
       const initialScores = {};
       studentList.forEach(s => { initialScores[s] = 0; });
+      drawnStudentsCycle = [];
 
-      // "선생님이 선택" 모드인 경우 참여자 선택 단계로 먼저 진입
       if (gameSettings.drawerSelectMode === 'teacher') {
         pendingRoundConfig = {
           roundNum: 1,
@@ -1486,6 +1762,7 @@
               settings: gameSettings,
               strokes: [],
               chat: [],
+              correctSolvers: [],
               timerStarted: false
             });
           } catch (err) {
@@ -1509,6 +1786,7 @@
         categoryName: categoryName,
         strokes: [],
         chat: [],
+        correctSolvers: [],
         scores: initialScores,
         timerStarted: false,
         settings: gameSettings,
@@ -1552,6 +1830,28 @@
       }
     }
 
+    function setChatDisabledState(isDisabled, placeholderText) {
+      const chatInput = document.getElementById('chat-input');
+      const chatSendBtn = document.getElementById('chat-send-btn');
+      if (chatInput) {
+        chatInput.disabled = isDisabled;
+        chatInput.placeholder = placeholderText;
+        if (isDisabled) {
+          chatInput.classList.add('bg-slate-100', 'cursor-not-allowed');
+        } else {
+          chatInput.classList.remove('bg-slate-100', 'cursor-not-allowed');
+        }
+      }
+      if (chatSendBtn) {
+        chatSendBtn.disabled = isDisabled;
+        if (isDisabled) {
+          chatSendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+          chatSendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      }
+    }
+
     function setupGameScreen(data) {
       const resultModal = document.getElementById('round-result-modal');
       if (resultModal) resultModal.classList.add('hidden');
@@ -1562,7 +1862,13 @@
       const roundNum = data.currentRound || 1;
       const drawerName = data.drawer || '미정';
 
-      // 새 라운드 또는 새 출제자(2~3명 릴레이)로 바뀔 때마다 타이머와 LAST 10초 상태 완전 초기화!
+      if (lastSetupRoundNum !== roundNum) {
+        hasAnsweredCorrectlyThisRound = false;
+        lastSentMessage = '';
+        sameMessageCount = 0;
+        renderedChatIds.clear();
+      }
+
       if (lastSetupRoundNum !== roundNum || lastSetupDrawerName !== drawerName) {
         lastSetupRoundNum = roundNum;
         lastSetupDrawerName = drawerName;
@@ -1592,14 +1898,11 @@
 
       const kwDisplay = document.getElementById('game-keyword-display');
       const chatInputContainer = document.getElementById('chat-input-container');
-      const chatInput = document.getElementById('chat-input');
-      const chatSendBtn = document.getElementById('chat-send-btn');
 
       if (isTeacher) {
         kwDisplay.innerText = data.keyword || '???';
         chatInputContainer.classList.add('hidden');
 
-        // 선생님용 라운드 시작 팝업: 라운드당 오직 1번만 뜨도록 라운드키 체크 및 DB showIntro 갱신
         const teacherRoundKey = `round_${roundNum}`;
         if (data.showIntro && introShownForRound !== teacherRoundKey) {
           introShownForRound = teacherRoundKey;
@@ -1619,6 +1922,8 @@
         chatInputContainer.classList.remove('hidden');
         const isMyTurnToDraw = (studentName === data.drawer);
         const amIInDrawerGroup = (data.drawersList || [data.drawer]).includes(studentName);
+        const solvedList = data.correctSolvers || [];
+        const alreadySolved = hasAnsweredCorrectlyThisRound || solvedList.includes(studentName) || data.solver === studentName;
 
         if (isMyTurnToDraw) {
           kwDisplay.innerHTML = `${data.keyword} <span class="text-rose-600 font-black text-base">(내가 그릴 차례!)</span>`;
@@ -1629,25 +1934,11 @@
         }
 
         if (amIInDrawerGroup) {
-          if (chatInput) {
-            chatInput.disabled = true;
-            chatInput.placeholder = "🎨 출제자는 채팅을 입력할 수 없습니다.";
-            chatInput.classList.add('bg-slate-100', 'cursor-not-allowed');
-          }
-          if (chatSendBtn) {
-            chatSendBtn.disabled = true;
-            chatSendBtn.classList.add('opacity-50', 'cursor-not-allowed');
-          }
+          setChatDisabledState(true, "🎨 출제자는 채팅을 입력할 수 없습니다.");
+        } else if (alreadySolved) {
+          setChatDisabledState(true, "🎉 정답을 맞혔습니다! 다음 라운드까지 채팅이 금지됩니다.");
         } else {
-          if (chatInput) {
-            chatInput.disabled = false;
-            chatInput.placeholder = "정답을 입력하세요...";
-            chatInput.classList.remove('bg-slate-100', 'cursor-not-allowed');
-          }
-          if (chatSendBtn) {
-            chatSendBtn.disabled = false;
-            chatSendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          }
+          setChatDisabledState(false, "정답을 입력하세요...");
         }
       }
 
@@ -1711,6 +2002,20 @@
             text.innerText = `${data.drawer}님이 그릴 수 있어요!`;
           }
           overlay.classList.remove('hidden');
+
+          // "(참여자 이름)님이 그릴 수 있어요!" / "내가 그려야 해요!" 메시지 등장 시 사운드 재생
+          playGameSound('roundStart');
+
+          // 그리는 참여자 선택이 [랜덤] 모드일 때 매 라운드마다 추가 안내 사운드 재생
+          const selectMode = data.settings?.drawerSelectMode || gameSettings.drawerSelectMode || 'random';
+          const randomSelectKey = `random_select_round_${roundNum}`;
+          if (selectMode === 'random' && selectingSoundPlayedForRound !== randomSelectKey) {
+            selectingSoundPlayedForRound = randomSelectKey;
+            setTimeout(() => {
+              playGameSound('selectingRandom');
+            }, 900);
+          }
+
           setTimeout(() => {
             overlay.classList.add('hidden');
           }, 2000);
@@ -1757,7 +2062,6 @@
           const drawersList = roomData?.drawersList || [roomData?.drawer];
           const turnIdx = roomData?.drawerTurnIndex || 0;
 
-          // 2명 이상 그리는 설정에서 아직 다음 순번 출제자가 남아있다면 다음 사람에게 턴 넘기기
           if (turnIdx + 1 < drawersList.length) {
             clearInterval(timerInterval);
             timerInterval = null;
@@ -1776,7 +2080,6 @@
             return;
           }
 
-          // 마지막 출제자까지 시간을 다 쓴 경우 LAST 10초 돌입
           isLastSpurt = true;
           remainingTime = 10;
           updateTimerDisplay(remainingTime);
@@ -1806,13 +2109,38 @@
       const text = input ? input.value.trim() : '';
       if (!text || !roomData) return;
 
+      if (roomData.status !== 'playing') return;
+      const amIInDrawerGroup = (roomData.drawersList || [roomData.drawer]).includes(studentName);
+      const solvedList = roomData.correctSolvers || [];
+      if (amIInDrawerGroup || hasAnsweredCorrectlyThisRound || solvedList.includes(studentName)) {
+        setChatDisabledState(true, "🎉 정답을 맞혔습니다! 다음 라운드까지 채팅이 금지됩니다.");
+        return;
+      }
+
       input.value = '';
+
+      const cleanForSpamCheck = text.replace(/\s+/g, '').toLowerCase();
+      if (lastSentMessage === cleanForSpamCheck) {
+        sameMessageCount += 1;
+      } else {
+        lastSentMessage = cleanForSpamCheck;
+        sameMessageCount = 1;
+      }
+
+      if (sameMessageCount >= 3) {
+        const spamBroadcastText = `⚠️ 시스템 · ${studentName}님이 채팅창 도배로 추방되었습니다. 남은 참여자분들도 추방되지 않게 주의하세요.`;
+        setChatDisabledState(true, "채팅 도배 시 추방입니다. 추방되었습니다.");
+        await leaveRoom("채팅 도배 시 추방입니다. 추방되었습니다.", spamBroadcastText);
+        return;
+      }
 
       const normalize = (str) => (str || '').replace(/\s+/g, '').toLowerCase();
       const isCorrect = normalize(text) === normalize(roomData.keyword);
 
       let earnedPoints = 0;
       if (isCorrect) {
+        hasAnsweredCorrectlyThisRound = true;
+        setChatDisabledState(true, "🎉 정답을 맞혔습니다! 다음 라운드까지 채팅이 금지됩니다.");
         const totalSec = roomData?.settings?.timer || 30;
         const ratio = Math.max(0, Math.min(1, remainingTime / totalSec));
         earnedPoints = Math.round(10 + ratio * 89);
@@ -1828,10 +2156,17 @@
       const chatList = roomData.chat || [];
       chatList.push(chatItem);
 
+      const updatedSolvers = isCorrect
+        ? Array.from(new Set([...solvedList, studentName]))
+        : solvedList;
+
       if (window.FirebaseApp && window.FirebaseApp.db) {
         try {
           const { doc, updateDoc } = window.FirebaseApp;
-          await updateDoc(doc(window.FirebaseApp.db, 'catchmind_rooms', roomCode), { chat: chatList });
+          await updateDoc(doc(window.FirebaseApp.db, 'catchmind_rooms', roomCode), {
+            chat: chatList,
+            correctSolvers: updatedSolvers
+          });
         } catch (e) {
           console.warn("Chat error:", e);
         }
@@ -1847,6 +2182,18 @@
       const totalSec = roomData?.settings?.timer || 30;
       const ratio = Math.max(0, Math.min(1, remainingTime / totalSec));
       const earnedPoints = Math.round(10 + ratio * 89);
+      const solvedList = roomData?.correctSolvers || [];
+      const updatedSolvers = Array.from(new Set([...solvedList, senderName]));
+
+      if (window.FirebaseApp && window.FirebaseApp.db && roomCode) {
+        try {
+          const { doc, updateDoc } = window.FirebaseApp;
+          await updateDoc(doc(window.FirebaseApp.db, 'catchmind_rooms', roomCode), {
+            correctSolvers: updatedSolvers
+          });
+        } catch (e) {}
+      }
+
       endRound(senderName, '선생님 인정 정답!', earnedPoints);
     }
 
@@ -1855,9 +2202,21 @@
       if (!box) return;
       box.innerHTML = '<div class="p-2 bg-[#fff8e1] rounded-xl border border-[#ffe082] text-[#8d6e63]">[시스템]: 게임이 시작되었습니다!</div>';
 
+      const currentIds = new Set();
+
       chatList.forEach(c => {
+        const msgId = c.id || `${c.sender}_${c.text}`;
+        currentIds.add(msgId);
+        const isNew = !renderedChatIds.has(msgId);
+
         const div = document.createElement('div');
-        div.className = "p-2 bg-white/80 rounded-xl border border-[#e6cca0] flex items-center justify-between";
+        if (c.isSystemWarning) {
+          div.className = `p-2.5 bg-rose-50 rounded-xl border-2 border-rose-300 text-rose-700 font-black text-xs sm:text-sm leading-snug ${isNew ? 'animate-chat-rise' : ''}`;
+          div.innerText = c.text;
+          box.appendChild(div);
+          return;
+        }
+        div.className = `p-2 bg-white/80 rounded-xl border border-[#e6cca0] flex items-center justify-between ${isNew ? 'animate-chat-rise' : ''}`;
         div.innerHTML = `
           <div>
             <span class="text-[#ff7a38] font-bold">${c.sender}:</span>
@@ -1873,7 +2232,9 @@
         }
         box.appendChild(div);
       });
-      box.scrollTop = box.scrollHeight;
+
+      renderedChatIds = currentIds;
+      box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
     }
 
     async function endRound(solverName, message, points = 0) {
@@ -1891,9 +2252,15 @@
         scores[solverName] = (scores[solverName] || 0) + points;
       }
 
+      const solvedList = roomData?.correctSolvers || [];
+      const updatedSolvers = solverName
+        ? Array.from(new Set([...solvedList, solverName]))
+        : solvedList;
+
       const updateData = {
         status: 'round_ended',
         solver: solverName,
+        correctSolvers: updatedSolvers,
         earnedPoints: points,
         scores: scores,
         endMessage: message
@@ -1922,6 +2289,13 @@
       const lastSpurtEl = document.getElementById('last-spurt-overlay');
       if (lastSpurtEl) lastSpurtEl.classList.add('hidden');
 
+      if (!isTeacher) {
+        const solvedList = data.correctSolvers || [];
+        if (hasAnsweredCorrectlyThisRound || solvedList.includes(studentName) || data.solver === studentName) {
+          setChatDisabledState(true, "🎉 정답을 맞혔습니다! 다음 라운드까지 채팅이 금지됩니다.");
+        }
+      }
+
       const modal = document.getElementById('round-result-modal');
       if (!modal) return;
       modal.classList.remove('hidden');
@@ -1940,6 +2314,14 @@
         solver.innerText = `${data.solver}님이 맞추셨어요!`;
         earnedScore.innerText = `+${data.earnedPoints || 0}점 획득!`;
         earnedScore.classList.remove('hidden');
+
+        // 정답을 맞췄을 때 정답 효과음 재생 (라운드당 1회)
+        const roundNum = data.currentRound || 1;
+        const correctKey = `correct_round_${roundNum}_${data.solver}`;
+        if (correctSoundPlayedForRound !== correctKey) {
+          correctSoundPlayedForRound = correctKey;
+          playGameSound('correctAnswer');
+        }
       } else {
         title.innerText = "⏱️ 라운드가 종료되었어요!";
         solver.innerText = "아쉽게 아무도 맞추지 못했어요.";
@@ -2057,7 +2439,6 @@
       const mode = roomData?.settings?.drawerSelectMode || gameSettings.drawerSelectMode || 'random';
       const requiredPainters = roomData?.settings?.painters || gameSettings.painters || 1;
 
-      // "선생님이 선택" 모드인 경우 다음 라운드 시작 전에도 선생님이 출제자를 고를 수 있도록 모달 띄우기
       if (mode === 'teacher') {
         pendingRoundConfig = {
           roundNum: nextRoundNum,
@@ -2071,6 +2452,8 @@
             await updateDoc(doc(window.FirebaseApp.db, 'catchmind_rooms', roomCode), {
               status: 'selecting_drawer',
               currentRound: nextRoundNum,
+              solver: null,
+              correctSolvers: [],
               strokes: [],
               chat: [],
               timerStarted: false
@@ -2100,6 +2483,8 @@
         categoryName: categoryName,
         strokes: [],
         chat: [],
+        solver: null,
+        correctSolvers: [],
         isSkipped: false,
         timerStarted: false,
         showIntro: true
@@ -2181,6 +2566,8 @@
               isSkipped: false,
               strokes: [],
               chat: [],
+              solver: null,
+              correctSolvers: [],
               scores: resetScores,
               timerStarted: false,
               showIntro: false
@@ -2191,17 +2578,25 @@
         }
         showScreen('screen-teacher-lobby');
       } else {
-        await leaveRoom();
+        await leaveRoom("방을 나가셨습니다.");
       }
     }
 
     function renderTimerOptions() {
       const container = document.getElementById('timer-options');
       if (!container) return;
-      const times = [15, 20, 30, 45, 60];
-      if (!times.includes(gameSettings.timer)) {
-        gameSettings.timer = 30;
+
+      let times = [15, 30, 60];
+      if (gameSettings.painters === 2) {
+        times = [20, 30, 60];
+      } else if (gameSettings.painters === 3) {
+        times = [15, 20, 30];
       }
+
+      if (!times.includes(gameSettings.timer)) {
+        gameSettings.timer = times[0];
+      }
+
       container.innerHTML = times.map(t => {
         const active = gameSettings.timer === t;
         return `<button type="button" onclick="selectTimer(${t})" class="px-3 py-1.5 rounded-xl border ${active ? 'border-[#ff7a38] text-white bg-[#ff7a38] shadow' : 'border-[#d9c4a5] text-slate-700 bg-white hover:bg-slate-50'} text-xs font-bold transition timer-btn" data-value="${t}">${t}초</button>`;
@@ -2264,7 +2659,8 @@
       const modal = document.getElementById('qr-modal');
       if (modal) {
         modal.classList.remove('hidden');
-        renderQrCode('modal-qrcode', roomCode, 220);
+        const qrSize = Math.min(340, Math.floor(window.innerWidth * 0.68));
+        renderQrCode('modal-qrcode', roomCode, qrSize);
       }
     }
 
@@ -2305,6 +2701,8 @@
     window.triggerClearCanvas = triggerClearCanvas;
     window.sendChat = sendChat;
     window.closeCustomNoticeModal = closeCustomNoticeModal;
+    window.closeLaunchNoticeModal = closeLaunchNoticeModal;
+    window.handleDontShowNoticeChange = handleDontShowNoticeChange;
   </script>
 </body>
 </html>
