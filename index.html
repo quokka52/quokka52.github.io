@@ -21,141 +21,224 @@
             font-weight: 700;
             font-display: swap;
         }
+
         body {
             font-family: 'Mona12', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #161026;
+            /* 아케이드 그리드 + CRT 스캔라인 배경 패턴 */
+            background-image: 
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(139, 92, 246, 0.06) 1px, transparent 1px),
+                linear-gradient(rgba(139, 92, 246, 0.06) 1px, transparent 1px);
+            background-size: 100% 4px, 28px 28px, 28px 28px;
+            color: #ffffff;
         }
-        .game-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        /* 레트로 3D 입체 타이틀 텍스트 */
+        .arcade-title {
+            background: linear-gradient(180deg, #ffe047 0%, #ff9900 55%, #ff5e00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0px 4px 0px #7c2d12) drop-shadow(0px 6px 0px #1e1035);
+            letter-spacing: 0.04em;
         }
-        .game-card:hover {
+
+        /* 둥둥 떠다니는 픽셀 장식 애니메이션 */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(6deg); }
+        }
+        .pixel-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+
+        /* 게임 카드 네온 호버 효과 */
+        .arcade-card {
+            background-color: #1c1738;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+        }
+        .arcade-card:hover {
             transform: translateY(-6px);
+        }
+
+        /* 스티커 뱃지 스타일 */
+        .sticker-badge {
+            box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.45);
+            transform: rotate(-8deg);
+            transition: transform 0.2s ease;
+        }
+        .sticker-badge:hover {
+            transform: rotate(-2deg) scale(1.05);
+        }
+
+        /* 오락실 안내 문구 딱딱 끊어지는 깜빡임 애니메이션 */
+        @keyframes arcadeStepBlink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+        .arcade-blink {
+            animation: arcadeStepBlink 1.6s steps(1, end) infinite;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen flex flex-col selection:bg-amber-400 selection:text-slate-950 relative overflow-x-hidden">
 
-    <!-- 상단 네비게이션 바 -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-3 group">
-                <!-- 오둥게임즈 로고 이미지 영역 (오리 이모티콘 제거 및 첨부된 오둥이 로고 그래픽 적용) -->
-                <div class="w-10 h-10 rounded-xl overflow-hidden bg-[#FFA400] flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform border border-amber-400/30">
-                    <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-label="Odung Games 로고">
-                        <!-- 주황색 배경 -->
-                        <rect width="200" height="200" fill="#FFA400" />
-                        <!-- 오둥이 하얀 몸통 및 검은 외곽선 -->
-                        <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin="round" />
-                        <!-- 왼쪽 눈 -->
-                        <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
-                        <circle cx="85" cy="95" r="4.5" fill="#000000" />
-                        <!-- 오른쪽 눈 -->
-                        <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
-                        <circle cx="115" cy="95" r="4.5" fill="#000000" />
-                        <!-- 주황색 부리 -->
-                        <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="6.5" stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <span class="font-bold text-xl tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                    Odung Games
-                </span>
-            </a>
-            <nav class="flex items-center gap-4">
-                <span class="text-xs sm:text-sm px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-400">
-                    odunggames.github.io
-                </span>
-            </nav>
+    <!-- 배경 떠다니는 픽셀 별/장식 요소들 -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden z-0">
+        <span class="pixel-float absolute top-24 left-[12%] text-amber-400/70 text-lg select-none">✦</span>
+        <span class="pixel-float absolute top-16 right-[25%] text-emerald-400/70 text-base select-none" style="animation-delay: 1s;">◆</span>
+        <span class="pixel-float absolute top-44 right-[8%] text-pink-400/70 text-xl select-none" style="animation-delay: 2s;">✦</span>
+        <span class="pixel-float absolute bottom-32 left-[6%] text-purple-400/60 text-lg select-none" style="animation-delay: 1.5s;">★</span>
+        <span class="pixel-float absolute bottom-24 right-[14%] text-amber-300/60 text-base select-none" style="animation-delay: 0.7s;">✦</span>
+    </div>
+
+    <!-- 상단 아케이드 상태바 (DOBBI 스타일 상단 바) -->
+    <header class="relative z-20 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 pb-2 flex items-center justify-between">
+        <!-- 좌측: 오둥게임즈 로고 & 브랜드명 -->
+        <a href="/" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-lg overflow-hidden bg-[#FFA400] flex items-center justify-center border-2 border-black shadow-[3px_3px_0px_#000] group-hover:scale-105 transition-transform">
+                <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-label="Odung Games 로고">
+                    <rect width="200" height="200" fill="#FFA400" />
+                    <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin="round" />
+                    <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
+                    <circle cx="85" cy="95" r="4.5" fill="#000000" />
+                    <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
+                    <circle cx="115" cy="95" r="4.5" fill="#000000" />
+                    <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="6.5" stroke-linejoin="round" />
+                </svg>
+            </div>
+            <span class="text-slate-300 group-hover:text-white tracking-widest text-sm sm:text-base font-bold transition-colors">
+                ODUNG GAMES
+            </span>
+        </a>
+
+        <!-- 우측: 1P START 버튼 & GAMES 카운터 -->
+        <div class="flex items-center gap-3 sm:gap-4">
+            <button onclick="showToast('게스트 모드로 바로 플레이할 수 있어요!')" class="px-3 py-1.5 bg-[#121629] border-2 border-[#4ade80] text-[#4ade80] text-xs sm:text-sm font-bold tracking-wider shadow-[0_0_10px_rgba(74,222,128,0.25)] hover:bg-[#4ade80] hover:text-[#121629] transition-colors cursor-pointer">
+        <!-- 우측: GAMES 카운터 -->
+        <div class="flex items-center gap-3 sm:gap-4">
+            <div class="text-xs sm:text-sm tracking-wider text-slate-400 font-bold">
+                GAMES <span id="total-games-count" class="text-amber-400 text-sm sm:text-base ml-1">3</span>
+            </div>
         </div>
     </header>
 
-    <!-- 히어로 섹션 -->
-    <section class="relative overflow-hidden py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
-        <!-- 배경 장식 효과 -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/20 blur-[120px] rounded-full pointer-events-none"></div>
+    <!-- 히어로 섹션 (오락실 메인 간판 영역) -->
+    <section class="relative z-10 pt-8 pb-10 sm:pt-10 sm:pb-12 px-4 sm:px-6 max-w-5xl w-full mx-auto text-center">
         
-        <div class="max-w-4xl mx-auto text-center relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-6">
-                <span>✨</span> 웹에서 바로 즐기는 미니게임 천국
+        <!-- 좌측 상단 떠있는 오둥이 스티커 뱃지 (스크린샷의 꽥꽥 교실 스티커 오마주) -->
+        <div class="hidden md:flex flex-col items-center absolute left-6 top-8 sticker-badge bg-white text-slate-900 p-2 rounded-md border-2 border-slate-900 select-none">
+            <div class="w-11 h-11 rounded bg-[#FFA400] border-2 border-black overflow-hidden mb-1">
+                <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="200" height="200" fill="#FFA400" />
+                    <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="10" stroke-linejoin="round" />
+                    <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
+                    <circle cx="85" cy="95" r="5" fill="#000000" />
+                    <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
+                    <circle cx="115" cy="95" r="5" fill="#000000" />
+                    <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="7" stroke-linejoin="round" />
+                </svg>
             </div>
-            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
-                <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    오둥게임즈
-                </span>에 오신걸 환영해요.
-            </h1>
-            <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto mb-8">
-                오둥이를 좋아하는 학생이 만들었어요. 많은 관심 부탁드려요
-            </p>
+            <span class="text-[11px] font-bold leading-tight text-slate-900">오둥 오락실</span>
+            <span class="text-[9px] text-slate-500">누구나 · 무료</span>
+        </div>
 
-            <!-- 카테고리 필터 버튼 -->
-            <div id="category-filters" class="flex flex-wrap justify-center gap-2">
-                <button data-category="all" class="filter-btn active px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white shadow-md shadow-indigo-500/20 transition-all">
-                    전체 게임
-                </button>
-                <button data-category="multi" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all">
-                    멀티 / 파티
-                </button>
-                <button data-category="arcade" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all">
-                    아케이드 / 퍼즐
-                </button>
-            </div>
+        <!-- 모바일용 미니 스티커 -->
+        <div class="inline-flex md:hidden items-center gap-2 px-3 py-1 mb-4 bg-white text-slate-900 border-2 border-black rounded shadow-[2px_2px_0px_#000] text-xs font-bold">
+            <span>🦆</span> 오둥 오락실 OPEN!
+        </div>
+
+        <!-- 메인 픽셀 타이틀 -->
+        <h1 class="arcade-title text-3xl sm:text-5xl md:text-[52px] font-bold mb-4 leading-tight">
+            오둥 오락실
+        </h1>
+
+        <!-- 서브 타이틀 (레트로 오락실 안내 문구 스타일 + 느린 깜빡임) -->
+        <p class="arcade-blink text-amber-300 text-xs sm:text-base tracking-widest font-bold mb-8 flex items-center justify-center gap-2">
+            <span>🕹️</span>
+            <span>PRESS START · 궁금한 게임을 눌러 보세요</span>
+            <span>🕹️</span>
+        </p>
+
+        <!-- 레트로 사각 탭 버튼 (카테고리 필터) -->
+        <div id="category-filters" class="flex flex-wrap justify-center gap-2 sm:gap-2.5">
+            <button data-category="all" class="filter-btn active px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#4ade80] bg-[#4ade80] text-[#121629] shadow-[0_0_12px_rgba(74,222,128,0.4)] transition-all cursor-pointer">
+                전체 <span class="count-badge ml-1 opacity-80">3</span>
+            </button>
+            <button data-category="multi" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
+                멀티 / 파티 <span class="count-badge ml-1 text-slate-400">1</span>
+            </button>
+            <button data-category="arcade" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
+                아케이드 / 퍼즐 <span class="count-badge ml-1 text-slate-400">2</span>
+            </button>
         </div>
     </section>
 
-    <!-- 게임 목록 그리드 -->
-    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div id="games-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- 자바스크립트를 통해 게임 카드가 동적으로 렌더링됩니다 -->
+    <!-- 게임 목록 그리드 (GAME 01, 02, 03 네온 프레임 카드) -->
+    <main class="relative z-10 flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 pb-24">
+        <div id="games-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7 pt-3">
+            <!-- 자바스크립트를 통해 오락실 게임 카드가 동적으로 렌더링됩니다 -->
         </div>
     </main>
 
-    <!-- 알림 메시지 모달 (alert 대체용) -->
+    <!-- 레트로 알림 토스트 모달 (alert 대체용) -->
     <div id="toast-modal" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
-        <div class="bg-slate-800 border border-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
-            <span class="text-lg">🚧</span>
-            <p id="toast-message" class="text-sm font-medium">아직 준비 중인 게임입니다!</p>
+        <div class="bg-[#121629] border-2 border-amber-400 text-white px-5 py-3 shadow-[0_0_20px_rgba(251,191,36,0.35)] flex items-center gap-3">
+            <span class="text-lg">🕹️</span>
+            <p id="toast-message" class="text-xs sm:text-sm font-bold text-amber-300">아직 준비 중인 게임입니다!</p>
         </div>
     </div>
 
     <!-- 푸터 -->
-    <footer class="border-t border-slate-900 bg-slate-950 py-8 px-4 text-center text-slate-500 text-sm">
-        <p>© 2026 Odung Games. All rights reserved.</p>
+    <footer class="relative z-10 border-t-2 border-[#2a224d] bg-[#120d21] py-6 px-4 text-center text-slate-400 text-xs tracking-wider">
+        <p>INSERT COIN TO PLAY • © 2026 ODUNG GAMES. ALL RIGHTS RESERVED.</p>
     </footer>
 
     <script>
-        // 게임 데이터 목록 (추후 새 게임을 만들면 여기에 객체만 추가하면 됩니다!)
+        // 기존 게임 데이터 유지 + 레트로 오락실 카드 테마 속성 매핑
         const gamesList = [
             {
                 id: 'catchmind',
+                gameNumber: 'GAME 01',
                 title: '캐치마인드 (CatchMind)',
                 description: '제시어를 보고 그림을 그리면 친구들이 정답을 맞추는 실시간 그림 퀴즈 게임!',
                 url: './catchmind/', // odunggames.github.io/catchmind 로 이동
                 category: 'multi',
-                badge: '인기 🔥',
-                badgeColor: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-                gradient: 'from-amber-400 to-orange-500',
+                subBadge: '★ 실시간 멀티',
+                tags: ['#그림퀴즈', '#인기게임'],
+                themeColor: '#4ade80', // 네온 그린
+                glowColor: 'rgba(74, 222, 128, 0.25)',
+                iconBg: 'from-amber-400 to-orange-500',
                 icon: '🎨',
                 isReady: true
             },
             {
                 id: 'coming-soon-1',
+                gameNumber: 'GAME 02',
                 title: '오둥이 피하기',
                 description: '하늘에서 떨어지는 장애물을 피해 최고 점수에 도전하는 아케이드 게임입니다.',
                 url: '#coming-soon',
                 category: 'arcade',
-                badge: '개발 중',
-                badgeColor: 'bg-slate-800 text-slate-400 border-slate-700',
-                gradient: 'from-emerald-400 to-teal-500',
+                subBadge: '★ 개발 중',
+                tags: ['#컨트롤', '#최고기록'],
+                themeColor: '#a78bfa', // 네온 퍼플
+                glowColor: 'rgba(167, 139, 250, 0.25)',
+                iconBg: 'from-emerald-400 to-teal-500',
                 icon: '🏃',
                 isReady: false
             },
             {
                 id: 'coming-soon-2',
+                gameNumber: 'GAME 03',
                 title: '스피드 타자 왕',
                 description: '제한 시간 안에 떨어지는 단어들을 빠르게 입력해 방어하는 타자 게임입니다.',
                 url: '#coming-soon',
                 category: 'arcade',
-                badge: '예정',
-                badgeColor: 'bg-slate-800 text-slate-400 border-slate-700',
-                gradient: 'from-blue-400 to-indigo-500',
+                subBadge: '★ 출시 예정',
+                tags: ['#타자연습', '#시간도전'],
+                themeColor: '#fbbf24', // 네온 옐로우
+                glowColor: 'rgba(251, 191, 36, 0.25)',
+                iconBg: 'from-blue-400 to-indigo-500',
                 icon: '⌨️',
                 isReady: false
             }
@@ -177,7 +260,20 @@
             }, 2500);
         }
 
-        // 게임 카드 렌더링 함수
+        // 카테고리별 개수 업데이트
+        function updateCategoryCounts() {
+            document.getElementById('total-games-count').textContent = gamesList.length;
+            filterBtns.forEach(btn => {
+                const cat = btn.dataset.category;
+                const count = cat === 'all' 
+                    ? gamesList.length 
+                    : gamesList.filter(g => g.category === cat).length;
+                const badge = btn.querySelector('.count-badge');
+                if (badge) badge.textContent = count;
+            });
+        }
+
+        // 게임 카드 렌더링 함수 (첨부된 이미지의 GAME 01~04 네온 프레임 스타일)
         function renderGames(filterCategory = 'all') {
             gamesGrid.innerHTML = '';
 
@@ -187,41 +283,67 @@
 
             filteredGames.forEach(game => {
                 const card = document.createElement('div');
-                card.className = 'game-card group bg-slate-900/60 border border-slate-800/80 hover:border-indigo-500/50 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg';
+                card.className = 'arcade-card relative border-[3px] p-6 pt-8 flex flex-col items-center text-center justify-between';
+                card.style.borderColor = game.themeColor;
+                card.style.boxShadow = `0 0 20px ${game.glowColor}, inset 0 0 15px rgba(0,0,0,0.4)`;
+
+                const tagsHtml = game.tags.map(tag => `
+                    <span class="px-2 py-1 bg-[#130f26] border border-[#3b3363] text-slate-300 text-[11px] font-bold">
+                        ${tag}
+                    </span>
+                `).join('');
 
                 card.innerHTML = `
-                    <div>
-                        <!-- 썸네일 영역 -->
-                        <div class="h-44 bg-gradient-to-br ${game.gradient} relative flex items-center justify-center overflow-hidden">
-                            <span class="text-6xl transform group-hover:scale-110 transition-transform duration-300 drop-shadow-md">
-                                ${game.icon}
-                            </span>
-                            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-semibold border backdrop-blur-md ${game.badgeColor}">
-                                ${game.badge}
-                            </span>
+                    <!-- 좌측 상단 GAME 01 라벨 탭 -->
+                    <div class="absolute -top-3.5 left-4 px-2.5 py-0.5 text-xs font-bold tracking-wider text-[#121629]"
+                         style="background-color: ${game.themeColor};">
+                        ${game.gameNumber}
+                    </div>
+
+                    <div class="w-full flex flex-col items-center">
+                        <!-- 중앙 픽셀 아이콘 프레임 -->
+                        <div class="w-24 h-24 mb-5 bg-[#120e24] border-2 border-[#3b3363] p-2 flex items-center justify-center shadow-inner">
+                            <div class="w-full h-full bg-gradient-to-br ${game.iconBg} flex items-center justify-center border border-black/40">
+                                <span class="text-4xl drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
+                                    ${game.icon}
+                                </span>
+                            </div>
                         </div>
-                        
-                        <!-- 텍스트 설명 영역 -->
-                        <div class="p-6">
-                            <h2 class="text-xl font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors">
-                                ${game.title}
-                            </h2>
-                            <p class="text-slate-400 text-sm leading-relaxed">
-                                ${game.description}
-                            </p>
+
+                        <!-- 게임 제목 -->
+                        <h2 class="text-lg sm:text-xl font-bold text-white mb-2.5 tracking-wide">
+                            ${game.title}
+                        </h2>
+
+                        <!-- 노란색 등급/상태 뱃지 (★ 실시간 멀티 등) -->
+                        <div class="inline-block px-3 py-0.5 mb-3 border border-amber-400/80 bg-amber-400/10 text-amber-300 text-xs font-bold">
+                            ${game.subBadge}
+                        </div>
+
+                        <!-- 게임 설명 -->
+                        <p class="text-slate-300 text-xs leading-relaxed mb-4 line-clamp-2 px-1">
+                            ${game.description}
+                        </p>
+
+                        <!-- 해시태그 박스 -->
+                        <div class="flex flex-wrap justify-center gap-1.5 mb-4">
+                            ${tagsHtml}
                         </div>
                     </div>
 
-                    <!-- 하단 플레이 버튼 -->
-                    <div class="px-6 pb-6 pt-2">
+                    <!-- 하단 중앙 돌출형 PLAY 버튼 (스크린샷의 하단 1P LOGIN 탭 스타일) -->
+                    <div class="w-full pt-1">
                         ${game.isReady ? `
-                            <a href="${game.url}" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors shadow-md shadow-indigo-600/20">
-                                <span>지금 플레이하기</span>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            <a href="${game.url}" 
+                               class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 text-xs sm:text-sm font-bold tracking-wider text-[#121629] transition-transform active:translate-y-0.5 hover:brightness-110"
+                               style="background-color: ${game.themeColor}; box-shadow: 0 4px 0 rgba(0,0,0,0.5);">
+                                <span>▶ GAME START</span>
                             </a>
                         ` : `
-                            <button onclick="showToast('${game.title}은(는) 현재 열심히 개발 중입니다!')" class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer">
-                                <span>출시 준비 중</span>
+                            <button onclick="showToast('${game.title}은(는) 현재 열심히 개발 중입니다!')" 
+                                    class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-[#120e24] border-2 text-xs sm:text-sm font-bold tracking-wider transition-colors hover:bg-white/5 cursor-pointer"
+                                    style="border-color: ${game.themeColor}; color: ${game.themeColor};">
+                                <span>COMING SOON</span>
                             </button>
                         `}
                     </div>
@@ -235,18 +357,24 @@
             btn.addEventListener('click', () => {
                 // 버튼 스타일 초기화
                 filterBtns.forEach(b => {
-                    b.classList.remove('bg-indigo-600', 'text-white', 'shadow-md', 'shadow-indigo-500/20');
-                    b.classList.add('bg-slate-900', 'text-slate-400', 'border', 'border-slate-800');
+                    b.classList.remove('bg-[#4ade80]', 'text-[#121629]', 'border-[#4ade80]', 'shadow-[0_0_12px_rgba(74,222,128,0.4)]');
+                    b.classList.add('bg-[#1e193b]', 'text-slate-300', 'border-[#3b3363]');
+                    const badge = b.querySelector('.count-badge');
+                    if (badge) badge.classList.add('text-slate-400');
                 });
-                // 활성화된 버튼 스타일 적용
-                btn.classList.remove('bg-slate-900', 'text-slate-400', 'border', 'border-slate-800');
-                btn.classList.add('bg-indigo-600', 'text-white', 'shadow-md', 'shadow-indigo-500/20');
+
+                // 활성화된 버튼 스타일 적용 (레트로 민트/그린 하이라이트)
+                btn.classList.remove('bg-[#1e193b]', 'text-slate-300', 'border-[#3b3363]');
+                btn.classList.add('bg-[#4ade80]', 'text-[#121629]', 'border-[#4ade80]', 'shadow-[0_0_12px_rgba(74,222,128,0.4)]');
+                const activeBadge = btn.querySelector('.count-badge');
+                if (activeBadge) activeBadge.classList.remove('text-slate-400');
 
                 renderGames(btn.dataset.category);
             });
         });
 
-        // 초기 렌더링
+        // 초기 실행
+        updateCategoryCounts();
         renderGames();
     </script>
 </body>
