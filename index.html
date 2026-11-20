@@ -4,17 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Odung Games - 오둥 게임즈</title>
+    <!-- 파비콘 설정 (오둥이 로고 SVG 인라인 적용) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='40' fill='%23FFA400'/%3E%3Cpath d='M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z' fill='%23FFFFFF' stroke='%23000000' stroke-width='9' stroke-linejoin='round'/%3E%3Cellipse cx='85' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='85' cy='95' r='4.5' fill='%23000000'/%3E%3Cellipse cx='115' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='115' cy='95' r='4.5' fill='%23000000'/%3E%3Cpath d='M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z' fill='%23FFA400' stroke='%23000000' stroke-width='6.5' stroke-linejoin='round'/%3E%3C/svg%3E">
     <!-- Tailwind CSS 로드 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @font-face {
-            font-family: 'Dohyun';
-            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMDOHYEON.woff') format('woff');
-            font-weight: normal;
+            font-family: 'Mona12';
+            src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/2611030023@color-1792-1712/color-1792-1712/Mona12.woff2') format('woff2');
+            font-weight: 400;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Mona12';
+            src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/2611030026@color-1792-1713/color-1792-1713/Mona12.woff2') format('woff2');
+            font-weight: 700;
             font-display: swap;
         }
         body {
-            font-family: 'Dohyun', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            font-family: 'Mona12', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
         }
         .game-card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -30,8 +38,22 @@
     <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <a href="/" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-                    <span class="text-xl">🎮</span>
+                <!-- 오둥게임즈 로고 이미지 영역 (오리 이모티콘 제거 및 첨부된 오둥이 로고 그래픽 적용) -->
+                <div class="w-10 h-10 rounded-xl overflow-hidden bg-[#FFA400] flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform border border-amber-400/30">
+                    <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-label="Odung Games 로고">
+                        <!-- 주황색 배경 -->
+                        <rect width="200" height="200" fill="#FFA400" />
+                        <!-- 오둥이 하얀 몸통 및 검은 외곽선 -->
+                        <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin="round" />
+                        <!-- 왼쪽 눈 -->
+                        <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
+                        <circle cx="85" cy="95" r="4.5" fill="#000000" />
+                        <!-- 오른쪽 눈 -->
+                        <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
+                        <circle cx="115" cy="95" r="4.5" fill="#000000" />
+                        <!-- 주황색 부리 -->
+                        <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="6.5" stroke-linejoin="round" />
+                    </svg>
                 </div>
                 <span class="font-bold text-xl tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
                     Odung Games
@@ -55,13 +77,12 @@
                 <span>✨</span> 웹에서 바로 즐기는 미니게임 천국
             </div>
             <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
-                심심할 땐 언제든지,<br class="sm:hidden" />
                 <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    오둥 게임즈
-                </span>
+                    오둥게임즈
+                </span>에 오신걸 환영해요.
             </h1>
             <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto mb-8">
-                별도의 설치 없이 브라우저에서 바로 플레이할 수 있는 다양한 웹 게임들을 만나보세요.
+                오둥이를 좋아하는 학생이 만들었어요. 많은 관심 부탁드려요
             </p>
 
             <!-- 카테고리 필터 버튼 -->
