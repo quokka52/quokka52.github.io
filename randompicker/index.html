@@ -3,45 +3,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오둥이 번호 뽑기 - 선생님용 랜덤 뽑기</title>
+    <title>오둥이 번호 뽑기 - macOS Browser Edition</title>
     <!-- 파비콘 설정 -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='40' fill='%23FFA400'/%3E%3Cpath d='M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z' fill='%23FFFFFF' stroke='%23000000' stroke-width='9' stroke-linejoin='round'/%3E%3Cellipse cx='85' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='85' cy='95' r='4.5' fill='%23000000'/%3E%3Cellipse cx='115' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='115' cy='95' r='4.5' fill='%23000000'/%3E%3Cpath d='M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z' fill='%23FFA400' stroke='%23000000' stroke-width='6.5' stroke-linejoin='round'/%3E%3C/svg%3E">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css');
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
-        @font-face {
-            font-family: 'Galmuri11';
-            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2506-1@1.0/Galmuri11-Bold.woff2') format('woff2');
-            font-weight: 700;
-            font-display: swap;
+        /* macOS 다크 모드(기본) 디자인 토큰 */
+        :root {
+            --wallpaper-bg: radial-gradient(circle at 15% 20%, #3b2667 0%, #1c1b29 45%, #121217 100%);
+            --window-bg: rgba(30, 30, 34, 0.88);
+            --window-border: rgba(255, 255, 255, 0.16);
+            --window-shadow: 0 28px 70px -12px rgba(0, 0, 0, 0.75), 0 0 0 0.5px rgba(255, 255, 255, 0.08) inset;
+            --toolbar-bg: linear-gradient(180deg, rgba(54, 54, 60, 0.92) 0%, rgba(42, 42, 47, 0.92) 100%);
+            --url-bg: rgba(22, 22, 26, 0.72);
+            --url-hover-bg: rgba(26, 26, 31, 0.9);
+            --url-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+            --tabbar-bg: rgba(24, 24, 28, 0.95);
+            --tab-active-bg: #28282e;
+            --tab-active-shadow: 0 1px 4px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+            --tab-hover-bg: rgba(255, 255, 255, 0.06);
+            --title-strip-bg: rgba(35, 35, 41, 0.9);
+            --viewport-bg: rgba(30, 30, 35, 0.6);
+            --card-bg: rgba(44, 44, 50, 0.65);
+            --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            --well-bg: #15151a;
+            --chip-bg: #24242b;
+            --chip-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+            --btn-sec-bg: rgba(255, 255, 255, 0.1);
+            --btn-sec-hover: rgba(255, 255, 255, 0.16);
+            --seg-track-bg: rgba(18, 18, 22, 0.75);
+            --seg-active-bg: #48484f;
+            --seg-active-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --border-strong: rgba(255, 255, 255, 0.16);
+            --text-primary: #f5f5f7;
+            --text-secondary: #d1d1d6;
+            --text-muted: #98989d;
+            --text-accent: #fbbf24;
+            --text-success: #34d399;
+            --kbd-bg: rgba(255, 255, 255, 0.12);
+            --claw-bg: radial-gradient(circle at 50% 28%, #252047 0%, #131122 100%);
+            --scroll-thumb: rgba(255, 255, 255, 0.22);
+            --scroll-thumb-hover: rgba(255, 255, 255, 0.35);
+            --sound-on-bg: rgba(48, 209, 88, 0.2);
+            --sound-on-border: rgba(48, 209, 88, 0.4);
+            --sound-on-text: #30d158;
+            --absent-bg: rgba(255, 255, 255, 0.04);
+            --history-pill-bg: rgba(168, 85, 247, 0.2);
+            --history-pill-border: rgba(192, 132, 252, 0.35);
+            --history-pill-text: #e9d5ff;
+            --rank-pill-bg: rgba(10, 132, 255, 0.2);
+            --rank-pill-text: #5ac8fa;
+            --modal-rank-bg: rgba(251, 191, 36, 0.2);
+            --claw-shadow: inset 0 0 32px rgba(0, 0, 0, 0.72);
+            --claw-border: rgba(255, 255, 255, 0.15);
+            --rail-bg: rgba(51, 65, 85, 0.9);
+            --dropzone-bg: rgba(12, 11, 20, 0.9);
+            --running-bg: rgba(245, 158, 11, 0.2);
+            --running-border: rgba(245, 158, 11, 0.4);
+            --running-text: #fcd34d;
+            --backdrop-bg: rgba(0, 0, 0, 0.55);
+        }
+
+        /* 시스템 설정이 라이트 모드일 때 자동 적용 (전체 밝은 라이트 테마) */
+        @media (prefers-color-scheme: light) {
+            :root:not([data-theme="dark"]) {
+                --wallpaper-bg: linear-gradient(135deg, #e0f2fe 0%, #ede9fe 50%, #fce7f3 100%);
+                --window-bg: rgba(255, 255, 255, 0.94);
+                --window-border: rgba(0, 0, 0, 0.12);
+                --window-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.16), 0 0 0 0.5px rgba(255, 255, 255, 0.9) inset;
+                --toolbar-bg: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
+                --url-bg: #ffffff;
+                --url-hover-bg: #ffffff;
+                --url-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+                --tabbar-bg: #e5e7eb;
+                --tab-active-bg: #ffffff;
+                --tab-active-shadow: 0 1px 4px rgba(0, 0, 0, 0.09), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+                --tab-hover-bg: rgba(0, 0, 0, 0.05);
+                --title-strip-bg: #f9fafb;
+                --viewport-bg: #f3f4f6;
+                --card-bg: #ffffff;
+                --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+                --well-bg: #f8fafc;
+                --chip-bg: #ffffff;
+                --chip-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+                --btn-sec-bg: #ffffff;
+                --btn-sec-hover: #f3f4f6;
+                --seg-track-bg: #e5e7eb;
+                --seg-active-bg: #ffffff;
+                --seg-active-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+                --border-subtle: rgba(0, 0, 0, 0.09);
+                --border-strong: rgba(0, 0, 0, 0.15);
+                --text-primary: #111827;
+                --text-secondary: #374151;
+                --text-muted: #6b7280;
+                --text-accent: #b45309;
+                --text-success: #15803d;
+                --kbd-bg: #e5e7eb;
+                --claw-bg: radial-gradient(circle at 50% 24%, #ffffff 0%, #e0f2fe 58%, #dbeafe 100%);
+                --claw-shadow: inset 0 0 24px rgba(14, 116, 144, 0.12);
+                --claw-border: rgba(0, 0, 0, 0.14);
+                --rail-bg: #cbd5e1;
+                --dropzone-bg: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+                --running-bg: rgba(245, 158, 11, 0.16);
+                --running-border: rgba(217, 119, 6, 0.38);
+                --running-text: #b45309;
+                --backdrop-bg: rgba(15, 23, 42, 0.35);
+                --scroll-thumb: rgba(0, 0, 0, 0.2);
+                --scroll-thumb-hover: rgba(0, 0, 0, 0.35);
+                --sound-on-bg: rgba(22, 163, 74, 0.12);
+                --sound-on-border: rgba(22, 163, 74, 0.35);
+                --sound-on-text: #15803d;
+                --absent-bg: #f1f5f9;
+                --history-pill-bg: rgba(147, 51, 234, 0.1);
+                --history-pill-border: rgba(147, 51, 234, 0.28);
+                --history-pill-text: #6b21a8;
+                --rank-pill-bg: rgba(0, 113, 227, 0.12);
+                --rank-pill-text: #0066cc;
+                --modal-rank-bg: rgba(217, 119, 6, 0.14);
+            }
+        }
+
+        /* 수동 라이트 모드 선택 시 강제 적용 (전체 밝은 라이트 테마) */
+        :root[data-theme="light"] {
+            --wallpaper-bg: linear-gradient(135deg, #e0f2fe 0%, #ede9fe 50%, #fce7f3 100%);
+            --window-bg: rgba(255, 255, 255, 0.94);
+            --window-border: rgba(0, 0, 0, 0.12);
+            --window-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.16), 0 0 0 0.5px rgba(255, 255, 255, 0.9) inset;
+            --toolbar-bg: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
+            --url-bg: #ffffff;
+            --url-hover-bg: #ffffff;
+            --url-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+            --tabbar-bg: #e5e7eb;
+            --tab-active-bg: #ffffff;
+            --tab-active-shadow: 0 1px 4px rgba(0, 0, 0, 0.09), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+            --tab-hover-bg: rgba(0, 0, 0, 0.05);
+            --title-strip-bg: #f9fafb;
+            --viewport-bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+            --well-bg: #f8fafc;
+            --chip-bg: #ffffff;
+            --chip-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+            --btn-sec-bg: #ffffff;
+            --btn-sec-hover: #f3f4f6;
+            --seg-track-bg: #e5e7eb;
+            --seg-active-bg: #ffffff;
+            --seg-active-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+            --border-subtle: rgba(0, 0, 0, 0.09);
+            --border-strong: rgba(0, 0, 0, 0.15);
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6b7280;
+            --text-accent: #b45309;
+            --text-success: #15803d;
+            --kbd-bg: #e5e7eb;
+            --claw-bg: radial-gradient(circle at 50% 24%, #ffffff 0%, #e0f2fe 58%, #dbeafe 100%);
+            --claw-shadow: inset 0 0 24px rgba(14, 116, 144, 0.12);
+            --claw-border: rgba(0, 0, 0, 0.14);
+            --rail-bg: #cbd5e1;
+            --dropzone-bg: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+            --running-bg: rgba(245, 158, 11, 0.16);
+            --running-border: rgba(217, 119, 6, 0.38);
+            --running-text: #b45309;
+            --backdrop-bg: rgba(15, 23, 42, 0.35);
+            --scroll-thumb: rgba(0, 0, 0, 0.2);
+            --scroll-thumb-hover: rgba(0, 0, 0, 0.35);
+            --sound-on-bg: rgba(22, 163, 74, 0.12);
+            --sound-on-border: rgba(22, 163, 74, 0.35);
+            --sound-on-text: #15803d;
+            --absent-bg: #f1f5f9;
+            --history-pill-bg: rgba(147, 51, 234, 0.1);
+            --history-pill-border: rgba(147, 51, 234, 0.28);
+            --history-pill-text: #6b21a8;
+            --rank-pill-bg: rgba(0, 113, 227, 0.12);
+            --rank-pill-text: #0066cc;
+            --modal-rank-bg: rgba(217, 119, 6, 0.14);
         }
 
         body {
-            font-family: 'Galmuri11', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #2c1608;
-            background-image: 
-                linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-                linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(22, 16, 38, 1) 0%, rgba(132, 53, 10, 0.9) 60%, rgba(217, 119, 6, 1) 100%);
-            background-size: 28px 28px, 28px 28px, 100% 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+            background: var(--wallpaper-bg);
             background-attachment: fixed;
-            color: #ffffff;
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.3s ease, color 0.25s ease;
         }
 
-        .arcade-title {
-            background: linear-gradient(180deg, #ffe047 0%, #ff9900 55%, #ff5e00 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0px 3px 0px #7c2d12) drop-shadow(0px 5px 0px #1e1035);
+        /* macOS 메인 브라우저 윈도우 프레임 */
+        .macos-window {
+            background: var(--window-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--window-border);
+            box-shadow: var(--window-shadow);
+            transition: background-color 0.25s ease, border-color 0.25s ease;
+        }
+
+        /* macOS 상단 타이틀바 & 툴바 */
+        .macos-toolbar {
+            background: var(--toolbar-bg);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        /* macOS 주소창 (Safari Unified Bar) */
+        .macos-url-bar {
+            background: var(--url-bg);
+            border: 1px solid var(--border-subtle);
+            box-shadow: var(--url-shadow);
+            transition: all 0.2s ease;
+        }
+        .macos-url-bar:hover {
+            background: var(--url-hover-bg);
+            border-color: var(--border-strong);
+        }
+
+        /* macOS 브라우저 탭 스타일 */
+        .macos-tab-bar {
+            background: var(--tabbar-bg);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .macos-tab {
+            position: relative;
+            transition: all 0.18s ease;
+        }
+        .macos-tab.active {
+            background: var(--tab-active-bg);
+            color: var(--text-primary);
+            box-shadow: var(--tab-active-shadow);
+        }
+        .macos-tab.inactive {
+            background: transparent;
+            color: var(--text-muted);
+        }
+        .macos-tab.inactive:hover {
+            background: var(--tab-hover-bg);
+            color: var(--text-primary);
+        }
+
+        /* 제목 바 및 본문 뷰포트 배경 */
+        .mac-title-strip {
+            background: var(--title-strip-bg);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .mac-viewport {
+            background: var(--viewport-bg);
+        }
+
+        /* 테마 대응 텍스트/보더/서피스 헬퍼 클래스 */
+        .mac-text-primary { color: var(--text-primary); }
+        .mac-text-secondary { color: var(--text-secondary); }
+        .mac-text-muted { color: var(--text-muted); }
+        .mac-text-accent { color: var(--text-accent); }
+        .mac-text-success { color: var(--text-success); }
+        .mac-border { border-color: var(--border-subtle); }
+        .mac-border-strong { border-color: var(--border-strong); }
+        .mac-well {
+            background: var(--well-bg);
+            border: 1px solid var(--border-subtle);
+        }
+        .mac-chip {
+            background: var(--chip-bg);
+            border: 1px solid var(--border-strong);
+            color: var(--text-primary);
+            box-shadow: var(--chip-shadow);
+        }
+        .mac-kbd {
+            background: var(--kbd-bg);
+            color: var(--text-primary);
+        }
+
+        /* macOS 기본 버튼 스타일 */
+        .mac-btn {
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
+            user-select: none;
+        }
+        .mac-btn:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+
+        .mac-btn-secondary {
+            background: var(--btn-sec-bg);
+            border: 1px solid var(--border-strong);
+            color: var(--text-primary);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        }
+        .mac-btn-secondary:hover:not(:disabled) {
+            background: var(--btn-sec-hover);
+        }
+
+        .mac-btn-primary {
+            background: linear-gradient(180deg, #34c759 0%, #28a745 100%);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(48, 209, 88, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        .mac-btn-primary:hover:not(:disabled) {
+            filter: brightness(1.07);
+            box-shadow: 0 4px 12px rgba(48, 209, 88, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        }
+
+        .mac-btn-blue {
+            background: linear-gradient(180deg, #0a84ff 0%, #0066cc 100%);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(10, 132, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        }
+        .mac-btn-blue:hover:not(:disabled) {
+            filter: brightness(1.08);
+        }
+
+        .mac-btn-amber {
+            background: linear-gradient(180deg, #ff9f0a 0%, #e08600 100%);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            color: #1c1c1e;
+            box-shadow: 0 2px 8px rgba(255, 159, 10, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        }
+        .mac-btn-amber:hover:not(:disabled) {
+            filter: brightness(1.06);
+        }
+
+        /* macOS 세그먼트 컨트롤 (Segmented Control) */
+        .mac-segmented {
+            background: var(--seg-track-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 3px;
+        }
+        .mac-seg-item {
+            border-radius: 7px;
+            transition: all 0.18s ease;
+        }
+        .mac-seg-item.active {
+            background: var(--seg-active-bg);
+            color: var(--text-primary);
+            box-shadow: var(--seg-active-shadow);
+        }
+        .mac-seg-item.inactive {
+            color: var(--text-muted);
+        }
+        .mac-seg-item.inactive:hover {
+            color: var(--text-primary);
+        }
+
+        /* macOS 패널 카드 */
+        .mac-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
         }
 
         /* 인형뽑기 기계 유리창 내부 */
         .claw-window {
-            background: radial-gradient(circle at 50% 30%, #2a2152 0%, #140f29 100%);
-            box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.85);
-            transition: height 0.25s ease;
+            background: var(--claw-bg);
+            border: 1px solid var(--claw-border);
+            box-shadow: var(--claw-shadow);
+            transition: height 0.25s ease, background 0.3s ease;
+        }
+        .claw-rail {
+            background: var(--rail-bg);
+            border-bottom: 1px solid var(--border-strong);
+        }
+        .claw-dropzone {
+            background: var(--dropzone-bg);
+            border-top: 1px solid var(--border-strong);
+            border-right: 1px solid var(--border-strong);
         }
 
         /* 크레인 애니메이션 */
@@ -51,7 +383,6 @@
         #crane-cable {
             transition: height 0.35s ease-in-out;
         }
-        /* 다수 인원 연속 뽑기 시 고속 모드 */
         .crane-fast #crane-carriage {
             transition: left 0.14s cubic-bezier(0.25, 1, 0.5, 1), transform 0.25s ease !important;
         }
@@ -76,446 +407,586 @@
         }
 
         @keyframes popIn {
-            0% { transform: scale(0.6) translateY(15px); opacity: 0; }
-            80% { transform: scale(1.06) translateY(-2px); opacity: 1; }
+            0% { transform: scale(0.75) translateY(12px); opacity: 0; }
+            80% { transform: scale(1.03) translateY(-2px); opacity: 1; }
             100% { transform: scale(1) translateY(0); opacity: 1; }
         }
         .animate-pop-in {
-            animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
-        ::-webkit-scrollbar { width: 7px; }
-        ::-webkit-scrollbar-track { background: #140f29; }
-        ::-webkit-scrollbar-thumb { background: #4c3d8f; border: 1px solid #140f29; }
+        /* macOS 스타일 스크롤바 */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--scroll-thumb-hover); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-amber-400 selection:text-slate-950">
+<body class="min-h-screen p-2 sm:p-5 flex flex-col items-center justify-start selection:bg-[#0a84ff] selection:text-white">
 
-    <!-- 상단 바 -->
-    <header class="max-w-7xl w-full mx-auto px-4 pt-4 pb-3 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg overflow-hidden bg-[#FFA400] flex items-center justify-center border-2 border-black shadow-[3px_3px_0px_#000]">
-                <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="200" height="200" fill="#FFA400" />
-                    <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin="round" />
-                    <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
-                    <circle cx="85" cy="95" r="4.5" fill="#000000" />
-                    <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
-                    <circle cx="115" cy="95" r="4.5" fill="#000000" />
-                    <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="6.5" stroke-linejoin="round" />
-                </svg>
+    <!-- macOS Safari 웹 브라우저 전체 창 -->
+    <div id="browser-window" class="macos-window w-full max-w-7xl rounded-2xl overflow-hidden flex flex-col">
+
+        <!-- 1. macOS 브라우저 상단 툴바 (신호등 + 네비게이션 + 주소창 + 툴 버튼) -->
+        <header class="macos-toolbar px-3.5 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-3">
+            <!-- 좌측: macOS 신호등 버튼 & 뒤로/앞으로 브라우저 버튼 -->
+            <div class="flex items-center gap-4">
+                <!-- 신호등 (Traffic Lights) -->
+                <div class="flex items-center gap-2 group">
+                    <button onclick="showToast('오둥이 번호 뽑기 브라우저 창입니다.')" class="w-3.5 h-3.5 rounded-full bg-[#ff5f56] border border-black/20 flex items-center justify-center text-[9px] text-black/70 font-bold cursor-pointer" title="닫기">
+                        <span class="opacity-0 group-hover:opacity-100 leading-none">×</span>
+                    </button>
+                    <button onclick="showToast('최소화 기능은 브라우저에서 지원되지 않습니다.')" class="w-3.5 h-3.5 rounded-full bg-[#ffbd2e] border border-black/20 flex items-center justify-center text-[9px] text-black/70 font-bold cursor-pointer" title="최소화">
+                        <span class="opacity-0 group-hover:opacity-100 leading-none">−</span>
+                    </button>
+                    <button onclick="toggleFullScreen()" class="w-3.5 h-3.5 rounded-full bg-[#27c93f] border border-black/20 flex items-center justify-center text-[9px] text-black/70 font-bold cursor-pointer" title="전체 화면 전환">
+                        <span class="opacity-0 group-hover:opacity-100 leading-none">+</span>
+                    </button>
+                </div>
+
+                <!-- 뒤로 / 앞으로 웹 브라우저 버튼 -->
+                <div class="hidden sm:flex items-center gap-1">
+                    <button onclick="switchMainTab('claw')" class="mac-btn w-7 h-7 flex items-center justify-center mac-text-secondary hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer" title="이전 탭">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <button onclick="switchMainTab('group')" class="mac-btn w-7 h-7 flex items-center justify-center mac-text-secondary hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer" title="다음 탭">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
             </div>
-            <div>
-                <h1 class="arcade-title text-xl sm:text-2xl font-bold tracking-wider">오둥이 번호 뽑기</h1>
-                <p class="text-[11px] text-amber-300/90">TEACHER'S ARCADE PICKER</p>
-            </div>
-        </div>
 
-        <!-- 우측 컨트롤: 단축키 안내 & 효과음 토글 -->
-        <div class="flex items-center gap-2">
-            <button onclick="toggleModal('shortcut-modal', true)" class="px-3 py-1.5 bg-[#1c1738] border-2 border-[#3b3363] hover:border-amber-400 text-slate-300 hover:text-amber-300 text-xs font-bold transition-colors cursor-pointer">
-                ⌨️ 단축키
-            </button>
-            <button id="sound-toggle-btn" onclick="toggleSound()" class="px-3 py-1.5 bg-[#121629] border-2 border-[#4ade80] text-[#4ade80] text-xs font-bold shadow-[0_0_10px_rgba(74,222,128,0.2)] cursor-pointer transition-all">
-                🔊 효과음 ON
-            </button>
-        </div>
-    </header>
-
-    <!-- 모드 전환 탭 버튼 -->
-    <nav class="max-w-7xl w-full mx-auto px-4 mt-1 mb-5">
-        <div class="flex flex-wrap gap-2.5 border-b-2 border-[#3b3363] pb-3">
-            <button onclick="switchMainTab('claw')" id="nav-tab-claw" class="px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#4ade80] bg-[#4ade80] text-[#121629] shadow-[0_0_12px_rgba(74,222,128,0.4)] cursor-pointer transition-all">
-                🕹️ 번호 뽑기 (1~N명)
-            </button>
-            <button onclick="switchMainTab('group')" id="nav-tab-group" class="px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white cursor-pointer transition-all">
-                👥 모둠(조) 편성
-            </button>
-        </div>
-
-        <!-- 뽑기 / 모둠 편성 제목 입력 칸 (원래 크기·크게 보기 및 모든 탭에서 공통 고정 표시) -->
-        <div class="mt-3 bg-[#1c1738] border-2 border-amber-400/80 focus-within:border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)] px-3.5 py-2.5 flex items-center gap-2.5">
-            <span class="text-xs sm:text-sm font-bold text-amber-300 shrink-0">🏷️ 제목</span>
-            <input type="text" id="picker-title-input" maxlength="60" oninput="handleTitleInput(this.value)" onkeydown="if(event.key==='Enter') this.blur()" placeholder="여기에 뽑기 또는 모둠 편성 제목을 입력하세요 (예: 오늘의 발표자 뽑기)" class="w-full bg-[#120e24] border border-[#3b3363] focus:border-amber-400 focus:outline-none px-3 py-1.5 text-sm sm:text-base font-bold text-white placeholder-slate-500">
-            <button type="button" id="clear-title-btn" onclick="clearPickerTitle()" class="hidden px-2.5 py-1.5 bg-[#120e24] border border-slate-500 hover:border-amber-400 text-slate-300 hover:text-amber-300 text-xs font-bold shrink-0 cursor-pointer transition-colors" title="제목 지우기">
-                ✕
-            </button>
-        </div>
-    </nav>
-
-    <!-- 메인 영역 -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 pb-16">
-
-        <!-- [탭 1] 인형뽑기 화면 (좌측: 인형뽑기 기계 / 우측: 모든 설정 및 결과) -->
-        <div id="view-claw" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-            <!-- [좌측 6칸 (확대 시 12칸 전체)] 오둥이 인형뽑기 유리창 머신 -->
-            <div id="claw-machine-panel" class="lg:col-span-6 bg-[#1c1738] border-[4px] border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.25)] p-4 sm:p-5 flex flex-col justify-between transition-all duration-200">
-                <div>
-                    <!-- 머신 상단 상태바 + 돋보기 확대 버튼 -->
-                    <div class="bg-[#120e24] border-2 border-amber-400/70 py-2 px-3 sm:px-4 mb-3 flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-xs sm:text-sm font-bold text-amber-300">★ ODUNG NUMBER PICKER ★</span>
-                        <div class="flex items-center gap-2 sm:gap-3 ml-auto">
-                            <span class="text-xs text-slate-300 font-bold">남은 캡슐: <span id="machine-ball-count" class="text-amber-400">25</span>개</span>
-                            <span id="machine-status-text" class="text-xs text-[#4ade80] font-bold">READY</span>
-
-                            <!-- 돋보기 아이콘 버튼 (누르면 뽑기 화면이 크게 확대됨) -->
-                            <button id="claw-zoom-btn" onclick="toggleClawZoom()" class="px-2.5 py-1 bg-[#1e193b] border-2 border-amber-400 hover:bg-amber-400 hover:text-[#121629] text-amber-300 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-[2px_2px_0px_#000]" title="인형뽑기 기계 크게 보기 (단축키: Z)">
-                                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                    <line id="zoom-icon-plus" x1="11" y1="8" x2="11" y2="14"></line>
-                                    <line x1="8" y1="11" x2="14" y2="11"></line>
-                                </svg>
-                                <span id="claw-zoom-label">크게 보기</span>
-                            </button>
+            <!-- 중앙: macOS Safari 통합 주소창 -->
+            <div class="flex-1 max-w-xl mx-auto">
+                <div class="macos-url-bar rounded-lg px-3 py-1.5 flex items-center justify-between gap-2 text-xs">
+                    <div class="flex items-center gap-2 mac-text-muted">
+                        <div class="w-4 h-4 rounded bg-[#FFA400] flex items-center justify-center overflow-hidden shrink-0">
+                            <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="200" height="200" fill="#FFA400" />
+                                <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="12" />
+                                <circle cx="85" cy="95" r="7" fill="#000000" />
+                                <circle cx="115" cy="95" r="7" fill="#000000" />
+                                <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="8" />
+                            </svg>
                         </div>
+                        <span class="mac-text-success">🔒</span>
                     </div>
+                    <span id="browser-url-text" class="mac-text-primary font-medium truncate tracking-tight">
+                        odunggames.github.io/randompicker
+                    </span>
+                    <button onclick="resetPickedHistory()" class="mac-text-muted hover:opacity-80 transition-opacity cursor-pointer" title="뽑기 상태 새로고침">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+                </div>
+            </div>
 
-                    <!-- 유리창 내부 (크레인 + 인원수에 맞춘 캡슐 더미) -->
-                    <div id="claw-window-box" class="claw-window relative w-full h-[380px] sm:h-[440px] border-2 border-[#3b3363] overflow-hidden select-none">
-                        <!-- 상단 레일 -->
-                        <div class="w-full h-3.5 bg-slate-700 border-b-2 border-black relative z-20 flex justify-around items-center">
-                            <span class="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
-                            <span class="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
-                            <span class="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
-                            <span class="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
+            <!-- 우측: macOS 툴바 유틸리티 버튼 (테마 모드 + 단축키 + 효과음) -->
+            <div class="flex items-center gap-2">
+                <button id="theme-toggle-btn" onclick="cycleTheme()" class="mac-btn mac-btn-secondary px-3 py-1.5 text-xs flex items-center gap-1.5 cursor-pointer" title="컴퓨터 화면 모드 자동 연동 / 라이트 / 다크 전환">
+                    <span>🌓</span>
+                    <span>시스템</span>
+                </button>
+                <button onclick="toggleModal('shortcut-modal', true)" class="mac-btn mac-btn-secondary px-3 py-1.5 text-xs flex items-center gap-1.5 cursor-pointer">
+                    <span>⌨️</span>
+                    <span class="hidden sm:inline">단축키</span>
+                </button>
+                <button id="sound-toggle-btn" onclick="toggleSound()" class="mac-btn px-3 py-1.5 text-xs flex items-center gap-1.5 cursor-pointer" style="background: var(--sound-on-bg); border: 1px solid var(--sound-on-border); color: var(--sound-on-text);">
+                    <span>🔊</span>
+                    <span>효과음 ON</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 2. macOS Safari 브라우저 탭 바 -->
+        <nav class="macos-tab-bar px-3 pt-1.5 flex items-center gap-1.5 overflow-x-auto">
+            <button onclick="switchMainTab('claw')" id="nav-tab-claw" class="macos-tab active flex-1 max-w-[260px] px-4 py-2 rounded-t-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer">
+                <span>🕹️</span>
+                <span class="truncate">오둥이 번호 뽑기 (1~N명)</span>
+            </button>
+            <button onclick="switchMainTab('group')" id="nav-tab-group" class="macos-tab inactive flex-1 max-w-[240px] px-4 py-2 rounded-t-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer">
+                <span>👥</span>
+                <span class="truncate">모둠(조) 자동 편성</span>
+            </button>
+            <button onclick="toggleModal('roster-modal', true)" class="ml-auto px-2.5 py-1.5 rounded-lg mac-text-muted hover:opacity-80 text-xs font-medium flex items-center gap-1 cursor-pointer transition-opacity" title="우리 반 명단 관리">
+                <span>+</span>
+                <span class="hidden sm:inline">명단 설정</span>
+            </button>
+        </nav>
+
+        <!-- [추가 기능 1] 뽑기 / 모둠 편성 제목 입력 바 (원래 크기·크게 보기 및 모든 탭 공통 고정 표시) -->
+        <div class="mac-title-strip px-4 sm:px-6 py-2.5">
+            <div class="mac-well border-amber-500/40 focus-within:border-amber-500 rounded-xl px-3.5 py-2 flex items-center gap-2.5 transition-colors">
+                <span class="text-xs sm:text-sm font-bold mac-text-accent shrink-0 flex items-center gap-1">
+                    <span>🏷️</span>
+                    <span>제목</span>
+                </span>
+                <input type="text" id="picker-title-input" maxlength="60" oninput="handleTitleInput(this.value)" onkeydown="if(event.key==='Enter') this.blur()" placeholder="여기에 뽑기 또는 모둠 편성 제목을 입력하세요 (예: 오늘의 발표자 뽑기)" class="w-full bg-transparent text-sm sm:text-base font-bold mac-text-primary placeholder-slate-400 focus:outline-none">
+                <button type="button" id="clear-title-btn" onclick="clearPickerTitle()" class="hidden mac-btn mac-btn-secondary px-2.5 py-1 text-xs mac-text-muted shrink-0 cursor-pointer" title="제목 지우기">
+                    ✕
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. 브라우저 뷰포트 본문 영역 -->
+        <main class="p-4 sm:p-6 flex-grow mac-viewport">
+
+            <!-- [탭 1] 인형뽑기 메인 화면 -->
+            <div id="view-claw" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+                <!-- [좌측 6칸 (확대 시 12칸 전체)] 오둥이 인형뽑기 머신 -->
+                <div id="claw-machine-panel" class="lg:col-span-6 mac-card p-4 sm:p-5 flex flex-col justify-between transition-all duration-200">
+                    <div>
+                        <!-- 머신 상단 상태바 + [추가 기능 2] 크게 보기 / 원래 크기 토글 버튼 -->
+                        <div class="mac-well rounded-xl py-2.5 px-3.5 sm:px-4 mb-3.5 flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                <span class="text-xs sm:text-sm font-bold mac-text-primary tracking-tight">오둥이 캡슐 뽑기 머신</span>
+                            </div>
+                            <div class="flex items-center gap-2 sm:gap-2.5 ml-auto">
+                                <span class="text-xs mac-text-muted font-medium">남은 캡슐 <strong id="machine-ball-count" class="mac-text-accent">25</strong>개</span>
+                                <span id="machine-status-text" class="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-[11px] mac-text-success font-bold">READY</span>
+
+                                <!-- 돋보기 확대 / 원래 크기 버튼 -->
+                                <button id="claw-zoom-btn" onclick="toggleClawZoom()" class="mac-btn mac-btn-secondary px-2.5 py-1 text-xs flex items-center gap-1.5 mac-text-accent border-amber-500/40 cursor-pointer" title="인형뽑기 기계 크게 보기 / 원래 크기 (단축키: Z)">
+                                    <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        <line id="zoom-icon-plus" x1="11" y1="8" x2="11" y2="14"></line>
+                                        <line x1="8" y1="11" x2="14" y2="11"></line>
+                                    </svg>
+                                    <span id="claw-zoom-label">크게 보기</span>
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- 움직이는 크레인 본체 -->
-                        <div id="crane-carriage" class="absolute top-3.5 z-20 flex flex-col items-center -translate-x-1/2 origin-top" style="left: 50%;">
-                            <div class="w-14 h-6 bg-amber-400 border-2 border-black shadow-[2px_2px_0px_#000] flex items-center justify-center">
-                                <div class="w-6 h-2 bg-red-500 border border-black"></div>
+                        <!-- 유리창 내부 -->
+                        <div id="claw-window-box" class="claw-window relative w-full h-[380px] sm:h-[440px] rounded-2xl overflow-hidden select-none">
+                            <!-- 상단 레일 -->
+                            <div class="claw-rail w-full h-3.5 relative z-20 flex justify-around items-center">
+                                <span class="w-1.5 h-1.5 bg-slate-500 rounded-full"></span>
+                                <span class="w-1.5 h-1.5 bg-slate-500 rounded-full"></span>
+                                <span class="w-1.5 h-1.5 bg-slate-500 rounded-full"></span>
+                                <span class="w-1.5 h-1.5 bg-slate-500 rounded-full"></span>
                             </div>
-                            <div id="crane-cable" class="w-1.5 bg-slate-300 border-x border-black" style="height: 24px;"></div>
-                            <div id="claw-head" class="relative flex flex-col items-center claw-open">
-                                <div class="w-8 h-5 bg-slate-200 border-2 border-black rounded-t-md z-10 flex items-center justify-center">
-                                    <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
-                                </div>
-                                <div class="relative w-24 h-14 -mt-1 flex justify-center">
-                                    <svg class="claw-arm-left w-10 h-14 -mr-2" viewBox="0 0 40 56" fill="none">
-                                        <path d="M28 4 L8 26 L18 50 L25 46 L17 26 L33 9 Z" fill="#cbd5e1" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
-                                    </svg>
-                                    <svg class="claw-arm-right w-10 h-14 -ml-2" viewBox="0 0 40 56" fill="none">
-                                        <path d="M12 4 L32 26 L22 50 L15 46 L23 26 L7 9 Z" fill="#cbd5e1" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
-                                    </svg>
-                                </div>
 
-                                <!-- 집게에 잡힌 캡슐 (뽑는 도중에는 번호/이름 비공개 처리) -->
-                                <div id="grabbed-capsule" class="hidden -mt-9 flex flex-col items-center z-30">
-                                    <div id="grabbed-capsule-inner" class="w-16 h-16 rounded-full bg-white border-[3px] border-black shadow-[0_0_20px_rgba(255,255,255,0.95)] flex flex-col items-center justify-center relative overflow-hidden">
-                                        <!-- JS로 오둥이 캡슐 SVG 렌더링 -->
+                            <!-- 움직이는 크레인 본체 -->
+                            <div id="crane-carriage" class="absolute top-3.5 z-20 flex flex-col items-center -translate-x-1/2 origin-top" style="left: 50%;">
+                                <div class="w-14 h-6 rounded-md bg-gradient-to-b from-amber-300 to-amber-500 border border-black/50 shadow-md flex items-center justify-center">
+                                    <div class="w-6 h-2 rounded-full bg-red-500/90"></div>
+                                </div>
+                                <div id="crane-cable" class="w-1.5 bg-slate-300 border-x border-black/40" style="height: 24px;"></div>
+                                <div id="claw-head" class="relative flex flex-col items-center claw-open">
+                                    <div class="w-8 h-5 bg-slate-200 border border-black/50 rounded-t-md z-10 flex items-center justify-center">
+                                        <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
+                                    </div>
+                                    <div class="relative w-24 h-14 -mt-1 flex justify-center">
+                                        <svg class="claw-arm-left w-10 h-14 -mr-2" viewBox="0 0 40 56" fill="none">
+                                            <path d="M28 4 L8 26 L18 50 L25 46 L17 26 L33 9 Z" fill="#e2e8f0" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+                                        </svg>
+                                        <svg class="claw-arm-right w-10 h-14 -ml-2" viewBox="0 0 40 56" fill="none">
+                                            <path d="M12 4 L32 26 L22 50 L15 46 L23 26 L7 9 Z" fill="#e2e8f0" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+
+                                    <!-- 집게에 잡힌 캡슐 -->
+                                    <div id="grabbed-capsule" class="hidden -mt-9 flex flex-col items-center z-30">
+                                        <div id="grabbed-capsule-inner" class="w-16 h-16 rounded-full bg-white border-2 border-slate-900 shadow-[0_0_24px_rgba(255,255,255,0.85)] flex flex-col items-center justify-center relative overflow-hidden">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- 좌측 하단 배출구 표시 -->
+                            <div id="drop-zone-box" class="claw-dropzone absolute bottom-0 left-0 w-24 h-28 rounded-tr-2xl z-10 flex flex-col items-center justify-center transition-all">
+                                <span class="text-[10px] mac-text-accent font-bold tracking-wider">DROP ZONE</span>
+                                <span class="text-base mt-1">⬇️</span>
+                                <span id="drop-counter-badge" class="text-xs mac-text-muted mt-1 font-semibold">0 / 1</span>
+                            </div>
+
+                            <!-- 바닥 캡슐 더미 영역 -->
+                            <div id="doll-pile-container" class="absolute bottom-2.5 left-24 right-2.5 pl-3 h-44 flex flex-wrap-reverse content-start items-end justify-center gap-1.5 z-10 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 확대(크게 보기) 모드 전용 퀵 컨트롤 바 -->
+                    <div id="zoomed-quick-controls" class="hidden mt-3.5 mac-well border-amber-500/45 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2.5">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-xs mac-text-accent font-bold">🎯 추첨 인원</span>
+                            <div class="mac-segmented grid grid-cols-5 gap-1">
+                                <button onclick="setDrawCount(1)" class="mac-seg-item active px-2.5 py-1 text-xs font-semibold cursor-pointer draw-cnt-btn" data-cnt="1">1명</button>
+                                <button onclick="setDrawCount(2)" class="mac-seg-item inactive px-2.5 py-1 text-xs font-semibold cursor-pointer draw-cnt-btn" data-cnt="2">2명</button>
+                                <button onclick="setDrawCount(3)" class="mac-seg-item inactive px-2.5 py-1 text-xs font-semibold cursor-pointer draw-cnt-btn" data-cnt="3">3명</button>
+                                <button onclick="setDrawCount(4)" class="mac-seg-item inactive px-2.5 py-1 text-xs font-semibold cursor-pointer draw-cnt-btn" data-cnt="4">4명</button>
+                                <button onclick="setDrawCount(5)" class="mac-seg-item inactive px-2.5 py-1 text-xs font-semibold cursor-pointer draw-cnt-btn" data-cnt="5">5명</button>
+                            </div>
                         </div>
 
-                        <!-- 좌측 하단 배출구 표시 -->
-                        <div id="drop-zone-box" class="absolute bottom-0 left-0 w-24 h-28 bg-[#0d0a1a] border-t-4 border-r-4 border-[#3b3363] z-10 flex flex-col items-center justify-center transition-all">
-                            <span class="text-[10px] text-amber-400 font-bold tracking-wider">DROP ZONE</span>
-                            <span class="text-lg mt-0.5">⬇️</span>
-                            <span id="drop-counter-badge" class="text-xs text-slate-400 mt-0.5 font-bold">0 / 1</span>
+                        <div class="flex flex-wrap items-center gap-2 ml-auto">
+                            <button id="zoom-start-claw-btn" onclick="startClawSequence(false)" class="mac-btn mac-btn-primary px-4 py-2 text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer">
+                                <span>🕹️ 뽑기 시작!</span>
+                            </button>
+                            <button id="zoom-instant-claw-btn" onclick="startClawSequence(true)" class="mac-btn mac-btn-amber px-3.5 py-2 text-xs sm:text-sm flex items-center gap-1 cursor-pointer">
+                                <span>⚡ 한 번에 뽑기</span>
+                            </button>
+                            <button onclick="toggleClawZoom()" class="mac-btn mac-btn-secondary px-3 py-2 text-xs flex items-center gap-1 cursor-pointer">
+                                <span>🔍 원래 크기</span>
+                            </button>
                         </div>
+                    </div>
 
-                        <!-- 바닥 캡슐 더미 영역 -->
-                        <div id="doll-pile-container" class="absolute bottom-2 left-24 right-2 pl-4 h-44 flex flex-wrap-reverse content-start items-end justify-center gap-1.5 z-10 transition-all">
-                            <!-- JS로 인원수에 맞춰 오둥이 캡슐 렌더링 -->
-                        </div>
+                    <!-- 하단 macOS 정보 바 -->
+                    <div class="mt-3.5 mac-well rounded-xl py-2 px-3.5 flex items-center justify-between text-xs mac-text-muted">
+                        <span>⌨️ <kbd class="px-1.5 py-0.5 mac-kbd rounded mac-text-primary font-sans">Space</kbd> 뽑기 · <kbd class="px-1.5 py-0.5 mac-kbd rounded mac-text-primary font-sans">Z</kbd> 크게 보기 / 원래 크기</span>
+                        <span class="mac-text-accent font-medium">Odung Arcade Engine</span>
                     </div>
                 </div>
 
-                <!-- 확대 보기 모드 전용 퀵 컨트롤 바 (크게 볼 때도 바로 뽑기 가능) -->
-                <div id="zoomed-quick-controls" class="hidden mt-3.5 bg-[#120e24] border-2 border-amber-400 p-3 flex flex-wrap items-center justify-between gap-2.5">
-                    <div class="flex flex-wrap items-center gap-1.5">
-                        <span class="text-xs text-amber-300 font-bold mr-1">🎯 인원:</span>
-                        <button onclick="setDrawCount(1)" class="draw-cnt-btn px-3 py-1.5 text-xs font-bold border-2 border-amber-400 bg-amber-400 text-[#121629] cursor-pointer" data-cnt="1">1명</button>
-                        <button onclick="setDrawCount(2)" class="draw-cnt-btn px-3 py-1.5 text-xs font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer" data-cnt="2">2명</button>
-                        <button onclick="setDrawCount(3)" class="draw-cnt-btn px-3 py-1.5 text-xs font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer" data-cnt="3">3명</button>
-                        <button onclick="setDrawCount(4)" class="draw-cnt-btn px-3 py-1.5 text-xs font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer" data-cnt="4">4명</button>
-                        <button onclick="setDrawCount(5)" class="draw-cnt-btn px-3 py-1.5 text-xs font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer" data-cnt="5">5명</button>
+                <!-- [우측 6칸] macOS 컨트롤 패널 및 결과 영역 -->
+                <div id="claw-side-panel" class="lg:col-span-6 flex flex-col gap-4">
+
+                    <!-- 1) 몇 명 뽑을지 선택 (macOS Segmented Control) + 실행 버튼 -->
+                    <div class="mac-card p-4 flex flex-col gap-3.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-bold mac-text-primary flex items-center gap-1.5">
+                                <span>🎯</span> 추첨 인원 선택
+                            </span>
+                            <span class="text-xs mac-text-muted">단축키 1 ~ 5</span>
+                        </div>
+
+                        <!-- macOS 세그먼트 컨트롤 바 -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="mac-segmented flex-1 grid grid-cols-5 gap-1">
+                                <button onclick="setDrawCount(1)" class="mac-seg-item active py-1.5 text-xs sm:text-sm font-semibold cursor-pointer draw-cnt-btn" data-cnt="1">1명</button>
+                                <button onclick="setDrawCount(2)" class="mac-seg-item inactive py-1.5 text-xs sm:text-sm font-semibold cursor-pointer draw-cnt-btn" data-cnt="2">2명</button>
+                                <button onclick="setDrawCount(3)" class="mac-seg-item inactive py-1.5 text-xs sm:text-sm font-semibold cursor-pointer draw-cnt-btn" data-cnt="3">3명</button>
+                                <button onclick="setDrawCount(4)" class="mac-seg-item inactive py-1.5 text-xs sm:text-sm font-semibold cursor-pointer draw-cnt-btn" data-cnt="4">4명</button>
+                                <button onclick="setDrawCount(5)" class="mac-seg-item inactive py-1.5 text-xs sm:text-sm font-semibold cursor-pointer draw-cnt-btn" data-cnt="5">5명</button>
+                            </div>
+
+                            <div class="flex items-center gap-1.5 mac-well rounded-xl px-2.5 py-1.5">
+                                <span class="text-xs mac-text-muted">직접</span>
+                                <input type="number" id="custom-draw-count" min="1" max="50" value="1" oninput="setDrawCount(this.value, true)" onchange="setDrawCount(this.value, false)" class="w-12 bg-transparent mac-text-accent text-xs sm:text-sm font-bold text-center focus:outline-none">
+                                <span class="text-xs mac-text-secondary">명</span>
+                            </div>
+                        </div>
+
+                        <!-- macOS 액션 버튼 그룹 -->
+                        <div class="flex gap-2.5">
+                            <button id="start-claw-btn" onclick="startClawSequence(false)" class="mac-btn mac-btn-primary flex-1 py-3 text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer">
+                                <span>🕹️ 뽑기 시작!</span>
+                            </button>
+                            <button id="instant-claw-btn" onclick="startClawSequence(true)" class="mac-btn mac-btn-amber px-4 py-3 text-xs sm:text-sm flex items-center justify-center gap-1.5 shrink-0 cursor-pointer" title="애니메이션 없이 즉시 결과 확인">
+                                <span>⚡ 한 번에 뽑기</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-2 ml-auto">
-                        <button id="zoom-start-claw-btn" onclick="startClawSequence(false)" class="px-5 py-2 bg-[#4ade80] hover:brightness-110 active:translate-y-0.5 text-[#121629] font-bold text-sm border-2 border-black shadow-[3px_3px_0px_#000] cursor-pointer transition-all">
-                            🕹️ 뽑기 시작!
-                        </button>
-                        <button id="zoom-instant-claw-btn" onclick="startClawSequence(true)" class="px-3.5 py-2 bg-amber-400 hover:brightness-110 active:translate-y-0.5 text-[#121629] font-bold text-xs sm:text-sm border-2 border-black shadow-[3px_3px_0px_#000] cursor-pointer transition-all">
-                            ⚡ 한 번에 뽑기
-                        </button>
-                        <button onclick="toggleClawZoom()" class="px-3 py-2 bg-[#1e193b] border-2 border-slate-400 hover:border-white text-slate-200 text-xs font-bold cursor-pointer">
-                            🔍 원래 크기
-                        </button>
-                    </div>
-                </div>
+                    <!-- 2) 당첨 결과 확인 영역 -->
+                    <div class="mac-card p-4">
+                        <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b mac-border">
+                            <h2 class="text-sm font-bold mac-text-primary flex items-center gap-1.5">
+                                <span>🎉</span> 당첨 결과
+                            </h2>
+                            <span id="turn-progress-badge" class="text-xs px-2.5 py-0.5 rounded-full mac-kbd mac-text-secondary font-medium">
+                                대기 중
+                            </span>
+                        </div>
 
-                <!-- 머신 하단 레트로 데코 바 -->
-                <div class="mt-3.5 bg-[#120e24] border-2 border-[#3b3363] py-2 px-3 flex items-center justify-between text-[11px] text-slate-400 font-bold">
-                    <span>🕹️ SPACEBAR : 뽑기 실행 · Z : 확대/축소</span>
-                    <span class="text-amber-300">INSERT COIN • FREE PLAY</span>
+                        <div id="current-winners-box" class="min-h-[84px] max-h-[150px] overflow-y-auto mac-well rounded-xl p-2.5 grid grid-cols-2 sm:grid-cols-3 content-start gap-2">
+                            <div class="col-span-full py-4 text-center">
+                                <p class="text-xs mac-text-muted">
+                                    인원을 선택하고 <span class="mac-text-success font-semibold">[뽑기 시작!]</span>을 누르면 당첨 순서대로 표시됩니다.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3) 중복 방지 & 이미 뽑힌 학생 -->
+                    <div class="mac-card p-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-2.5 border-b mac-border">
+                            <div>
+                                <h3 class="text-sm font-bold mac-text-primary">📦 중복 방지 및 뽑힌 명단</h3>
+                                <p class="text-xs mac-text-muted mt-0.5">
+                                    남은 인원 <strong id="remaining-count" class="mac-text-accent">25</strong>명 / 전체 출석 <strong id="total-present-count" class="mac-text-primary">25</strong>명
+                                </p>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <label class="mac-btn mac-btn-secondary flex items-center gap-1.5 cursor-pointer px-3 py-1.5 text-xs">
+                                    <input type="checkbox" id="no-repeat-checkbox" checked onchange="handleOptionChange()" class="accent-[#0a84ff] w-3.5 h-3.5 rounded cursor-pointer">
+                                    <span>중복 제외</span>
+                                </label>
+                                <button onclick="resetPickedHistory()" class="mac-btn px-3 py-1.5 rounded-xl bg-red-500/15 border border-red-500/35 text-red-500 hover:bg-red-500 hover:text-white text-xs cursor-pointer" title="이미 뽑힌 기록 초기화 (R)">
+                                    ↻ 초기화
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="picked-history-list" class="h-[68px] overflow-y-auto mac-well rounded-xl p-2.5 flex flex-wrap content-start gap-1.5">
+                            <span class="text-xs mac-text-muted">아직 뽑힌 학생이 없습니다.</span>
+                        </div>
+                    </div>
+
+                    <!-- 4) 출석 / 결석 빠른 체크 & 명단 수정 -->
+                    <div class="mac-card p-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                            <div>
+                                <h3 class="text-sm font-bold mac-text-primary">✅ 출석 / 결석 관리</h3>
+                                <p class="text-xs mac-text-muted">학생 버튼을 클릭하면 결석 처리되어 제외됩니다.</p>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="setAllPresent()" class="mac-btn mac-btn-secondary px-3 py-1.5 text-xs mac-text-success cursor-pointer">
+                                    전원 출석
+                                </button>
+                                <button onclick="toggleModal('roster-modal', true)" class="mac-btn mac-btn-blue px-3 py-1.5 text-xs cursor-pointer">
+                                    ✏️ 명단 수정
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="attendance-grid" class="grid grid-cols-5 sm:grid-cols-6 gap-1.5 max-h-[150px] overflow-y-auto p-2.5 mac-well rounded-xl">
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
-            <!-- [우측 6칸] 모든 설정 옵션 및 당첨 결과 영역 -->
-            <div id="claw-side-panel" class="lg:col-span-6 flex flex-col gap-4">
-
-                <!-- 1) 몇 명 뽑을지 선택지 + 뽑기 시작 / 한 번에 뽑기 버튼 -->
-                <div class="bg-[#1c1738] border-[3px] border-amber-400 p-4 flex flex-col gap-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs sm:text-sm text-amber-300 font-bold">🎯 몇 명을 뽑을까요?</span>
-                        <span class="text-[11px] text-slate-400">(단축키 숫자 1~5)</span>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <button onclick="setDrawCount(1)" class="draw-cnt-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold border-2 border-amber-400 bg-amber-400 text-[#121629] cursor-pointer" data-cnt="1">1명</button>
-                        <button onclick="setDrawCount(2)" class="draw-cnt-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer" data-cnt="2">2명</button>
-                        <button onclick="setDrawCount(3)" class="draw-cnt-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer" data-cnt="3">3명</button>
-                        <button onclick="setDrawCount(4)" class="draw-cnt-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer" data-cnt="4">4명</button>
-                        <button onclick="setDrawCount(5)" class="draw-cnt-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer" data-cnt="5">5명</button>
-                        <div class="flex items-center gap-1.5 ml-auto">
-                            <span class="text-xs text-slate-400 font-bold">직접:</span>
-                            <input type="number" id="custom-draw-count" min="1" max="50" value="1" oninput="setDrawCount(this.value, true)" onchange="setDrawCount(this.value, false)" class="w-14 px-2 py-1.5 bg-[#120e24] border-2 border-[#3b3363] text-amber-300 text-xs sm:text-sm font-bold text-center focus:outline-none focus:border-amber-400" title="직접 입력">
-                            <span class="text-xs text-slate-300 font-bold">명</span>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-2.5 pt-1">
-                        <button id="start-claw-btn" onclick="startClawSequence(false)" class="flex-1 py-3 bg-[#4ade80] hover:brightness-110 active:translate-y-0.5 text-[#121629] font-bold text-sm sm:text-base border-2 border-black shadow-[4px_4px_0px_#000] cursor-pointer transition-all flex items-center justify-center gap-1.5">
-                            <span>🕹️ 뽑기 시작!</span>
-                        </button>
-                        <button id="instant-claw-btn" onclick="startClawSequence(true)" class="px-4 py-3 bg-amber-400 hover:brightness-110 active:translate-y-0.5 text-[#121629] font-bold text-xs sm:text-sm border-2 border-black shadow-[4px_4px_0px_#000] cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0" title="집게 왕복 없이 한 번에 결과를 뽑습니다">
-                            <span>⚡ 한 번에 뽑기</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 2) 당첨 결과 확인 영역 -->
-                <div class="bg-[#1c1738] border-[3px] border-[#4ade80] p-4">
-                    <div class="flex items-center justify-between border-b-2 border-[#3b3363] pb-2 mb-2.5">
-                        <h2 class="text-sm font-bold text-[#4ade80] flex items-center gap-1.5">
-                            <span>🎉</span> 당첨 결과
+            <!-- [탭 2] 모둠(조) 편성 전용 화면 -->
+            <section id="view-group" class="hidden mac-card p-5 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b mac-border pb-4 mb-5">
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-bold mac-text-primary flex items-center gap-2">
+                            <span>👥</span> 자동 모둠(조) 편성기
                         </h2>
-                        <span id="turn-progress-badge" class="text-[11px] px-2 py-0.5 bg-[#120e24] border border-[#4ade80]/50 text-[#4ade80] font-bold">
-                            대기 중
-                        </span>
+                        <p class="text-xs sm:text-sm mac-text-muted mt-1">
+                            결석생을 제외한 현재 출석 학생(<strong id="group-present-count" class="mac-text-success">25</strong>명)을 원하는 모둠 수로 균등하게 나눕니다.
+                        </p>
                     </div>
 
-                    <div id="current-winners-box" class="min-h-[84px] max-h-[150px] overflow-y-auto bg-[#120e24] border-2 border-[#3b3363] p-2.5 grid grid-cols-2 sm:grid-cols-3 content-start gap-2">
-                        <div class="col-span-full py-4 text-center">
-                            <p class="text-xs text-slate-400">
-                                인원을 선택하고 <span class="text-[#4ade80] font-bold">[뽑기 시작!]</span>을 누르면 당첨 순서대로 표시됩니다!
-                            </p>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <button onclick="toggleModal('roster-modal', true)" class="mac-btn mac-btn-secondary px-3.5 py-2 text-xs cursor-pointer">
+                            ✏️ 명단 수정
+                        </button>
+
+                        <div class="flex items-center gap-2 mac-well rounded-xl px-3 py-1.5">
+                            <label for="group-count-select" class="text-xs font-medium mac-text-secondary">모둠 수</label>
+                            <select id="group-count-select" class="bg-transparent mac-text-accent text-xs sm:text-sm font-bold focus:outline-none cursor-pointer">
+                                <option value="2" class="text-slate-900">2모둠</option>
+                                <option value="3" class="text-slate-900">3모둠</option>
+                                <option value="4" selected class="text-slate-900">4모둠</option>
+                                <option value="5" class="text-slate-900">5모둠</option>
+                                <option value="6" class="text-slate-900">6모둠</option>
+                                <option value="7" class="text-slate-900">7모둠</option>
+                                <option value="8" class="text-slate-900">8모둠</option>
+                            </select>
                         </div>
+
+                        <button onclick="generateGroups()" class="mac-btn mac-btn-primary px-5 py-2 text-xs sm:text-sm cursor-pointer">
+                            🎲 모둠 나누기
+                        </button>
                     </div>
                 </div>
 
-                <!-- 3) 중복 방지 & 이미 뽑힌 학생 -->
-                <div class="bg-[#1c1738] border-[3px] border-purple-400 p-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#3b3363] pb-2 mb-2.5">
-                        <div>
-                            <h3 class="text-sm font-bold text-purple-300">📦 중복 방지 및 뽑힌 명단</h3>
-                            <p class="text-[11px] text-slate-300 mt-0.5">
-                                남은 인원: <span id="remaining-count" class="text-amber-400 font-bold">25</span>명 / 출석: <span id="total-present-count" class="text-white font-bold">25</span>명
-                            </p>
-                        </div>
-
-                        <div class="flex items-center gap-1.5">
-                            <label class="flex items-center gap-1 cursor-pointer bg-[#120e24] border border-[#3b3363] px-2.5 py-1.5 text-xs font-bold">
-                                <input type="checkbox" id="no-repeat-checkbox" checked onchange="handleOptionChange()" class="accent-amber-400 w-3.5 h-3.5 cursor-pointer">
-                                <span class="text-amber-300">중복 제외</span>
-                            </label>
-                            <button onclick="resetPickedHistory()" class="px-2.5 py-1.5 bg-red-500/20 border border-red-400 text-red-300 hover:bg-red-500 hover:text-white text-xs font-bold cursor-pointer transition-colors" title="이미 뽑힌 기록 초기화 (R)">
-                                ↻ 초기화
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="picked-history-list" class="h-[68px] overflow-y-auto bg-[#120e24] border border-[#3b3363] p-2 flex flex-wrap content-start gap-1.5">
-                        <span class="text-xs text-slate-500">아직 뽑힌 학생이 없습니다.</span>
+                <div id="groups-result-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="col-span-full text-center py-12 mac-text-muted text-xs sm:text-sm mac-well border-dashed rounded-2xl">
+                        우측 상단의 <span class="mac-text-success font-semibold">[🎲 모둠 나누기]</span> 버튼을 누르면 이곳에 모둠 편성표가 표시됩니다.
                     </div>
                 </div>
+            </section>
 
-                <!-- 4) 출석 / 결석 빠른 체크 & 명단 수정 -->
-                <div class="bg-[#1c1738] border-[3px] border-sky-400 p-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                        <div>
-                            <h3 class="text-sm font-bold text-sky-300">✅ 출석 / 결석 체크</h3>
-                            <p class="text-[11px] text-slate-300">클릭 시 결석 처리되어 캡슐에서 제외됩니다.</p>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="setAllPresent()" class="px-2.5 py-1 bg-[#120e24] border border-[#4ade80] text-[#4ade80] hover:bg-[#4ade80] hover:text-[#121629] text-xs font-bold cursor-pointer">
-                                전원 출석
-                            </button>
-                            <button onclick="toggleModal('roster-modal', true)" class="px-2.5 py-1 bg-sky-400 text-[#121629] text-xs font-bold hover:brightness-110 cursor-pointer">
-                                ✏️ 명단 수정
-                            </button>
-                        </div>
-                    </div>
+        </main>
+    </div>
 
-                    <div id="attendance-grid" class="grid grid-cols-5 sm:grid-cols-6 gap-1.5 max-h-[150px] overflow-y-auto p-2 bg-[#120e24] border border-[#3b3363]">
-                        <!-- JS로 학생 출석/결석 버튼 렌더링 -->
-                    </div>
-                </div>
+    <!-- [macOS 시트 팝업 1] 최종 당첨 결과 발표 모달 -->
+    <div id="result-reveal-modal" class="fixed inset-0 z-50 hidden items-center justify-center backdrop-blur-md p-4" style="background: var(--backdrop-bg);">
+        <div class="animate-pop-in macos-window rounded-2xl max-w-2xl w-full p-6 text-center relative">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/35 mac-text-accent text-xs font-semibold mb-3">
+                <span>★</span>
+                <span>CONGRATULATIONS</span>
+            </div>
+            <h3 id="modal-result-title" class="text-xl sm:text-2xl font-bold mac-text-primary mb-4">🎉 당첨 결과 발표</h3>
 
+            <div id="modal-winners-list" class="mac-well rounded-2xl p-4 mb-5 grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[55vh] overflow-y-auto">
             </div>
 
-        </div>
-
-        <!-- [탭 2] 모둠(조) 편성 전용 화면 -->
-        <section id="view-group" class="hidden bg-[#1c1738] border-[3px] border-amber-400/90 shadow-[0_0_25px_rgba(251,191,36,0.2)] p-4 sm:p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-[#3b3363] pb-4 mb-5">
-                <div>
-                    <h2 class="text-lg sm:text-xl font-bold text-amber-300 flex items-center gap-2">
-                        <span>👥</span> 자동 모둠(조) 편성기
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-300 mt-1">
-                        결석생을 제외한 현재 출석 학생(<span id="group-present-count" class="text-[#4ade80] font-bold">25</span>명)을 원하는 모둠 수로 공평하게 나눕니다.
-                    </p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2.5">
-                    <button onclick="toggleModal('roster-modal', true)" class="px-3 py-2 bg-[#120e24] border-2 border-sky-400 text-sky-300 hover:bg-sky-400 hover:text-[#121629] text-xs font-bold cursor-pointer transition-colors">
-                        ✏️ 명단 확인/수정
-                    </button>
-
-                    <div class="flex items-center gap-2 bg-[#120e24] border-2 border-[#3b3363] px-3 py-1.5">
-                        <label for="group-count-select" class="text-xs font-bold text-slate-300">모둠 수:</label>
-                        <select id="group-count-select" class="bg-[#1c1738] text-amber-300 text-xs sm:text-sm font-bold px-2 py-0.5 border border-amber-400/60 focus:outline-none">
-                            <option value="2">2모둠</option>
-                            <option value="3">3모둠</option>
-                            <option value="4" selected>4모둠</option>
-                            <option value="5">5모둠</option>
-                            <option value="6">6모둠</option>
-                            <option value="7">7모둠</option>
-                            <option value="8">8모둠</option>
-                        </select>
-                    </div>
-
-                    <button onclick="generateGroups()" class="px-5 py-2 bg-[#4ade80] hover:brightness-110 text-[#121629] text-xs sm:text-sm font-bold border-2 border-black shadow-[3px_3px_0px_#000] cursor-pointer transition-all">
-                        🎲 모둠 나누기
-                    </button>
-                </div>
-            </div>
-
-            <div id="groups-result-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="col-span-full text-center py-12 text-slate-400 text-xs sm:text-sm bg-[#120e24] border border-dashed border-[#3b3363]">
-                    우측 상단의 <span class="text-[#4ade80] font-bold">[🎲 모둠 나누기]</span> 버튼을 누르면 이곳에 모둠 편성표가 나타납니다!
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- [팝업 1] 최종 당첨 결과 한 번에 공개 모달 -->
-    <div id="result-reveal-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div class="animate-pop-in bg-[#1e193b] border-[4px] border-amber-400 max-w-2xl w-full p-6 shadow-[0_0_40px_rgba(251,191,36,0.45)] text-center relative">
-            <div class="inline-block px-3 py-1 bg-amber-400 text-[#121629] text-xs font-bold mb-3 shadow-[2px_2px_0px_#000]">
-                ★ CONGRATULATIONS ★
-            </div>
-            <h3 id="modal-result-title" class="text-xl sm:text-2xl font-bold text-white mb-4">🎉 당첨 결과 발표! 🎉</h3>
-
-            <div id="modal-winners-list" class="bg-[#120e24] border-2 border-[#3b3363] p-4 mb-5 grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[55vh] overflow-y-auto">
-                <!-- 당첨자 배지 한 번에 렌더링 -->
-            </div>
-
-            <button onclick="toggleModal('result-reveal-modal', false)" class="w-full py-3 bg-[#4ade80] hover:brightness-110 text-[#121629] font-bold text-base border-2 border-black shadow-[4px_4px_0px_#000] cursor-pointer">
-                확인 (닫기)
+            <button onclick="toggleModal('result-reveal-modal', false)" class="mac-btn mac-btn-blue w-full py-3 text-base cursor-pointer">
+                확인
             </button>
         </div>
     </div>
 
-    <!-- [팝업 2] 우리 반 명단 일괄 입력/수정 모달 -->
-    <div id="roster-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4">
-        <div class="bg-[#1e193b] border-[3px] border-sky-400 max-w-md w-full p-5 shadow-[0_0_25px_rgba(56,189,248,0.3)]">
-            <div class="flex items-center justify-between border-b-2 border-[#3b3363] pb-3 mb-3">
-                <h3 class="text-base font-bold text-sky-300">✏️ 우리 반 명단 등록 / 수정</h3>
-                <button onclick="toggleModal('roster-modal', false)" class="text-slate-400 hover:text-white px-2 py-0.5 border border-slate-500 text-xs cursor-pointer">✕</button>
+    <!-- [macOS 시트 팝업 2] 우리 반 명단 일괄 입력/수정 모달 -->
+    <div id="roster-modal" class="fixed inset-0 z-50 hidden items-center justify-center backdrop-blur-md p-4" style="background: var(--backdrop-bg);">
+        <div class="animate-pop-in macos-window rounded-2xl max-w-md w-full p-5">
+            <div class="flex items-center justify-between border-b mac-border pb-3 mb-3">
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleModal('roster-modal', false)" class="w-3 h-3 rounded-full bg-[#ff5f56] cursor-pointer" title="닫기"></button>
+                    <h3 class="text-base font-bold mac-text-primary ml-1">✏️ 우리 반 명단 등록 및 수정</h3>
+                </div>
+                <button onclick="toggleModal('roster-modal', false)" class="mac-text-muted hover:opacity-80 text-xs px-2 py-1 rounded-lg cursor-pointer">닫기</button>
             </div>
 
-            <p class="text-xs text-slate-300 mb-3 leading-relaxed">
+            <p class="text-xs mac-text-secondary mb-3 leading-relaxed">
                 엑셀/한글 명단을 복사해 붙여넣거나(줄바꿈·쉼표 구분), 번호 자동 생성을 눌러주세요.
             </p>
 
-            <div class="bg-[#120e24] border border-[#3b3363] p-2.5 mb-3 flex items-center justify-between gap-2">
-                <div class="flex items-center gap-1.5 text-xs font-bold">
+            <div class="mac-well rounded-xl p-2.5 mb-3 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 text-xs font-medium mac-text-primary">
                     <span>1번 ~</span>
-                    <input type="number" id="auto-num-input" min="2" max="60" value="25" class="w-14 px-2 py-1 bg-[#1c1738] border border-sky-400 text-sky-300 text-center">
+                    <input type="number" id="auto-num-input" min="2" max="60" value="25" class="w-14 px-2 py-1 rounded-lg mac-chip mac-text-accent font-bold text-center focus:outline-none">
                     <span>번까지</span>
                 </div>
-                <button onclick="generateNumberRoster()" class="px-3 py-1 bg-sky-400 text-[#121629] text-xs font-bold hover:brightness-110 cursor-pointer">
+                <button onclick="generateNumberRoster()" class="mac-btn mac-btn-secondary px-3 py-1.5 text-xs text-sky-500 cursor-pointer">
                     번호 자동 생성
                 </button>
             </div>
 
-            <textarea id="roster-textarea" rows="9" placeholder="김오둥&#10;이아케&#10;박레트로" class="w-full bg-[#120e24] border-2 border-[#3b3363] focus:border-sky-400 focus:outline-none p-3 text-xs sm:text-sm text-white leading-relaxed mb-3"></textarea>
+            <textarea id="roster-textarea" rows="8" placeholder="김오둥&#10;이아케&#10;박레트로" class="w-full mac-well rounded-xl focus:border-[#0a84ff] focus:outline-none p-3 text-xs sm:text-sm mac-text-primary leading-relaxed mb-3.5"></textarea>
 
-            <button onclick="saveRosterFromTextarea()" class="w-full py-3 bg-amber-400 hover:brightness-110 text-[#121629] font-bold text-sm border-2 border-black shadow-[3px_3px_0px_#000] cursor-pointer">
+            <button onclick="saveRosterFromTextarea()" class="mac-btn mac-btn-blue w-full py-3 text-sm cursor-pointer">
                 💾 명단 저장 및 적용하기
             </button>
         </div>
     </div>
 
-    <!-- [팝업 3] 단축키 안내 모달 -->
-    <div id="shortcut-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4">
-        <div class="bg-[#1e193b] border-[3px] border-amber-400 max-w-md w-full p-5 shadow-[0_0_25px_rgba(251,191,36,0.3)]">
-            <div class="flex items-center justify-between border-b-2 border-[#3b3363] pb-3 mb-4">
-                <h3 class="text-base font-bold text-amber-300">⌨️ 오둥이 번호 뽑기 단축키</h3>
-                <button onclick="toggleModal('shortcut-modal', false)" class="text-slate-400 hover:text-white px-2 py-0.5 border border-slate-500 text-xs cursor-pointer">✕</button>
+    <!-- [macOS 시트 팝업 3] 단축키 안내 모달 -->
+    <div id="shortcut-modal" class="fixed inset-0 z-50 hidden items-center justify-center backdrop-blur-md p-4" style="background: var(--backdrop-bg);">
+        <div class="animate-pop-in macos-window rounded-2xl max-w-md w-full p-5">
+            <div class="flex items-center justify-between border-b mac-border pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleModal('shortcut-modal', false)" class="w-3 h-3 rounded-full bg-[#ff5f56] cursor-pointer" title="닫기"></button>
+                    <h3 class="text-base font-bold mac-text-primary ml-1">⌨️ 키보드 단축키</h3>
+                </div>
+                <button onclick="toggleModal('shortcut-modal', false)" class="mac-text-muted hover:opacity-80 text-xs px-2 py-1 rounded-lg cursor-pointer">닫기</button>
             </div>
-            <ul class="space-y-2.5 text-xs sm:text-sm text-slate-200">
-                <li class="flex justify-between items-center bg-[#120e24] p-2.5 border border-[#3b3363]">
-                    <span>번호 뽑기 시작 (결과창 닫기)</span>
-                    <kbd class="px-2 py-1 bg-amber-400 text-black font-bold text-xs">Spacebar</kbd>
+            <ul class="space-y-2 text-xs sm:text-sm mac-text-primary">
+                <li class="flex justify-between items-center mac-well p-3 rounded-xl">
+                    <span>번호 뽑기 시작 / 결과창 닫기</span>
+                    <kbd class="px-2.5 py-1 rounded-md mac-kbd font-semibold text-xs">Space</kbd>
                 </li>
-                <li class="flex justify-between items-center bg-[#120e24] p-2.5 border border-[#3b3363]">
+                <li class="flex justify-between items-center mac-well p-3 rounded-xl">
                     <span>뽑을 인원 1~5명 빠른 선택</span>
-                    <kbd class="px-2 py-1 bg-slate-700 text-white font-bold text-xs">숫자 1 ~ 5</kbd>
+                    <kbd class="px-2.5 py-1 rounded-md mac-kbd font-semibold text-xs">1 ~ 5</kbd>
                 </li>
-                <li class="flex justify-between items-center bg-[#120e24] p-2.5 border border-[#3b3363]">
-                    <span>인형뽑기 기계 크게 보기 / 축소</span>
-                    <kbd class="px-2 py-1 bg-slate-700 text-white font-bold text-xs">Z</kbd>
+                <li class="flex justify-between items-center mac-well p-3 rounded-xl">
+                    <span>인형뽑기 기계 크게 보기 / 원래 크기</span>
+                    <kbd class="px-2.5 py-1 rounded-md mac-kbd font-semibold text-xs">Z</kbd>
                 </li>
-                <li class="flex justify-between items-center bg-[#120e24] p-2.5 border border-[#3b3363]">
+                <li class="flex justify-between items-center mac-well p-3 rounded-xl">
                     <span>효과음 음소거 켜기/끄기</span>
-                    <kbd class="px-2 py-1 bg-slate-700 text-white font-bold text-xs">M</kbd>
+                    <kbd class="px-2.5 py-1 rounded-md mac-kbd font-semibold text-xs">M</kbd>
                 </li>
-                <li class="flex justify-between items-center bg-[#120e24] p-2.5 border border-[#3b3363]">
+                <li class="flex justify-between items-center mac-well p-3 rounded-xl">
                     <span>이미 뽑힌 학생 기록 초기화</span>
-                    <kbd class="px-2 py-1 bg-slate-700 text-white font-bold text-xs">R</kbd>
+                    <kbd class="px-2.5 py-1 rounded-md mac-kbd font-semibold text-xs">R</kbd>
                 </li>
             </ul>
         </div>
     </div>
 
-    <!-- 레트로 토스트 알림 -->
-    <div id="toast-modal" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
-        <div class="bg-[#121629] border-2 border-amber-400 text-white px-5 py-3 shadow-[0_0_20px_rgba(251,191,36,0.4)] flex items-center gap-2.5">
-            <span class="text-base">🦆</span>
-            <p id="toast-message" class="text-xs sm:text-sm font-bold text-amber-300">알림 메시지</p>
+    <!-- macOS 상단 알림 배너 (Notification Toast) -->
+    <div id="toast-modal" class="fixed top-6 right-6 z-50 hidden">
+        <div class="animate-pop-in macos-window rounded-2xl px-4 py-3 flex items-center gap-3 max-w-sm">
+            <div class="w-8 h-8 rounded-lg bg-[#FFA400] flex items-center justify-center text-base shrink-0">🦆</div>
+            <div>
+                <div class="text-[11px] mac-text-muted font-semibold">오둥이 번호 뽑기</div>
+                <p id="toast-message" class="text-xs sm:text-sm font-semibold mac-text-primary">알림 메시지</p>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- 1. 상태 관리 및 로컬 스토리지 ---
-        const STORAGE_KEY = 'odung_teacher_picker_v2';
-        const TITLE_STORAGE_KEY = 'odung_teacher_picker_title_v1';
+        // --- 1. 상태 관리 및 초기화 ---
         let students = []; // { id, name, absent: boolean, picked: boolean }
         let drawCount = 1;
         let isAnimating = false;
         let soundEnabled = true;
         let currentTab = 'claw';
         let isClawZoomed = false;
+        let themePreference = 'system'; // 'system' | 'light' | 'dark'
+        const LOCAL_STORAGE_KEY = 'odung_random_picker_roster_v1';
+        const TITLE_STORAGE_KEY = 'odung_macos_picker_title_v1';
+        const THEME_STORAGE_KEY = 'odung_macos_theme_pref_v1';
+
+        function initTheme() {
+            try {
+                const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+                if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system') {
+                    themePreference = savedTheme;
+                }
+            } catch (e) {}
+            applyThemePreference();
+
+            // 컴퓨터 OS 다크/라이트 모드 실시간 변경 감지
+            if (window.matchMedia) {
+                const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                const onSystemThemeChange = () => {
+                    if (themePreference === 'system') {
+                        applyThemePreference();
+                    }
+                };
+                if (mediaQuery.addEventListener) {
+                    mediaQuery.addEventListener('change', onSystemThemeChange);
+                } else if (mediaQuery.addListener) {
+                    mediaQuery.addListener(onSystemThemeChange);
+                }
+            }
+        }
+
+        function applyThemePreference() {
+            const root = document.documentElement;
+            const btn = document.getElementById('theme-toggle-btn');
+
+            if (themePreference === 'system') {
+                root.removeAttribute('data-theme');
+                const isSysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (btn) {
+                    btn.innerHTML = `<span>${isSysDark ? '🌙' : '☀️'}</span><span>시스템 (${isSysDark ? '다크' : '라이트'})</span>`;
+                }
+            } else if (themePreference === 'light') {
+                root.setAttribute('data-theme', 'light');
+                if (btn) {
+                    btn.innerHTML = '<span>☀️</span><span>라이트</span>';
+                }
+            } else {
+                root.setAttribute('data-theme', 'dark');
+                if (btn) {
+                    btn.innerHTML = '<span>🌙</span><span>다크</span>';
+                }
+            }
+        }
+
+        function cycleTheme() {
+            const order = ['system', 'light', 'dark'];
+            const nextIdx = (order.indexOf(themePreference) + 1) % order.length;
+            themePreference = order[nextIdx];
+            try {
+                localStorage.setItem(THEME_STORAGE_KEY, themePreference);
+            } catch (e) {}
+            applyThemePreference();
+            playTone(540, 'sine', 0.05, 0, 0.04);
+
+            const labels = {
+                system: '컴퓨터 시스템 화면 모드에 자동 연동됩니다.',
+                light: '라이트 모드로 전환되었습니다.',
+                dark: '다크 모드로 전환되었습니다.'
+            };
+            showToast(labels[themePreference]);
+        }
 
         function initApp() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                try {
+            initTheme();
+            // 로컬 저장소 우선 복원
+            try {
+                const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed) && parsed.length > 0) {
                         students = parsed;
                     }
-                } catch (e) {
-                    console.error('명단 로드 오류:', e);
                 }
-            }
+            } catch (e) {}
+
             if (students.length === 0) {
                 students = Array.from({ length: 25 }, (_, i) => ({
                     id: 'stu_' + (i + 1),
@@ -523,24 +994,37 @@
                     absent: false,
                     picked: false
                 }));
-                saveState();
             }
 
             // 저장된 제목 복원
-            const savedTitle = localStorage.getItem(TITLE_STORAGE_KEY) || '';
-            const titleInput = document.getElementById('picker-title-input');
-            if (titleInput) {
-                titleInput.value = savedTitle;
-                handleTitleInput(savedTitle);
-            }
+            try {
+                const savedTitle = localStorage.getItem(TITLE_STORAGE_KEY) || '';
+                const titleInput = document.getElementById('picker-title-input');
+                if (titleInput) {
+                    titleInput.value = savedTitle;
+                    handleTitleInput(savedTitle);
+                }
+            } catch (e) {}
 
             syncRosterTextarea();
             renderAttendanceGrid();
             updateStatusUI();
         }
 
+        function saveState() {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(students));
+            } catch (e) {}
+            if (typeof window.saveRosterToCloud === 'function') {
+                window.saveRosterToCloud(students);
+            }
+        }
+
+        // --- [추가 기능 1] 제목 입력 및 초기화 처리 ---
         function handleTitleInput(val) {
-            localStorage.setItem(TITLE_STORAGE_KEY, val);
+            try {
+                localStorage.setItem(TITLE_STORAGE_KEY, val);
+            } catch (e) {}
             const clearBtn = document.getElementById('clear-title-btn');
             if (clearBtn) {
                 if (val.trim().length > 0) {
@@ -560,14 +1044,10 @@
             }
         }
 
-        function saveState() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
-        }
-
-        // 돋보기 버튼: 인형뽑기 기계 확대(크게 보기) / 원래 크기 토글
+        // --- [추가 기능 2] 인형뽑기 기계 크게 보기 / 원래 크기 전환 ---
         function toggleClawZoom() {
             if (isAnimating) {
-                showToast('뽑기 진행 중에는 화면 크기를 변경할 수 없습니다!');
+                showToast('뽑기 진행 중에는 화면 크기를 변경할 수 없습니다.');
                 return;
             }
             isClawZoomed = !isClawZoomed;
@@ -589,7 +1069,7 @@
                 machinePanel.classList.add('lg:col-span-12', 'max-w-5xl', 'w-full', 'mx-auto');
 
                 windowBox.classList.remove('h-[380px]', 'sm:h-[440px]');
-                windowBox.classList.add('h-[470px]', 'sm:h-[600px]');
+                windowBox.classList.add('h-[470px]', 'sm:h-[590px]');
 
                 carriage.classList.add('scale-125', 'sm:scale-[1.35]');
 
@@ -601,16 +1081,16 @@
 
                 quickControls.classList.remove('hidden');
 
-                zoomBtn.className = 'px-2.5 py-1 bg-amber-400 border-2 border-black text-[#121629] text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-[2px_2px_0px_#000]';
+                zoomBtn.className = 'mac-btn mac-btn-amber px-2.5 py-1 text-xs flex items-center gap-1.5 cursor-pointer';
                 zoomLabel.textContent = '원래 크기';
                 zoomIconPlus.classList.add('hidden');
-                playTone(620, 'square', 0.07, 0, 0.05);
+                playTone(620, 'sine', 0.07, 0, 0.05);
             } else {
                 sidePanel.classList.remove('hidden');
                 machinePanel.classList.remove('lg:col-span-12', 'max-w-5xl', 'w-full', 'mx-auto');
                 machinePanel.classList.add('lg:col-span-6');
 
-                windowBox.classList.remove('h-[470px]', 'sm:h-[600px]');
+                windowBox.classList.remove('h-[470px]', 'sm:h-[590px]');
                 windowBox.classList.add('h-[380px]', 'sm:h-[440px]');
 
                 carriage.classList.remove('scale-125', 'sm:scale-[1.35]');
@@ -623,208 +1103,175 @@
 
                 quickControls.classList.add('hidden');
 
-                zoomBtn.className = 'px-2.5 py-1 bg-[#1e193b] border-2 border-amber-400 hover:bg-amber-400 hover:text-[#121629] text-amber-300 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-[2px_2px_0px_#000]';
+                zoomBtn.className = 'mac-btn mac-btn-secondary px-2.5 py-1 text-xs flex items-center gap-1.5 mac-text-accent border-amber-500/40 cursor-pointer';
                 zoomLabel.textContent = '크게 보기';
                 zoomIconPlus.classList.remove('hidden');
-                playTone(460, 'square', 0.07, 0, 0.05);
+                playTone(460, 'sine', 0.07, 0, 0.05);
             }
 
-            // 캡슐 크기 즉시 재렌더링
-            renderDollPile(getEligibleStudents().length);
+            updateStatusUI();
         }
 
-        // 탭 전환 (번호 뽑기 <-> 모둠 편성)
+        // 전체화면 전환 (macOS 초록 버튼)
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {
+                    showToast('전체화면 모드를 지원하지 않는 환경입니다.');
+                });
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+
+        // --- 2. 탭 전환 (macOS Safari 탭 스타일) ---
         function switchMainTab(tabName) {
             if (isAnimating) {
-                showToast('번호 뽑기가 진행 중일 때는 탭을 바꿀 수 없습니다!');
+                showToast('뽑기 진행 중에는 탭을 이동할 수 없습니다.');
                 return;
             }
             currentTab = tabName;
-
+            const clawTab = document.getElementById('nav-tab-claw');
+            const groupTab = document.getElementById('nav-tab-group');
             const clawView = document.getElementById('view-claw');
             const groupView = document.getElementById('view-group');
-            const clawBtn = document.getElementById('nav-tab-claw');
-            const groupBtn = document.getElementById('nav-tab-group');
+            const urlText = document.getElementById('browser-url-text');
 
             if (tabName === 'claw') {
+                clawTab.classList.remove('inactive');
+                clawTab.classList.add('active');
+                groupTab.classList.remove('active');
+                groupTab.classList.add('inactive');
                 clawView.classList.remove('hidden');
                 groupView.classList.add('hidden');
-
-                clawBtn.className = 'px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#4ade80] bg-[#4ade80] text-[#121629] shadow-[0_0_12px_rgba(74,222,128,0.4)] cursor-pointer transition-all';
-                groupBtn.className = 'px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white cursor-pointer transition-all';
+                urlText.textContent = 'odunggames.github.io/randompicker';
             } else {
-                clawView.classList.add('hidden');
+                groupTab.classList.remove('inactive');
+                groupTab.classList.add('active');
+                clawTab.classList.remove('active');
+                clawTab.classList.add('inactive');
                 groupView.classList.remove('hidden');
-
-                groupBtn.className = 'px-4 py-2 text-xs sm:text-sm font-bold border-2 border-amber-400 bg-amber-400 text-[#121629] shadow-[0_0_12px_rgba(251,191,36,0.4)] cursor-pointer transition-all';
-                clawBtn.className = 'px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white cursor-pointer transition-all';
+                clawView.classList.add('hidden');
+                urlText.textContent = 'odunggames.github.io/randompicker/groups';
             }
+            playTone(520, 'sine', 0.05, 0, 0.04);
         }
 
-        // --- 2. 8비트 레트로 효과음 (Web Audio API) ---
-        let audioCtx = null;
-        function playTone(freq, type = 'square', duration = 0.1, delay = 0, vol = 0.08) {
-            if (!soundEnabled) return;
-            try {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
-
-                gain.gain.setValueAtTime(vol, audioCtx.currentTime + delay);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                osc.start(audioCtx.currentTime + delay);
-                osc.stop(audioCtx.currentTime + delay + duration);
-            } catch (e) {}
-        }
-
-        function sfxMove() {
-            playTone(320, 'square', 0.07, 0, 0.05);
-            playTone(400, 'square', 0.07, 0.08, 0.05);
-        }
-
-        function sfxDrop() {
-            playTone(500, 'triangle', 0.1, 0, 0.08);
-            playTone(380, 'triangle', 0.1, 0.1, 0.08);
-            playTone(260, 'triangle', 0.12, 0.2, 0.08);
-        }
-
-        function sfxCatch() {
-            playTone(523.25, 'square', 0.08, 0, 0.07);
-            playTone(659.25, 'square', 0.08, 0.08, 0.07);
-            playTone(783.99, 'square', 0.14, 0.16, 0.08);
-        }
-
-        function sfxFanfare() {
-            const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5];
-            const times = [0, 0.1, 0.2, 0.3, 0.45, 0.58];
-            notes.forEach((n, idx) => playTone(n, 'square', 0.15, times[idx], 0.09));
-        }
-
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            const btn = document.getElementById('sound-toggle-btn');
-            if (soundEnabled) {
-                btn.textContent = '🔊 효과음 ON';
-                btn.className = 'px-3 py-1.5 bg-[#121629] border-2 border-[#4ade80] text-[#4ade80] text-xs font-bold shadow-[0_0_10px_rgba(74,222,128,0.2)] cursor-pointer transition-all';
-                playTone(660, 'square', 0.1, 0, 0.06);
-            } else {
-                btn.textContent = '🔇 효과음 OFF';
-                btn.className = 'px-3 py-1.5 bg-[#121629] border-2 border-slate-500 text-slate-400 text-xs font-bold cursor-pointer transition-all';
-            }
-        }
-
-        // --- 3. 인형뽑기 캡슐 렌더링 & 추첨 로직 ---
-        const sleep = ms => new Promise(res => setTimeout(res, ms));
-
-        // 1~50번 원문자 변환 유틸 함수 (①, ②, ③...)
-        function getCircledNumber(num) {
-            if (num >= 1 && num <= 20) return String.fromCharCode(0x2460 + num - 1);
-            if (num >= 21 && num <= 35) return String.fromCharCode(0x3251 + num - 21);
-            if (num >= 36 && num <= 50) return String.fromCharCode(0x32B1 + num - 36);
-            return `(${num})`;
-        }
-
-        function setDrawCount(cnt, isTyping = false) {
+        // --- 3. 뽑을 인원 설정 (macOS Segmented Control) ---
+        function setDrawCount(val, isTyping = false) {
             if (isAnimating) return;
-            const inputEl = document.getElementById('custom-draw-count');
-            if (isTyping && cnt === '') return;
-
-            let parsed = parseInt(cnt, 10);
-            if (isNaN(parsed) || parsed < 1) parsed = 1;
-            if (parsed > 50) parsed = 50;
-            drawCount = parsed;
-
-            if (!isTyping) {
-                inputEl.value = drawCount;
+            let num = parseInt(val, 10);
+            if (isNaN(num)) {
+                if (isTyping) return;
+                num = 1;
             }
-            document.getElementById('drop-counter-badge').textContent = `0 / ${drawCount}`;
+            num = Math.max(1, Math.min(50, num));
+            drawCount = num;
+
+            const inputEl = document.getElementById('custom-draw-count');
+            if (!isTyping) inputEl.value = num;
 
             document.querySelectorAll('.draw-cnt-btn').forEach(btn => {
                 const btnCnt = parseInt(btn.dataset.cnt, 10);
-                const isZoomQuick = btn.closest('#zoomed-quick-controls') !== null;
-                const padClass = isZoomQuick ? 'px-3 py-1.5 text-xs' : 'px-3.5 py-1.5 text-xs sm:text-sm';
-
-                if (btnCnt === drawCount) {
-                    btn.className = `draw-cnt-btn ${padClass} font-bold border-2 border-amber-400 bg-amber-400 text-[#121629] cursor-pointer`;
+                if (btnCnt === num) {
+                    btn.classList.remove('inactive');
+                    btn.classList.add('active');
                 } else {
-                    btn.className = `draw-cnt-btn ${padClass} font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 cursor-pointer`;
+                    btn.classList.remove('active');
+                    btn.classList.add('inactive');
                 }
             });
+
+            document.getElementById('drop-counter-badge').textContent = `0 / ${drawCount}`;
+            playTone(480, 'sine', 0.04, 0, 0.03);
         }
 
-        function getEligibleStudents() {
-            const noRepeat = document.getElementById('no-repeat-checkbox').checked;
-            return students.filter(s => !s.absent && (!noRepeat || !s.picked));
-        }
-
-        // 투명 캡슐 속 오둥이 인형 SVG 생성 함수
-        function getOdungCapsuleSvg(showQuestion = false) {
+        // --- 4. 캡슐 더미 및 UI 상태 업데이트 ---
+        function getOdungCapsuleSVG(colorHex = '#FFA400') {
             return `
-                <svg viewBox="0 0 120 120" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <radialGradient id="odungSphere" cx="50%" cy="50%" r="50%">
-                            <stop offset="68%" stop-color="#ffffff"/>
-                            <stop offset="90%" stop-color="#d4d4d8"/>
-                            <stop offset="100%" stop-color="#3f3f46"/>
-                        </radialGradient>
-                        <clipPath id="odungBodyClip">
-                            <path d="M 27 89 C 22 55, 34 32, 61 32 C 88 32, 99 56, 95 89 C 92 103, 30 103, 27 89 Z" />
-                        </clipPath>
-                    </defs>
-                    <circle cx="60" cy="60" r="58" fill="url(#odungSphere)" stroke="#000" stroke-width="3" />
-                    <ellipse cx="44" cy="103" rx="11.5" ry="6" fill="#f59e0b" stroke="#000" stroke-width="4" />
-                    <ellipse cx="77" cy="103" rx="11.5" ry="6" fill="#f59e0b" stroke="#000" stroke-width="4" />
-                    <g clip-path="url(#odungBodyClip)">
-                        <rect x="15" y="20" width="90" height="90" fill="#ffffff" />
-                        <path d="M 22 58 C 24 38, 36 30, 52 30 C 40 34, 31 44, 29 60 Z" fill="#a1a1aa" />
-                    </g>
-                    <path d="M 27 89 C 22 55, 34 32, 61 32 C 88 32, 99 56, 95 89 C 92 103, 30 103, 27 89 Z" fill="none" stroke="#000000" stroke-width="4.5" stroke-linejoin="round" />
-                    <path d="M 33 68 C 24 73, 24 89, 34 91" fill="#ffffff" stroke="#000000" stroke-width="4.2" stroke-linecap="round" />
-                    <path d="M 85 68 C 94 73, 94 89, 84 91" fill="#ffffff" stroke="#000000" stroke-width="4.2" stroke-linecap="round" />
-                    <circle cx="51" cy="50" r="8.5" fill="#ffffff" stroke="#000000" stroke-width="3.8" />
-                    <circle cx="51" cy="51" r="2.5" fill="#000000" />
-                    <circle cx="67.5" cy="50" r="8.5" fill="#ffffff" stroke="#000000" stroke-width="3.8" />
-                    <circle cx="67.5" cy="51" r="2.5" fill="#000000" />
-                    <path d="M 26 64 C 26 56, 75 56, 75 65 C 75 74, 26 74, 26 64 Z" fill="#FFA400" stroke="#000000" stroke-width="4" stroke-linejoin="round" />
-                    ${showQuestion ? `
-                        <rect x="44" y="81" width="32" height="22" rx="5" fill="#fbbf24" stroke="#000" stroke-width="3" />
-                        <text x="60" y="97" text-anchor="middle" font-size="15" font-weight="bold" fill="#000">?</text>
-                    ` : ''}
+                <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="200" height="200" fill="${colorHex}" />
+                    <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="10" stroke-linejoin="round" />
+                    <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
+                    <circle cx="85" cy="95" r="5" fill="#000000" />
+                    <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
+                    <circle cx="115" cy="95" r="5" fill="#000000" />
+                    <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="7" stroke-linejoin="round" />
                 </svg>
             `;
         }
 
-        function renderDollPile(count) {
-            const container = document.getElementById('doll-pile-container');
-            container.innerHTML = '';
-
-            const displayCount = Math.min(count, 45);
-            const sizeClasses = isClawZoomed
-                ? 'w-14 h-14 sm:w-16 sm:h-16'
-                : 'w-10 h-10 sm:w-11 sm:h-11';
+        function renderDollPile(eligibleCount) {
+            const pile = document.getElementById('doll-pile-container');
+            pile.innerHTML = '';
+            const colors = ['#FFA400', '#38bdf8', '#fb7185', '#4ade80', '#a78bfa', '#fbbf24'];
+            const displayCount = Math.min(eligibleCount, 42);
+            const sizeClass = isClawZoomed ? 'w-14 h-14 sm:w-16 sm:h-16' : 'w-11 h-11 sm:w-12 sm:h-12';
 
             for (let i = 0; i < displayCount; i++) {
-                const rot = ((i * 17) % 28) - 14;
-                const delay = (i % 5) * 0.35;
-
-                const ball = document.createElement('div');
-                ball.className = `doll-pile-item ${sizeClasses} rounded-full border-2 border-black shadow-[2px_3px_4px_rgba(0,0,0,0.75)] flex items-center justify-center shrink-0 overflow-hidden bg-white`;
-                ball.style.setProperty('--rot', `${rot}deg`);
-                ball.style.animationDelay = `${delay}s`;
-                ball.innerHTML = getOdungCapsuleSvg(false);
-                container.appendChild(ball);
+                const rot = ((i * 17) % 30) - 15;
+                const delay = ((i * 0.23) % 2).toFixed(2);
+                const color = colors[i % colors.length];
+                const div = document.createElement('div');
+                div.className = `doll-pile-item ${sizeClass} rounded-full border-2 border-slate-900 overflow-hidden shadow-md shrink-0`;
+                div.style.setProperty('--rot', `${rot}deg`);
+                div.style.animationDelay = `${delay}s`;
+                div.innerHTML = getOdungCapsuleSVG(color);
+                pile.appendChild(div);
             }
         }
+
+        function updateStatusUI() {
+            const noRepeat = document.getElementById('no-repeat-checkbox').checked;
+            const presentStudents = students.filter(s => !s.absent);
+            const eligibleStudents = noRepeat ? presentStudents.filter(s => !s.picked) : presentStudents;
+            const pickedStudents = students.filter(s => s.picked);
+
+            document.getElementById('machine-ball-count').textContent = eligibleStudents.length;
+            document.getElementById('remaining-count').textContent = eligibleStudents.length;
+            document.getElementById('total-present-count').textContent = presentStudents.length;
+            document.getElementById('group-present-count').textContent = presentStudents.length;
+
+            renderDollPile(eligibleStudents.length);
+            renderPickedHistory(pickedStudents);
+        }
+
+        function renderPickedHistory(pickedStudents) {
+            const list = document.getElementById('picked-history-list');
+            if (pickedStudents.length === 0) {
+                list.innerHTML = '<span class="text-xs mac-text-muted">아직 뽑힌 학생이 없습니다.</span>';
+                return;
+            }
+            list.innerHTML = pickedStudents.map(s => `
+                <span class="px-2.5 py-1 rounded-lg text-xs font-semibold" style="background: var(--history-pill-bg); border: 1px solid var(--history-pill-border); color: var(--history-pill-text);">
+                    ${escapeHtml(s.name)}
+                </span>
+            `).join('');
+        }
+
+        function handleOptionChange() {
+            updateStatusUI();
+            saveState();
+        }
+
+        function resetPickedHistory() {
+            if (isAnimating) return;
+            students.forEach(s => s.picked = false);
+            document.getElementById('current-winners-box').innerHTML = `
+                <div class="col-span-full py-4 text-center">
+                    <p class="text-xs mac-text-muted">
+                        인원을 선택하고 <span class="mac-text-success font-semibold">[뽑기 시작!]</span>을 누르면 당첨 순서대로 표시됩니다.
+                    </p>
+                </div>
+            `;
+            document.getElementById('turn-progress-badge').textContent = '대기 중';
+            document.getElementById('drop-counter-badge').textContent = `0 / ${drawCount}`;
+            updateStatusUI();
+            saveState();
+            showToast('이미 뽑힌 명단이 초기화되었습니다.');
+        }
+
+        // --- 5. 인형뽑기 추첨 실행 (일반 뽑기 & 한 번에 뽑기 모두 등수 차례대로 표시) ---
+        const sleep = ms => new Promise(res => setTimeout(res, ms));
 
         function setDrawButtonsDisabled(disabled) {
             const ids = ['start-claw-btn', 'instant-claw-btn', 'zoom-start-claw-btn', 'zoom-instant-claw-btn'];
@@ -843,366 +1290,254 @@
         async function startClawSequence(isInstant = false) {
             if (isAnimating) return;
 
-            const customVal = parseInt(document.getElementById('custom-draw-count').value, 10);
-            if (!isNaN(customVal) && customVal >= 1) {
-                drawCount = Math.min(customVal, 50);
-            }
+            const noRepeat = document.getElementById('no-repeat-checkbox').checked;
+            const presentStudents = students.filter(s => !s.absent);
+            let pool = noRepeat ? presentStudents.filter(s => !s.picked) : [...presentStudents];
 
-            const eligible = getEligibleStudents();
-            if (eligible.length === 0) {
-                showToast('뽑을 수 있는 학생이 없습니다! 초기화 또는 출석을 확인해 주세요.');
+            if (pool.length === 0) {
+                showToast(noRepeat ? '모든 출석 학생이 뽑혔습니다! [↻ 초기화]를 눌러주세요.' : '출석한 학생이 없습니다!');
                 return;
             }
 
-            const actualCount = Math.min(drawCount, eligible.length);
-            if (actualCount < drawCount) {
-                showToast(`남은 인원이 ${actualCount}명뿐이라 ${actualCount}명만 뽑습니다!`);
+            const actualDrawCount = Math.min(drawCount, pool.length);
+            if (actualDrawCount < drawCount) {
+                showToast(`남은 인원이 ${pool.length}명뿐이어서 ${actualDrawCount}명만 추첨합니다.`);
             }
 
             isAnimating = true;
             setDrawButtonsDisabled(true);
 
-            const windowBox = document.getElementById('claw-window-box');
             const statusText = document.getElementById('machine-status-text');
             const progressBadge = document.getElementById('turn-progress-badge');
-
-            statusText.textContent = isInstant ? 'INSTANT CATCH!' : 'CATCHING...';
-            progressBadge.textContent = `0 / ${actualCount} 진행 중`;
-
-            const isFast = isInstant || actualCount >= 3;
-            if (isFast) {
-                windowBox.classList.add('crane-fast');
-            } else {
-                windowBox.classList.remove('crane-fast');
-            }
-
             const winnersBox = document.getElementById('current-winners-box');
-            winnersBox.innerHTML = `
-                <div class="col-span-full my-auto flex flex-col items-center justify-center py-6 text-center">
-                    <span class="text-2xl animate-bounce mb-1">🤫</span>
-                    <p class="text-xs font-bold text-amber-300 leading-relaxed">캡슐을 모두 뽑은 뒤 한 번에 공개됩니다!</p>
-                    <p id="secret-progress-text" class="text-[11px] text-slate-400 mt-1">0 / ${actualCount}개 확보 중...</p>
-                </div>
-            `;
+            const clawWindow = document.getElementById('claw-window-box');
 
-            const carriage = document.getElementById('crane-carriage');
-            const cable = document.getElementById('crane-cable');
-            const clawHead = document.getElementById('claw-head');
-            const grabbedCapsule = document.getElementById('grabbed-capsule');
-            document.getElementById('grabbed-capsule-inner').innerHTML = getOdungCapsuleSvg(true);
-            const noRepeat = document.getElementById('no-repeat-checkbox').checked;
+            statusText.textContent = 'RUNNING';
+            statusText.style.background = 'var(--running-bg)';
+            statusText.style.border = '1px solid var(--running-border)';
+            statusText.style.color = 'var(--running-text)';
+            statusText.className = 'px-2 py-0.5 rounded-md text-[11px] font-bold';
 
-            // 확대 보기 모드 여부에 따른 크레인 케이블 하강 길이 보정
-            const dropCableHeight = isClawZoomed ? '245px' : '185px';
+            winnersBox.innerHTML = '';
 
-            const turnWinners = [];
-            let instantRankedList = [];
+            // 무작위 셔플 후 당첨자 선정 (1등부터 N등 순서 유지)
+            const shuffledPool = [...pool];
+            for (let i = shuffledPool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
+            }
+            const selectedWinners = shuffledPool.slice(0, actualDrawCount);
 
             if (isInstant) {
-                // [한 번에 뽑기] 인원수만큼 랜덤으로 뽑아 1등부터 순서대로 배정
-                const shuffled = [...eligible];
-                for (let i = shuffled.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                }
-                const selectedStudents = shuffled.slice(0, actualCount);
-
-                instantRankedList = selectedStudents.map((stu, idx) => {
+                // ⚡ 한 번에 뽑기: 일반 뽑기와 동일하게 1등부터 N등까지 차례대로 표시!
+                selectedWinners.forEach((winner, idx) => {
                     if (noRepeat) {
-                        stu.picked = true;
+                        const target = students.find(s => s.id === winner.id);
+                        if (target) target.picked = true;
                     }
-                    return { student: stu, rank: idx + 1 };
+                    appendWinnerCard(winnersBox, winner, idx + 1);
                 });
+                progressBadge.textContent = `완료 (${selectedWinners.length}명)`;
+                document.getElementById('drop-counter-badge').textContent = `${selectedWinners.length} / ${selectedWinners.length}`;
+                playFanfare();
+                updateStatusUI();
                 saveState();
-
-                carriage.style.left = '55%';
-                clawHead.classList.remove('claw-closed');
-                clawHead.classList.add('claw-open');
-                sfxMove();
-                await sleep(160);
-
-                cable.style.height = dropCableHeight;
-                sfxDrop();
-                await sleep(150);
-
-                clawHead.classList.remove('claw-open');
-                clawHead.classList.add('claw-closed');
-                grabbedCapsule.classList.remove('hidden');
-                sfxCatch();
-
-                if (noRepeat) {
-                    const rem = getEligibleStudents().length;
-                    document.getElementById('machine-ball-count').textContent = rem;
-                    renderDollPile(rem);
-                }
-                await sleep(120);
-
-                cable.style.height = '22px';
-                await sleep(150);
-
-                carriage.style.left = '14%';
-                sfxMove();
-                await sleep(160);
-
-                clawHead.classList.remove('claw-closed');
-                clawHead.classList.add('claw-open');
-                grabbedCapsule.classList.add('hidden');
-                document.getElementById('drop-counter-badge').textContent = `${instantRankedList.length} / ${actualCount}`;
-                await sleep(100);
+                openResultRevealModal(selectedWinners);
             } else {
-                // [뽑기 시작!] N번 왕복 애니메이션
-                const moveDelay = actualCount >= 6 ? 150 : (actualCount >= 3 ? 210 : 380);
-                const dropDelay = actualCount >= 6 ? 140 : (actualCount >= 3 ? 190 : 350);
-                const catchDelay = actualCount >= 6 ? 80 : (actualCount >= 3 ? 120 : 220);
+                // 🕹️ 크레인 애니메이션 순차 뽑기
+                const isFast = actualDrawCount >= 2;
+                if (isFast) clawWindow.classList.add('crane-fast');
+                else clawWindow.classList.remove('crane-fast');
 
-                for (let i = 0; i < actualCount; i++) {
-                    const currentPool = getEligibleStudents();
-                    if (currentPool.length === 0) break;
+                const moveDelay = isFast ? 170 : 420;
+                const dropDelay = isFast ? 160 : 380;
+                const dropCableHeight = isClawZoomed ? '270px' : '210px';
 
-                    const randIdx = Math.floor(Math.random() * currentPool.length);
-                    const chosen = currentPool[randIdx];
-                    turnWinners.push(chosen);
+                const carriage = document.getElementById('crane-carriage');
+                const cable = document.getElementById('crane-cable');
+                const clawHead = document.getElementById('claw-head');
+                const grabbedCap = document.getElementById('grabbed-capsule');
+                const grabbedInner = document.getElementById('grabbed-capsule-inner');
+                const capsuleColors = ['#FFA400', '#38bdf8', '#fb7185', '#4ade80', '#a78bfa'];
 
-                    if (noRepeat) {
-                        chosen.picked = true;
-                        saveState();
-                    }
+                for (let i = 0; i < selectedWinners.length; i++) {
+                    const winner = selectedWinners[i];
+                    const rank = i + 1;
+                    progressBadge.textContent = `뽑는 중 (${rank} / ${selectedWinners.length})`;
 
-                    // 1) 크레인 좌우 이동
-                    const targetX = 32 + Math.floor(Math.random() * 54);
-                    carriage.style.left = `${targetX}%`;
+                    // 1. 랜덤 위치로 크레인 수평 이동
+                    const targetLeft = 35 + Math.floor(Math.random() * 52);
+                    carriage.style.left = `${targetLeft}%`;
                     clawHead.classList.remove('claw-closed');
                     clawHead.classList.add('claw-open');
-                    sfxMove();
+                    playTone(360 + i * 30, 'triangle', 0.08, 0, 0.04);
                     await sleep(moveDelay);
 
-                    // 2) 집게 하강
+                    // 2. 케이블 하강
                     cable.style.height = dropCableHeight;
-                    sfxDrop();
+                    playTone(280, 'sine', 0.12, 0, 0.04);
                     await sleep(dropDelay);
 
-                    // 3) 집게 오므리기 및 캡슐 잡기
+                    // 3. 집게 오므리며 캡슐 잡기
                     clawHead.classList.remove('claw-open');
                     clawHead.classList.add('claw-closed');
-                    grabbedCapsule.classList.remove('hidden');
-                    sfxCatch();
+                    grabbedInner.innerHTML = getOdungCapsuleSVG(capsuleColors[i % capsuleColors.length]);
+                    grabbedCap.classList.remove('hidden');
+                    playTone(540, 'sine', 0.08, 0, 0.05);
+                    await sleep(isFast ? 110 : 220);
 
-                    if (noRepeat) {
-                        const rem = getEligibleStudents().length;
-                        document.getElementById('machine-ball-count').textContent = rem;
-                        renderDollPile(rem);
-                    }
-                    await sleep(catchDelay);
-
-                    // 4) 집게 상승
-                    cable.style.height = '22px';
+                    // 4. 케이블 상승
+                    cable.style.height = '24px';
                     await sleep(dropDelay);
 
-                    // 5) 배출구(DROP ZONE)로 이동 후 투하
-                    carriage.style.left = '14%';
-                    sfxMove();
+                    // 5. 좌측 배출구(DROP ZONE)로 이동
+                    carriage.style.left = '13%';
                     await sleep(moveDelay);
 
+                    // 6. 집게 벌리며 투하 & 당첨자 카드에 1등, 2등... 순서대로 추가
                     clawHead.classList.remove('claw-closed');
                     clawHead.classList.add('claw-open');
-                    grabbedCapsule.classList.add('hidden');
+                    grabbedCap.classList.add('hidden');
+                    playTone(680, 'sine', 0.1, 0, 0.06);
 
-                    document.getElementById('drop-counter-badge').textContent = `${i + 1} / ${actualCount}`;
-                    progressBadge.textContent = `${i + 1} / ${actualCount} 완료`;
-                    const secretText = document.getElementById('secret-progress-text');
-                    if (secretText) secretText.textContent = `${i + 1} / ${actualCount}개 확보 완료!`;
+                    if (noRepeat) {
+                        const target = students.find(s => s.id === winner.id);
+                        if (target) target.picked = true;
+                    }
 
-                    await sleep(catchDelay);
+                    appendWinnerCard(winnersBox, winner, rank);
+                    document.getElementById('drop-counter-badge').textContent = `${rank} / ${selectedWinners.length}`;
+                    updateStatusUI();
+                    await sleep(isFast ? 100 : 200);
                 }
+
+                // 크레인 중앙 원위치 복귀
+                carriage.style.left = '50%';
+                clawWindow.classList.remove('crane-fast');
+                progressBadge.textContent = `완료 (${selectedWinners.length}명)`;
+                playFanfare();
+                saveState();
+                openResultRevealModal(selectedWinners);
             }
-
-            // 크레인 원위치 복귀 & 당첨 결과 한 번에 공개
-            carriage.style.left = '50%';
-            windowBox.classList.remove('crane-fast');
-            statusText.textContent = 'COMPLETE!';
-
-            if (isInstant) {
-                progressBadge.textContent = `1~${instantRankedList.length}등 랜덤 추첨!`;
-
-                winnersBox.innerHTML = instantRankedList.map((item, idx) => {
-                    const isFirst = item.rank === 1;
-                    const cardStyle = isFirst
-                        ? 'from-yellow-300 via-amber-400 to-orange-400'
-                        : 'from-amber-300 to-amber-400';
-
-                    return `
-                        <div class="animate-pop-in px-2.5 py-2 bg-gradient-to-r ${cardStyle} text-[#121629] border-2 border-black shadow-[3px_3px_0px_#000] flex items-center justify-between gap-1.5 text-left" style="animation-delay: ${idx * 0.03}s;">
-                            <span class="text-xs sm:text-sm font-bold truncate">${escapeHtml(item.student.name)}</span>
-                            <span class="text-xs sm:text-sm font-bold shrink-0 px-1.5 py-0.5 bg-black text-amber-300 rounded-sm">${item.rank}등</span>
-                        </div>
-                    `;
-                }).join('');
-
-                document.getElementById('modal-winners-list').innerHTML = instantRankedList.map((item) => {
-                    const isFirst = item.rank === 1;
-                    const modalCardStyle = isFirst
-                        ? 'from-yellow-200 via-amber-400 to-orange-500'
-                        : 'from-amber-300 to-orange-400';
-
-                    return `
-                        <div class="px-3 py-2.5 bg-gradient-to-r ${modalCardStyle} text-[#121629] border-[3px] border-black shadow-[4px_4px_0px_#000] flex items-center justify-between gap-2 text-left">
-                            <span class="text-base sm:text-lg font-bold truncate">${escapeHtml(item.student.name)}</span>
-                            <span class="text-sm sm:text-base font-bold shrink-0 px-2 py-0.5 bg-black text-amber-300 rounded-sm">${item.rank}등</span>
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                progressBadge.textContent = `총 ${turnWinners.length}명 당첨!`;
-
-                winnersBox.innerHTML = turnWinners.map((w, idx) => `
-                    <div class="animate-pop-in px-2.5 py-2 bg-gradient-to-r from-amber-300 to-amber-400 text-[#121629] border-2 border-black shadow-[3px_3px_0px_#000] flex items-center gap-1.5 text-left" style="animation-delay: ${idx * 0.04}s;">
-                        <span class="text-xs sm:text-sm font-bold shrink-0 px-1.5 py-0.5 bg-black text-amber-300 rounded-sm">${getCircledNumber(idx + 1)}</span>
-                        <span class="text-xs sm:text-sm font-bold truncate">${escapeHtml(w.name)}</span>
-                    </div>
-                `).join('');
-
-                document.getElementById('modal-winners-list').innerHTML = turnWinners.map((w, idx) => `
-                    <div class="px-3 py-2.5 bg-gradient-to-r from-amber-300 to-orange-400 text-[#121629] border-[3px] border-black shadow-[4px_4px_0px_#000] flex items-center gap-2 text-left">
-                        <span class="text-sm sm:text-base font-bold shrink-0 px-2 py-0.5 bg-black text-amber-300 rounded-sm">${getCircledNumber(idx + 1)}</span>
-            const customTitle = document.getElementById('picker-title-input')?.value.trim();
-            document.getElementById('modal-result-title').textContent = customTitle
-                ? `🎉 ${customTitle} 🎉`
-                : '🎉 당첨 결과 발표! 🎉';
-
-            updateStatusUI();
-            sfxFanfare();
-            toggleModal('result-reveal-modal', true);
 
             isAnimating = false;
             setDrawButtonsDisabled(false);
             statusText.textContent = 'READY';
+            statusText.removeAttribute('style');
+            statusText.className = 'px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-[11px] mac-text-success font-bold';
         }
 
-        // --- 4. 출석/결석 및 중복 방지 상태 UI 관리 ---
-        function handleOptionChange() {
-            updateStatusUI();
+        function appendWinnerCard(container, winner, rank) {
+            const card = document.createElement('div');
+            card.className = 'animate-pop-in mac-chip rounded-xl px-3 py-2 flex items-center justify-between';
+            card.innerHTML = `
+                <span class="px-2 py-0.5 rounded-md text-[11px] font-bold" style="background: var(--rank-pill-bg); color: var(--rank-pill-text);">${rank}등</span>
+                <span class="text-xs sm:text-sm font-bold mac-text-primary truncate ml-2">${escapeHtml(winner.name)}</span>
+            `;
+            container.appendChild(card);
+            container.scrollTop = container.scrollHeight;
         }
 
-        function resetPickedHistory() {
+        function openResultRevealModal(winners) {
+            const customTitle = document.getElementById('picker-title-input')?.value.trim();
+            document.getElementById('modal-result-title').textContent = customTitle
+                ? `🎉 ${customTitle}`
+                : '🎉 당첨 결과 발표';
+
+            const modalList = document.getElementById('modal-winners-list');
+            modalList.innerHTML = winners.map((w, idx) => `
+                <div class="mac-chip rounded-xl p-3 flex flex-col items-center justify-center">
+                    <span class="px-2.5 py-0.5 rounded-full mac-text-accent text-xs font-bold mb-1.5" style="background: var(--modal-rank-bg);">${idx + 1}등</span>
+                    <span class="text-base sm:text-lg font-bold mac-text-primary truncate w-full text-center">${escapeHtml(w.name)}</span>
+                </div>
+            `).join('');
+            toggleModal('result-reveal-modal', true);
+        }
+
+        // --- 6. 출석 / 결석 관리 & 명단 모달 ---
+        function renderAttendanceGrid() {
+            const grid = document.getElementById('attendance-grid');
+            grid.innerHTML = students.map(s => {
+                if (s.absent) {
+                    return `
+                        <button type="button" onclick="toggleAttendance('${s.id}')" class="mac-btn py-1.5 px-1.5 border mac-border mac-text-muted line-through opacity-60 text-xs truncate cursor-pointer" style="background: var(--absent-bg);" title="결석 (클릭 시 출석)">
+                            ${escapeHtml(s.name)}
+                        </button>
+                    `;
+                }
+                return `
+                    <button type="button" onclick="toggleAttendance('${s.id}')" class="mac-btn mac-chip py-1.5 px-1.5 text-xs truncate cursor-pointer hover:opacity-85" title="출석 (클릭 시 결석)">
+                        ${escapeHtml(s.name)}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function toggleAttendance(id) {
             if (isAnimating) return;
-            students.forEach(s => s.picked = false);
-            saveState();
-            updateStatusUI();
-            showToast('이미 뽑힌 학생 기록이 초기화되었습니다!');
-        }
-
-        function toggleStudentAbsent(id) {
-            if (isAnimating) return;
-            const stu = students.find(s => s.id === id);
-            if (!stu) return;
-            stu.absent = !stu.absent;
-            saveState();
+            const target = students.find(s => s.id === id);
+            if (!target) return;
+            target.absent = !target.absent;
             renderAttendanceGrid();
             updateStatusUI();
+            saveState();
         }
 
         function setAllPresent() {
             if (isAnimating) return;
             students.forEach(s => s.absent = false);
-            saveState();
             renderAttendanceGrid();
             updateStatusUI();
+            saveState();
             showToast('전원 출석 상태로 변경되었습니다.');
         }
 
-        function renderAttendanceGrid() {
-            const grid = document.getElementById('attendance-grid');
-            grid.innerHTML = '';
-
-            students.forEach(stu => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.onclick = () => toggleStudentAbsent(stu.id);
-
-                if (stu.absent) {
-                    btn.className = 'px-1.5 py-2 bg-[#1a152e] border border-red-500/40 text-slate-500 line-through text-[11px] font-bold truncate cursor-pointer hover:border-red-400 transition-colors';
-                    btn.title = `${stu.name} (결석 - 클릭 시 출석 처리)`;
-                } else {
-                    btn.className = 'px-1.5 py-2 bg-[#1e193b] border border-sky-400/50 text-white hover:border-amber-400 text-[11px] font-bold truncate cursor-pointer transition-colors';
-                    btn.title = `${stu.name} (출석 - 클릭 시 결석 처리)`;
-                }
-                btn.textContent = stu.name;
-                grid.appendChild(btn);
-            });
-        }
-
-        function updateStatusUI() {
-            const presentStudents = students.filter(s => !s.absent);
-            const eligibleStudents = getEligibleStudents();
-            const pickedStudents = students.filter(s => s.picked);
-
-            document.getElementById('total-present-count').textContent = presentStudents.length;
-            document.getElementById('remaining-count').textContent = eligibleStudents.length;
-            document.getElementById('machine-ball-count').textContent = eligibleStudents.length;
-            document.getElementById('group-present-count').textContent = presentStudents.length;
-
-            renderDollPile(eligibleStudents.length);
-
-            const historyBox = document.getElementById('picked-history-list');
-            if (pickedStudents.length === 0) {
-                historyBox.innerHTML = '<span class="text-xs text-slate-500">아직 뽑힌 학생이 없습니다.</span>';
-            } else {
-                historyBox.innerHTML = pickedStudents.map(s => `
-                    <span class="px-2 py-0.5 bg-purple-500/20 border border-purple-400/60 text-purple-200 text-[11px] font-bold">
-                        ${escapeHtml(s.name)}
-                    </span>
-                `).join('');
-            }
-        }
-
-        // --- 5. 명단 등록/수정 모달 로직 ---
         function syncRosterTextarea() {
             document.getElementById('roster-textarea').value = students.map(s => s.name).join('\n');
         }
 
         function generateNumberRoster() {
-            let count = parseInt(document.getElementById('auto-num-input').value, 10);
-            if (isNaN(count) || count < 2) count = 2;
-            if (count > 60) count = 60;
-            const lines = Array.from({ length: count }, (_, i) => `${i + 1}번`);
+            const cnt = Math.max(2, Math.min(60, parseInt(document.getElementById('auto-num-input').value, 10) || 25));
+            const lines = Array.from({ length: cnt }, (_, i) => `${i + 1}번`);
             document.getElementById('roster-textarea').value = lines.join('\n');
+            playTone(580, 'sine', 0.06, 0, 0.04);
         }
 
         function saveRosterFromTextarea() {
             const raw = document.getElementById('roster-textarea').value;
-            const names = raw
-                .split(/[\n,]+/)
-                .map(n => n.trim())
-                .filter(n => n.length > 0);
-
+            const names = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
             if (names.length === 0) {
-                showToast('최소 1명 이상의 이름을 입력해 주세요!');
+                showToast('최소 1명 이상의 이름을 입력해 주세요.');
                 return;
             }
 
-            students = names.map((name, idx) => ({
-                id: 'stu_' + Date.now() + '_' + idx,
-                name,
-                absent: false,
-                picked: false
-            }));
+            const prevMap = new Map(students.map(s => [s.name, { absent: s.absent, picked: s.picked }]));
+            students = names.slice(0, 60).map((name, idx) => {
+                const prev = prevMap.get(name);
+                return {
+                    id: 'stu_' + (idx + 1) + '_' + Date.now(),
+                    name,
+                    absent: prev ? prev.absent : false,
+                    picked: prev ? prev.picked : false
+                };
+            });
 
-            saveState();
             renderAttendanceGrid();
             updateStatusUI();
+            saveState();
             toggleModal('roster-modal', false);
-            showToast(`총 ${students.length}명의 명단이 저장되었습니다!`);
+            showToast(`총 ${students.length}명의 우리 반 명단이 저장되었습니다.`);
         }
 
-        // --- 6. 모둠(조) 편성 로직 ---
+        // --- 7. 모둠(조) 편성기 ---
         function generateGroups() {
             const present = students.filter(s => !s.absent);
             if (present.length < 2) {
-                showToast('모둠을 나누려면 최소 2명 이상의 출석 학생이 필요합니다!');
+                showToast('모둠을 나누려면 최소 2명 이상의 출석 학생이 필요합니다.');
                 return;
             }
 
-            const groupCount = parseInt(document.getElementById('group-count-select').value, 10);
+            const groupCount = Math.min(parseInt(document.getElementById('group-count-select').value, 10) || 4, present.length);
             const shuffled = [...present];
             for (let i = shuffled.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -1215,62 +1550,89 @@
             });
 
             const grid = document.getElementById('groups-result-grid');
-            const borderColors = [
-                'border-[#4ade80]',
-                'border-amber-400',
-                'border-sky-400',
-                'border-pink-400',
-                'border-purple-400',
-                'border-orange-400',
-                'border-teal-400',
-                'border-rose-400'
-            ];
-
-            grid.innerHTML = groups.map((members, idx) => {
-                const bColor = borderColors[idx % borderColors.length];
-                const memberTags = members.length > 0
-                    ? members.map(m => `<li class="px-2.5 py-1.5 bg-[#120e24] border border-[#3b3363] text-white text-xs sm:text-sm font-bold">${escapeHtml(m.name)}</li>`).join('')
-                    : `<li class="text-xs text-slate-500">배정 인원 없음</li>`;
-
-                return `
-                    <div class="animate-pop-in bg-[#16122e] border-[3px] ${bColor} p-3.5 flex flex-col" style="animation-delay: ${idx * 0.05}s;">
-                        <div class="flex items-center justify-between border-b border-[#3b3363] pb-2 mb-2.5">
-                            <span class="text-sm sm:text-base font-bold text-amber-300">${idx + 1}모둠</span>
-                            <span class="text-xs text-slate-400 font-bold">${members.length}명</span>
-                        </div>
-                        <ul class="space-y-1.5">
-                            ${memberTags}
-                        </ul>
+            grid.innerHTML = groups.map((members, idx) => `
+                <div class="animate-pop-in mac-well rounded-2xl p-4 flex flex-col">
+                    <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b mac-border">
+                        <span class="text-sm font-bold mac-text-accent">${idx + 1}모둠</span>
+                        <span class="px-2 py-0.5 rounded-full mac-kbd text-[11px] mac-text-secondary font-semibold">${members.length}명</span>
                     </div>
-                `;
-            }).join('');
+                    <div class="flex flex-wrap gap-1.5">
+                        ${members.map(m => `
+                            <span class="px-2.5 py-1 rounded-lg mac-chip text-xs font-semibold">
+                                ${escapeHtml(m.name)}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
 
-            sfxFanfare();
+            playFanfare();
+            showToast(`${groupCount}개 모둠 편성이 완료되었습니다!`);
         }
 
-        // --- 7. 공용 모달, 토스트, 단축키 처리 ---
+        // --- 8. 모달, 효과음, 단축키 유틸리티 ---
         function toggleModal(modalId, show) {
-            const modal = document.getElementById(modalId);
-            if (!modal) return;
+            const el = document.getElementById(modalId);
+            if (!el) return;
             if (show) {
                 if (modalId === 'roster-modal') syncRosterTextarea();
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
+                el.classList.remove('hidden');
+                el.classList.add('flex');
             } else {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
+                el.classList.add('hidden');
+                el.classList.remove('flex');
             }
         }
 
-        let toastTimer = null;
+        let audioCtx = null;
+        function playTone(freq, type = 'sine', duration = 0.08, delay = 0, vol = 0.05) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime + delay);
+                osc.stop(audioCtx.currentTime + delay + duration);
+            } catch (e) {}
+        }
+
+        function playFanfare() {
+            [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
+                playTone(f, 'triangle', 0.14, idx * 0.09, 0.07);
+            });
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('sound-toggle-btn');
+            if (soundEnabled) {
+                btn.innerHTML = '<span>🔊</span><span>효과음 ON</span>';
+                btn.className = 'mac-btn px-3 py-1.5 text-xs flex items-center gap-1.5 cursor-pointer';
+                btn.style.background = 'var(--sound-on-bg)';
+                btn.style.border = '1px solid var(--sound-on-border)';
+                btn.style.color = 'var(--sound-on-text)';
+                playTone(660, 'sine', 0.07, 0, 0.05);
+            } else {
+                btn.innerHTML = '<span>🔇</span><span>효과음 OFF</span>';
+                btn.removeAttribute('style');
+                btn.className = 'mac-btn mac-btn-secondary px-3 py-1.5 mac-text-muted text-xs flex items-center gap-1.5 cursor-pointer';
+            }
+        }
+
+        let toastTimeout = null;
         function showToast(msg) {
-            const toast = document.getElementById('toast-modal');
+            const modal = document.getElementById('toast-modal');
             document.getElementById('toast-message').textContent = msg;
-            toast.classList.remove('hidden');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 2600);
+            modal.classList.remove('hidden');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => modal.classList.add('hidden'), 2600);
         }
 
         function escapeHtml(str) {
@@ -1282,62 +1644,110 @@
                 .replace(/'/g, '&#39;');
         }
 
-        // 키보드 단축키 바인딩
+        // 키보드 단축키 연결
         document.addEventListener('keydown', (e) => {
-            const tag = document.activeElement.tagName;
+            const tag = document.activeElement?.tagName;
             if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
             const resultModal = document.getElementById('result-reveal-modal');
-            const rosterModal = document.getElementById('roster-modal');
-            const shortcutModal = document.getElementById('shortcut-modal');
-
-            if (e.code === 'Escape') {
-                toggleModal('result-reveal-modal', false);
-                toggleModal('roster-modal', false);
-                toggleModal('shortcut-modal', false);
-                return;
-            }
-
             if (e.code === 'Space') {
                 e.preventDefault();
                 if (!resultModal.classList.contains('hidden')) {
                     toggleModal('result-reveal-modal', false);
-                    return;
+                } else if (currentTab === 'claw' && !isAnimating) {
+                    startClawSequence(false);
                 }
-                if (rosterModal.classList.contains('hidden') && shortcutModal.classList.contains('hidden')) {
-                    if (currentTab !== 'claw') switchMainTab('claw');
-                    startClawSequence();
-                }
-                return;
-            }
-
-            if (['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5'].includes(e.code)) {
-                const num = parseInt(e.code.replace('Digit', ''), 10);
-                setDrawCount(num);
-                showToast(`뽑을 인원: ${num}명 선택`);
-                return;
-            }
-
-            if (e.code === 'KeyZ') {
+            } else if (['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5'].includes(e.code)) {
+                const n = parseInt(e.code.replace('Digit', ''), 10);
+                setDrawCount(n);
+            } else if (e.code === 'KeyZ') {
                 if (currentTab === 'claw') {
                     toggleClawZoom();
                 }
-                return;
-            }
-
-            if (e.code === 'KeyM') {
+            } else if (e.code === 'KeyM') {
                 toggleSound();
-                return;
-            }
-
-            if (e.code === 'KeyR') {
+            } else if (e.code === 'KeyR') {
                 resetPickedHistory();
-                return;
             }
         });
 
         // 앱 시작
         initApp();
+    </script>
+
+    <!-- 수정한 명단 및 출석 상태를 다시 열었을 때도 유지하기 위한 자동 저장 모듈 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let pendingStudents = null;
+
+        window.saveRosterToCloud = async function(studentList) {
+            if (!db || !currentUser) {
+                pendingStudents = JSON.parse(JSON.stringify(studentList));
+                return;
+            }
+            try {
+                const rosterRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'roster');
+                await setDoc(rosterRef, {
+                    students: studentList,
+                    updatedAt: Date.now()
+                });
+            } catch (err) {
+                console.error('명단 저장 오류:', err);
+            }
+        };
+
+        async function initCloudSync() {
+            if (!firebaseConfig) return;
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                currentUser = auth.currentUser;
+                if (!currentUser) return;
+
+                if (pendingStudents) {
+                    const toSave = pendingStudents;
+                    pendingStudents = null;
+                    await window.saveRosterToCloud(toSave);
+                }
+
+                const rosterRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'roster');
+                onSnapshot(rosterRef, (snapshot) => {
+                    if (!currentUser) return;
+                    if (snapshot.exists()) {
+                        const data = snapshot.data();
+                        if (Array.isArray(data.students) && data.students.length > 0) {
+                            students = data.students;
+                            syncRosterTextarea();
+                            renderAttendanceGrid();
+                            updateStatusUI();
+                        }
+                    }
+                }, (error) => {
+                    console.error('명단 불러오기 오류:', error);
+                });
+            } catch (err) {
+                console.error('저장소 연결 오류:', err);
+            }
+        }
+
+        initCloudSync();
     </script>
 </body>
 </html>
