@@ -1,0 +1,3553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리반 타자왕 - GAME 03 | 오둥오락실</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Galmuri11 Retro Pixel Font -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css" />
+    <!-- QRCode.js for Room Invite QR Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #120f24;
+            --card-bg: #171433;
+            --arcade-yellow: #facc15;
+            --arcade-yellow-dark: #eab308;
+            --neon-blue: #38bdf8;
+            --neon-pink: #f43f5e;
+            --neon-green: #4ade80;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Galmuri11', monospace, sans-serif;
+        }
+
+        body {
+            background-color: #16111d;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: #f8fafc;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        /* ==========================================
+           OLD CRT TV INFINITE OVERLAYS & ANIMATIONS
+        =========================================== */
+        .crt-overlay {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background:
+                linear-gradient(
+                    rgba(18, 16, 16, 0) 50%,
+                    rgba(0, 0, 0, 0.24) 50%
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255, 0, 0, 0.03),
+                    rgba(0, 255, 0, 0.015),
+                    rgba(0, 0, 255, 0.03)
+                );
+            background-size: 100% 4px, 6px 100%;
+            z-index: 50;
+            animation: crtFlicker 0.14s infinite alternate;
+        }
+
+        .crt-scan-beam {
+            pointer-events: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 110px;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(186, 230, 253, 0.055) 50%,
+                rgba(255, 255, 255, 0.09) 52%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            z-index: 51;
+            animation: crtScanRoll 5.5s linear infinite;
+        }
+
+        .crt-glitch-bar {
+            pointer-events: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(250, 204, 21, 0.14);
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
+            z-index: 52;
+            opacity: 0;
+            animation: crtTrackingGlitch 7s infinite;
+        }
+
+        .crt-vignette {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            box-shadow: inset 0 0 85px rgba(0, 0, 0, 0.78);
+            z-index: 53;
+        }
+
+        @keyframes crtFlicker {
+            0% { opacity: 0.92; }
+            50% { opacity: 0.98; }
+            100% { opacity: 0.94; }
+        }
+
+        @keyframes crtScanRoll {
+            0% { transform: translateY(-130px); }
+            100% { transform: translateY(105vh); }
+        }
+
+        @keyframes crtTrackingGlitch {
+            0%, 88%, 100% {
+                opacity: 0;
+                transform: translateY(20vh) scaleX(1);
+            }
+            90% {
+                opacity: 0.85;
+                transform: translateY(35vh) scaleX(1.02);
+            }
+            92% {
+                opacity: 0.4;
+                transform: translateY(62vh) scaleX(0.98);
+            }
+            94% {
+                opacity: 0.9;
+                transform: translateY(78vh) scaleX(1.01);
+            }
+            96% {
+                opacity: 0;
+            }
+        }
+
+        /* RGB Phosphor Chromatic Aberration & Subtle Jitter for Retro TV Text */
+        body, button, span, p, input, td, th {
+            animation: crtSubtleTextGlow 2.8s infinite ease-in-out;
+        }
+
+        h1, h2, #hudScore, #hudTimer, #hudCombo, #roomCodeDisplay, #countdownNumber {
+            animation: crtTextAberration 3.2s infinite ease-in-out;
+        }
+
+        @keyframes crtSubtleTextGlow {
+            0%, 100% {
+                text-shadow:
+                    -0.7px 0 rgba(244, 63, 94, 0.45),
+                    0.7px 0 rgba(56, 189, 248, 0.45);
+            }
+            49% {
+                text-shadow:
+                    -1.1px 0 rgba(244, 63, 94, 0.6),
+                    1.1px 0 rgba(56, 189, 248, 0.6);
+                transform: translateX(0);
+            }
+            50% {
+                text-shadow:
+                    -1.6px 0.3px rgba(244, 63, 94, 0.75),
+                    1.6px -0.3px rgba(56, 189, 248, 0.75);
+                transform: translateX(0.4px);
+            }
+            51% {
+                text-shadow:
+                    -0.7px 0 rgba(244, 63, 94, 0.45),
+                    0.7px 0 rgba(56, 189, 248, 0.45);
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes crtTextAberration {
+            0%, 100% {
+                text-shadow:
+                    -1.2px 0 rgba(244, 63, 94, 0.65),
+                    1.2px 0 rgba(56, 189, 248, 0.65),
+                    0 0 8px rgba(250, 204, 21, 0.25);
+                transform: translateX(0);
+            }
+            48% {
+                text-shadow:
+                    -1.8px 0 rgba(244, 63, 94, 0.8),
+                    1.8px 0 rgba(56, 189, 248, 0.8),
+                    0 0 12px rgba(250, 204, 21, 0.35);
+                transform: translateX(0);
+            }
+            50% {
+                text-shadow:
+                    -2.6px 0.5px rgba(244, 63, 94, 0.92),
+                    2.6px -0.5px rgba(56, 189, 248, 0.92),
+                    0 0 10px rgba(255, 255, 255, 0.35);
+                transform: translateX(-0.8px);
+            }
+            51% {
+                transform: translateX(0.6px);
+            }
+            52% {
+                text-shadow:
+                    -1.2px 0 rgba(244, 63, 94, 0.65),
+                    1.2px 0 rgba(56, 189, 248, 0.65),
+                    0 0 8px rgba(250, 204, 21, 0.25);
+                transform: translateX(0);
+            }
+        }
+
+        /* ==========================================
+           ARCADE CABINET & CONTROLS
+        =========================================== */
+        .arcade-frame {
+            background-color: var(--card-bg);
+            border: 3px solid var(--arcade-yellow);
+            box-shadow:
+                0 0 0 4px #0d0b1a,
+                0 12px 40px rgba(0, 0, 0, 0.75),
+                0 0 24px rgba(250, 204, 21, 0.18),
+                inset 0 0 32px rgba(0, 0, 0, 0.65);
+            position: relative;
+            transition: box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .arcade-frame.fever-active {
+            border-color: #fb7185;
+            box-shadow:
+                0 0 0 4px #0d0b1a,
+                0 0 35px rgba(244, 63, 94, 0.55),
+                inset 0 0 25px rgba(244, 63, 94, 0.2);
+            animation: feverPulse 0.6s infinite alternate;
+        }
+
+        @keyframes feverPulse {
+            from { border-color: #facc15; }
+            to { border-color: #f43f5e; }
+        }
+
+        .game-badge {
+            background-color: var(--arcade-yellow);
+            color: #141129;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            box-shadow: 3px 3px 0px #090712;
+        }
+
+        .pixel-btn {
+            border: 2px solid #090712;
+            box-shadow: 0 4px 0 #090712;
+            transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .pixel-btn:hover:not(:disabled) {
+            filter: brightness(1.08);
+        }
+
+        .pixel-btn:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #090712;
+        }
+
+        .pixel-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .option-pill {
+            background-color: #100d24;
+            border: 2px solid #2e295e;
+            color: #94a3b8;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .option-pill:hover {
+            border-color: #64748b;
+            color: #e2e8f0;
+        }
+
+        .option-pill.active {
+            background-color: rgba(250, 204, 21, 0.15);
+            border-color: var(--arcade-yellow);
+            color: var(--arcade-yellow);
+            box-shadow: 0 0 12px rgba(250, 204, 21, 0.2);
+        }
+
+        .typing-input {
+            background-color: #0b0918;
+            border: 3px solid #3b3575;
+            color: #ffffff;
+            caret-color: var(--arcade-yellow);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .typing-input:focus {
+            outline: none;
+            border-color: var(--arcade-yellow);
+            box-shadow: 0 0 16px rgba(250, 204, 21, 0.3);
+        }
+
+        .typing-input.shake {
+            animation: inputShake 0.28s ease;
+            border-color: #f43f5e;
+        }
+
+        @keyframes inputShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            50% { transform: translateX(6px); }
+            75% { transform: translateX(-4px); }
+        }
+
+        @keyframes countdownPop {
+            0% { transform: scale(1.7); opacity: 0.2; }
+            40% { transform: scale(0.95); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .countdown-pop {
+            animation: countdownPop 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes levelUpBounce {
+            0% { transform: scale(0.4) translateY(12px); opacity: 0; }
+            50% { transform: scale(1.12) translateY(-4px); opacity: 1; }
+            75% { transform: scale(0.96) translateY(0); opacity: 1; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .levelup-banner {
+            animation: levelUpBounce 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .skill-card {
+            background: linear-gradient(180deg, #1b173d 0%, #0f0c21 100%);
+            border: 2px solid #3b3575;
+            transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+            cursor: pointer;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--arcade-yellow);
+            box-shadow: 0 0 18px rgba(250, 204, 21, 0.35);
+        }
+
+        .skill-card.awakening-card {
+            background: linear-gradient(180deg, #451a03 0%, #1e1035 100%);
+            border: 2px solid #facc15;
+            box-shadow: 0 0 22px rgba(250, 204, 21, 0.45);
+            animation: feverPulse 0.7s infinite alternate;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+        }
+
+        /* QR Code Container Styling */
+        #qrcodeBox img, #qrcodeBox canvas {
+            margin: 0 auto;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #120f24;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2e295e;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="p-2.5 sm:p-5">
+    <!-- Old CRT TV Infinite Effects -->
+    <div class="crt-overlay"></div>
+    <div class="crt-scan-beam"></div>
+    <div class="crt-glitch-bar"></div>
+    <div class="crt-vignette"></div>
+
+    <!-- Non-blocking Toast Message -->
+    <div id="toastBox" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden bg-[#0f0c21] border-2 border-yellow-400 text-yellow-300 text-xs sm:text-sm px-4 py-2 rounded shadow-lg">
+    </div>
+
+    <!-- Main Container -->
+    <div class="w-full max-w-4xl mx-auto my-auto pt-4">
+        <!-- Main Arcade Cabinet Box -->
+        <div id="arcadeFrame" class="arcade-frame rounded-md p-4 sm:p-6">
+            <!-- Top-Left GAME 03 Floating Tag -->
+            <div class="game-badge absolute -top-4 left-4 px-3 py-1 text-xs sm:text-sm rounded-sm flex items-center gap-2 z-20">
+                <span>GAME 03</span>
+            </div>
+
+            <!-- Synchronized 3-2-1 Countdown Overlay -->
+            <div id="countdownOverlay" class="hidden absolute inset-0 bg-[#090714]/90 z-30 rounded-md flex-col items-center justify-center text-center p-4">
+                <div class="text-xs sm:text-sm text-cyan-300 tracking-widest mb-2">전원 출격 준비!</div>
+                <div id="countdownNumber" class="text-6xl sm:text-8xl font-bold text-yellow-400 drop-shadow-[0_4px_0_#000]">3</div>
+                <div class="text-xs sm:text-sm text-slate-300 mt-4">카운트다운이 끝나면 동시에 시작됩니다!</div>
+            </div>
+
+            <!-- Level Up 3-Skill Selection Modal (Appears 2 seconds after Lv.N UP!) -->
+            <div id="skillSelectModal" class="hidden absolute inset-0 bg-[#090714]/92 z-30 rounded-md flex-col items-center justify-center p-4 sm:p-6 text-center">
+                <div class="text-xs text-yellow-400 tracking-widest mb-1">SKILL UPGRADE</div>
+                <h3 id="skillModalTitle" class="text-xl sm:text-2xl font-bold text-white mb-1">⚡ Lv.2 달성! 스킬을 선택하세요</h3>
+                <p class="text-[11px] sm:text-xs text-slate-300 mb-4">카드를 클릭하거나 키보드 <span class="text-yellow-300 font-bold">[1] [2] [3]</span> 키로 즉시 선택!</p>
+                <div id="skillCardsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl">
+                </div>
+            </div>
+
+            <!-- Top Header Bar -->
+            <div class="flex items-center justify-between border-b-2 border-[#2a2554] pb-3 mb-4 pt-1">
+                <div class="flex items-center gap-2">
+                    <button id="homeLogoBtn" type="button" class="text-xs sm:text-sm text-yellow-400 hover:text-yellow-300 tracking-wider cursor-pointer">
+                        오둥오락실
+                    </button>
+                    <span class="text-xs text-slate-500 hidden sm:inline">| ODUNG ARCADE</span>
+                    <span id="roleBadge" class="hidden text-[11px] bg-indigo-500/20 border border-indigo-400/50 text-indigo-300 px-2 py-0.5 rounded">
+                        대기 중
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="openHofHeaderBtn" type="button"
+                        class="text-xs bg-[#0f0c21] border border-amber-400/60 hover:border-yellow-400 text-amber-300 px-2.5 py-1 rounded transition">
+                        🏆 명예의 전당
+                    </button>
+                    <button id="soundToggleBtn" type="button" title="효과음 켜기/끄기"
+                        class="text-xs bg-[#0f0c21] border border-[#2e295e] hover:border-yellow-400 text-slate-200 px-2.5 py-1 rounded transition">
+                        🔊 ON
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 VIEW 1: INITIAL ROLE SELECTION (선생님용 / 학생용)
+            =========================================== -->
+            <div id="roleSelectScreen" class="flex flex-col items-center text-center py-2 sm:py-4">
+                <!-- Icon Box -->
+                <div class="relative mb-3">
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-[#0f0c21] border-4 border-[#27224d] p-1.5 rounded shadow-inner mx-auto">
+                        <div class="w-full h-full rounded-sm bg-gradient-to-b from-[#4f9cf9] to-[#6366f1] flex items-center justify-center relative overflow-hidden">
+                            <svg class="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-[0_3px_0_rgba(15,23,42,0.5)]" viewBox="0 0 32 24" fill="none">
+                                <rect x="2" y="4" width="28" height="16" rx="2" fill="#e2e8f0"/>
+                                <rect x="2" y="18" width="28" height="3" rx="1" fill="#94a3b8"/>
+                                <rect x="5" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="8" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="11" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="14" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="17" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="20" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="23" y="7" width="4" height="2" fill="#64748b"/>
+                                <rect x="5" y="10" width="3" height="2" fill="#64748b"/>
+                                <rect x="9" y="10" width="2" height="2" fill="#64748b"/>
+                                <rect x="12" y="10" width="2" height="2" fill="#64748b"/>
+                                <rect x="15" y="10" width="2" height="2" fill="#64748b"/>
+                                <rect x="18" y="10" width="2" height="2" fill="#64748b"/>
+                                <rect x="21" y="10" width="2" height="2" fill="#64748b"/>
+                                <rect x="24" y="10" width="3" height="2" fill="#64748b"/>
+                                <rect x="5" y="13" width="3" height="2" fill="#64748b"/>
+                                <rect x="9" y="13" width="13" height="2" fill="#64748b"/>
+                                <rect x="23" y="13" width="4" height="2" fill="#64748b"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <span class="inline-block mt-2 text-[11px] bg-amber-500/20 border border-amber-400/60 text-amber-300 px-2.5 py-0.5 rounded">
+                        🐹 우주선 쿼카 단체 레이스 에디션
+                    </span>
+                </div>
+
+                <!-- Title -->
+                <h1 class="text-2xl sm:text-4xl font-bold text-white tracking-wide mb-2 drop-shadow-[0_2px_0_#090712]">
+                    우리반 타자왕
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-lg leading-relaxed mb-6 px-2">
+                    선생님이 방을 개설하고 QR 코드로 학생들이 입장해, 떨어지는 단어를 격추하며 우주선 쿼카를 전진시키는 실시간 단체 타자 대결!
+                </p>
+
+                <!-- 2 Primary Role Buttons: 선생님용 / 학생용 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl mb-5">
+                    <button id="selectTeacherBtn" type="button"
+                        class="pixel-btn bg-yellow-400 hover:bg-yellow-300 text-[#141129] p-5 rounded-md flex flex-col items-center justify-center gap-2 text-center">
+                        <span class="text-3xl">👨‍🏫</span>
+                        <span class="text-lg sm:text-xl font-bold">선생님용</span>
+                        <span class="text-xs text-[#1e1b4b] font-normal">방 생성 · QR 공유 · 실시간 우주선 관제</span>
+                    </button>
+
+                    <button id="selectStudentBtn" type="button"
+                        class="pixel-btn bg-cyan-400 hover:bg-cyan-300 text-[#0f172a] p-5 rounded-md flex flex-col items-center justify-center gap-2 text-center">
+                        <span class="text-3xl">🧑‍🎓</span>
+                        <span class="text-lg sm:text-xl font-bold">학생용</span>
+                        <span class="text-xs text-[#0f172a] font-normal">방 번호(4자리) 입력 · 이름 등록 후 참가</span>
+                    </button>
+                </div>
+
+                <!-- Hall of Fame Button -->
+                <button id="selectHofBtn" type="button"
+                    class="pixel-btn w-full max-w-xl bg-[#25204a] hover:bg-[#312b61] text-amber-300 font-bold text-sm sm:text-base py-3 px-5 rounded-md flex items-center justify-center gap-2">
+                    <span>🏆</span>
+                    <span>명예의 전당 (역대 최고 기록 보기)</span>
+                </button>
+            </div>
+
+            <!-- ==========================================
+                 VIEW 1.5: TEACHER CLASS CODE CREATION (학급 코드 생성)
+            =========================================== -->
+            <div id="teacherSetupScreen" class="hidden flex-col items-center text-center py-3">
+                <div class="text-xs text-yellow-400 tracking-widest mb-1">TEACHER CLASS SETUP</div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">🏫 학급 코드 생성</h2>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-md mb-5">
+                    방을 만들기 전에 학교 이름과 학년·반을 입력해주세요.<br/>
+                    <span class="text-amber-300">동일한 학교 이름과 학년·반을 입력한 학생만</span> 입장할 수 있습니다.
+                </p>
+
+                <div class="w-full max-w-md bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-4 sm:p-5 space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs text-yellow-400 mb-1.5">▶ 학교 이름</label>
+                        <input id="teacherSchoolInput" type="text" maxlength="20"
+                            placeholder="여기에 학교 이름을 적으세요"
+                            class="typing-input w-full py-2.5 px-4 rounded text-base sm:text-lg text-center" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-yellow-400 mb-1.5">▶ 학년, 반 (숫자만 입력)</label>
+                        <input id="teacherClassInput" type="text" inputmode="numeric" maxlength="6"
+                            placeholder="학년, 반을 숫자로만 적으세요"
+                            class="typing-input w-full py-2.5 px-4 rounded text-base sm:text-lg font-bold text-center tracking-widest" />
+                        <div class="text-[11px] text-slate-400 mt-1 text-center">
+                            예) 3학년 2반 → <span class="text-cyan-300 font-bold">302</span> 또는 <span class="text-cyan-300 font-bold">32</span>
+                        </div>
+                    </div>
+
+                    <button id="createClassRoomBtn" type="button"
+                        class="pixel-btn w-full bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-base sm:text-lg py-3 px-5 rounded">
+                        🚀 방 생성하기 (4자리 방 코드 발급)
+                    </button>
+
+                    <button id="teacherSetupBackBtn" type="button"
+                        class="w-full text-xs text-slate-400 hover:text-slate-200 pt-1 text-center cursor-pointer">
+                        ← 역할 선택으로 돌아가기
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 VIEW 2: TEACHER LOBBY (방 생성 & QR 코드)
+            =========================================== -->
+            <div id="teacherLobbyScreen" class="hidden flex-col">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
+                    <!-- Left: Room Code & QR Code -->
+                    <div class="md:col-span-5 bg-[#0f0c21] border-2 border-[#2e295e] rounded-md p-4 flex flex-col items-center justify-center text-center">
+                        <div id="lobbyClassInfoDisplay" class="text-xs font-bold bg-amber-500/20 border border-amber-400/60 text-amber-300 px-3 py-1 rounded mb-2">
+                            🏫 학교명 · 학년반
+                        </div>
+                        <div class="text-xs text-cyan-300 mb-1">참여 방 번호 (4자리)</div>
+                        <div id="roomCodeDisplay" class="text-4xl sm:text-5xl font-bold text-yellow-400 tracking-[0.2em] mb-3 bg-[#171433] border-2 border-yellow-400/60 px-4 py-2 rounded">
+                            0000
+                        </div>
+
+                        <!-- QR Code Frame -->
+                        <div class="bg-white p-2.5 rounded-md border-4 border-yellow-400 shadow-md mb-2.5">
+                            <div id="qrcodeBox" class="w-[148px] h-[148px] flex items-center justify-center"></div>
+                        </div>
+
+                        <div id="joinUrlDisplay" class="text-[11px] text-slate-300 break-all bg-[#171433] border border-[#2e295e] px-2.5 py-1.5 rounded w-full mb-2">
+                            https://AI.Gemini.com/?room=0000
+                        </div>
+                        <button id="copyJoinLinkBtn" type="button"
+                            class="pixel-btn w-full bg-[#25204a] hover:bg-[#312b61] text-yellow-300 text-xs py-2 px-3 rounded">
+                            📋 학생 입장 주소 복사하기
+                        </button>
+                    </div>
+
+                    <!-- Right: Settings & Joined Students List -->
+                    <div class="md:col-span-7 flex flex-col gap-3">
+                        <!-- Match Settings -->
+                        <div class="bg-[#0f0c21] border-2 border-[#2e295e] rounded-md p-3.5 space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="text-xs text-yellow-400">▶ 제한 시간 설정</span>
+                                <div class="flex gap-1.5">
+                                    <button type="button" data-duration="30" class="dur-btn option-pill px-2.5 py-1 rounded text-xs font-bold">30초</button>
+                                    <button type="button" data-duration="60" class="dur-btn option-pill active px-2.5 py-1 rounded text-xs font-bold">60초</button>
+                                    <button type="button" data-duration="90" class="dur-btn option-pill px-2.5 py-1 rounded text-xs font-bold">90초</button>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="text-xs text-yellow-400">▶ 단어 언어 설정</span>
+                                <div class="flex gap-1.5">
+                                    <button type="button" data-lang="ko" class="t-lang-btn option-pill active px-2.5 py-1 rounded text-xs font-bold">한글</button>
+                                    <button type="button" data-lang="en" class="t-lang-btn option-pill px-2.5 py-1 rounded text-xs font-bold">영문</button>
+                                    <button type="button" data-lang="mix" class="t-lang-btn option-pill px-2.5 py-1 rounded text-xs font-bold">한/영 혼합</button>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5 border-t border-[#231f47]">
+                                <span class="text-xs text-rose-400">▶ 개인 보스 & 스킬 시스템</span>
+                                <span class="text-[11px] bg-rose-500/15 border border-rose-400/50 text-rose-200 px-2.5 py-0.5 rounded">
+                                    👾 1,000점마다 보스 출현 · 6개 격추 시 레벨업!
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Joined Students Real-Time Roster -->
+                        <div class="flex-1 bg-[#0f0c21] border-2 border-[#2e295e] rounded-md p-3.5 flex flex-col">
+                            <div class="flex items-center justify-between border-b border-[#231f47] pb-2 mb-2.5">
+                                <span class="text-xs text-cyan-300 font-bold">🚀 탑승 완료한 학생 우주선</span>
+                                <span class="text-xs bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 px-2 py-0.5 rounded font-bold">
+                                    <span id="lobbyStudentCount">0</span>명 대기 중
+                                </span>
+                            </div>
+                            <div id="lobbyStudentsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[150px] overflow-y-auto">
+                                <div class="col-span-full text-center text-xs text-slate-400 py-8">
+                                    학생들이 학급 정보와 방 번호를 입력하면 이곳에 우주선이 나타납니다!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teacher Lobby Bottom Actions -->
+                <div class="flex flex-col sm:flex-row gap-2.5">
+                    <button id="teacherStartRaceBtn" type="button"
+                        class="pixel-btn flex-1 bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-base sm:text-lg py-3 px-6 rounded">
+                        ▶ 단체 게임 시작! (3·2·1 카운트다운)
+                    </button>
+                    <button id="teacherLeaveLobbyBtn" type="button"
+                        class="pixel-btn bg-[#25204a] hover:bg-[#312b61] text-slate-200 font-bold text-xs sm:text-sm py-3 px-4 rounded">
+                        나가기
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 VIEW 3: TEACHER LIVE RACE TRACK (실시간 우주선 전진 관제)
+            =========================================== -->
+            <div id="teacherRaceScreen" class="hidden flex-col">
+                <!-- Teacher Live HUD -->
+                <div class="grid grid-cols-4 gap-2 mb-3">
+                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2.5 py-1.5 text-center">
+                        <div class="text-[10px] text-slate-400">ROOM</div>
+                        <div id="tHudRoom" class="text-sm sm:text-base font-bold text-yellow-400">0000</div>
+                    </div>
+                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2.5 py-1.5 text-center">
+                        <div class="text-[10px] text-slate-400">남은 시간</div>
+                        <div id="tHudTimer" class="text-sm sm:text-base font-bold text-cyan-300">60.0s</div>
+                    </div>
+                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2.5 py-1.5 text-center">
+                        <div class="text-[10px] text-slate-400">참여 우주선</div>
+                        <div id="tHudCount" class="text-sm sm:text-base font-bold text-emerald-400">0대</div>
+                    </div>
+                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2.5 py-1.5 text-center">
+                        <div class="text-[10px] text-slate-400">현재 1위</div>
+                        <div id="tHudLeader" class="text-xs sm:text-sm font-bold text-rose-400 truncate">-</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-[11px] text-slate-300 px-1 mb-2">
+                    <span>💡 학생이 단어 1개를 격추할 때마다 해당 학생의 우주선이 <strong class="text-yellow-400">1칸씩 전진</strong>합니다!</span>
+                    <button id="teacherForceEndBtn" type="button" class="text-rose-400 hover:text-rose-300 underline">
+                        경기 종료 및 순위 발표
+                    </button>
+                </div>
+
+                <!-- Teacher Space Race Track Canvas -->
+                <div id="teacherCanvasWrapper" class="relative w-full h-[360px] sm:h-[430px] bg-[#090714] border-2 border-[#2e295e] rounded overflow-y-auto overflow-x-hidden">
+                    <canvas id="teacherCanvas"></canvas>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 VIEW 4: TEACHER TOP 3 PODIUM (시간 종료 후 1~3위 발표)
+            =========================================== -->
+            <div id="teacherPodiumScreen" class="hidden flex-col items-center text-center py-2">
+                <div class="text-xs text-yellow-400 tracking-widest mb-1">TIME UP! FINAL RESULTS</div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-5">🏆 우리반 타자왕 TOP 3 시상대</h2>
+
+                <!-- Top 3 Podium Pedestals (2nd - 1st - 3rd) -->
+                <div class="grid grid-cols-3 gap-2 sm:gap-4 items-end w-full max-w-2xl mb-5 px-1">
+                    <!-- 2nd Place -->
+                    <div id="podium2" class="bg-[#0f0c21] border-2 border-slate-300 rounded-t-md p-2.5 sm:p-3 flex flex-col items-center justify-end min-h-[155px] shadow-[0_0_15px_rgba(203,213,225,0.2)]">
+                        <div class="text-2xl mb-1">🥈</div>
+                        <div class="text-xs font-bold text-slate-300 mb-1">2위</div>
+                        <div id="podium2Name" class="text-sm sm:text-base font-bold text-white truncate max-w-full mb-1">-</div>
+                        <div id="podium2Steps" class="text-xs text-cyan-300 font-bold">0칸 전진</div>
+                        <div id="podium2Score" class="text-[11px] text-slate-400">0점</div>
+                    </div>
+
+                    <!-- 1st Place -->
+                    <div id="podium1" class="bg-gradient-to-b from-amber-500/20 to-[#0f0c21] border-2 border-yellow-400 rounded-t-md p-3 sm:p-4 flex flex-col items-center justify-end min-h-[195px] shadow-[0_0_25px_rgba(250,204,21,0.35)]">
+                        <div class="text-3xl sm:text-4xl mb-1 animate-bounce">👑</div>
+                        <div class="text-xs sm:text-sm font-bold text-yellow-400 mb-1">1위 CHAMPION</div>
+                        <div id="podium1Name" class="text-base sm:text-lg font-bold text-white truncate max-w-full mb-1">-</div>
+                        <div id="podium1Steps" class="text-xs sm:text-sm text-yellow-300 font-bold">0칸 전진</div>
+                        <div id="podium1Score" class="text-xs text-amber-200">0점</div>
+                    </div>
+
+                    <!-- 3rd Place -->
+                    <div id="podium3" class="bg-[#0f0c21] border-2 border-amber-600 rounded-t-md p-2.5 sm:p-3 flex flex-col items-center justify-end min-h-[135px] shadow-[0_0_15px_rgba(217,119,6,0.2)]">
+                        <div class="text-2xl mb-1">🥉</div>
+                        <div class="text-xs font-bold text-amber-500 mb-1">3위</div>
+                        <div id="podium3Name" class="text-sm sm:text-base font-bold text-white truncate max-w-full mb-1">-</div>
+                        <div id="podium3Steps" class="text-xs text-cyan-300 font-bold">0칸 전진</div>
+                        <div id="podium3Score" class="text-[11px] text-slate-400">0점</div>
+                    </div>
+                </div>
+
+                <!-- Full Ranking Summary -->
+                <div class="w-full max-w-2xl bg-[#0f0c21] border border-[#2a2554] rounded p-3 mb-4 max-h-[140px] overflow-y-auto text-left">
+                    <div class="text-xs text-slate-400 mb-2">전체 참여 학생 기록 (명예의 전당 자동 등록 완료)</div>
+                    <div id="podiumFullList" class="space-y-1.5 text-xs"></div>
+                </div>
+
+                <!-- Podium Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-2.5 w-full max-w-2xl">
+                    <button id="teacherRematchBtn" type="button"
+                        class="pixel-btn flex-1 bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-sm py-3 px-4 rounded">
+                        ↻ 같은 방에서 다시 하기
+                    </button>
+                    <button id="podiumHofBtn" type="button"
+                        class="pixel-btn flex-1 bg-amber-500 hover:bg-amber-400 text-[#141129] font-bold text-sm py-3 px-4 rounded">
+                        🏆 명예의 전당 확인
+                    </button>
+                    <button id="podiumHomeBtn" type="button"
+                        class="pixel-btn bg-[#25204a] hover:bg-[#312b61] text-white font-bold text-sm py-3 px-4 rounded">
+                        메인으로
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 VIEW 5: STUDENT JOIN & WAITING LOBBY
+            =========================================== -->
+            <div id="studentJoinScreen" class="hidden flex-col items-center text-center py-3">
+                <div class="text-xs text-cyan-300 tracking-widest mb-1">STUDENT BOARDING PASS</div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">🧑‍🎓 우주선 탑승하기</h2>
+
+                <!-- Join Form -->
+                <div id="studentJoinForm" class="w-full max-w-md bg-[#0f0c21] border-2 border-[#2e295e] rounded-md p-4 sm:p-5 space-y-3.5 text-left">
+                    <div>
+                        <label class="block text-xs text-yellow-400 mb-1">▶ 학교 이름</label>
+                        <input id="studentSchoolInput" type="text" maxlength="20"
+                            placeholder="여기에 학교 이름을 적으세요"
+                            class="typing-input w-full py-2 px-3.5 rounded text-sm sm:text-base text-center" />
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-xs text-yellow-400 mb-1">▶ 학년, 반 (숫자만)</label>
+                            <input id="studentClassInput" type="text" inputmode="numeric" maxlength="6"
+                                placeholder="학년, 반을 숫자로만 적으세요"
+                                class="typing-input w-full py-2 px-2.5 rounded text-sm sm:text-base font-bold text-center tracking-wider" />
+                        </div>
+                        <div>
+                            <label class="block text-xs text-yellow-400 mb-1">▶ 방 코드 4자리</label>
+                            <input id="studentRoomInput" type="text" inputmode="numeric" maxlength="4" placeholder="예: 0482"
+                                class="typing-input w-full py-2 px-2.5 rounded text-base sm:text-lg font-bold text-center tracking-[0.25em]" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-yellow-400 mb-1">▶ 학생 이름 (닉네임)</label>
+                        <input id="studentNameInput" type="text" maxlength="10" placeholder="이름을 입력하세요 (최대 10자)"
+                            class="typing-input w-full py-2 px-3.5 rounded text-sm sm:text-base text-center" />
+                    </div>
+
+                    <!-- Validation / Mismatch Error Banner -->
+                    <div id="studentJoinErrorBox" class="hidden bg-rose-950/90 border border-rose-500 text-rose-200 text-xs p-2.5 rounded leading-relaxed">
+                    </div>
+
+                    <button id="studentJoinSubmitBtn" type="button"
+                        class="pixel-btn w-full bg-cyan-400 hover:bg-cyan-300 text-[#0f172a] font-bold text-base sm:text-lg py-3 px-5 rounded">
+                        🚀 우주선 탑승 완료!
+                    </button>
+                    <button id="studentBackHomeBtn" type="button"
+                        class="w-full text-xs text-slate-400 hover:text-slate-200 pt-1 text-center cursor-pointer">
+                        ← 역할 선택으로 돌아가기
+                    </button>
+                </div>
+
+                <!-- Waiting Lobby (Shown after joining) -->
+                <div id="studentWaitingBox" class="hidden w-full max-w-md bg-[#0f0c21] border-2 border-cyan-400/70 rounded-md p-5 flex-col items-center text-center">
+                    <div id="joinedClassLabel" class="text-xs font-bold bg-amber-500/20 border border-amber-400/60 text-amber-300 px-3 py-1 rounded mb-2">
+                        🏫 학교명 · 학년반
+                    </div>
+                    <div class="text-xs bg-cyan-500/20 border border-cyan-400 text-cyan-300 px-3 py-1 rounded mb-3">
+                        방 번호 <strong id="joinedRoomLabel" class="text-yellow-300">0000</strong> 탑승 완료!
+                    </div>
+                    <div class="text-4xl mb-2 animate-bounce">🐹🚀</div>
+                    <div class="text-lg font-bold text-white mb-1">
+                        파일럿: <span id="joinedNameLabel" class="text-yellow-400">학생</span>
+                    </div>
+                    <p class="text-xs text-slate-300 mb-4 animate-pulse">
+                        선생님이 단체 게임 시작을 누를 때까지 대기 중입니다...
+                    </p>
+                    <div class="w-full bg-[#171433] border border-[#2e295e] rounded p-3 text-xs text-slate-300">
+                        현재 함께 대기 중인 우주선: <strong id="studentLobbyPeerCount" class="text-emerald-400">1</strong>대
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 VIEW 6: STUDENT ACTIVE GAMEPLAY
+            =========================================== -->
+            <div id="studentGameScreen" class="hidden flex-col">
+                <!-- Top EXP Level Gauge & Equipped Skills Bar -->
+                <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-3 py-2 mb-2">
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <div class="flex items-center gap-2">
+                            <span id="hudLevelBadge" class="bg-yellow-400 text-[#141129] font-bold px-2 py-0.5 rounded text-[11px]">
+                                Lv.1
+                            </span>
+                            <span id="hudExpText" class="text-[11px] text-cyan-300">EXP 0 / 6개</span>
+                        </div>
+                        <div id="hudEquippedSkills" class="flex flex-wrap items-center gap-1 text-[10px]">
+                            <span class="text-slate-400">보유 스킬: 없음</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-2.5 bg-[#191536] rounded-sm overflow-hidden border border-[#2e295e]">
+                        <div id="hudExpBar" class="h-full bg-gradient-to-r from-cyan-400 via-emerald-400 to-yellow-400 transition-all duration-150" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <!-- Student Top HUD -->
+                <div class="grid grid-cols-4 gap-2 mb-2">
+                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                        <div class="text-[10px] text-slate-400">전진 칸수</div>
+                        <div id="hudSteps" class="text-sm sm:text-base font-bold text-emerald-400">0칸</div>
+                    </div>
+                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                        <div class="text-[10px] text-slate-400">TIME</div>
+                        <div id="hudTimer" class="text-sm sm:text-base font-bold text-cyan-300">60.0s</div>
+                    </div>
+                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                        <div class="text-[10px] text-slate-400">SCORE</div>
+                        <div id="hudScore" class="text-sm sm:text-base font-bold text-yellow-400">0</div>
+                    </div>
+                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                        <div class="text-[10px] text-slate-400">COMBO</div>
+                        <div id="hudCombo" class="text-sm sm:text-base font-bold text-rose-400">0</div>
+                    </div>
+                </div>
+
+                <!-- Sub Status Strip -->
+                <div class="flex items-center justify-between text-[11px] text-slate-400 px-1 mb-2">
+                    <div class="flex items-center gap-3">
+                        <span>속도: <strong id="hudCpm" class="text-slate-200">0 타/분</strong></span>
+                        <span id="feverIndicator" class="hidden text-rose-400 font-bold animate-pulse">🔥 FEVER x2</span>
+                        <span id="freezeIndicator" class="hidden text-cyan-300 font-bold">❄️ FREEZE!</span>
+                        <span id="awakenedIndicator" class="hidden text-yellow-300 font-bold animate-pulse">🌟 각성 오토 발동중!</span>
+                    </div>
+                    <span id="studentPilotHud" class="text-amber-300">🐹 파일럿</span>
+                </div>
+
+                <!-- Gameplay Canvas -->
+                <div id="canvasWrapper" class="relative w-full h-[270px] sm:h-[350px] bg-[#090714] border-2 border-[#2e295e] rounded overflow-hidden mb-2.5">
+                    <canvas id="gameCanvas"></canvas>
+                    <!-- Lv.N UP! Floating Banner (Shows for 2s before 3-Skill Modal opens) -->
+                    <div id="levelUpBanner" class="hidden pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-[#090714]/45 z-20">
+                        <div id="levelUpBannerText" class="levelup-banner text-3xl sm:text-5xl font-bold text-yellow-400 drop-shadow-[0_4px_0_#000] tracking-wider">
+                            Lv.2 UP!
+                        </div>
+                        <div class="text-xs sm:text-sm text-cyan-200 mt-2 bg-[#0f0c21]/90 border border-cyan-400/60 px-3 py-1 rounded">
+                            잠시 후 스킬 선택창이 열립니다...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Typing Input Area -->
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                        <input id="wordInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                            placeholder="단어를 입력하면 우주선이 1칸 전진합니다!"
+                            class="typing-input w-full py-2.5 sm:py-3 px-3 rounded text-base sm:text-lg text-center tracking-wider" />
+                    </div>
+                    <button id="fireBtn" type="button"
+                        class="pixel-btn bg-yellow-400 text-[#141129] font-bold text-xs sm:text-sm py-3 px-4 rounded shrink-0">
+                        격추!
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 VIEW 7: STUDENT RESULT SCREEN
+            =========================================== -->
+            <div id="studentResultScreen" class="hidden flex-col items-center text-center py-3">
+                <div class="text-xs text-yellow-400 tracking-widest mb-1">MISSION COMPLETE</div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">경기 종료!</h2>
+                <div id="studentFinalRankBadge" class="inline-block bg-yellow-400/15 border border-yellow-400 text-yellow-300 text-sm sm:text-base font-bold px-4 py-1.5 rounded mb-4">
+                    최종 순위 집계 중...
+                </div>
+
+                <div class="w-full max-w-md grid grid-cols-2 gap-2.5 mb-5">
+                    <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
+                        <div class="text-[11px] text-slate-400">전진한 칸수</div>
+                        <div id="sResSteps" class="text-lg sm:text-xl font-bold text-emerald-400 mt-0.5">0칸</div>
+                    </div>
+                    <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
+                        <div class="text-[11px] text-slate-400">최종 점수</div>
+                        <div id="sResScore" class="text-lg sm:text-xl font-bold text-yellow-400 mt-0.5">0</div>
+                    </div>
+                    <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
+                        <div class="text-[11px] text-slate-400">평균 타수 (CPM)</div>
+                        <div id="sResCpm" class="text-lg sm:text-xl font-bold text-cyan-300 mt-0.5">0 타</div>
+                    </div>
+                    <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
+                        <div class="text-[11px] text-slate-400">최대 콤보 / 정확도</div>
+                        <div id="sResAcc" class="text-lg sm:text-xl font-bold text-rose-300 mt-0.5">0 / 100%</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-2.5 w-full max-w-md">
+                    <button id="studentWaitRematchBtn" type="button"
+                        class="pixel-btn flex-1 bg-cyan-400 hover:bg-cyan-300 text-[#0f172a] font-bold text-sm py-3 px-4 rounded">
+                        🚀 대기실로 (다음 라운드 대기)
+                    </button>
+                    <button id="studentResultHofBtn" type="button"
+                        class="pixel-btn flex-1 bg-amber-500 hover:bg-amber-400 text-[#141129] font-bold text-sm py-3 px-4 rounded">
+                        🏆 명예의 전당
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 VIEW 8: HALL OF FAME (명예의 전당)
+            =========================================== -->
+            <div id="hallOfFameScreen" class="hidden flex-col items-center text-center py-2">
+                <div class="text-xs text-amber-400 tracking-widest mb-1">ODUNG ARCADE LEGENDS</div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-4">🏆 명예의 전당</h2>
+
+                <div class="w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md overflow-hidden mb-4">
+                    <div class="overflow-x-auto max-h-[320px] overflow-y-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead class="bg-[#1b173b] text-yellow-400 border-b-2 border-[#2e295e] sticky top-0">
+                                <tr>
+                                    <th class="py-2.5 px-3 text-center w-14">순위</th>
+                                    <th class="py-2.5 px-3">이름</th>
+                                    <th class="py-2.5 px-3 text-right">전진(격추)</th>
+                                    <th class="py-2.5 px-3 text-right">점수</th>
+                                    <th class="py-2.5 px-3 text-right hidden sm:table-cell">타수</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hofTableBody" class="divide-y divide-[#231f47]">
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-slate-400">기록을 불러오는 중...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <button id="closeHofBtn" type="button"
+                    class="pixel-btn w-full max-w-xs bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-sm py-3 px-6 rounded">
+                    ← 돌아가기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         FIREBASE & MULTIPLAYER APPLICATION LOGIC
+    =========================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import {
+            getFirestore, doc, setDoc, getDoc, updateDoc, addDoc,
+            onSnapshot, collection
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // 1. BACKEND SYNC LAYER (FIRESTORE + LOCAL FALLBACK)
+        // ==========================================
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'odung-speed-typing';
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let useFirestore = false;
+
+        // Local BroadcastChannel + Memory fallback if running outside Firebase environment
+        const localChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('odung_typing_sync') : null;
+        const localStore = {
+            rooms: {},
+            players: {},
+            hof: []
+        };
+
+        async function initBackend() {
+            try {
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+
+                    // RULE 3: Authenticate FIRST before any Firestore queries
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    currentUser = auth.currentUser;
+                    useFirestore = Boolean(currentUser);
+                }
+            } catch (err) {
+                console.warn('Firestore init fallback to local mode:', err);
+                useFirestore = false;
+            }
+        }
+
+        // Strict RULE 1 Paths: artifacts/{appId}/public/data/{collectionName}
+        function getRoomDocRef(roomCode) {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'typing_rooms', `room_${roomCode}`);
+        }
+        function getPlayersColRef() {
+            return collection(db, 'artifacts', appId, 'public', 'data', 'typing_players');
+        }
+        function getPlayerDocRef(roomCode, playerId) {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'typing_players', `${roomCode}_${playerId}`);
+        }
+        function getHofColRef() {
+            return collection(db, 'artifacts', appId, 'public', 'data', 'typing_hall_of_fame');
+        }
+
+        // ==========================================
+        // 2. WORD POOLS (KOREAN & ENGLISH)
+        // ==========================================
+        const WORD_DATA = {
+            ko: {
+                normal: [
+                    '오둥이', '오락실', '키보드', '스피드', '타자왕', '우주선', '쿼카', '레이저',
+                    '방어선', '별똥별', '은하수', '무지개', '고양이', '강아지', '다람쥐', '펭귄',
+                    '딸기우유', '초코파이', '김치볶음밥', '떡볶이', '붕어빵', '아메리카노',
+                    '컴퓨터', '프로그래밍', '알고리즘', '데이터', '네트워크', '클라우드', '인공지능',
+                    '대한민국', '부산바다', '광안대교', '해운대', '자갈치', '한라산', '독도',
+                    '행복', '사랑', '우정', '모험', '도전', '승리', '최고', '열정', '희망',
+                    '번개', '폭풍', '태양', '달빛', '구름', '바다', '하늘', '숲속', '꽃길',
+                    '피아노', '기타', '드럼', '멜로디', '하모니', '콘서트', '영화관', '팝콘',
+                    '비행기', '로켓', '인공위성', '망원경', '지구본', '나침반', '보물지도',
+                    '소나기', '첫눈', '단풍잎', '벚꽃엔딩', '여름밤', '가을바람', '겨울왕국'
+                ],
+                boss: [
+                    '우주선에타있는쿼카', '오둥오락실우리반타자왕', '무지개빛은하수여행',
+                    '초고속레이저방어시스템', '대한민국만세삼창', '광안리불꽃축제야경',
+                    '짜릿한역전승리의순간', '전광석화같은손놀림'
+                ]
+            },
+            en: {
+                normal: [
+                    'arcade', 'quokka', 'rocket', 'galaxy', 'laser', 'shield', 'pixel', 'retro',
+                    'speed', 'typing', 'master', 'combo', 'fever', 'planet', 'meteor', 'nebula',
+                    'cosmos', 'orbit', 'spaceship', 'pilot', 'starlight', 'horizon', 'gravity',
+                    'keyboard', 'console', 'joystick', 'victory', 'challenge', 'powerup', 'energy',
+                    'thunder', 'crystal', 'diamond', 'emerald', 'phoenix', 'dragon', 'wizard',
+                    'coffee', 'cookie', 'banana', 'cherry', 'orange', 'puzzle', 'rhythm', 'melody',
+                    'coding', 'server', 'system', 'binary', 'matrix', 'quantum', 'future', 'cyber'
+                ],
+                boss: [
+                    'intergalactic', 'constellation', 'supernova', 'acceleration',
+                    'championship', 'extraordinary', 'unstoppable', 'thunderstorm'
+                ]
+            }
+        };
+
+        // ==========================================
+        // 3. RETRO WEB AUDIO SYNTHESIZER
+        // ==========================================
+        class RetroSound {
+            constructor() {
+                this.enabled = true;
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+            playTone(freq, endFreq, duration, type = 'square', volume = 0.08, delay = 0) {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+                    const now = this.ctx.currentTime + delay;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, now);
+                    if (endFreq !== freq) {
+                        osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), now + duration);
+                    }
+                    gain.gain.setValueAtTime(volume, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + duration);
+                } catch (e) {}
+            }
+            laser() { this.playTone(920, 240, 0.11, 'sawtooth', 0.07); }
+            hit(combo = 1) {
+                const pitchBoost = Math.min(400, combo * 18);
+                this.playTone(440 + pitchBoost, 660 + pitchBoost, 0.09, 'square', 0.07, 0.03);
+            }
+            bonus() {
+                this.playTone(587, 587, 0.08, 'square', 0.08, 0);
+                this.playTone(880, 1174, 0.18, 'square', 0.08, 0.08);
+            }
+            bomb() { this.playTone(180, 42, 0.35, 'sawtooth', 0.13); }
+            freeze() { this.playTone(1046, 523, 0.22, 'triangle', 0.09); }
+            damage() { this.playTone(160, 75, 0.25, 'sawtooth', 0.12); }
+            bossAlert() {
+                this.playTone(220, 140, 0.18, 'sawtooth', 0.11, 0);
+                this.playTone(220, 140, 0.18, 'sawtooth', 0.11, 0.22);
+                this.playTone(330, 110, 0.32, 'sawtooth', 0.12, 0.44);
+            }
+            bossHit() {
+                this.playTone(300, 120, 0.12, 'square', 0.09, 0.04);
+            }
+            beep() { this.playTone(660, 660, 0.12, 'square', 0.09); }
+            start() {
+                this.playTone(440, 440, 0.08, 'square', 0.07, 0);
+                this.playTone(554, 554, 0.08, 'square', 0.07, 0.08);
+                this.playTone(659, 659, 0.08, 'square', 0.07, 0.16);
+                this.playTone(880, 880, 0.16, 'square', 0.08, 0.24);
+            }
+            gameOver() {
+                this.playTone(440, 440, 0.12, 'square', 0.08, 0);
+                this.playTone(392, 392, 0.12, 'square', 0.08, 0.13);
+                this.playTone(349, 349, 0.12, 'square', 0.08, 0.26);
+                this.playTone(293, 220, 0.32, 'sawtooth', 0.08, 0.39);
+            }
+        }
+        const sfx = new RetroSound();
+
+        // ==========================================
+        // 4. APPLICATION & MULTIPLAYER STATE
+        // ==========================================
+        const SHIP_ACCENT_COLORS = [
+            '#ef4444', '#38bdf8', '#4ade80', '#facc15',
+            '#c084fc', '#fb923c', '#f472b6', '#2dd4bf'
+        ];
+
+        const appState = {
+            currentView: 'roleSelect',
+            previousView: 'roleSelect',
+            role: null, // 'teacher' | 'student'
+            schoolName: '',
+            classCode: '',
+            roomCode: '',
+            playerId: crypto.randomUUID ? crypto.randomUUID() : `p_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+            playerName: '',
+            selectedDuration: 60,
+            selectedLang: 'ko',
+            roomData: null,
+            playersList: [], // Sorted array of player objects in current room
+            visualSteps: {}, // Smooth interpolated step positions for teacher race canvas
+            boostFlashes: {}, // Flash animation timers when a student advances +1 step
+            unsubRoom: null,
+            unsubPlayers: null,
+            unsubHof: null,
+            countdownTimerId: null,
+            activeCountdownStartAt: null,
+            hofRecords: []
+        };
+
+        // Normalization helpers for strict school & grade/class verification
+        function normalizeSchoolName(name) {
+            return String(name || '').replace(/\s+/g, '').toLowerCase();
+        }
+        function normalizeClassCode(code) {
+            return String(code || '').replace(/[^0-9]/g, '');
+        }
+
+        // ==========================================
+        // SKILL & AWAKENING DEFINITIONS
+        // ==========================================
+        const AUTO_TYPER_LEVELS = [
+            null,
+            { interval: 10.0, count: 1, label: '10초마다 1개 자동 격추' },
+            { interval: 6.0, count: 1, label: '6초마다 1개 자동 격추' },
+            { interval: 3.0, count: 2, label: '3초마다 2개 자동 격추' },
+            { interval: 3.0, count: 3, label: '3초마다 3개 자동 격추' },
+            { interval: 1.0, count: 3, label: '1초마다 3개 자동 격추' }
+        ];
+
+        const SKILL_CATALOG = {
+            autoTyper: {
+                id: 'autoTyper',
+                category: '액티브',
+                icon: '🤖',
+                name: '자동 타자',
+                maxLevel: 5,
+                getDesc: (nextLv) => AUTO_TYPER_LEVELS[nextLv]?.label || '초고속 자동 격추'
+            },
+            chainLaser: {
+                id: 'chainLaser',
+                category: '액티브',
+                icon: '⚡',
+                name: '연쇄 레이저',
+                maxLevel: 5,
+                getDesc: (nextLv) => `격추 시 ${nextLv * 18}% 확률로 주변 단어 추가 격추`
+            },
+            meteorShower: {
+                id: 'meteorShower',
+                category: '액티브',
+                icon: '☄️',
+                name: '쿼카 유성우',
+                maxLevel: 5,
+                getDesc: (nextLv) => `${Math.max(4, 13 - nextLv * 1.5).toFixed(1)}초마다 화면 단어 ${Math.min(4, 1 + Math.ceil(nextLv / 2))}개 폭격`
+            },
+            aiCore: {
+                id: 'aiCore',
+                category: '보조 스킬',
+                icon: '🔋',
+                name: '초전도 AI 코어',
+                maxLevel: 5,
+                getDesc: (nextLv) => `스킬 쿨타임 -${nextLv * 10}% (자동타자 Lv.5와 조합 시 각성!)`
+            },
+            plasmaAmp: {
+                id: 'plasmaAmp',
+                category: '보조 스킬',
+                icon: '💥',
+                name: '플라즈마 증폭기',
+                maxLevel: 5,
+                getDesc: (nextLv) => `보스 데미지 +${nextLv * 25}% & 긴 단어 점수 증폭`
+            },
+            expMagnet: {
+                id: 'expMagnet',
+                category: '보조 스킬',
+                icon: '🧲',
+                name: '경험치 부스터',
+                maxLevel: 5,
+                getDesc: (nextLv) => `레벨업 게이지 충전 +${nextLv * 22}% & 점수 +${nextLv * 12}%`
+            },
+            cryoField: {
+                id: 'cryoField',
+                category: '보조 스킬',
+                icon: '❄️',
+                name: '빙결 중력장',
+                maxLevel: 5,
+                getDesc: (nextLv) => `모든 단어 낙하 속도 영구 -${nextLv * 9}% 감속`
+            }
+        };
+
+        const AWAKENING_SKILL = {
+            id: 'awakenedAuto',
+            category: '🌟 각성 진화',
+            icon: '🌟',
+            name: '무한 오토 매트릭스',
+            maxLevel: 1,
+            isAwakening: true,
+            getDesc: () => '자동 타자 Lv.5 + 초전도 AI 코어 융합! 화면에 나오는 단어를 0.25초마다 끊임없이 자동 격추!'
+        };
+
+        // Student Individual Gameplay State
+        const gameState = {
+            playing: false,
+            lang: 'ko',
+            duration: 60,
+            nextBossScore: 1000,
+            bossCount: 0,
+            startTimeMs: 0,
+            timeLeft: 60.0,
+            elapsedTime: 0,
+            score: 0,
+            combo: 0,
+            maxCombo: 0,
+            wordsDestroyed: 0,
+            charsTyped: 0,
+            totalAttempts: 0,
+            freezeTimer: 0,
+            spawnTimer: 0,
+            shipRecoil: 0,
+            // Level & Skill Progression
+            level: 1,
+            exp: 0,
+            expToNext: 6,
+            skills: {}, // { skillId: level }
+            awakenedAuto: false,
+            autoTyperTimer: 0,
+            meteorTimer: 8.0,
+            skillModalOpen: false,
+            pendingSkillTimerId: null,
+            currentSkillChoices: [],
+            boss: {
+                active: false,
+                level: 1,
+                name: '우주 해적 메카냥',
+                hp: 300,
+                maxHp: 300,
+                hitFlash: 0,
+                x: 0,
+                y: 52
+            },
+            bossBeams: [],
+            words: [],
+            lasers: [],
+            particles: [],
+            popups: [],
+            stars: []
+        };
+
+        // ==========================================
+        // 5. DOM REFERENCES & TOAST HELPER
+        // ==========================================
+        const views = {
+            roleSelect: document.getElementById('roleSelectScreen'),
+            teacherSetup: document.getElementById('teacherSetupScreen'),
+            teacherLobby: document.getElementById('teacherLobbyScreen'),
+            teacherRace: document.getElementById('teacherRaceScreen'),
+            teacherPodium: document.getElementById('teacherPodiumScreen'),
+            studentJoin: document.getElementById('studentJoinScreen'),
+            studentGame: document.getElementById('studentGameScreen'),
+            studentResult: document.getElementById('studentResultScreen'),
+            hallOfFame: document.getElementById('hallOfFameScreen')
+        };
+
+        const arcadeFrame = document.getElementById('arcadeFrame');
+        const roleBadge = document.getElementById('roleBadge');
+        const countdownOverlay = document.getElementById('countdownOverlay');
+        const countdownNumber = document.getElementById('countdownNumber');
+        const toastBox = document.getElementById('toastBox');
+
+        let toastTimeout = null;
+        function showToast(msg) {
+            toastBox.textContent = msg;
+            toastBox.classList.remove('hidden');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toastBox.classList.add('hidden');
+            }, 2600);
+        }
+
+        function switchView(viewName) {
+            if (appState.currentView !== 'hallOfFame') {
+                appState.previousView = appState.currentView;
+            }
+            appState.currentView = viewName;
+
+            Object.entries(views).forEach(([key, el]) => {
+                const isTarget = key === viewName;
+                el.classList.toggle('hidden', !isTarget);
+                if (key !== 'roleSelect') {
+                    el.classList.toggle('flex', isTarget);
+                }
+            });
+
+            if (viewName !== 'studentGame') {
+                arcadeFrame.classList.remove('fever-active');
+            }
+            if (viewName === 'teacherRace') {
+                resizeTeacherCanvas();
+            }
+            if (viewName === 'studentGame') {
+                resizeStudentCanvas();
+            }
+        }
+
+        function setUrlQuery(key, value) {
+            try {
+                const url = new URL(window.location.href);
+                if (key && value) {
+                    url.search = `?${key}=${value}`;
+                } else {
+                    url.search = '';
+                }
+                window.history.replaceState({}, '', url.toString());
+            } catch (e) {}
+        }
+
+        function buildJoinUrl(roomCode) {
+            try {
+                const url = new URL(window.location.href);
+                url.search = `?room=${roomCode}`;
+                return url.toString();
+            } catch (e) {
+                return `https://AI.Gemini.com/?room=${roomCode}`;
+            }
+        }
+
+        // ==========================================
+        // 6. QUOKKA SPACESHIP PIXEL ART RENDERER
+        // ==========================================
+        const QUOKKA_PALETTE = {
+            K: '#221010',
+            W: '#f8fafc',
+            S: '#cbd5e1',
+            G: '#94a3b8',
+            D: '#475569',
+            R: '#ef4444',
+            B: '#bae6fd',
+            C: '#1e3a5f',
+            Q: '#92400e',
+            E: '#09090b',
+            M: '#fed7aa',
+            T: '#451a03',
+            g: '#22c55e',
+            y: '#facc15',
+            o: '#f97316'
+        };
+
+        const QUOKKA_SHIP_SPRITE = [
+            "..........KKKKKKK..........",
+            "........KKWSSSSSWKK........",
+            ".......KWSBBBBBBBSWK.......",
+            "......KWSBBTTTTTBBWSK......",
+            ".....KWSBBTQQTTTQQTBSWK....",
+            "....KWSBBTQQQQQQQQQTBSWK...",
+            "....KSBBTQQEQQQQQEQQTBSK...",
+            "...KWSBBTQQQQQEQQQQQTBBWK..",
+            "...KSBBBTMMMMMMMMMMMTBBSK..",
+            "..KWSBDDTMMMMTTTMMMMTDDBWK.",
+            "..KSBDRDTQQQQQQQQQQQTDRDBSK",
+            ".KWSBDgDTQQTQQQQQTQQTDoDBWK",
+            ".KSBBDyDTQQMMMMMMMQQTDyDBSK",
+            "KRRWSBDgDTQQMMMMMQQTDgDBRRK",
+            "KSSWSBBCTQQMMMMMMMQQTCBBSWK",
+            "KSSWSBBCTQQQMMMMMQQQTCBBSWK",
+            "KGGWSBTTTQQQQQQQQQTTTCBBSWK",
+            "KGGWSBBBBCCgCByBCrCCBBBBSWK",
+            "KRRWSGGBBBBBBBBBBBBBGGSWRRK",
+            ".KK.KSSGGBBBBBBBBBGGSSK.KK.",
+            "...KKKSSGGGGGGGGGGGSSKKK...",
+            "......KKKSSSWWWSSSKKK......",
+            "........KSSSWWWSSSK........",
+            ".........KRRRRRRRK.........",
+            "..........KKKKKKK.........."
+        ];
+
+        function drawQuokkaSpaceship(ctx, centerX, centerY, timeSec, recoilOffset = 0, pxSize = 2.5, accentColor = '#ef4444') {
+            const rows = QUOKKA_SHIP_SPRITE.length;
+            const cols = QUOKKA_SHIP_SPRITE[0].length;
+            const totalW = cols * pxSize;
+            const totalH = rows * pxSize;
+
+            const hoverY = Math.sin(timeSec * 4.2) * 2.2 + recoilOffset;
+            const startX = Math.round(centerX - totalW / 2);
+            const startY = Math.round(centerY - totalH / 2 + hoverY);
+
+            ctx.save();
+
+            // Thruster flame
+            const flameFlicker = Math.sin(timeSec * 28) > 0 ? 1 : 0.7;
+            const flameX = Math.round(centerX - pxSize * 1.5);
+            const flameY = Math.round(startY + totalH - 1);
+            ctx.fillStyle = 'rgba(251, 146, 60, 0.85)';
+            ctx.fillRect(flameX, flameY, pxSize * 3, pxSize * 2.2 * flameFlicker);
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(flameX + pxSize * 0.5, flameY, pxSize * 2, pxSize * 1.2 * flameFlicker);
+
+            ctx.shadowColor = 'rgba(186, 230, 253, 0.35)';
+            ctx.shadowBlur = 10;
+
+            for (let r = 0; r < rows; r++) {
+                const rowStr = QUOKKA_SHIP_SPRITE[r];
+                for (let c = 0; c < cols; c++) {
+                    const ch = rowStr[c];
+                    if (ch === '.') continue;
+                    let color = QUOKKA_PALETTE[ch];
+                    if (ch === 'R' || ch === 'r') color = accentColor;
+                    if (!color) continue;
+
+                    ctx.fillStyle = color;
+                    ctx.fillRect(
+                        startX + c * pxSize,
+                        startY + r * pxSize,
+                        Math.ceil(pxSize),
+                        Math.ceil(pxSize)
+                    );
+                }
+            }
+            ctx.restore();
+        }
+
+        // ==========================================
+        // 7. ROOM & REALTIME SYNC OPERATIONS
+        // ==========================================
+        function cleanupRoomListeners() {
+            if (appState.unsubRoom) { appState.unsubRoom(); appState.unsubRoom = null; }
+            if (appState.unsubPlayers) { appState.unsubPlayers(); appState.unsubPlayers = null; }
+            clearInterval(appState.countdownTimerId);
+            appState.activeCountdownStartAt = null;
+        }
+
+        async function writeRoomState(roomCode, data) {
+            const payload = { ...data, roomCode, updatedAt: Date.now() };
+            if (useFirestore && currentUser) {
+                await setDoc(getRoomDocRef(roomCode), payload, { merge: true });
+            } else {
+                localStore.rooms[roomCode] = { ...(localStore.rooms[roomCode] || {}), ...payload };
+                if (localChannel) localChannel.postMessage({ type: 'room_update', roomCode, data: localStore.rooms[roomCode] });
+                handleRoomSnapshot(localStore.rooms[roomCode]);
+            }
+        }
+
+        async function writePlayerState(roomCode, playerId, data) {
+            const payload = { ...data, roomCode, playerId, updatedAt: Date.now() };
+            if (useFirestore && currentUser) {
+                await setDoc(getPlayerDocRef(roomCode, playerId), payload, { merge: true });
+            } else {
+                const key = `${roomCode}_${playerId}`;
+                localStore.players[key] = { ...(localStore.players[key] || {}), ...payload };
+                if (localChannel) localChannel.postMessage({ type: 'player_update', roomCode, playerId, data: localStore.players[key] });
+                handlePlayersListUpdate(Object.values(localStore.players).filter(p => p.roomCode === roomCode));
+            }
+        }
+
+        async function saveToHallOfFame(entry) {
+            const record = {
+                name: entry.name,
+                wordsDestroyed: entry.wordsDestroyed || 0,
+                score: entry.score || 0,
+                cpm: entry.cpm || 0,
+                roomCode: entry.roomCode || '0000',
+                createdAt: Date.now()
+            };
+            if (useFirestore && currentUser) {
+                await addDoc(getHofColRef(), record);
+            } else {
+                localStore.hof.push(record);
+                if (localChannel) localChannel.postMessage({ type: 'hof_update', record });
+                renderHallOfFameTable(localStore.hof);
+            }
+        }
+
+        function subscribeToRoom(roomCode) {
+            cleanupRoomListeners();
+
+            if (useFirestore && currentUser) {
+                appState.unsubRoom = onSnapshot(getRoomDocRef(roomCode), (snap) => {
+                    if (snap.exists()) {
+                        handleRoomSnapshot(snap.data());
+                    }
+                }, (err) => console.error('Room listener error:', err));
+
+                // RULE 2: Fetch collection simply without complex where/orderBy, filter & sort in JS
+                appState.unsubPlayers = onSnapshot(getPlayersColRef(), (snapshot) => {
+                    const roomPlayers = [];
+                    snapshot.forEach(docSnap => {
+                        const d = docSnap.data();
+                        if (d.roomCode === roomCode) {
+                            roomPlayers.push(d);
+                        }
+                    });
+                    handlePlayersListUpdate(roomPlayers);
+                }, (err) => console.error('Players listener error:', err));
+            } else if (localChannel) {
+                localChannel.onmessage = (ev) => {
+                    const msg = ev.data;
+                    if (msg.type === 'query_room' && msg.roomCode === roomCode && appState.role === 'teacher' && appState.roomData) {
+                        localChannel.postMessage({ type: 'room_update', roomCode, data: appState.roomData });
+                    } else if (msg.type === 'room_update' && msg.roomCode === roomCode) {
+                        localStore.rooms[roomCode] = msg.data;
+                        handleRoomSnapshot(msg.data);
+                    } else if (msg.type === 'player_update' && msg.roomCode === roomCode) {
+                        localStore.players[`${roomCode}_${msg.playerId}`] = msg.data;
+                        handlePlayersListUpdate(Object.values(localStore.players).filter(p => p.roomCode === roomCode));
+                    } else if (msg.type === 'hof_update') {
+                        localStore.hof.push(msg.record);
+                        renderHallOfFameTable(localStore.hof);
+                    }
+                };
+            }
+        }
+
+        async function fetchRoomForVerification(roomCode) {
+            if (useFirestore && currentUser) {
+                const snap = await getDoc(getRoomDocRef(roomCode));
+                return snap.exists() ? snap.data() : null;
+            }
+            if (localStore.rooms[roomCode]) {
+                return localStore.rooms[roomCode];
+            }
+            if (localChannel) {
+                return new Promise((resolve) => {
+                    let resolved = false;
+                    const tempHandler = (ev) => {
+                        const msg = ev.data;
+                        if (msg && msg.type === 'room_update' && msg.roomCode === roomCode && !resolved) {
+                            resolved = true;
+                            localStore.rooms[roomCode] = msg.data;
+                            localChannel.removeEventListener('message', tempHandler);
+                            resolve(msg.data);
+                        }
+                    };
+                    localChannel.addEventListener('message', tempHandler);
+                    localChannel.postMessage({ type: 'query_room', roomCode });
+                    setTimeout(() => {
+                        if (!resolved) {
+                            resolved = true;
+                            localChannel.removeEventListener('message', tempHandler);
+                            resolve(localStore.rooms[roomCode] || null);
+                        }
+                    }, 300);
+                });
+            }
+            return null;
+        }
+
+        function subscribeToHallOfFame() {
+            if (appState.unsubHof) return;
+            if (useFirestore && currentUser) {
+                appState.unsubHof = onSnapshot(getHofColRef(), (snapshot) => {
+                    const list = [];
+                    snapshot.forEach(docSnap => list.push(docSnap.data()));
+                    appState.hofRecords = list;
+                    renderHallOfFameTable(list);
+                }, (err) => console.error('HOF listener error:', err));
+            } else {
+                renderHallOfFameTable(localStore.hof);
+            }
+        }
+
+        // ==========================================
+        // 8. REALTIME SNAPSHOT HANDLERS & SYNCHRONIZED COUNTDOWN
+        // ==========================================
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function handleRoomSnapshot(room) {
+            if (!room) return;
+            appState.roomData = room;
+
+            if (room.status === 'lobby') {
+                clearInterval(appState.countdownTimerId);
+                appState.activeCountdownStartAt = null;
+                countdownOverlay.classList.add('hidden');
+                countdownOverlay.classList.remove('flex');
+
+                if (appState.role === 'teacher' && appState.currentView !== 'teacherLobby' && appState.currentView !== 'hallOfFame') {
+                    switchView('teacherLobby');
+                } else if (appState.role === 'student' && (appState.currentView === 'studentResult' || appState.currentView === 'studentGame')) {
+                    gameState.playing = false;
+                    cancelAnimationFrame(studentAnimId);
+                    switchView('studentJoin');
+                    document.getElementById('studentJoinForm').classList.add('hidden');
+                    document.getElementById('studentWaitingBox').classList.remove('hidden');
+                    document.getElementById('studentWaitingBox').classList.add('flex');
+                }
+            } else if (room.status === 'countdown' || room.status === 'playing') {
+                const startAt = room.startAt || Date.now();
+                if (Date.now() < startAt) {
+                    startSynchronizedCountdown(room);
+                } else {
+                    countdownOverlay.classList.add('hidden');
+                    countdownOverlay.classList.remove('flex');
+
+                    if (appState.role === 'teacher') {
+                        if (appState.currentView !== 'teacherRace' && appState.currentView !== 'teacherPodium') {
+                            switchView('teacherRace');
+                            startTeacherRaceLoop(room);
+                        }
+                    } else if (appState.role === 'student') {
+                        if (!gameState.playing && appState.currentView !== 'studentResult') {
+                            startStudentGameplay(room);
+                        }
+                    }
+                }
+            } else if (room.status === 'finished') {
+                clearInterval(appState.countdownTimerId);
+                appState.activeCountdownStartAt = null;
+                countdownOverlay.classList.add('hidden');
+                countdownOverlay.classList.remove('flex');
+
+                if (appState.role === 'teacher' && appState.currentView !== 'teacherPodium') {
+                    cancelAnimationFrame(teacherRaceAnimId);
+                    showTeacherPodium(false);
+                } else if (appState.role === 'student') {
+                    if (gameState.playing) {
+                        finishStudentGameplay();
+                    } else if (appState.currentView === 'studentResult') {
+                        updateStudentFinalRankDisplay();
+                    }
+                }
+            }
+        }
+
+        function handlePlayersListUpdate(players) {
+            const prevStepsMap = {};
+            appState.playersList.forEach(p => {
+                prevStepsMap[p.playerId] = p.wordsDestroyed || 0;
+            });
+
+            const sorted = [...players].sort((a, b) => {
+                const stepDiff = (b.wordsDestroyed || 0) - (a.wordsDestroyed || 0);
+                if (stepDiff !== 0) return stepDiff;
+                const scoreDiff = (b.score || 0) - (a.score || 0);
+                if (scoreDiff !== 0) return scoreDiff;
+                return (a.joinedAt || 0) - (b.joinedAt || 0);
+            });
+
+            // Trigger +1 step boost flash on teacher track when a student advances
+            sorted.forEach(p => {
+                const prev = prevStepsMap[p.playerId];
+                const curr = p.wordsDestroyed || 0;
+                if (prev !== undefined && curr > prev) {
+                    appState.boostFlashes[p.playerId] = 1.0;
+                }
+            });
+
+            appState.playersList = sorted;
+
+            // Update Teacher Lobby Roster
+            const countEl = document.getElementById('lobbyStudentCount');
+            const gridEl = document.getElementById('lobbyStudentsGrid');
+            if (countEl) countEl.textContent = sorted.length;
+            if (gridEl) {
+                if (sorted.length === 0) {
+                    gridEl.innerHTML = `
+                        <div class="col-span-full text-center text-xs text-slate-400 py-8">
+                            학생들이 학급 정보와 방 번호를 입력하면 이곳에 우주선이 나타납니다!
+                        </div>
+                    `;
+                } else {
+                    gridEl.innerHTML = sorted.map((p, idx) => {
+                        const accent = SHIP_ACCENT_COLORS[idx % SHIP_ACCENT_COLORS.length];
+                        return `
+                            <div class="bg-[#171433] border border-[#2e295e] rounded px-2.5 py-2 flex items-center gap-2">
+                                <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${accent}"></span>
+                                <span class="text-xs font-bold text-white truncate">${escapeHtml(p.name)}</span>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Update Teacher Live Race HUD
+            const tHudCount = document.getElementById('tHudCount');
+            const tHudLeader = document.getElementById('tHudLeader');
+            if (tHudCount) tHudCount.textContent = `${sorted.length}대`;
+            if (tHudLeader) {
+                tHudLeader.textContent = sorted.length > 0
+                    ? `${sorted[0].name} (${sorted[0].wordsDestroyed || 0}칸)`
+                    : '-';
+            }
+
+            if (appState.currentView === 'teacherRace') {
+                resizeTeacherCanvas();
+            } else if (appState.currentView === 'teacherPodium') {
+                showTeacherPodium(false);
+            }
+
+            // Update Student Waiting Room Peer Count & Final Rank
+            const peerCountEl = document.getElementById('studentLobbyPeerCount');
+            if (peerCountEl) peerCountEl.textContent = Math.max(1, sorted.length);
+            if (appState.currentView === 'studentResult') {
+                updateStudentFinalRankDisplay();
+            }
+        }
+
+        function startSynchronizedCountdown(room) {
+            const startAt = room.startAt || (Date.now() + 3000);
+            if (appState.activeCountdownStartAt === startAt) return;
+            appState.activeCountdownStartAt = startAt;
+
+            clearInterval(appState.countdownTimerId);
+            countdownOverlay.classList.remove('hidden');
+            countdownOverlay.classList.add('flex');
+
+            let lastShown = null;
+            const updateTick = () => {
+                const diffMs = startAt - Date.now();
+                if (diffMs <= 0) {
+                    clearInterval(appState.countdownTimerId);
+                    appState.activeCountdownStartAt = null;
+                    countdownNumber.textContent = 'START!';
+                    sfx.start();
+
+                    setTimeout(() => {
+                        countdownOverlay.classList.add('hidden');
+                        countdownOverlay.classList.remove('flex');
+                    }, 350);
+
+                    if (appState.role === 'teacher') {
+                        switchView('teacherRace');
+                        startTeacherRaceLoop(room);
+                    } else if (appState.role === 'student') {
+                        startStudentGameplay(room);
+                    }
+                    return;
+                }
+
+                const sec = Math.min(3, Math.max(1, Math.ceil(diffMs / 1000)));
+                if (sec !== lastShown) {
+                    lastShown = sec;
+                    countdownNumber.textContent = String(sec);
+                    countdownNumber.classList.remove('countdown-pop');
+                    void countdownNumber.offsetWidth;
+                    countdownNumber.classList.add('countdown-pop');
+                    sfx.beep();
+                }
+            };
+
+            updateTick();
+            appState.countdownTimerId = setInterval(updateTick, 100);
+        }
+
+        // ==========================================
+        // 9. TEACHER FLOW (CLASS SETUP, CREATE ROOM, QR, RACE TRACK, TOP 3 PODIUM)
+        // ==========================================
+        function openTeacherSetup() {
+            appState.role = 'teacher';
+            roleBadge.textContent = '👨‍🏫 학급 코드 생성';
+            roleBadge.classList.remove('hidden');
+
+            const schoolInput = document.getElementById('teacherSchoolInput');
+            const classInput = document.getElementById('teacherClassInput');
+            if (appState.schoolName) schoolInput.value = appState.schoolName;
+            if (appState.classCode) classInput.value = appState.classCode;
+
+            switchView('teacherSetup');
+            setTimeout(() => schoolInput.focus(), 50);
+        }
+
+        function handleCreateClassRoom() {
+            const schoolRaw = document.getElementById('teacherSchoolInput').value.trim();
+            const classRaw = normalizeClassCode(document.getElementById('teacherClassInput').value);
+
+            if (!schoolRaw) {
+                showToast('학교 이름을 입력해주세요!');
+                document.getElementById('teacherSchoolInput').focus();
+                return;
+            }
+            if (!classRaw) {
+                showToast('학년, 반을 숫자로만 입력해주세요! (예: 302)');
+                document.getElementById('teacherClassInput').focus();
+                return;
+            }
+
+            sfx.bonus();
+            openTeacherMode(null, schoolRaw, classRaw);
+        }
+
+        function openTeacherMode(existingCode = null, schoolName = '', classCode = '') {
+            appState.role = 'teacher';
+            if (schoolName) appState.schoolName = schoolName;
+            if (classCode) appState.classCode = classCode;
+
+            roleBadge.textContent = `👨‍🏫 ${appState.schoolName} ${appState.classCode}반`;
+            roleBadge.classList.remove('hidden');
+
+            // Generate 4-digit random code 0000~9999
+            const code = existingCode && /^\d{4}$/.test(existingCode)
+                ? existingCode
+                : String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+
+            appState.roomCode = code;
+            setUrlQuery('host', code);
+
+            document.getElementById('lobbyClassInfoDisplay').textContent = `🏫 ${appState.schoolName} · ${appState.classCode}반`;
+            document.getElementById('roomCodeDisplay').textContent = code;
+            document.getElementById('tHudRoom').textContent = code;
+
+            const joinUrl = buildJoinUrl(code);
+            document.getElementById('joinUrlDisplay').textContent = joinUrl;
+
+            // Render QR Code
+            const qrBox = document.getElementById('qrcodeBox');
+            qrBox.innerHTML = '';
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrBox, {
+                    text: joinUrl,
+                    width: 140,
+                    height: 140,
+                    colorDark: '#120f24',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            }
+
+            switchView('teacherLobby');
+            subscribeToRoom(code);
+            writeRoomState(code, {
+                schoolName: appState.schoolName,
+                classCode: appState.classCode,
+                status: 'lobby',
+                duration: appState.selectedDuration,
+                lang: appState.selectedLang,
+                startAt: null
+            });
+        }
+
+        let teacherRaceAnimId = null;
+        let teacherEndTimeout = null;
+        const teacherCanvas = document.getElementById('teacherCanvas');
+        const tCtx = teacherCanvas.getContext('2d');
+        const teacherCanvasWrapper = document.getElementById('teacherCanvasWrapper');
+
+        function resizeTeacherCanvas() {
+            const rect = teacherCanvasWrapper.getBoundingClientRect();
+            const w = rect.width || 680;
+            const laneCount = Math.max(4, appState.playersList.length);
+            const h = Math.max(rect.height || 380, laneCount * 72 + 40);
+            const dpr = window.devicePixelRatio || 1;
+            teacherCanvas.style.height = `${h}px`;
+            teacherCanvas.width = Math.round(w * dpr);
+            teacherCanvas.height = Math.round(h * dpr);
+            tCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            tCtx.imageSmoothingEnabled = false;
+        }
+
+        function startTeacherRaceLoop(room) {
+            cancelAnimationFrame(teacherRaceAnimId);
+            clearTimeout(teacherEndTimeout);
+
+            const durationSec = room.duration || 60;
+            const startAt = room.startAt || Date.now();
+            const endAt = startAt + durationSec * 1000;
+
+            resizeTeacherCanvas();
+            let lastTime = performance.now();
+
+            const renderTeacherTrack = (now) => {
+                if (appState.currentView !== 'teacherRace') return;
+                const dt = Math.min(0.05, (now - lastTime) / 1000);
+                lastTime = now;
+                const nowSec = now / 1000;
+
+                const remainingSec = Math.max(0, (endAt - Date.now()) / 1000);
+                document.getElementById('tHudTimer').textContent = `${remainingSec.toFixed(1)}s`;
+                document.getElementById('tHudTimer').className = remainingSec <= 10
+                    ? 'text-sm sm:text-base font-bold text-rose-400 animate-pulse'
+                    : 'text-sm sm:text-base font-bold text-cyan-300';
+
+                if (remainingSec <= 0) {
+                    finishTeacherRace();
+                    return;
+                }
+
+                // Draw Space Race Track
+                const dpr = window.devicePixelRatio || 1;
+                const w = teacherCanvas.width / dpr;
+                const h = teacherCanvas.height / dpr;
+
+                tCtx.fillStyle = '#090714';
+                tCtx.fillRect(0, 0, w, h);
+
+                const players = appState.playersList;
+                const maxSteps = players.reduce((m, p) => Math.max(m, p.wordsDestroyed || 0), 0);
+                // Dynamic visible step scale (minimum 15 steps, expands smoothly as students advance)
+                const totalVisibleSteps = Math.max(15, Math.ceil((maxSteps + 4) / 5) * 5);
+
+                const leftLabelW = 115;
+                const rightStatW = 90;
+                const trackStartX = leftLabelW;
+                const trackEndX = w - rightStatW;
+                const trackSpan = Math.max(120, trackEndX - trackStartX);
+                const stepPx = trackSpan / totalVisibleSteps;
+
+                // Draw vertical step grid lines (each grid cell = 1 word cleared = 1칸)
+                tCtx.font = '10px "Galmuri11", monospace';
+                tCtx.textAlign = 'center';
+                for (let s = 0; s <= totalVisibleSteps; s++) {
+                    const gx = trackStartX + s * stepPx;
+                    const isMajor = s % 5 === 0;
+                    tCtx.strokeStyle = isMajor ? 'rgba(250, 204, 21, 0.25)' : 'rgba(59, 53, 117, 0.22)';
+                    tCtx.lineWidth = isMajor ? 1.5 : 1;
+                    tCtx.beginPath();
+                    tCtx.moveTo(gx, 22);
+                    tCtx.lineTo(gx, h - 10);
+                    tCtx.stroke();
+
+                    if (isMajor || totalVisibleSteps <= 20) {
+                        tCtx.fillStyle = isMajor ? '#facc15' : '#64748b';
+                        tCtx.fillText(`${s}`, gx, 14);
+                    }
+                }
+
+                if (players.length === 0) {
+                    tCtx.font = 'bold 14px "Galmuri11", monospace';
+                    tCtx.fillStyle = '#94a3b8';
+                    tCtx.textAlign = 'center';
+                    tCtx.fillText('참여 중인 학생 우주선이 없습니다.', w / 2, h / 2);
+                }
+
+                // Draw each student's lane and Quokka Spaceship
+                const laneH = 70;
+                players.forEach((p, idx) => {
+                    const laneTop = 26 + idx * laneH;
+                    const laneCenterY = laneTop + laneH / 2;
+                    const targetSteps = p.wordsDestroyed || 0;
+
+                    if (appState.visualSteps[p.playerId] === undefined) {
+                        appState.visualSteps[p.playerId] = targetSteps;
+                    }
+                    // Smoothly glide spaceship forward by 1 step per cleared word
+                    appState.visualSteps[p.playerId] += (targetSteps - appState.visualSteps[p.playerId]) * Math.min(1, dt * 10);
+                    const visStep = appState.visualSteps[p.playerId];
+
+                    if (appState.boostFlashes[p.playerId] > 0) {
+                        appState.boostFlashes[p.playerId] = Math.max(0, appState.boostFlashes[p.playerId] - dt * 2.5);
+                    }
+                    const flash = appState.boostFlashes[p.playerId] || 0;
+
+                    // Lane background strip
+                    tCtx.fillStyle = idx % 2 === 0 ? 'rgba(23, 20, 51, 0.55)' : 'rgba(15, 12, 33, 0.55)';
+                    tCtx.fillRect(8, laneTop + 3, w - 16, laneH - 6);
+                    tCtx.strokeStyle = idx === 0 ? 'rgba(250, 204, 21, 0.45)' : 'rgba(46, 41, 94, 0.7)';
+                    tCtx.lineWidth = 1.5;
+                    tCtx.strokeRect(8, laneTop + 3, w - 16, laneH - 6);
+
+                    // Left: Rank & Student Name
+                    tCtx.textAlign = 'left';
+                    tCtx.font = 'bold 11px "Galmuri11", monospace';
+                    tCtx.fillStyle = idx === 0 ? '#facc15' : idx === 1 ? '#cbd5e1' : idx === 2 ? '#d97706' : '#64748b';
+                    tCtx.fillText(`${idx + 1}위`, 16, laneCenterY - 10);
+
+                    tCtx.font = 'bold 13px "Galmuri11", monospace';
+                    tCtx.fillStyle = '#f8fafc';
+                    tCtx.fillText(p.name.slice(0, 7), 16, laneCenterY + 10);
+
+                    // Thruster trail behind spaceship
+                    const shipX = trackStartX + Math.min(totalVisibleSteps, visStep) * stepPx;
+                    const accentColor = SHIP_ACCENT_COLORS[idx % SHIP_ACCENT_COLORS.length];
+
+                    if (visStep > 0) {
+                        const grad = tCtx.createLinearGradient(trackStartX, laneCenterY, shipX, laneCenterY);
+                        grad.addColorStop(0, 'rgba(56, 189, 248, 0.05)');
+                        grad.addColorStop(1, flash > 0 ? 'rgba(250, 204, 21, 0.55)' : 'rgba(56, 189, 248, 0.3)');
+                        tCtx.fillStyle = grad;
+                        tCtx.fillRect(trackStartX, laneCenterY - 4, Math.max(0, shipX - trackStartX), 8);
+                    }
+
+                    // Draw Quokka Spaceship at current step!
+                    drawQuokkaSpaceship(tCtx, shipX, laneCenterY, nowSec + idx, 0, 1.85, accentColor);
+
+                    // Show active Boss Battle badge on Teacher's screen if student is fighting a boss
+                    if (p.bossActive) {
+                        tCtx.font = 'bold 10px "Galmuri11", monospace';
+                        tCtx.fillStyle = '#fb7185';
+                        tCtx.textAlign = 'center';
+                        tCtx.fillText('👾BOSS교전중', shipX, laneCenterY - 24);
+                    }
+
+                    // "+1칸!" pop indicator when student clears a word
+                    if (flash > 0) {
+                        tCtx.save();
+                        tCtx.globalAlpha = flash;
+                        tCtx.font = 'bold 11px "Galmuri11", monospace';
+                        tCtx.fillStyle = '#facc15';
+                        tCtx.textAlign = 'center';
+                        tCtx.fillText('+1칸!', shipX, laneCenterY - (p.bossActive ? 36 : 24) - (1 - flash) * 8);
+                        tCtx.restore();
+                    }
+
+                    // Right: Cleared Steps & Score
+                    tCtx.textAlign = 'right';
+                    tCtx.font = 'bold 13px "Galmuri11", monospace';
+                    tCtx.fillStyle = '#4ade80';
+                    tCtx.fillText(`${targetSteps}칸`, w - 16, laneCenterY - 6);
+
+                    tCtx.font = '11px "Galmuri11", monospace';
+                    tCtx.fillStyle = '#facc15';
+                    tCtx.fillText(`${(p.score || 0).toLocaleString()}점`, w - 16, laneCenterY + 12);
+                });
+
+                teacherRaceAnimId = requestAnimationFrame(renderTeacherTrack);
+            };
+
+            teacherRaceAnimId = requestAnimationFrame(renderTeacherTrack);
+        }
+
+        async function finishTeacherRace() {
+            cancelAnimationFrame(teacherRaceAnimId);
+            sfx.gameOver();
+            await writeRoomState(appState.roomCode, { status: 'finished' });
+            showTeacherPodium(true);
+        }
+
+        async function showTeacherPodium(recordHof = false) {
+            switchView('teacherPodium');
+            const sorted = appState.playersList;
+
+            const top1 = sorted[0];
+            const top2 = sorted[1];
+            const top3 = sorted[2];
+
+            document.getElementById('podium1Name').textContent = top1 ? top1.name : '없음';
+            document.getElementById('podium1Steps').textContent = top1 ? `${top1.wordsDestroyed || 0}칸 전진` : '-';
+            document.getElementById('podium1Score').textContent = top1 ? `${(top1.score || 0).toLocaleString()}점` : '-';
+
+            document.getElementById('podium2Name').textContent = top2 ? top2.name : '없음';
+            document.getElementById('podium2Steps').textContent = top2 ? `${top2.wordsDestroyed || 0}칸 전진` : '-';
+            document.getElementById('podium2Score').textContent = top2 ? `${(top2.score || 0).toLocaleString()}점` : '-';
+
+            document.getElementById('podium3Name').textContent = top3 ? top3.name : '없음';
+            document.getElementById('podium3Steps').textContent = top3 ? `${top3.wordsDestroyed || 0}칸 전진` : '-';
+            document.getElementById('podium3Score').textContent = top3 ? `${(top3.score || 0).toLocaleString()}점` : '-';
+
+            const fullListEl = document.getElementById('podiumFullList');
+            if (sorted.length === 0) {
+                fullListEl.innerHTML = `<div class="text-slate-400">참여 기록이 없습니다.</div>`;
+            } else {
+                fullListEl.innerHTML = sorted.map((p, i) => `
+                    <div class="flex items-center justify-between bg-[#171433] px-2.5 py-1.5 rounded border border-[#2a2554]">
+                        <div>
+                            <span class="text-yellow-400 font-bold mr-2">${i + 1}위</span>
+                            <span class="text-white font-bold">${escapeHtml(p.name)}</span>
+                        </div>
+                        <div class="text-slate-300">
+                            <span class="text-emerald-400 font-bold mr-2">${p.wordsDestroyed || 0}칸</span>
+                            <span class="text-yellow-300">${(p.score || 0).toLocaleString()}점</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Record Top 3 into Hall of Fame automatically
+            if (recordHof && sorted.length > 0) {
+                const winners = sorted.slice(0, 3).filter(p => (p.wordsDestroyed || 0) > 0 || (p.score || 0) > 0);
+                for (const w of winners) {
+                    await saveToHallOfFame({
+                        name: w.name,
+                        wordsDestroyed: w.wordsDestroyed || 0,
+                        score: w.score || 0,
+                        cpm: w.cpm || 0,
+                        roomCode: appState.roomCode
+                    });
+                }
+            }
+        }
+
+        // ==========================================
+        // 10. STUDENT FLOW (JOIN, LOBBY, GAMEPLAY, RESULT)
+        // ==========================================
+        function openStudentMode(prefillCode = '') {
+            appState.role = 'student';
+            roleBadge.textContent = '🧑‍🎓 학생 파일럿';
+            roleBadge.classList.remove('hidden');
+
+            document.getElementById('studentJoinForm').classList.remove('hidden');
+            document.getElementById('studentWaitingBox').classList.add('hidden');
+            document.getElementById('studentWaitingBox').classList.remove('flex');
+            document.getElementById('studentJoinErrorBox').classList.add('hidden');
+
+            const schoolInput = document.getElementById('studentSchoolInput');
+            const roomInput = document.getElementById('studentRoomInput');
+            if (prefillCode && /^\d{4}$/.test(prefillCode)) {
+                roomInput.value = prefillCode;
+            }
+            setTimeout(() => schoolInput.focus(), 50);
+
+            switchView('studentJoin');
+        }
+
+        function showStudentJoinError(message) {
+            const errBox = document.getElementById('studentJoinErrorBox');
+            errBox.textContent = `⚠️ ${message}`;
+            errBox.classList.remove('hidden');
+            showToast(message);
+            sfx.damage();
+        }
+
+        async function submitStudentJoin() {
+            const schoolName = document.getElementById('studentSchoolInput').value.trim();
+            const classCode = normalizeClassCode(document.getElementById('studentClassInput').value);
+            const roomCode = document.getElementById('studentRoomInput').value.trim();
+            const name = document.getElementById('studentNameInput').value.trim();
+            const errBox = document.getElementById('studentJoinErrorBox');
+            errBox.classList.add('hidden');
+
+            if (!schoolName) {
+                showStudentJoinError('학교 이름을 입력해주세요!');
+                document.getElementById('studentSchoolInput').focus();
+                return;
+            }
+            if (!classCode) {
+                showStudentJoinError('학년, 반을 숫자로만 입력해주세요! (예: 302)');
+                document.getElementById('studentClassInput').focus();
+                return;
+            }
+            if (!/^\d{4}$/.test(roomCode)) {
+                showStudentJoinError('4자리 숫자 방 코드(0000~9999)를 정확히 입력해주세요!');
+                document.getElementById('studentRoomInput').focus();
+                return;
+            }
+            if (!name) {
+                showStudentJoinError('학생 이름을 입력해주세요!');
+                document.getElementById('studentNameInput').focus();
+                return;
+            }
+
+            const submitBtn = document.getElementById('studentJoinSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '🔍 학급 코드 및 방 확인 중...';
+
+            try {
+                const roomData = await fetchRoomForVerification(roomCode);
+
+                if (!roomData) {
+                    showStudentJoinError(`방 코드 [${roomCode}]를 찾을 수 없습니다. 선생님이 방을 먼저 생성했는지 확인해주세요!`);
+                    return;
+                }
+
+                // Strict verification: Even if roomCode matches, schoolName and classCode MUST match!
+                const isSchoolMatch = normalizeSchoolName(roomData.schoolName) === normalizeSchoolName(schoolName);
+                const isClassMatch = normalizeClassCode(roomData.classCode) === classCode;
+
+                if (!isSchoolMatch || !isClassMatch) {
+                    showStudentJoinError(
+                        `접속 불가! 방 코드(${roomCode})는 같지만 [학교 이름] 또는 [학년·반]이 선생님이 개설한 학급 정보와 다릅니다.`
+                    );
+                    return;
+                }
+
+                appState.schoolName = roomData.schoolName || schoolName;
+                appState.classCode = classCode;
+                appState.roomCode = roomCode;
+                appState.playerName = name;
+                setUrlQuery('room', roomCode);
+
+                roleBadge.textContent = `🧑‍🎓 ${appState.schoolName} ${classCode}반`;
+                document.getElementById('joinedClassLabel').textContent = `🏫 ${appState.schoolName} · ${classCode}반`;
+                document.getElementById('joinedRoomLabel').textContent = roomCode;
+                document.getElementById('joinedNameLabel').textContent = name;
+                document.getElementById('studentPilotHud').textContent = `🐹 ${name}`;
+
+                document.getElementById('studentJoinForm').classList.add('hidden');
+                document.getElementById('studentWaitingBox').classList.remove('hidden');
+                document.getElementById('studentWaitingBox').classList.add('flex');
+
+                sfx.bonus();
+                subscribeToRoom(roomCode);
+                await writePlayerState(roomCode, appState.playerId, {
+                    name,
+                    schoolName: appState.schoolName,
+                    classCode: appState.classCode,
+                    wordsDestroyed: 0,
+                    score: 0,
+                    cpm: 0,
+                    maxCombo: 0,
+                    joinedAt: Date.now()
+                });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 우주선 탑승 완료!';
+            }
+        }
+
+        // Student Canvas & Gameplay Engine
+        const canvasWrapper = document.getElementById('canvasWrapper');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const wordInput = document.getElementById('wordInput');
+        let canvasWidth = 600;
+        let canvasHeight = 350;
+        let studentAnimId = null;
+
+        function resizeStudentCanvas() {
+            const rect = canvasWrapper.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+            const dpr = window.devicePixelRatio || 1;
+            canvasWidth = rect.width;
+            canvasHeight = rect.height;
+            canvas.width = Math.round(canvasWidth * dpr);
+            canvas.height = Math.round(canvasHeight * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.imageSmoothingEnabled = false;
+            initStudentStars();
+        }
+
+        function initStudentStars() {
+            gameState.stars = [];
+            const count = Math.floor((canvasWidth * canvasHeight) / 7500);
+            for (let i = 0; i < count; i++) {
+                gameState.stars.push({
+                    x: Math.random() * canvasWidth,
+                    y: Math.random() * canvasHeight,
+                    size: Math.random() < 0.3 ? 2 : 1,
+                    speed: 12 + Math.random() * 28,
+                    alpha: 0.25 + Math.random() * 0.65
+                });
+            }
+        }
+
+        function startStudentGameplay(room) {
+            cancelAnimationFrame(studentAnimId);
+            clearTimeout(gameState.pendingSkillTimerId);
+
+            gameState.playing = true;
+            gameState.lang = room.lang || 'ko';
+            gameState.duration = room.duration || 60;
+            gameState.nextBossScore = 1000;
+            gameState.bossCount = 0;
+            gameState.boss.active = false;
+            gameState.boss.hitFlash = 0;
+            gameState.bossBeams = [];
+            gameState.startTimeMs = room.startAt || Date.now();
+            gameState.timeLeft = gameState.duration;
+            gameState.elapsedTime = 0;
+            gameState.score = 0;
+            gameState.combo = 0;
+            gameState.maxCombo = 0;
+            gameState.wordsDestroyed = 0;
+            gameState.charsTyped = 0;
+            gameState.totalAttempts = 0;
+            gameState.freezeTimer = 0;
+            gameState.spawnTimer = 0.2;
+            gameState.shipRecoil = 0;
+
+            // Reset EXP & Skills
+            gameState.level = 1;
+            gameState.exp = 0;
+            gameState.expToNext = 6;
+            gameState.skills = {};
+            gameState.awakenedAuto = false;
+            gameState.autoTyperTimer = 0;
+            gameState.meteorTimer = 8.0;
+            gameState.skillModalOpen = false;
+            gameState.currentSkillChoices = [];
+
+            document.getElementById('levelUpBanner').classList.add('hidden');
+            document.getElementById('skillSelectModal').classList.add('hidden');
+            document.getElementById('skillSelectModal').classList.remove('flex');
+
+            gameState.words = [];
+            gameState.lasers = [];
+            gameState.particles = [];
+            gameState.popups = [];
+
+            // Reset player progress in room
+            writePlayerState(appState.roomCode, appState.playerId, {
+                name: appState.playerName,
+                wordsDestroyed: 0,
+                score: 0,
+                cpm: 0,
+                maxCombo: 0,
+                bossActive: false
+            });
+
+            switchView('studentGame');
+            resizeStudentCanvas();
+            updateStudentHUD();
+
+            wordInput.value = '';
+            wordInput.focus();
+            spawnStudentWord();
+
+            let lastTime = performance.now();
+            const loop = (now) => {
+                if (!gameState.playing) return;
+                const dt = Math.min(0.05, (now - lastTime) / 1000);
+                lastTime = now;
+
+                updateStudentGame(dt);
+                drawStudentGame();
+
+                studentAnimId = requestAnimationFrame(loop);
+            };
+            studentAnimId = requestAnimationFrame(loop);
+        }
+
+        // ==========================================
+        // EXP LEVEL-UP & 3-SKILL SELECTION LOGIC
+        // ==========================================
+        function addStudentExp(baseGain = 1) {
+            const magnetLv = gameState.skills.expMagnet || 0;
+            const gained = baseGain * (1 + magnetLv * 0.22);
+            gameState.exp += gained;
+
+            if (gameState.exp >= gameState.expToNext && !gameState.skillModalOpen && !gameState.pendingSkillTimerId) {
+                gameState.exp -= gameState.expToNext;
+                gameState.level += 1;
+                gameState.expToNext = Math.round(6 + (gameState.level - 1) * 2.5);
+
+                // Show Lv.N UP! Banner immediately, then open 3 skill choices 2 seconds later!
+                const banner = document.getElementById('levelUpBanner');
+                const bannerText = document.getElementById('levelUpBannerText');
+                bannerText.textContent = `Lv.${gameState.level} UP!`;
+                banner.classList.remove('hidden');
+                sfx.bonus();
+
+                gameState.pendingSkillTimerId = setTimeout(() => {
+                    gameState.pendingSkillTimerId = null;
+                    banner.classList.add('hidden');
+                    if (gameState.playing) {
+                        openSkillSelectionModal();
+                    }
+                }, 2000);
+            }
+        }
+
+        function generateSkillChoices() {
+            const choices = [];
+            const autoLv = gameState.skills.autoTyper || 0;
+            const aiCoreLv = gameState.skills.aiCore || 0;
+
+            // Check Awakening Condition: Auto-Typer Lv.5 + Support Skill (aiCore) >= Lv.1
+            if (!gameState.awakenedAuto && autoLv >= 5 && aiCoreLv >= 1) {
+                choices.push({ ...AWAKENING_SKILL, nextLevel: 1 });
+            }
+
+            // Collect upgradable skills under Lv.5
+            const pool = Object.values(SKILL_CATALOG)
+                .filter(sk => (gameState.skills[sk.id] || 0) < sk.maxLevel)
+                .map(sk => {
+                    const currLv = gameState.skills[sk.id] || 0;
+                    return { ...sk, nextLevel: currLv + 1 };
+                });
+
+            // Shuffle pool
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+
+            for (const item of pool) {
+                if (choices.length >= 3) break;
+                choices.push(item);
+            }
+
+            // Fallback bonus card if all skills are maxed out
+            while (choices.length < 3) {
+                choices.push({
+                    id: 'overdriveBonus',
+                    category: '초월 보너스',
+                    icon: '💎',
+                    name: '하이퍼 점수 충전',
+                    nextLevel: 1,
+                    getDesc: () => '즉시 +800점 획득 및 우주선 +2칸 추가 전진!'
+                });
+            }
+
+            return choices;
+        }
+
+        function openSkillSelectionModal() {
+            if (!gameState.playing) return;
+            gameState.skillModalOpen = true;
+            const choices = generateSkillChoices();
+            gameState.currentSkillChoices = choices;
+
+            document.getElementById('skillModalTitle').textContent = `⚡ Lv.${gameState.level} 달성! 스킬을 선택하세요`;
+            const grid = document.getElementById('skillCardsGrid');
+            grid.innerHTML = choices.map((sk, idx) => {
+                const isAwake = Boolean(sk.isAwakening);
+                const lvBadge = isAwake
+                    ? `<span class="bg-yellow-400 text-[#141129] font-bold px-2 py-0.5 rounded text-[10px]">MAX 각성</span>`
+                    : `<span class="bg-cyan-500/20 border border-cyan-400/60 text-cyan-300 font-bold px-2 py-0.5 rounded text-[10px]">Lv.${sk.nextLevel}</span>`;
+                return `
+                    <button type="button" data-skill-idx="${idx}"
+                        class="skill-card ${isAwake ? 'awakening-card' : ''} rounded-md p-3.5 flex flex-col items-center text-center justify-between gap-2">
+                        <div class="w-full flex items-center justify-between text-[10px]">
+                            <span class="text-amber-300 font-bold">[${idx + 1}] ${sk.category}</span>
+                            ${lvBadge}
+                        </div>
+                        <div class="text-3xl my-1">${sk.icon}</div>
+                        <div class="text-sm sm:text-base font-bold text-white">${sk.name}</div>
+                        <div class="text-[11px] text-slate-300 leading-snug">${sk.getDesc(sk.nextLevel)}</div>
+                    </button>
+                `;
+            }).join('');
+
+            grid.querySelectorAll('button[data-skill-idx]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = Number(btn.dataset.skillIdx);
+                    applySelectedSkill(idx);
+                });
+            });
+
+            const modal = document.getElementById('skillSelectModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function applySelectedSkill(choiceIdx) {
+            if (!gameState.skillModalOpen) return;
+            const chosen = gameState.currentSkillChoices[choiceIdx];
+            if (!chosen) return;
+
+            if (chosen.id === 'awakenedAuto') {
+                gameState.awakenedAuto = true;
+                gameState.autoTyperTimer = 0.1;
+                sfx.bossAlert();
+                showToast('🌟 [각성] 무한 오토 매트릭스 발동! 나오는 단어를 연속 자동 격추합니다!');
+            } else if (chosen.id === 'overdriveBonus') {
+                gameState.score += 800;
+                gameState.wordsDestroyed += 2;
+                sfx.bonus();
+            } else {
+                gameState.skills[chosen.id] = chosen.nextLevel;
+                if (chosen.id === 'autoTyper') {
+                    // Reset timer so newly upgraded auto-typer fires right away!
+                    gameState.autoTyperTimer = 0.25;
+                }
+                sfx.bonus();
+                showToast(`${chosen.icon} ${chosen.name} Lv.${chosen.nextLevel} 장착 완료!`);
+            }
+
+            gameState.skillModalOpen = false;
+            const modal = document.getElementById('skillSelectModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            updateStudentHUD();
+            wordInput.focus();
+        }
+
+        const BOSS_NAMES = [
+            '우주 해적 메카냥',
+            '은하 파괴자 드래곤',
+            '암흑 제국 타이탄',
+            '초시공 최종병기 Ω'
+        ];
+
+        function triggerPersonalBoss() {
+            const level = gameState.bossCount + 1;
+            const maxHp = 240 + (level - 1) * 120;
+            gameState.boss = {
+                active: true,
+                level,
+                name: `Lv.${level} ${BOSS_NAMES[(level - 1) % BOSS_NAMES.length]}`,
+                hp: maxHp,
+                maxHp,
+                hitFlash: 0,
+                x: canvasWidth / 2,
+                y: 52
+            };
+            sfx.bossAlert();
+            showToast(`⚠️ ${(level * 1000).toLocaleString()}점 돌파! 개인 보스 출현! 긴 단어를 격추해 체력을 크게 깎으세요!`);
+
+            spawnStudentWord();
+            spawnStudentWord();
+        }
+
+        function defeatPersonalBoss() {
+            const bx = gameState.boss.x || canvasWidth / 2;
+            const by = gameState.boss.y || 52;
+            const defeatedLevel = gameState.boss.level;
+
+            gameState.boss.active = false;
+            gameState.bossCount++;
+
+            // Boss Defeat Rewards: +350 Bonus Score & +3 Bonus Steps forward!
+            // Next boss will appear at the next 1,000-point milestone!
+            const bonusPoints = 350 * defeatedLevel;
+            gameState.score += bonusPoints;
+            gameState.wordsDestroyed += 3;
+            gameState.nextBossScore += 1000;
+
+            sfx.bomb();
+            sfx.bonus();
+
+            const colors = ['#facc15', '#fb7185', '#38bdf8', '#c084fc'];
+            for (let i = 0; i < 36; i++) {
+                const angle = (Math.PI * 2 * i) / 36 + Math.random() * 0.2;
+                const speed = 70 + Math.random() * 190;
+                gameState.particles.push({
+                    x: bx,
+                    y: by,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    size: 4 + Math.floor(Math.random() * 5),
+                    color: colors[i % colors.length],
+                    life: 1.3
+                });
+            }
+
+            gameState.popups.push({
+                x: bx,
+                y: by + 18,
+                text: `👑 보스 격파! +3칸 전진 & +${bonusPoints}점!`,
+                color: '#facc15',
+                life: 1.6
+            });
+        }
+
+        function pickWord(isBoss = false) {
+            let pool = [];
+            if (gameState.lang === 'ko') {
+                pool = isBoss ? WORD_DATA.ko.boss : WORD_DATA.ko.normal;
+            } else if (gameState.lang === 'en') {
+                pool = isBoss ? WORD_DATA.en.boss : WORD_DATA.en.normal;
+            } else {
+                pool = isBoss
+                    ? [...WORD_DATA.ko.boss, ...WORD_DATA.en.boss]
+                    : [...WORD_DATA.ko.normal, ...WORD_DATA.en.normal];
+            }
+            const activeTexts = new Set(gameState.words.map(w => w.text.toLowerCase()));
+            const candidates = pool.filter(w => !activeTexts.has(w.toLowerCase()));
+            const list = candidates.length > 0 ? candidates : pool;
+            return list[Math.floor(Math.random() * list.length)];
+        }
+
+        function spawnStudentWord() {
+            const roll = Math.random();
+            let type = 'normal';
+            if (gameState.boss.active) {
+                // During Boss battle, stream a rich mix of medium & long words continuously
+                if (roll < 0.08) type = 'bonus';
+                else if (roll < 0.13) type = 'freeze';
+                else if (roll < 0.34) type = 'boss';
+            } else {
+                if (roll < 0.08) type = 'bonus';
+                else if (roll < 0.13) type = 'bomb';
+                else if (roll < 0.18) type = 'freeze';
+                else if (roll < 0.25 && gameState.elapsedTime > 12) type = 'boss';
+            }
+
+            const text = pickWord(type === 'boss');
+            ctx.font = 'bold 15px "Galmuri11", monospace';
+            const textW = ctx.measureText(text).width;
+            const badgeExtra = type !== 'normal' ? 24 : 0;
+            const boxW = Math.max(64, textW + 26 + badgeExtra);
+            const boxH = 32;
+
+            const margin = 14;
+            const maxX = Math.max(margin, canvasWidth - boxW - margin);
+            let x = margin + Math.random() * (maxX - margin);
+            let startY = gameState.boss.active ? gameState.boss.y + 18 : -boxH;
+
+            if (gameState.boss.active) {
+                const cannonOffset = Math.random() < 0.5 ? -44 : 44;
+                x = Math.min(maxX, Math.max(margin, gameState.boss.x + cannonOffset - boxW / 2));
+            } else {
+                for (let attempt = 0; attempt < 6; attempt++) {
+                    const overlap = gameState.words.some(w =>
+                        w.y < 55 && Math.abs(w.x - x) < Math.max(w.w, boxW) + 8
+                    );
+                    if (!overlap) break;
+                    x = margin + Math.random() * (maxX - margin);
+                }
+            }
+
+            const baseSpeed = 42 + Math.min(58, gameState.elapsedTime * 0.85);
+            const typeMult = type === 'boss' ? 0.78 : type === 'bonus' ? 1.15 : 1.0;
+
+            gameState.words.push({
+                text,
+                type,
+                x,
+                y: startY,
+                w: boxW,
+                h: boxH,
+                speed: (baseSpeed + Math.random() * 14) * typeMult
+            });
+        }
+
+        function destroyStudentWord(index, isChainBomb = false, sourceTag = '') {
+            const word = gameState.words[index];
+            if (!word) return;
+
+            const centerX = word.x + word.w / 2;
+            const centerY = word.y + word.h / 2;
+            const wordLen = word.text.length;
+
+            gameState.words.splice(index, 1);
+            gameState.wordsDestroyed++;
+
+            // Charge EXP Gauge on every destroyed word!
+            addStudentExp(1);
+
+            if (!isChainBomb) {
+                gameState.combo++;
+                if (gameState.combo > gameState.maxCombo) gameState.maxCombo = gameState.combo;
+                if (!sourceTag) {
+                    gameState.charsTyped += wordLen;
+                }
+            }
+
+            const isFever = gameState.combo >= 10;
+            const feverMult = isFever ? 2 : 1;
+            const comboBonus = Math.min(250, gameState.combo * 10);
+            const magnetLv = gameState.skills.expMagnet || 0;
+            const plasmaLv = gameState.skills.plasmaAmp || 0;
+
+            // Score scales with word length + support skill bonuses
+            let basePoints = Math.round(Math.pow(wordLen, 2) * (12 + plasmaLv * 2)) + comboBonus;
+            let laserColor = sourceTag === 'AUTO' ? '#4ade80' : '#38bdf8';
+            let popupText = sourceTag === 'AUTO' ? '🤖 +1칸! ' : '+1칸! ';
+
+            if (word.type === 'boss') {
+                basePoints = Math.round(basePoints * 1.6);
+                laserColor = '#c084fc';
+            } else if (word.type === 'bonus') {
+                basePoints += 150;
+                laserColor = '#facc15';
+                popupText = '★ +1칸! ';
+                sfx.bonus();
+            } else if (word.type === 'freeze') {
+                gameState.freezeTimer = 4.0;
+                laserColor = '#22d3ee';
+                popupText = '❄️ +1칸! ';
+                sfx.freeze();
+            } else if (word.type === 'bomb') {
+                laserColor = '#fb7185';
+                popupText = '💣 EMP! ';
+                sfx.bomb();
+            }
+
+            const scoreMult = feverMult * (1 + magnetLv * 0.12);
+            const earned = Math.round(basePoints * scoreMult);
+            gameState.score += earned;
+
+            // Laser & Particle FX
+            gameState.lasers.push({
+                x1: canvasWidth / 2,
+                y1: canvasHeight - 48,
+                x2: centerX,
+                y2: centerY,
+                color: laserColor,
+                life: 1.0
+            });
+            gameState.shipRecoil = 6;
+
+            for (let i = 0; i < 16; i++) {
+                const angle = (Math.PI * 2 * i) / 16 + (Math.random() - 0.5) * 0.4;
+                const speed = 50 + Math.random() * 140;
+                gameState.particles.push({
+                    x: centerX,
+                    y: centerY,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    size: 3 + Math.floor(Math.random() * 4),
+                    color: laserColor,
+                    life: 1.0
+                });
+            }
+
+            gameState.popups.push({
+                x: centerX,
+                y: centerY - 10,
+                text: `${popupText}+${earned} (${wordLen}자)`,
+                color: laserColor,
+                life: 1.0
+            });
+
+            if (!isChainBomb && word.type === 'normal') {
+                sfx.laser();
+                sfx.hit(gameState.combo);
+            }
+
+            // Chain Laser Active Skill trigger on manual typing
+            const chainLv = gameState.skills.chainLaser || 0;
+            if (!isChainBomb && !sourceTag && chainLv > 0 && gameState.words.length > 0) {
+                if (Math.random() < chainLv * 0.18) {
+                    destroyStudentWord(0, true, 'CHAIN');
+                }
+            }
+
+            // If Personal Boss is active, deal damage proportional to word length + Plasma Amp!
+            if (gameState.boss.active) {
+                const dmgMult = (isFever ? 1.5 : 1.0) * (1 + plasmaLv * 0.25);
+                const damage = Math.max(12, Math.round(wordLen * 13 * dmgMult));
+                gameState.boss.hp = Math.max(0, gameState.boss.hp - damage);
+                gameState.boss.hitFlash = 1.0;
+                sfx.bossHit();
+
+                // Plasma beam from destroyed word into the Boss
+                gameState.bossBeams.push({
+                    x1: centerX,
+                    y1: centerY,
+                    x2: gameState.boss.x,
+                    y2: gameState.boss.y + 12,
+                    life: 1.0
+                });
+
+                gameState.popups.push({
+                    x: gameState.boss.x + (Math.random() - 0.5) * 50,
+                    y: gameState.boss.y + 26,
+                    text: `-${damage} DMG!`,
+                    color: '#fb7185',
+                    life: 1.05
+                });
+
+                if (gameState.boss.hp <= 0) {
+                    defeatPersonalBoss();
+                }
+            } else if (gameState.score >= gameState.nextBossScore) {
+                // Trigger Personal Boss every 1,000 points!
+                triggerPersonalBoss();
+            }
+
+            if (word.type === 'bomb' && !isChainBomb) {
+                while (gameState.words.length > 0) {
+                    destroyStudentWord(0, true, 'BOMB');
+                }
+            }
+
+            // Immediately sync +1 step advancement to Teacher Screen!
+            const minutes = Math.max(0.05, gameState.elapsedTime / 60);
+            const mult = gameState.lang === 'en' ? 1 : 2.3;
+            const cpm = Math.round((gameState.charsTyped * mult) / minutes);
+
+            writePlayerState(appState.roomCode, appState.playerId, {
+                name: appState.playerName,
+                wordsDestroyed: gameState.wordsDestroyed,
+                score: gameState.score,
+                cpm,
+                maxCombo: gameState.maxCombo,
+                bossActive: gameState.boss.active
+            });
+
+            updateStudentHUD();
+        }
+
+        function checkStudentTypedWord(forceSubmit = false) {
+            if (!gameState.playing) return;
+            const raw = wordInput.value.trim();
+            if (!raw) return;
+
+            const normalized = raw.toLowerCase();
+            let matchedIdx = -1;
+            let lowestY = -Infinity;
+
+            for (let i = 0; i < gameState.words.length; i++) {
+                if (gameState.words[i].text.toLowerCase() === normalized) {
+                    if (gameState.words[i].y > lowestY) {
+                        lowestY = gameState.words[i].y;
+                        matchedIdx = i;
+                    }
+                }
+            }
+
+            if (matchedIdx !== -1) {
+                gameState.totalAttempts++;
+                wordInput.value = '';
+                setTimeout(() => { if (document.activeElement === wordInput) wordInput.value = ''; }, 0);
+                destroyStudentWord(matchedIdx, false);
+            } else if (forceSubmit) {
+                gameState.totalAttempts++;
+                gameState.combo = 0;
+                sfx.damage();
+                wordInput.classList.remove('shake');
+                void wordInput.offsetWidth;
+                wordInput.classList.add('shake');
+                wordInput.value = '';
+                updateStudentHUD();
+            }
+        }
+
+        function updateStudentGame(dt) {
+            for (const s of gameState.stars) {
+                s.y += s.speed * dt;
+                if (s.y > canvasHeight) { s.y = 0; s.x = Math.random() * canvasWidth; }
+            }
+
+            const elapsedSec = (Date.now() - gameState.startTimeMs) / 1000;
+            gameState.elapsedTime = Math.max(0, elapsedSec);
+            gameState.timeLeft = Math.max(0, gameState.duration - gameState.elapsedTime);
+
+            if (gameState.timeLeft <= 0) {
+                finishStudentGameplay();
+                return;
+            }
+
+            // Pause word movement & skill timers while choosing 1 of 3 skills
+            if (gameState.skillModalOpen) {
+                updateStudentHUD();
+                return;
+            }
+
+            if (gameState.shipRecoil > 0) {
+                gameState.shipRecoil = Math.max(0, gameState.shipRecoil - dt * 28);
+            }
+
+            if (gameState.freezeTimer > 0) {
+                gameState.freezeTimer = Math.max(0, gameState.freezeTimer - dt);
+            }
+
+            // Move falling words downward
+            const cryoLv = gameState.skills.cryoField || 0;
+            const speedMult = (gameState.freezeTimer > 0 ? 0.42 : 1.0) * Math.max(0.45, 1 - cryoLv * 0.09);
+            const defenseLineY = canvasHeight - 62;
+
+            for (let i = gameState.words.length - 1; i >= 0; i--) {
+                const w = gameState.words[i];
+                w.y += w.speed * speedMult * dt;
+                if (w.y + w.h >= defenseLineY) {
+                    gameState.words.splice(i, 1);
+                    gameState.combo = 0;
+                    sfx.damage();
+                    gameState.popups.push({
+                        x: w.x + w.w / 2,
+                        y: defenseLineY - 12,
+                        text: '방어선 충돌!',
+                        color: '#f43f5e',
+                        life: 0.9
+                    });
+                }
+            }
+
+            // Active Skill 1: Auto-Typer (Lv.1~5) & Awakened Infinite Auto Matrix
+            const autoLv = gameState.skills.autoTyper || 0;
+            const aiCoreLv = gameState.skills.aiCore || 0;
+            const cdrMult = Math.max(0.45, 1 - aiCoreLv * 0.1);
+
+            if (gameState.awakenedAuto) {
+                gameState.autoTyperTimer -= dt;
+                if (gameState.autoTyperTimer <= 0) {
+                    gameState.autoTyperTimer = 0.25; // Continuously destroys words as they appear!
+                    if (gameState.words.length > 0) {
+                        // Target lowest word first
+                        let lowestIdx = 0;
+                        for (let i = 1; i < gameState.words.length; i++) {
+                            if (gameState.words[i].y > gameState.words[lowestIdx].y) lowestIdx = i;
+                        }
+                        destroyStudentWord(lowestIdx, true, 'AUTO');
+                    }
+                }
+            } else if (autoLv > 0) {
+                const spec = AUTO_TYPER_LEVELS[autoLv];
+                gameState.autoTyperTimer -= dt;
+                if (gameState.autoTyperTimer <= 0) {
+                    gameState.autoTyperTimer = spec.interval * cdrMult;
+                    for (let k = 0; k < spec.count; k++) {
+                        if (gameState.words.length === 0) break;
+                        let lowestIdx = 0;
+                        for (let i = 1; i < gameState.words.length; i++) {
+                            if (gameState.words[i].y > gameState.words[lowestIdx].y) lowestIdx = i;
+                        }
+                        destroyStudentWord(lowestIdx, true, 'AUTO');
+                    }
+                }
+            }
+
+            // Active Skill 2: Quokka Meteor Shower
+            const meteorLv = gameState.skills.meteorShower || 0;
+            if (meteorLv > 0) {
+                gameState.meteorTimer -= dt;
+                if (gameState.meteorTimer <= 0) {
+                    gameState.meteorTimer = Math.max(4.0, (13 - meteorLv * 1.5) * cdrMult);
+                    const strikeCount = Math.min(4, 1 + Math.ceil(meteorLv / 2));
+                    for (let k = 0; k < strikeCount; k++) {
+                        if (gameState.words.length === 0) break;
+                        destroyStudentWord(0, true, 'AUTO');
+                    }
+                }
+            }
+
+            // When Personal Boss is active or Awakened Auto is active, keep words streaming continuously!
+            const baseInterval = gameState.awakenedAuto
+                ? 0.42
+                : gameState.boss.active
+                    ? 0.72
+                    : Math.max(0.75, 1.65 - gameState.elapsedTime * 0.014);
+            const minWordsOnScreen = gameState.awakenedAuto ? 3 : gameState.boss.active ? 3 : 1;
+
+            gameState.spawnTimer -= dt;
+            if (gameState.spawnTimer <= 0 || gameState.words.length < minWordsOnScreen) {
+                spawnStudentWord();
+                gameState.spawnTimer = baseInterval;
+            }
+
+            if (gameState.boss.active) {
+                gameState.boss.x = canvasWidth / 2 + Math.sin(gameState.elapsedTime * 1.8) * Math.min(70, canvasWidth * 0.14);
+                if (gameState.boss.hitFlash > 0) {
+                    gameState.boss.hitFlash = Math.max(0, gameState.boss.hitFlash - dt * 4.5);
+                }
+            }
+
+            for (let i = gameState.lasers.length - 1; i >= 0; i--) {
+                gameState.lasers[i].life -= dt * 5.5;
+                if (gameState.lasers[i].life <= 0) gameState.lasers.splice(i, 1);
+            }
+            for (let i = gameState.bossBeams.length - 1; i >= 0; i--) {
+                gameState.bossBeams[i].life -= dt * 4.2;
+                if (gameState.bossBeams[i].life <= 0) gameState.bossBeams.splice(i, 1);
+            }
+            for (let i = gameState.particles.length - 1; i >= 0; i--) {
+                const p = gameState.particles[i];
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.vy += 180 * dt;
+                p.life -= dt * 2.2;
+                if (p.life <= 0) gameState.particles.splice(i, 1);
+            }
+            for (let i = gameState.popups.length - 1; i >= 0; i--) {
+                const pop = gameState.popups[i];
+                pop.y -= 36 * dt;
+                pop.life -= dt * 1.35;
+                if (pop.life <= 0) gameState.popups.splice(i, 1);
+            }
+
+            updateStudentHUD();
+        }
+
+        function drawCrtCanvasText(ctx, text, x, y, mainColor, timeSec, intensity = 1) {
+            const wave = 1.0 + Math.sin(timeSec * 5.2) * 0.35;
+            const glitchKick = Math.sin(timeSec * 29.0) > 0.96 ? 1.35 : 0;
+            const split = (wave + glitchKick) * intensity;
+            const jitterX = glitchKick > 0 ? (Math.sin(timeSec * 71.0) * 0.7) : 0;
+
+            ctx.fillStyle = 'rgba(244, 63, 94, 0.62)';
+            ctx.fillText(text, x - split + jitterX, y);
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.62)';
+            ctx.fillText(text, x + split + jitterX, y);
+            ctx.fillStyle = mainColor;
+            ctx.fillText(text, x + jitterX, y);
+        }
+
+        function drawPersonalBoss(ctx, nowSec) {
+            if (!gameState.boss.active) return;
+            const bx = Math.round(gameState.boss.x);
+            const by = Math.round(gameState.boss.y + Math.sin(nowSec * 3.5) * 3);
+            const isHit = gameState.boss.hitFlash > 0.2;
+
+            ctx.save();
+            // Boss Aura
+            ctx.shadowColor = isHit ? '#ffffff' : '#f43f5e';
+            ctx.shadowBlur = isHit ? 22 : 14;
+
+            // Main Saucer / Mothership Hull (Pixel Art Blocks)
+            const hullMain = isHit ? '#ffffff' : '#4c1d95';
+            const hullTrim = isHit ? '#fef08a' : '#f43f5e';
+            const coreColor = isHit ? '#ef4444' : '#facc15';
+
+            // Upper Dome
+            ctx.fillStyle = isHit ? '#ffffff' : '#38bdf8';
+            ctx.fillRect(bx - 24, by - 22, 48, 10);
+            ctx.fillRect(bx - 16, by - 28, 32, 6);
+
+            // Wide Armored Body
+            ctx.fillStyle = hullMain;
+            ctx.fillRect(bx - 54, by - 12, 108, 16);
+            ctx.fillRect(bx - 42, by + 4, 84, 8);
+
+            // Side Cannons (where words stream out)
+            ctx.fillStyle = hullTrim;
+            ctx.fillRect(bx - 50, by + 10, 12, 10);
+            ctx.fillRect(bx + 38, by + 10, 12, 10);
+            ctx.fillRect(bx - 18, by + 10, 36, 6);
+
+            // Glowing Eyes & Core
+            ctx.fillStyle = coreColor;
+            ctx.fillRect(bx - 30, by - 7, 10, 6);
+            ctx.fillRect(bx + 20, by - 7, 10, 6);
+            ctx.fillRect(bx - 8, by - 8, 16, 8);
+
+            ctx.restore();
+
+            // Boss Name & HP Bar above Boss
+            const barW = Math.min(240, canvasWidth - 40);
+            const barH = 12;
+            const barX = Math.round(canvasWidth / 2 - barW / 2);
+            const barY = 8;
+            const hpRatio = Math.max(0, gameState.boss.hp / gameState.boss.maxHp);
+
+            ctx.fillStyle = 'rgba(9, 7, 20, 0.88)';
+            ctx.fillRect(barX - 2, barY - 2, barW + 4, barH + 4);
+            ctx.strokeStyle = '#fb7185';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(barX - 2, barY - 2, barW + 4, barH + 4);
+
+            // HP Fill
+            ctx.fillStyle = hpRatio > 0.5 ? '#f43f5e' : hpRatio > 0.25 ? '#f97316' : '#facc15';
+            ctx.fillRect(barX, barY, Math.round(barW * hpRatio), barH);
+
+            // Boss Name & Numeric HP
+            ctx.font = 'bold 10px "Galmuri11", monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(
+                `${gameState.boss.name} (${gameState.boss.hp}/${gameState.boss.maxHp})`,
+                canvasWidth / 2,
+                barY + barH / 2 + 0.5
+            );
+            ctx.textAlign = 'left';
+        }
+
+        function drawStudentGame() {
+            const nowSec = performance.now() / 1000;
+            ctx.fillStyle = '#090714';
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            ctx.strokeStyle = 'rgba(59, 53, 117, 0.16)';
+            ctx.lineWidth = 1;
+            for (let gx = 0; gx < canvasWidth; gx += 32) {
+                ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, canvasHeight); ctx.stroke();
+            }
+            for (let gy = 0; gy < canvasHeight; gy += 32) {
+                ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(canvasWidth, gy); ctx.stroke();
+            }
+
+            for (const s of gameState.stars) {
+                ctx.fillStyle = `rgba(226, 232, 240, ${s.alpha})`;
+                ctx.fillRect(s.x, s.y, s.size, s.size);
+            }
+
+            if (gameState.freezeTimer > 0) {
+                ctx.fillStyle = 'rgba(34, 211, 238, 0.08)';
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            }
+
+            const defenseLineY = canvasHeight - 62;
+            ctx.save();
+            ctx.strokeStyle = 'rgba(244, 63, 94, 0.65)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 6]);
+            ctx.beginPath();
+            ctx.moveTo(0, defenseLineY);
+            ctx.lineTo(canvasWidth, defenseLineY);
+            ctx.stroke();
+            ctx.restore();
+
+            // Draw Quokka Spaceship at bottom center
+            drawQuokkaSpaceship(ctx, canvasWidth / 2, canvasHeight - 31, nowSec, gameState.shipRecoil || 0, 2.4);
+
+            // Draw Personal Boss at top if active
+            drawPersonalBoss(ctx, nowSec);
+
+            for (const l of gameState.lasers) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, l.life);
+                ctx.strokeStyle = l.color;
+                ctx.lineWidth = 4 * l.life;
+                ctx.shadowColor = l.color;
+                ctx.shadowBlur = 12;
+                ctx.beginPath();
+                ctx.moveTo(l.x1, l.y1);
+                ctx.lineTo(l.x2, l.y2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Draw Boss Attack Plasma Beams (Word -> Boss)
+            for (const b of gameState.bossBeams) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, b.life);
+                ctx.strokeStyle = '#fb7185';
+                ctx.lineWidth = 6 * b.life;
+                ctx.shadowColor = '#facc15';
+                ctx.shadowBlur = 16;
+                ctx.beginPath();
+                ctx.moveTo(b.x1, b.y1);
+                ctx.lineTo(b.x2, b.y2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            const currentTyped = wordInput.value.trim().toLowerCase();
+            ctx.font = 'bold 15px "Galmuri11", monospace';
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'left';
+
+            for (const w of gameState.words) {
+                const isPrefixMatch = currentTyped.length > 0 && w.text.toLowerCase().startsWith(currentTyped);
+                let borderColor = '#3b3575';
+                let bgColor = 'rgba(15, 12, 33, 0.92)';
+                let badge = '';
+
+                if (w.type === 'bonus') { borderColor = '#facc15'; bgColor = 'rgba(66, 48, 8, 0.92)'; badge = '★ '; }
+                else if (w.type === 'bomb') { borderColor = '#fb7185'; bgColor = 'rgba(68, 13, 27, 0.92)'; badge = '💣 '; }
+                else if (w.type === 'freeze') { borderColor = '#22d3ee'; bgColor = 'rgba(11, 52, 66, 0.92)'; badge = '❄️ '; }
+                else if (w.type === 'boss') { borderColor = '#c084fc'; bgColor = 'rgba(46, 16, 77, 0.94)'; badge = '👾 '; }
+
+                if (isPrefixMatch) borderColor = '#facc15';
+
+                ctx.save();
+                ctx.fillStyle = bgColor;
+                ctx.strokeStyle = borderColor;
+                ctx.lineWidth = isPrefixMatch || w.type !== 'normal' ? 2.5 : 2;
+                ctx.fillRect(w.x, w.y, w.w, w.h);
+                ctx.strokeRect(w.x, w.y, w.w, w.h);
+                ctx.restore();
+
+                const fullLabel = badge + w.text;
+                const totalTextW = ctx.measureText(fullLabel).width;
+                let drawX = w.x + (w.w - totalTextW) / 2;
+                const drawY = w.y + w.h / 2 + 1;
+
+                if (badge) {
+                    drawCrtCanvasText(ctx, badge, drawX, drawY, borderColor, nowSec, 0.9);
+                    drawX += ctx.measureText(badge).width;
+                }
+                if (isPrefixMatch) {
+                    const matchedPart = w.text.slice(0, currentTyped.length);
+                    const restPart = w.text.slice(currentTyped.length);
+                    drawCrtCanvasText(ctx, matchedPart, drawX, drawY, '#facc15', nowSec, 1.1);
+                    drawX += ctx.measureText(matchedPart).width;
+                    drawCrtCanvasText(ctx, restPart, drawX, drawY, '#f8fafc', nowSec, 0.95);
+                } else {
+                    drawCrtCanvasText(ctx, w.text, drawX, drawY, '#f8fafc', nowSec, 0.95);
+                }
+            }
+
+            for (const p of gameState.particles) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.life);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+                ctx.restore();
+            }
+
+            ctx.font = 'bold 13px "Galmuri11", monospace';
+            ctx.textAlign = 'center';
+            for (const pop of gameState.popups) {
+                ctx.globalAlpha = Math.max(0, pop.life);
+                drawCrtCanvasText(ctx, pop.text, pop.x, pop.y, pop.color, nowSec, 1.15);
+            }
+            ctx.globalAlpha = 1;
+            ctx.textAlign = 'left';
+        }
+
+        function updateStudentHUD() {
+            // Update Top EXP Gauge & Equipped Skills
+            document.getElementById('hudLevelBadge').textContent = `Lv.${gameState.level}`;
+            const curExp = Math.floor(gameState.exp);
+            const maxExp = gameState.expToNext;
+            document.getElementById('hudExpText').textContent = `EXP ${curExp} / ${maxExp}개`;
+            const expPct = Math.min(100, Math.round((gameState.exp / maxExp) * 100));
+            document.getElementById('hudExpBar').style.width = `${expPct}%`;
+
+            const skillsContainer = document.getElementById('hudEquippedSkills');
+            const badges = [];
+            if (gameState.awakenedAuto) {
+                badges.push(`<span class="bg-yellow-400/25 border border-yellow-400 text-yellow-300 px-1.5 py-0.5 rounded font-bold">🌟각성오토</span>`);
+            }
+            Object.entries(gameState.skills).forEach(([id, lv]) => {
+                if (lv > 0 && SKILL_CATALOG[id]) {
+                    const sk = SKILL_CATALOG[id];
+                    badges.push(`<span class="bg-[#1b173d] border border-[#3b3575] text-cyan-200 px-1.5 py-0.5 rounded">${sk.icon}${sk.name} Lv.${lv}</span>`);
+                }
+            });
+            skillsContainer.innerHTML = badges.length > 0
+                ? badges.join('')
+                : `<span class="text-slate-400">6개 격추 시 첫 스킬 선택!</span>`;
+
+            document.getElementById('hudSteps').textContent = `${gameState.wordsDestroyed}칸`;
+            document.getElementById('hudTimer').textContent = `${gameState.timeLeft.toFixed(1)}s`;
+            document.getElementById('hudTimer').className = gameState.timeLeft <= 10
+                ? 'text-sm sm:text-base font-bold text-rose-400 animate-pulse'
+                : 'text-sm sm:text-base font-bold text-cyan-300';
+            document.getElementById('hudScore').textContent = gameState.score.toLocaleString();
+            document.getElementById('hudCombo').textContent = gameState.combo;
+
+            const minutes = Math.max(0.05, gameState.elapsedTime / 60);
+            const mult = gameState.lang === 'en' ? 1 : 2.3;
+            const cpm = Math.round((gameState.charsTyped * mult) / minutes);
+            document.getElementById('hudCpm').textContent = `${cpm} 타/분`;
+
+            const isFever = gameState.combo >= 10;
+            document.getElementById('feverIndicator').classList.toggle('hidden', !isFever);
+            arcadeFrame.classList.toggle('fever-active', isFever && appState.currentView === 'studentGame');
+            document.getElementById('freezeIndicator').classList.toggle('hidden', gameState.freezeTimer <= 0);
+            document.getElementById('awakenedIndicator').classList.toggle('hidden', !gameState.awakenedAuto);
+        }
+
+        function finishStudentGameplay() {
+            if (!gameState.playing) return;
+            gameState.playing = false;
+            cancelAnimationFrame(studentAnimId);
+            sfx.gameOver();
+
+            const minutes = Math.max(0.05, gameState.elapsedTime / 60);
+            const mult = gameState.lang === 'en' ? 1 : 2.3;
+            const avgCpm = Math.round((gameState.charsTyped * mult) / minutes);
+            const acc = gameState.totalAttempts > 0
+                ? Math.round((gameState.wordsDestroyed / gameState.totalAttempts) * 100)
+                : 100;
+
+            document.getElementById('sResSteps').textContent = `${gameState.wordsDestroyed}칸`;
+            document.getElementById('sResScore').textContent = `${gameState.score.toLocaleString()}점`;
+            document.getElementById('sResCpm').textContent = `${avgCpm} 타/분`;
+            document.getElementById('sResAcc').textContent = `${gameState.maxCombo} / ${acc}%`;
+
+            switchView('studentResult');
+            updateStudentFinalRankDisplay();
+        }
+
+        function updateStudentFinalRankDisplay() {
+            const idx = appState.playersList.findIndex(p => p.playerId === appState.playerId);
+            const total = appState.playersList.length;
+            const badge = document.getElementById('studentFinalRankBadge');
+            if (idx !== -1) {
+                const medal = idx === 0 ? '👑 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : '🚀 ';
+                badge.textContent = `${medal}전체 ${total}명 중 ${idx + 1}위 달성!`;
+            } else {
+                badge.textContent = `🚀 총 ${gameState.wordsDestroyed}칸 전진 완료!`;
+            }
+        }
+
+        // ==========================================
+        // 11. HALL OF FAME RENDERER
+        // ==========================================
+        function renderHallOfFameTable(records) {
+            const tbody = document.getElementById('hofTableBody');
+            const sorted = [...records]
+                .sort((a, b) => {
+                    if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+                    return (b.wordsDestroyed || 0) - (a.wordsDestroyed || 0);
+                })
+                .slice(0, 20);
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-slate-400">
+                            아직 등록된 기록이 없습니다. 첫 번째 명예의 전당 주인공이 되어보세요!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = sorted.map((r, idx) => {
+                const rankIcon = idx === 0 ? '👑 1위' : idx === 1 ? '🥈 2위' : idx === 2 ? '🥉 3위' : `${idx + 1}위`;
+                const rowHighlight = idx === 0
+                    ? 'bg-yellow-400/10 text-yellow-300'
+                    : idx === 1
+                        ? 'bg-slate-300/5 text-slate-200'
+                        : idx === 2
+                            ? 'bg-amber-600/10 text-amber-300'
+                            : 'text-slate-300';
+
+                return `
+                    <tr class="${rowHighlight}">
+                        <td class="py-2.5 px-3 text-center font-bold">${rankIcon}</td>
+                        <td class="py-2.5 px-3 font-bold text-white">${escapeHtml(r.name || '익명')}</td>
+                        <td class="py-2.5 px-3 text-right text-emerald-400 font-bold">${r.wordsDestroyed || 0}칸</td>
+                        <td class="py-2.5 px-3 text-right text-yellow-400 font-bold">${(r.score || 0).toLocaleString()}</td>
+                        <td class="py-2.5 px-3 text-right text-cyan-300 hidden sm:table-cell">${r.cpm || 0}타</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ==========================================
+        // 12. EVENT LISTENERS & URL BOOTSTRAP
+        // ==========================================
+        document.getElementById('selectTeacherBtn').addEventListener('click', () => openTeacherSetup());
+        document.getElementById('selectStudentBtn').addEventListener('click', () => openStudentMode());
+
+        // Enforce numeric-only input on Grade/Class fields
+        document.getElementById('teacherClassInput').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+        document.getElementById('studentClassInput').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+        document.getElementById('studentRoomInput').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        // Teacher Class Setup Submit & Enter key support
+        document.getElementById('createClassRoomBtn').addEventListener('click', handleCreateClassRoom);
+        document.getElementById('teacherSchoolInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('teacherClassInput').focus();
+            }
+        });
+        document.getElementById('teacherClassInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleCreateClassRoom();
+            }
+        });
+        document.getElementById('teacherSetupBackBtn').addEventListener('click', resetToHome);
+
+        document.getElementById('selectHofBtn').addEventListener('click', () => {
+            subscribeToHallOfFame();
+            switchView('hallOfFame');
+        });
+        document.getElementById('openHofHeaderBtn').addEventListener('click', () => {
+            subscribeToHallOfFame();
+            switchView('hallOfFame');
+        });
+        document.getElementById('podiumHofBtn').addEventListener('click', () => {
+            subscribeToHallOfFame();
+            switchView('hallOfFame');
+        });
+        document.getElementById('studentResultHofBtn').addEventListener('click', () => {
+            subscribeToHallOfFame();
+            switchView('hallOfFame');
+        });
+        document.getElementById('closeHofBtn').addEventListener('click', () => {
+            switchView(appState.previousView || 'roleSelect');
+        });
+
+        function resetToHome() {
+            cleanupRoomListeners();
+            gameState.playing = false;
+            cancelAnimationFrame(studentAnimId);
+            cancelAnimationFrame(teacherRaceAnimId);
+            appState.role = null;
+            appState.roomCode = '';
+            roleBadge.classList.add('hidden');
+            setUrlQuery(null, null);
+            switchView('roleSelect');
+        }
+
+        document.getElementById('homeLogoBtn').addEventListener('click', resetToHome);
+        document.getElementById('teacherLeaveLobbyBtn').addEventListener('click', resetToHome);
+        document.getElementById('podiumHomeBtn').addEventListener('click', resetToHome);
+        document.getElementById('studentBackHomeBtn').addEventListener('click', resetToHome);
+
+        // Copy Join URL (using execCommand for iFrame compatibility)
+        document.getElementById('copyJoinLinkBtn').addEventListener('click', () => {
+            const url = buildJoinUrl(appState.roomCode);
+            const tempInput = document.createElement('input');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast(`입장 주소가 복사되었습니다! (${url})`);
+        });
+
+        // Teacher Settings Buttons
+        document.querySelectorAll('.dur-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                appState.selectedDuration = Number(btn.dataset.duration);
+                if (appState.roomCode) {
+                    writeRoomState(appState.roomCode, { duration: appState.selectedDuration });
+                }
+            });
+        });
+
+        document.querySelectorAll('.t-lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.t-lang-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                appState.selectedLang = btn.dataset.lang;
+                if (appState.roomCode) {
+                    writeRoomState(appState.roomCode, { lang: appState.selectedLang });
+                }
+            });
+        });
+
+        // Keyboard shortcut 1, 2, 3 for Skill Selection Modal
+        window.addEventListener('keydown', (e) => {
+            if (gameState.skillModalOpen && ['1', '2', '3'].includes(e.key)) {
+                e.preventDefault();
+                applySelectedSkill(Number(e.key) - 1);
+            }
+        });
+
+        // Teacher Start Group Countdown (3, 2, 1)
+        document.getElementById('teacherStartRaceBtn').addEventListener('click', async () => {
+            if (!appState.roomCode) return;
+            appState.visualSteps = {};
+            appState.boostFlashes = {};
+            const startAt = Date.now() + 3400; // 3.4s ahead for synchronized 3-2-1 countdown
+            await writeRoomState(appState.roomCode, {
+                status: 'countdown',
+                startAt,
+                duration: appState.selectedDuration,
+                lang: appState.selectedLang
+            });
+        });
+
+        document.getElementById('teacherForceEndBtn').addEventListener('click', () => finishTeacherRace());
+
+        document.getElementById('teacherRematchBtn').addEventListener('click', async () => {
+            appState.visualSteps = {};
+            appState.boostFlashes = {};
+            switchView('teacherLobby');
+            await writeRoomState(appState.roomCode, {
+                status: 'lobby',
+                startAt: null
+            });
+        });
+
+        // Student Join & Wait Rematch
+        document.getElementById('studentJoinSubmitBtn').addEventListener('click', submitStudentJoin);
+        document.getElementById('studentSchoolInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('studentClassInput').focus();
+            }
+        });
+        document.getElementById('studentClassInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('studentRoomInput').focus();
+            }
+        });
+        document.getElementById('studentNameInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitStudentJoin();
+            }
+        });
+        document.getElementById('studentRoomInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('studentNameInput').focus();
+            }
+        });
+
+        document.getElementById('studentWaitRematchBtn').addEventListener('click', () => {
+            switchView('studentJoin');
+            document.getElementById('studentJoinForm').classList.add('hidden');
+            document.getElementById('studentWaitingBox').classList.remove('hidden');
+            document.getElementById('studentWaitingBox').classList.add('flex');
+        });
+
+        // Student Typing Events
+        wordInput.addEventListener('input', () => checkStudentTypedWord(false));
+        wordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkStudentTypedWord(true);
+            }
+        });
+        document.getElementById('fireBtn').addEventListener('click', () => {
+            checkStudentTypedWord(true);
+            wordInput.focus();
+        });
+
+        // Sound Toggle
+        document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
+            sfx.enabled = !sfx.enabled;
+            e.target.textContent = sfx.enabled ? '🔊 ON' : '🔇 OFF';
+        });
+
+        window.addEventListener('resize', () => {
+            if (appState.currentView === 'teacherRace') resizeTeacherCanvas();
+            if (appState.currentView === 'studentGame') resizeStudentCanvas();
+        });
+
+        // Bootstrap on Window Load
+        window.onload = async function () {
+            await initBackend();
+            subscribeToHallOfFame();
+
+            const params = new URLSearchParams(window.location.search);
+            const roomParam = params.get('room');
+            const hostParam = params.get('host');
+
+            if (roomParam && /^\d{4}$/.test(roomParam)) {
+                openStudentMode(roomParam);
+            } else if (hostParam && /^\d{4}$/.test(hostParam)) {
+                const existingRoom = await fetchRoomForVerification(hostParam);
+                if (existingRoom && existingRoom.schoolName && existingRoom.classCode) {
+                    openTeacherMode(hostParam, existingRoom.schoolName, existingRoom.classCode);
+                } else {
+                    openTeacherSetup();
+                }
+            } else {
+                switchView('roleSelect');
+            }
+        };
+    </script>
+</body>
+</html>
