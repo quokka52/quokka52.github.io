@@ -295,9 +295,9 @@
                     <div id="input-name-box" class="hidden mb-5">
                         <div class="flex items-center justify-between mb-1.5">
                             <span class="text-xs sm:text-sm font-bold text-stone-700">학생 이름 명단 (줄바꿈 또는 쉼표로 구분)</span>
-                            <button onclick="applyNameList()" class="retro-btn px-3 py-1 bg-amber-400 text-xs font-bold cursor-pointer">명단 반영</button>
+                            <button onclick="applyNameList(false)" class="retro-btn px-3 py-1 bg-amber-400 text-xs font-bold cursor-pointer">명단 반영</button>
                         </div>
-                        <textarea id="name-list-textarea" rows="5" onchange="applyNameList()" placeholder="김오둥&#10;이수달&#10;박하늘&#10;정다은" class="w-full bg-[#f7f0e4] border-2 border-[#3a2618] p-3 text-sm text-[#2c1e12] font-bold focus:outline-none focus:border-amber-500"></textarea>
+                        <textarea id="name-list-textarea" rows="5" oninput="applyNameList(true)" onchange="applyNameList(false)" placeholder="김오둥&#10;이수달&#10;박하늘&#10;정다은" class="w-full bg-[#f7f0e4] border-2 border-[#3a2618] p-3 text-sm text-[#2c1e12] font-bold focus:outline-none focus:border-amber-500"></textarea>
                     </div>
 
                     <!-- 출석/결석 토글 칩 그리드 -->
@@ -586,6 +586,8 @@
         // --- 1. 전역 상태 관리 ---
         const ROWS = 6;
         const COLS = 8;
+        const STORAGE_KEY = 'odung_seat_picker_roster_v1';
+
         let currentStep = 1;
         let inputMode = 'number'; // 'number' | 'name'
         let studentCount = 24;
@@ -593,13 +595,13 @@
         let deskMap = Array(ROWS * COLS).fill(false); // 48칸 중 책상 배치 여부
         let seatAssignments = {}; // { cellIndex: studentObj }
         let currentPreset = 'pair3';
-        let hasCustomLayout = false;
         let isEditMode = false;
         let isAnimating = false;
         let isTransitioning = false;
         let soundOn = true;
         let chartPerspective = 'student'; // 'student' | 'teacher'
-        let zoomLevel = 1.0;
+        let currentZoom = 1.0;
+        let hasCustomLayout = false;
 
         const BUBBLE_LINES = [
             '내 자리는 어디지?',
@@ -611,56 +613,117 @@
             '여기 내 자리인가?'
         ];
 
-        // --- 2. 확대/축소(Zoom) 기능 ---
+        // --- 화면 확대/축소 제어 ---
         function changeZoom(delta) {
-            if (isAnimating) {
-                showToast('자리 뽑기 진행 중에는 배율을 바꿀 수 없습니다.');
-                return;
-            }
-            const nextZoom = Math.round((zoomLevel + delta) * 10) / 10;
-            if (nextZoom < 0.6 || nextZoom > 1.5) {
-                showToast(nextZoom < 0.6 ? '최소 60%까지 축소할 수 있습니다.' : '최대 150%까지 확대할 수 있습니다.');
-                return;
-            }
-            applyZoom(nextZoom);
-            playTone(delta > 0 ? 540 : 420, 'square', 0.05, 0, 0.04);
+            currentZoom = Math.round(Math.max(0.6, Math.min(1.5, currentZoom + delta)) * 10) / 10;
+            applyZoom();
         }
 
         function resetZoom() {
-            if (isAnimating) return;
-            applyZoom(1.0);
-            playTone(480, 'square', 0.05, 0, 0.04);
+            currentZoom = 1.0;
+            applyZoom();
+            showToast('화면 배율이 100%로 초기화되었습니다.');
         }
 
-        function applyZoom(level) {
-            zoomLevel = level;
+        function applyZoom() {
             const wrapper = document.getElementById('zoom-wrapper');
             const label = document.getElementById('zoom-label');
-            if (label) label.textContent = `${Math.round(zoomLevel * 100)}%`;
-
             if (wrapper) {
-                if ('zoom' in wrapper.style) {
-                    wrapper.style.zoom = zoomLevel;
-                    wrapper.style.transform = '';
-                    wrapper.style.width = '';
-                } else {
-                    // Firefox 등 zoom 미지원 브라우저 폴백
-                    wrapper.style.transformOrigin = 'top left';
-                    wrapper.style.transform = `scale(${zoomLevel})`;
-                    wrapper.style.width = `${100 / zoomLevel}%`;
-                }
+                wrapper.style.zoom = currentZoom;
+            }
+            if (label) {
+                label.textContent = `${Math.round(currentZoom * 100)}%`;
             }
         }
 
-        // --- 3. 초기화 및 단계 전환 (좌우 슬라이드 교차 애니메이션) ---
+        // --- 명단 저장 및 불러오기 ---
+        function saveRosterState() {
+            const payload = {
+                inputMode,
+                studentCount,
+                students,
+                rawNames: document.getElementById('name-list-textarea')?.value || '',
+                updatedAt: Date.now()
+            };
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+            } catch (e) {}
+
+            if (typeof window.saveSeatRosterToCloud === 'function') {
+                window.saveSeatRosterToCloud(payload);
+            }
+        }
+
+        function applyLoadedRosterData(data) {
+            if (!data || !Array.isArray(data.students) || data.students.length === 0) return false;
+
+            inputMode = data.inputMode === 'name' ? 'name' : 'number';
+            studentCount = Math.max(2, Math.min(48, Number(data.studentCount) || data.students.length));
+            students = data.students.slice(0, 48).map((s, idx) => ({
+                id: s.id || idx + 1,
+                label: String(s.label || `${idx + 1}번`),
+                absent: Boolean(s.absent)
+            }));
+
+            document.getElementById('num-count-display').textContent = studentCount;
+            const textarea = document.getElementById('name-list-textarea');
+            if (textarea) {
+                textarea.value = data.rawNames || students.map(s => s.label).join('\n');
+            }
+
+            syncInputModeUI(inputMode);
+            renderStudentChips();
+            if (!hasCustomLayout) {
+                applyPreset(currentPreset);
+            }
+            updateCountsUI();
+            return true;
+        }
+
+        function loadRosterFromLocal() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return false;
+                const parsed = JSON.parse(raw);
+                return applyLoadedRosterData(parsed);
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // --- 2. 초기화 및 단계 전환 (좌우 슬라이드 교차 애니메이션) ---
         function init() {
             const today = new Date();
             const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
             document.getElementById('chalkboard-date').textContent = dateStr;
             document.getElementById('chart-date-text').textContent = dateStr;
 
-            buildStudentsFromCount(24);
-            applyPreset('pair3');
+            const restored = loadRosterFromLocal();
+            if (!restored) {
+                buildStudentsFromCount(24, false);
+                applyPreset('pair3');
+            }
+            setInitialStepView(1);
+        }
+
+        function setInitialStepView(stepNum) {
+            currentStep = stepNum;
+            for (let i = 1; i <= 4; i++) {
+                const view = document.getElementById(`step-view-${i}`);
+                const tab = document.getElementById(`step-tab-${i}`);
+                const badge = tab.querySelector('span:first-child');
+
+                if (i === stepNum) {
+                    view.classList.remove('hidden');
+                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer';
+                    badge.className = 'px-1.5 py-0.5 bg-[#2c1e12] text-amber-300 text-[11px]';
+                } else {
+                    view.classList.add('hidden');
+                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer';
+                    badge.className = 'px-1.5 py-0.5 bg-stone-500 text-white text-[11px]';
+                }
+            }
             updateCountsUI();
         }
 
@@ -669,7 +732,6 @@
                 if (isAnimating) showToast('자리 뽑기가 진행 중일 때는 이동할 수 없습니다!');
                 return;
             }
-
             if (currentStep === stepNum) return;
 
             const presentCount = students.filter(s => !s.absent).length;
@@ -702,11 +764,10 @@
             const outClass = isForward ? 'anim-slide-out-left' : 'anim-slide-out-right';
             const inClass = isForward ? 'anim-slide-in-right' : 'anim-slide-in-left';
 
-            // 상단 스텝 탭 하이라이트 변경
+            // 상단 스텝 탭 상태 즉시 반영
             for (let i = 1; i <= 4; i++) {
                 const tab = document.getElementById(`step-tab-${i}`);
                 const badge = tab.querySelector('span:first-child');
-
                 if (i === stepNum) {
                     tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer';
                     badge.className = 'px-1.5 py-0.5 bg-[#2c1e12] text-amber-300 text-[11px]';
@@ -716,7 +777,7 @@
                 }
             }
 
-            // 단계별 콘텐츠 미리 준비
+            // 단계별 콘텐츠 사전 렌더링
             if (stepNum === 2) {
                 if (!hasCustomLayout) {
                     applyPreset(currentPreset);
@@ -728,7 +789,6 @@
             } else if (stepNum === 4) {
                 renderSeatChartGrid();
             }
-
             updateCountsUI();
 
             const prevView = document.getElementById(`step-view-${prevStep}`);
@@ -741,8 +801,6 @@
             prevView.classList.add(outClass);
             nextView.classList.add(inClass);
 
-            playTone(isForward ? 520 : 420, 'square', 0.05, 0, 0.04);
-
             setTimeout(() => {
                 prevView.classList.add('hidden');
                 prevView.classList.remove(outClass);
@@ -752,10 +810,8 @@
             }, 340);
         }
 
-        // --- 4. 참가자 관리 (번호/이름 & 출석/결석) ---
-        function switchInputMode(mode) {
-            if (isAnimating) return;
-            inputMode = mode;
+        // --- 3. 참가자 관리 (번호/이름 & 출석/결석) ---
+        function syncInputModeUI(mode) {
             const numBtn = document.getElementById('mode-num-btn');
             const nameBtn = document.getElementById('mode-name-btn');
             const numBox = document.getElementById('input-number-box');
@@ -766,25 +822,37 @@
                 nameBtn.className = 'retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm font-bold cursor-pointer';
                 numBox.classList.remove('hidden');
                 nameBox.classList.add('hidden');
-                buildStudentsFromCount(studentCount);
             } else {
                 nameBtn.className = 'retro-btn py-2.5 bg-[#2c1e12] text-white text-sm font-bold cursor-pointer';
                 numBtn.className = 'retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm font-bold cursor-pointer';
                 nameBox.classList.remove('hidden');
                 numBox.classList.add('hidden');
-                if (!document.getElementById('name-list-textarea').value.trim()) {
-                    document.getElementById('name-list-textarea').value = students.map(s => s.label).join('\n');
+            }
+        }
+
+        function switchInputMode(mode) {
+            if (isAnimating) return;
+            inputMode = mode;
+            syncInputModeUI(mode);
+
+            if (mode === 'number') {
+                buildStudentsFromCount(studentCount, true);
+            } else {
+                const textarea = document.getElementById('name-list-textarea');
+                if (!textarea.value.trim()) {
+                    textarea.value = students.map(s => s.label).join('\n');
                 }
+                applyNameList(true);
             }
         }
 
         function changeStudentCount(delta) {
             if (isAnimating) return;
-            buildStudentsFromCount(studentCount + delta);
+            buildStudentsFromCount(studentCount + delta, true);
             playTone(440, 'square', 0.05, 0, 0.05);
         }
 
-        function buildStudentsFromCount(count) {
+        function buildStudentsFromCount(count, shouldSave = true) {
             studentCount = Math.max(2, Math.min(48, count));
             document.getElementById('num-count-display').textContent = studentCount;
             students = Array.from({ length: studentCount }, (_, i) => ({
@@ -795,24 +863,28 @@
             renderStudentChips();
             if (!hasCustomLayout) applyPreset(currentPreset);
             updateCountsUI();
+            if (shouldSave) saveRosterState();
         }
 
-        function applyNameList() {
+        function applyNameList(silent = false) {
             if (isAnimating) return;
             const raw = document.getElementById('name-list-textarea').value;
             const names = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
             if (names.length === 0) {
-                showToast('최소 1명 이상의 이름을 입력해 주세요!');
+                if (!silent) showToast('최소 1명 이상의 이름을 입력해 주세요!');
                 return;
             }
+            const prevAbsentMap = new Map(students.map(s => [s.label, s.absent]));
             students = names.slice(0, 48).map((name, idx) => ({
                 id: idx + 1,
                 label: name,
-                absent: false
+                absent: prevAbsentMap.get(name) || false
             }));
             renderStudentChips();
             if (!hasCustomLayout) applyPreset(currentPreset);
             updateCountsUI();
+            saveRosterState();
+            if (!silent) showToast(`총 ${students.length}명의 명단이 저장되었습니다!`);
         }
 
         function toggleAbsent(id) {
@@ -823,6 +895,7 @@
             renderStudentChips();
             if (!hasCustomLayout) applyPreset(currentPreset);
             updateCountsUI();
+            saveRosterState();
         }
 
         function resetAbsent() {
@@ -831,6 +904,7 @@
             renderStudentChips();
             if (!hasCustomLayout) applyPreset(currentPreset);
             updateCountsUI();
+            saveRosterState();
             showToast('전원 출석 상태로 변경되었습니다.');
         }
 
@@ -859,7 +933,7 @@
             document.getElementById('summary-students').textContent = presentCount;
         }
 
-        // --- 5. 7가지 교실 배치 프리셋 & 직접 꾸미기 ---
+        // --- 4. 7가지 교실 배치 프리셋 & 직접 꾸미기 ---
         function applyPreset(presetName) {
             if (isAnimating) return;
             currentPreset = presetName;
@@ -1008,7 +1082,7 @@
             }
         }
 
-        // --- 6. 교실 무대 렌더링 및 애니메이션 연출 ---
+        // --- 5. 교실 무대 렌더링 및 애니메이션 연출 ---
         function renderDesksGrid() {
             const grid = document.getElementById('desks-grid');
             if (!grid) return;
@@ -1046,6 +1120,7 @@
 
         const sleep = ms => new Promise(res => setTimeout(res, ms));
 
+        // 완전 무작위 Fisher-Yates 셔플 알고리즘
         function fisherYatesShuffle(arr) {
             const copy = [...arr];
             for (let i = copy.length - 1; i > 0; i--) {
@@ -1116,12 +1191,11 @@
                 const stageRect = stageEl.getBoundingClientRect();
                 const doorRect = document.getElementById('classroom-door').getBoundingClientRect();
 
-                // Zoom 배율이 적용되어 있을 때도 정확히 좌표 계산
-                const scaleFactor = zoomLevel || 1;
-                const stageW = stageRect.width / scaleFactor;
-                const stageH = stageRect.height / scaleFactor;
-                const doorX = (doorRect.left - stageRect.left + doorRect.width / 2) / scaleFactor;
-                const doorY = (doorRect.top - stageRect.top + doorRect.height / 2) / scaleFactor;
+                // Zoom 배율을 보정한 교실 내부 좌표 계산
+                const stageWidth = stageRect.width / currentZoom;
+                const stageHeight = stageRect.height / currentZoom;
+                const doorX = (doorRect.left - stageRect.left + doorRect.width / 2) / currentZoom;
+                const doorY = (doorRect.top - stageRect.top + doorRect.height / 2) / currentZoom;
 
                 const activeSprites = [];
                 const enterGap = Math.max(45, Math.min(95, Math.floor(1100 / pairs.length)));
@@ -1149,8 +1223,8 @@
 
                     requestAnimationFrame(() => {
                         el.style.opacity = '1';
-                        const enterX = doorX + 35 + Math.random() * (stageW * 0.55);
-                        const enterY = doorY - 35 - Math.random() * (stageH * 0.45);
+                        const enterX = doorX + 35 + Math.random() * (stageWidth * 0.55);
+                        const enterY = doorY - 35 - Math.random() * (stageHeight * 0.45);
                         el.style.left = `${enterX}px`;
                         el.style.top = `${enterY}px`;
                     });
@@ -1161,11 +1235,12 @@
 
                 await sleep(360);
 
+                // 교실 중앙 복도를 돌아다니며 자리 탐색 (2회 랜덤 이동)
                 teacherBubble.textContent = '어디가 내 자리일까? 두근두근!';
                 for (let wander = 0; wander < 2; wander++) {
                     activeSprites.forEach((sp) => {
-                        const randX = stageW * (0.14 + Math.random() * 0.72);
-                        const randY = stageH * (0.28 + Math.random() * 0.54);
+                        const randX = stageWidth * (0.14 + Math.random() * 0.72);
+                        const randY = stageHeight * (0.28 + Math.random() * 0.54);
                         sp.el.style.left = `${randX}px`;
                         sp.el.style.top = `${randY}px`;
                     });
@@ -1173,6 +1248,7 @@
                     await sleep(430);
                 }
 
+                // 배정된 랜덤 책상으로 한 명씩 달려가 착석!
                 teacherBubble.textContent = '자리 발표! 자기 책상으로 착석!!';
                 const sitGap = Math.max(40, Math.min(95, Math.floor(1000 / activeSprites.length)));
 
@@ -1181,9 +1257,10 @@
                     sp.el.classList.add('sprinting');
                     const targetCell = document.querySelector(`#desks-grid [data-cell-idx="${sp.pair.seatIdx}"]`);
                     if (targetCell) {
+                        const currentStageRect = stageEl.getBoundingClientRect();
                         const cellRect = targetCell.getBoundingClientRect();
-                        const tx = (cellRect.left - stageRect.left + cellRect.width / 2) / scaleFactor;
-                        const ty = (cellRect.top - stageRect.top + cellRect.height / 2) / scaleFactor;
+                        const tx = (cellRect.left - currentStageRect.left + cellRect.width / 2) / currentZoom;
+                        const ty = (cellRect.top - currentStageRect.top + cellRect.height / 2) / currentZoom;
                         sp.el.style.left = `${tx}px`;
                         sp.el.style.top = `${ty}px`;
                     }
@@ -1216,7 +1293,7 @@
             instantBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
 
-        // --- 7. STEP 4 자리표 확인 및 저장/인쇄 ---
+        // --- 6. STEP 4 자리표 확인 및 저장/인쇄 ---
         function setChartPerspective(perspective) {
             chartPerspective = perspective;
             const stuBtn = document.getElementById('view-student-btn');
@@ -1372,7 +1449,7 @@
             showToast('자리표 이미지가 저장되었습니다!');
         }
 
-        // --- 8. 효과음 & 유틸리티 ---
+        // --- 7. 효과음 & 유틸리티 ---
         let audioCtx = null;
         function playTone(freq, type = 'square', duration = 0.08, delay = 0, vol = 0.06) {
             if (!soundOn) return;
@@ -1431,6 +1508,73 @@
 
         // 초기 실행
         init();
+    </script>
+
+    <!-- 클라우드 환경 명단 동기화 모듈 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let pendingPayload = null;
+
+        window.saveSeatRosterToCloud = async function(payload) {
+            if (!db || !currentUser) {
+                pendingPayload = JSON.parse(JSON.stringify(payload));
+                return;
+            }
+            try {
+                const rosterRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'seat_roster');
+                await setDoc(rosterRef, payload);
+            } catch (err) {
+                console.error('자리뽑기 명단 저장 오류:', err);
+            }
+        };
+
+        async function initSeatCloudSync() {
+            if (!firebaseConfig) return;
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                currentUser = auth.currentUser;
+                if (!currentUser) return;
+
+                if (pendingPayload) {
+                    const toSave = pendingPayload;
+                    pendingPayload = null;
+                    await window.saveSeatRosterToCloud(toSave);
+                }
+
+                const rosterRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'seat_roster');
+                onSnapshot(rosterRef, (snapshot) => {
+                    if (!currentUser || !snapshot.exists()) return;
+                    const data = snapshot.data();
+                    if (typeof applyLoadedRosterData === 'function') {
+                        applyLoadedRosterData(data);
+                    }
+                }, (error) => {
+                    console.error('자리뽑기 명단 불러오기 오류:', error);
+                });
+            } catch (err) {
+                console.error('저장소 연결 오류:', err);
+            }
+        }
+
+        initSeatCloudSync();
     </script>
 </body>
 </html>
