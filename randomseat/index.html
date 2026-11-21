@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오둥이 앉아라 자리뽑기 - Odung Seat Picker</title>
+    <title>오둥이 자리뽑기 - Odung Seat Picker</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='40' fill='%23FFA400'/%3E%3Cpath d='M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z' fill='%23FFFFFF' stroke='%23000000' stroke-width='9' stroke-linejoin='round'/%3E%3Cellipse cx='85' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='85' cy='95' r='4.5' fill='%23000000'/%3E%3Cellipse cx='115' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='115' cy='95' r='4.5' fill='%23000000'/%3E%3Cpath d='M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z' fill='%23FFA400' stroke='%23000000' stroke-width='6.5' stroke-linejoin='round'/%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -105,11 +105,11 @@
         }
 
         @keyframes waddle {
-            0%, 100% { transform: translateY(0px) rotate(-6deg); }
-            50% { transform: translateY(-5px) rotate(6deg); }
+            0%, 100% { transform: translateY(0px) rotate(-4deg); }
+            50% { transform: translateY(-4px) rotate(4deg); }
         }
         .walking .sprite-body {
-            animation: waddle 0.22s infinite ease-in-out;
+            animation: waddle 0.26s infinite ease-in-out;
         }
 
         @keyframes seatBounce {
@@ -119,6 +119,51 @@
         }
         .seated-pop {
             animation: seatBounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* 단계별 좌우 교차(슬라이드 + 페이드) 애니메이션 */
+        .step-container {
+            display: grid;
+            grid-template-areas: "stack";
+            overflow-x: hidden;
+            width: 100%;
+            padding: 4px;
+        }
+        .step-view {
+            grid-area: stack;
+            width: 100%;
+        }
+
+        @keyframes slideOutLeft {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(-60px); opacity: 0; }
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(60px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(60px); opacity: 0; }
+        }
+        @keyframes slideInLeft {
+            from { transform: translateX(-60px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .anim-slide-out-left {
+            animation: slideOutLeft 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            pointer-events: none;
+        }
+        .anim-slide-in-right {
+            animation: slideInRight 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .anim-slide-out-right {
+            animation: slideOutRight 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            pointer-events: none;
+        }
+        .anim-slide-in-left {
+            animation: slideInLeft 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
         @media print {
@@ -131,7 +176,6 @@
                 width: 100%;
                 border: none !important;
                 box-shadow: none !important;
-                transform: none !important; /* 인쇄 시 확대비율 해제 */
             }
             .no-print { display: none !important; }
         }
@@ -139,384 +183,396 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-amber-300 selection:text-stone-900">
 
-    <!-- 상단 헤더 -->
-    <header class="max-w-7xl w-full mx-auto px-4 pt-4 pb-3 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-xl overflow-hidden bg-[#FFA400] flex items-center justify-center border-[3px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618]">
-                <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="200" height="200" fill="#FFA400" />
-                    <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin="round" />
-                    <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
-                    <circle cx="85" cy="95" r="4.5" fill="#000000" />
-                    <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
-                    <circle cx="115" cy="95" r="4.5" fill="#000000" />
-                    <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="6.5" stroke-linejoin="round" />
-                </svg>
+    <!-- 확대/축소(Zoom)가 적용되는 전체 래퍼 -->
+    <div id="zoom-wrapper" class="w-full flex-grow flex flex-col transition-all duration-150">
+
+        <!-- 상단 헤더 -->
+        <header class="max-w-7xl w-full mx-auto px-4 pt-4 pb-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl overflow-hidden bg-[#FFA400] flex items-center justify-center border-[3px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618]">
+                    <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="200" height="200" fill="#FFA400" />
+                        <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin="round" />
+                        <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
+                        <circle cx="85" cy="95" r="4.5" fill="#000000" />
+                        <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
+                        <circle cx="115" cy="95" r="4.5" fill="#000000" />
+                        <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="6.5" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 bg-emerald-700 text-amber-200 text-[11px] font-bold border border-[#3a2618]">두근두근 자리 바꾸는 날</span>
+                        <span class="text-xs text-stone-600 font-bold">ODUNG GAMES</span>
+                    </div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-[#2c1e12] tracking-tight mt-0.5">오둥이 자리뽑기</h1>
+                </div>
             </div>
-            <div>
-                <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 bg-emerald-700 text-amber-200 text-[11px] font-bold border border-[#3a2618]">두근두근 자리 바꾸는 날</span>
-                    <span class="text-xs text-stone-600 font-bold">ODUNG GAMES</span>
+
+            <!-- 우측 컨트롤: 화면 확대/축소 + 효과음 ON/OFF -->
+            <div class="flex items-center gap-2">
+                <div class="flex items-center bg-[#fffdf8] border-[2.5px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618]" title="화면 배율 확대/축소">
+                    <button onclick="changeZoom(-0.1)" class="px-2.5 py-1 bg-[#f3eadc] hover:bg-amber-200 text-[#2c1e12] text-xs font-bold border-r-2 border-[#3a2618] cursor-pointer" title="화면 축소">
+                        -
+                    </button>
+                    <button onclick="resetZoom()" id="zoom-label" class="px-2.5 py-1 text-xs font-bold text-[#2c1e12] hover:bg-amber-100 min-w-[54px] text-center cursor-pointer" title="100% 기본 크기로 복귀">
+                        100%
+                    </button>
+                    <button onclick="changeZoom(0.1)" class="px-2.5 py-1 bg-[#f3eadc] hover:bg-amber-200 text-[#2c1e12] text-xs font-bold border-l-2 border-[#3a2618] cursor-pointer" title="화면 확대">
+                        +
+                    </button>
                 </div>
-                <h1 class="text-xl sm:text-2xl font-bold text-[#2c1e12] tracking-tight mt-0.5">오둥이 앉아라 자리뽑기</h1>
+
+                <button id="sound-btn" onclick="toggleSound()" class="retro-btn px-3 py-1.5 bg-amber-300 text-[#2c1e12] text-xs font-bold cursor-pointer">
+                    🔊 효과음 ON
+                </button>
             </div>
-        </div>
+        </header>
 
-        <div class="flex items-center gap-2">
-            <!-- 확대/축소 버튼 컨트롤 -->
-            <div class="flex items-center bg-[#fffdf8] border-[2.5px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618]">
-                <button onclick="setZoom(-0.1)" class="px-2.5 py-1.5 bg-[#f3eadc] hover:bg-stone-300 text-[#2c1e12] font-bold text-sm border-r-2 border-[#3a2618] cursor-pointer" title="축소">-</button>
-                <span id="zoom-level-text" class="px-3 py-1.5 text-xs font-bold text-[#2c1e12] min-w-[55px] text-center">100%</span>
-                <button onclick="setZoom(0.1)" class="px-2.5 py-1.5 bg-[#f3eadc] hover:bg-stone-300 text-[#2c1e12] font-bold text-sm border-l-2 border-[#3a2618] cursor-pointer" title="확대">+</button>
+        <!-- 상단 4단계 스텝 네비게이션 바 -->
+        <nav class="max-w-6xl w-full mx-auto px-4 mb-5">
+            <div class="retro-panel p-2.5 grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#fff9ed]">
+                <button onclick="goToStep(1)" id="step-tab-1" class="step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="px-1.5 py-0.5 bg-[#2c1e12] text-amber-300 text-[11px]">01</span>
+                    <span>우리 반 친구들</span>
+                </button>
+                <button onclick="goToStep(2)" id="step-tab-2" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="px-1.5 py-0.5 bg-stone-500 text-white text-[11px]">02</span>
+                    <span>자리 배치 선택</span>
+                </button>
+                <button onclick="goToStep(3)" id="step-tab-3" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="px-1.5 py-0.5 bg-stone-500 text-white text-[11px]">03</span>
+                    <span>교실 자리뽑기</span>
+                </button>
+                <button onclick="goToStep(4)" id="step-tab-4" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="px-1.5 py-0.5 bg-stone-500 text-white text-[11px]">04</span>
+                    <span>자리표 저장</span>
+                </button>
             </div>
-            <button id="sound-btn" onclick="toggleSound()" class="retro-btn px-3 py-1.5 bg-amber-300 text-[#2c1e12] text-xs font-bold cursor-pointer">
-                🔊 효과음 ON
-            </button>
-        </div>
-    </header>
+        </nav>
 
-    <!-- 메인 콘텐츠 영역 (이 부분을 확대/축소) -->
-    <main class="w-full flex-grow overflow-x-hidden">
-        <div id="zoom-wrapper" class="w-full max-w-6xl mx-auto px-4 pb-12" style="transform-origin: top center; transition: transform 0.2s ease, margin 0.2s ease;">
-            
-            <!-- 상단 4단계 스텝 네비게이션 바 -->
-            <nav class="w-full mb-5 pt-2">
-                <div class="retro-panel p-2.5 grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#fff9ed]">
-                    <button onclick="goToStep(1)" id="step-tab-1" class="step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                        <span class="px-1.5 py-0.5 bg-[#2c1e12] text-amber-300 text-[11px]">01</span>
-                        <span>우리 반 친구들</span>
-                    </button>
-                    <button onclick="goToStep(2)" id="step-tab-2" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                        <span class="px-1.5 py-0.5 bg-stone-500 text-white text-[11px]">02</span>
-                        <span>자리 배치 선택</span>
-                    </button>
-                    <button onclick="goToStep(3)" id="step-tab-3" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                        <span class="px-1.5 py-0.5 bg-stone-500 text-white text-[11px]">03</span>
-                        <span>교실 자리뽑기</span>
-                    </button>
-                    <button onclick="goToStep(4)" id="step-tab-4" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                        <span class="px-1.5 py-0.5 bg-stone-500 text-white text-[11px]">04</span>
-                        <span>자리표 저장</span>
-                    </button>
-                </div>
-            </nav>
+        <!-- 메인 단계별 컨테이너 (좌우 슬라이드 교차 영역) -->
+        <main class="max-w-6xl w-full mx-auto px-4 pb-12 flex-grow">
+            <div class="step-container">
 
-            <!-- =========================================================
-                 [STEP 1] 우리 반 친구들 설정 화면
-                 ========================================================= -->
-            <section id="step-view-1" class="max-w-2xl mx-auto retro-panel p-5 sm:p-7">
-                <div class="flex items-center justify-between border-b-2 border-[#e5d7c3] pb-3 mb-5">
-                    <div>
-                        <span class="inline-block px-2 py-0.5 bg-amber-400 border border-[#3a2618] text-xs font-bold mb-1">STEP 01</span>
-                        <h2 class="text-lg sm:text-xl font-bold text-[#2c1e12]">우리 반 친구들을 등록해 주세요</h2>
-                    </div>
-                    <div class="px-3 py-1.5 bg-[#f7f0e4] border-2 border-[#3a2618] text-xs sm:text-sm font-bold text-emerald-700">
-                        출석 <span id="present-count-badge" class="text-base">24</span>명
-                    </div>
-                </div>
-
-                <!-- 번호로 / 이름으로 탭 -->
-                <div class="grid grid-cols-2 gap-3 mb-5">
-                    <button id="mode-num-btn" onclick="switchInputMode('number')" class="retro-btn py-2.5 bg-[#2c1e12] text-white text-sm font-bold cursor-pointer">
-                        🔢 번호로 설정
-                    </button>
-                    <button id="mode-name-btn" onclick="switchInputMode('name')" class="retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm font-bold cursor-pointer">
-                        ✏️ 이름으로 설정
-                    </button>
-                </div>
-
-                <!-- 번호 입력 모드 -->
-                <div id="input-number-box" class="mb-5">
-                    <p class="text-xs sm:text-sm text-stone-600 text-center mb-2.5 font-bold">우리 반은 총 몇 명인가요?</p>
-                    <div class="flex items-center justify-center gap-6 bg-[#f7f0e4] border-2 border-[#3a2618] py-4 px-6">
-                        <button onclick="changeStudentCount(-1)" class="retro-btn w-11 h-11 bg-white text-xl font-bold flex items-center justify-center cursor-pointer">-</button>
-                        <div class="text-3xl font-bold text-[#2c1e12] min-w-[96px] text-center">
-                            <span id="num-count-display">24</span><span class="text-base ml-1">명</span>
-                        </div>
-                        <button onclick="changeStudentCount(1)" class="retro-btn w-11 h-11 bg-white text-xl font-bold flex items-center justify-center cursor-pointer">+</button>
-                    </div>
-                </div>
-
-                <!-- 이름 입력 모드 -->
-                <div id="input-name-box" class="hidden mb-5">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="text-xs sm:text-sm font-bold text-stone-700">학생 이름 명단 (줄바꿈 또는 쉼표로 구분)</span>
-                        <button onclick="applyNameList()" class="retro-btn px-3 py-1 bg-amber-400 text-xs font-bold cursor-pointer">명단 반영</button>
-                    </div>
-                    <textarea id="name-list-textarea" rows="5" onchange="applyNameList()" placeholder="김오둥&#10;이수달&#10;박하늘&#10;정다은" class="w-full bg-[#f7f0e4] border-2 border-[#3a2618] p-3 text-sm text-[#2c1e12] font-bold focus:outline-none focus:border-amber-500"></textarea>
-                </div>
-
-                <!-- 출석/결석 토글 칩 그리드 -->
-                <div class="mb-6">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs text-stone-600 font-bold">💡 이름(번호)을 누르면 당일 결석생으로 제외됩니다</span>
-                        <button onclick="resetAbsent()" class="text-xs text-emerald-700 underline font-bold cursor-pointer">전원 출석</button>
-                    </div>
-                    <div id="student-chips-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-[210px] overflow-y-auto p-3 bg-[#f7f0e4] border-2 border-[#3a2618]">
-                        <!-- JS 렌더링 -->
-                    </div>
-                </div>
-
-                <!-- 다음 단계 이동 버튼 -->
-                <div class="flex justify-end pt-2 border-t-2 border-[#e5d7c3]">
-                    <button onclick="goToStep(2)" class="retro-btn px-6 py-3 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base font-bold cursor-pointer flex items-center gap-2">
-                        <span>다음 단계: 자리 배치 선택</span>
-                        <span>▶</span>
-                    </button>
-                </div>
-            </section>
-
-            <!-- =========================================================
-                 [STEP 2] 자리 배치 선택 & 직접 꾸미기 화면
-                 ========================================================= -->
-            <section id="step-view-2" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-                <!-- 좌측: 배치 프리셋 및 꾸미기 옵션 (5칸) -->
-                <div class="lg:col-span-5 retro-panel p-5 flex flex-col gap-4">
-                    <div class="flex items-center justify-between border-b-2 border-[#e5d7c3] pb-3">
+                <!-- =========================================================
+                     [STEP 1] 우리 반 친구들 설정 화면
+                     ========================================================= -->
+                <section id="step-view-1" class="step-view max-w-2xl mx-auto retro-panel p-5 sm:p-7">
+                    <div class="flex items-center justify-between border-b-2 border-[#e5d7c3] pb-3 mb-5">
                         <div>
-                            <span class="inline-block px-2 py-0.5 bg-amber-400 border border-[#3a2618] text-xs font-bold mb-1">STEP 02</span>
-                            <h2 class="text-base sm:text-lg font-bold text-[#2c1e12]">교실 책상 배치 선택</h2>
+                            <span class="inline-block px-2 py-0.5 bg-amber-400 border border-[#3a2618] text-xs font-bold mb-1">STEP 01</span>
+                            <h2 class="text-lg sm:text-xl font-bold text-[#2c1e12]">우리 반 친구들을 등록해 주세요</h2>
                         </div>
-                        <div class="text-right text-xs font-bold">
-                            <div class="text-emerald-700">출석 <span id="step2-present-count">24</span>명</div>
-                            <div class="text-amber-700">책상 <span id="desk-count-badge">24</span>석</div>
+                        <div class="px-3 py-1.5 bg-[#f7f0e4] border-2 border-[#3a2618] text-xs sm:text-sm font-bold text-emerald-700">
+                            출석 <span id="present-count-badge" class="text-base">24</span>명
                         </div>
                     </div>
 
-                    <!-- 7가지 프리셋 버튼 -->
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="applyPreset('pair3')" data-preset="pair3" class="preset-btn retro-btn p-2.5 bg-amber-200 text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
-                            <span class="text-base">👥👥👥</span>
-                            <span>짝꿍 3분단</span>
+                    <!-- 번호로 / 이름으로 탭 -->
+                    <div class="grid grid-cols-2 gap-3 mb-5">
+                        <button id="mode-num-btn" onclick="switchInputMode('number')" class="retro-btn py-2.5 bg-[#2c1e12] text-white text-sm font-bold cursor-pointer">
+                            🔢 번호로 설정
                         </button>
-                        <button onclick="applyPreset('pair4')" data-preset="pair4" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
-                            <span class="text-base">👥👥👥👥</span>
-                            <span>짝꿍 4분단</span>
-                        </button>
-                        <button onclick="applyPreset('single')" data-preset="single" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
-                            <span class="text-base">🧍🧍🧍🧍</span>
-                            <span>혼자 앉기</span>
-                        </button>
-                        <button onclick="applyPreset('group3')" data-preset="group3" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
-                            <span class="text-base">☘️</span>
-                            <span>3인 책상</span>
-                        </button>
-                        <button onclick="applyPreset('group4')" data-preset="group4" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
-                            <span class="text-base">🍀</span>
-                            <span>4인 모둠</span>
-                        </button>
-                        <button onclick="applyPreset('group6')" data-preset="group6" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
-                            <span class="text-base">🍱</span>
-                            <span>6인 모둠</span>
-                        </button>
-                        <button onclick="applyPreset('ushape')" data-preset="ushape" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer col-span-3">
-                            <span class="text-base">🧲 ㄷ자 배치</span>
+                        <button id="mode-name-btn" onclick="switchInputMode('name')" class="retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm font-bold cursor-pointer">
+                            ✏️ 이름으로 설정
                         </button>
                     </div>
 
-                    <!-- 직접 꾸미기 토글 -->
-                    <button id="edit-layout-btn" onclick="toggleEditMode()" class="retro-btn w-full py-2.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm font-bold cursor-pointer flex items-center justify-center gap-1.5">
-                        <span>🛠️ 자리 직접 꾸미기 (책상 추가/제거)</span>
-                    </button>
+                    <!-- 번호 입력 모드 -->
+                    <div id="input-number-box" class="mb-5">
+                        <p class="text-xs sm:text-sm text-stone-600 text-center mb-2.5 font-bold">우리 반은 총 몇 명인가요?</p>
+                        <div class="flex items-center justify-center gap-6 bg-[#f7f0e4] border-2 border-[#3a2618] py-4 px-6">
+                            <button onclick="changeStudentCount(-1)" class="retro-btn w-11 h-11 bg-white text-xl font-bold flex items-center justify-center cursor-pointer">-</button>
+                            <div class="text-3xl font-bold text-[#2c1e12] min-w-[96px] text-center">
+                                <span id="num-count-display">24</span><span class="text-base ml-1">명</span>
+                            </div>
+                            <button onclick="changeStudentCount(1)" class="retro-btn w-11 h-11 bg-white text-xl font-bold flex items-center justify-center cursor-pointer">+</button>
+                        </div>
+                    </div>
 
-                    <!-- 이전 / 다음 단계 버튼 -->
-                    <div class="flex items-center justify-between gap-2 pt-3 border-t-2 border-[#e5d7c3]">
-                        <button onclick="goToStep(1)" class="retro-btn px-4 py-2.5 bg-white text-[#2c1e12] text-xs sm:text-sm font-bold cursor-pointer">
-                            ◀ 이전
-                        </button>
-                        <button onclick="goToStep(3)" class="retro-btn flex-1 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-xs sm:text-sm font-bold cursor-pointer">
-                            다음: 교실 자리뽑기 ▶
+                    <!-- 이름 입력 모드 -->
+                    <div id="input-name-box" class="hidden mb-5">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs sm:text-sm font-bold text-stone-700">학생 이름 명단 (줄바꿈 또는 쉼표로 구분)</span>
+                            <button onclick="applyNameList()" class="retro-btn px-3 py-1 bg-amber-400 text-xs font-bold cursor-pointer">명단 반영</button>
+                        </div>
+                        <textarea id="name-list-textarea" rows="5" onchange="applyNameList()" placeholder="김오둥&#10;이수달&#10;박하늘&#10;정다은" class="w-full bg-[#f7f0e4] border-2 border-[#3a2618] p-3 text-sm text-[#2c1e12] font-bold focus:outline-none focus:border-amber-500"></textarea>
+                    </div>
+
+                    <!-- 출석/결석 토글 칩 그리드 -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs text-stone-600 font-bold">💡 이름(번호)을 누르면 당일 결석생으로 제외됩니다</span>
+                            <button onclick="resetAbsent()" class="text-xs text-emerald-700 underline font-bold cursor-pointer">전원 출석</button>
+                        </div>
+                        <div id="student-chips-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-[210px] overflow-y-auto p-3 bg-[#f7f0e4] border-2 border-[#3a2618]">
+                            <!-- JS 렌더링 -->
+                        </div>
+                    </div>
+
+                    <!-- 다음 단계 이동 버튼 -->
+                    <div class="flex justify-end pt-2 border-t-2 border-[#e5d7c3]">
+                        <button onclick="goToStep(2)" class="retro-btn px-6 py-3 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base font-bold cursor-pointer flex items-center gap-2">
+                            <span>다음 단계: 자리 배치 선택</span>
+                            <span>▶</span>
                         </button>
                     </div>
-                </div>
+                </section>
 
-                <!-- 우측: 배치 미리보기 및 직접 편집 교실 판 (7칸) -->
-                <div class="lg:col-span-7 retro-panel p-4 bg-[#fff9ed]">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs sm:text-sm font-bold text-[#2c1e12]" id="preview-guide-text">📐 선택한 책상 배치 미리보기</span>
-                        <span class="text-xs text-stone-500 font-bold">8열 × 6행 교실</span>
+                <!-- =========================================================
+                     [STEP 2] 자리 배치 선택 & 직접 꾸미기 화면
+                     ========================================================= -->
+                <section id="step-view-2" class="step-view hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                    <!-- 좌측: 배치 프리셋 및 꾸미기 옵션 (5칸) -->
+                    <div class="lg:col-span-5 retro-panel p-5 flex flex-col gap-4">
+                        <div class="flex items-center justify-between border-b-2 border-[#e5d7c3] pb-3">
+                            <div>
+                                <span class="inline-block px-2 py-0.5 bg-amber-400 border border-[#3a2618] text-xs font-bold mb-1">STEP 02</span>
+                                <h2 class="text-base sm:text-lg font-bold text-[#2c1e12]">교실 책상 배치 선택</h2>
+                            </div>
+                            <div class="text-right text-xs font-bold">
+                                <div class="text-emerald-700">출석 <span id="step2-present-count">24</span>명</div>
+                                <div class="text-amber-700">책상 <span id="desk-count-badge">24</span>석</div>
+                            </div>
+                        </div>
+
+                        <!-- 7가지 프리셋 버튼 -->
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="applyPreset('pair3')" data-preset="pair3" class="preset-btn retro-btn p-2.5 bg-amber-200 text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                                <span class="text-base">👥👥👥</span>
+                                <span>짝꿍 3분단</span>
+                            </button>
+                            <button onclick="applyPreset('pair4')" data-preset="pair4" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                                <span class="text-base">👥👥👥👥</span>
+                                <span>짝꿍 4분단</span>
+                            </button>
+                            <button onclick="applyPreset('single')" data-preset="single" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                                <span class="text-base">🧍🧍🧍🧍</span>
+                                <span>혼자 앉기</span>
+                            </button>
+                            <button onclick="applyPreset('group3')" data-preset="group3" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                                <span class="text-base">☘️</span>
+                                <span>3인 책상</span>
+                            </button>
+                            <button onclick="applyPreset('group4')" data-preset="group4" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                                <span class="text-base">🍀</span>
+                                <span>4인 모둠</span>
+                            </button>
+                            <button onclick="applyPreset('group6')" data-preset="group6" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                                <span class="text-base">🍱</span>
+                                <span>6인 모둠</span>
+                            </button>
+                            <button onclick="applyPreset('ushape')" data-preset="ushape" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer col-span-3">
+                                <span class="text-base">🧲 ㄷ자 배치</span>
+                            </button>
+                        </div>
+
+                        <!-- 직접 꾸미기 토글 -->
+                        <button id="edit-layout-btn" onclick="toggleEditMode()" class="retro-btn w-full py-2.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm font-bold cursor-pointer flex items-center justify-center gap-1.5">
+                            <span>🛠️ 자리 직접 꾸미기 (책상 추가/제거)</span>
+                        </button>
+
+                        <!-- 이전 / 다음 단계 버튼 -->
+                        <div class="flex items-center justify-between gap-2 pt-3 border-t-2 border-[#e5d7c3]">
+                            <button onclick="goToStep(1)" class="retro-btn px-4 py-2.5 bg-white text-[#2c1e12] text-xs sm:text-sm font-bold cursor-pointer">
+                                ◀ 이전
+                            </button>
+                            <button onclick="goToStep(3)" class="retro-btn flex-1 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-xs sm:text-sm font-bold cursor-pointer">
+                                다음: 교실 자리뽑기 ▶
+                            </button>
+                        </div>
                     </div>
-                    <div class="classroom-floor p-4 sm:p-5 flex flex-col justify-between min-h-[410px]">
-                        <div class="chalkboard max-w-xs w-full mx-auto py-1.5 px-4 text-center text-white text-xs font-bold mb-5">
+
+                    <!-- 우측: 배치 미리보기 및 직접 편집 교실 판 (7칸) -->
+                    <div class="lg:col-span-7 retro-panel p-4 bg-[#fff9ed]">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs sm:text-sm font-bold text-[#2c1e12]" id="preview-guide-text">📐 선택한 책상 배치 미리보기</span>
+                            <span class="text-xs text-stone-500 font-bold">8열 × 6행 교실</span>
+                        </div>
+                        <div class="classroom-floor p-4 sm:p-5 flex flex-col justify-between min-h-[410px]">
+                            <div class="chalkboard max-w-xs w-full mx-auto py-1.5 px-4 text-center text-white text-xs font-bold mb-5">
+                                칠판 / 교탁
+                            </div>
+                            <div id="preview-desks-grid" class="grid grid-cols-8 gap-1.5 sm:gap-2 my-auto">
+                                <!-- JS로 미리보기/편집용 책상 렌더링 -->
+                            </div>
+                            <div class="mt-4 text-right text-[11px] font-bold text-[#4a2e16]">
+                                * 직접 꾸미기 버튼을 누르면 빈 칸을 클릭해 책상을 놓을 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- =========================================================
+                     [STEP 3] 두근두근 교실 자리뽑기 무대 화면
+                     ========================================================= -->
+                <section id="step-view-3" class="step-view hidden flex flex-col gap-4">
+                    <!-- 상단 컨트롤 & 안내 배너 -->
+                    <div class="retro-panel px-4 py-3 flex flex-wrap items-center justify-between gap-3 bg-[#fff9ed]">
+                        <div class="flex items-center gap-2.5">
+                            <button onclick="goToStep(2)" id="step3-back-btn" class="retro-btn px-3 py-1.5 bg-white text-[#2c1e12] text-xs font-bold cursor-pointer">
+                                ◀ 배치 수정
+                            </button>
+                            <span id="stage-badge" class="px-2.5 py-1 bg-emerald-700 text-white text-xs font-bold border border-[#3a2618]">READY</span>
+                            <div>
+                                <h2 id="stage-title" class="text-sm sm:text-base font-bold text-[#2c1e12]">새로운 자리 새 짝꿍! 우리 반 자리 바꾸기</h2>
+                                <p id="stage-subtitle" class="text-xs text-stone-600">자리 <span id="summary-seats" class="text-amber-700 font-bold">24</span>석 · 출석 <span id="summary-students" class="text-emerald-700 font-bold">24</span>명 준비 완료!</p>
+                            </div>
+                        </div>
+
+                        <!-- 실행 버튼 그룹 -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button id="start-anim-btn" onclick="startSeatAssignment(false)" class="retro-btn px-5 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base font-bold cursor-pointer flex items-center gap-1.5">
+                                <span>🎬 자리 뽑기!</span>
+                            </button>
+                            <button id="instant-assign-btn" onclick="startSeatAssignment(true)" class="retro-btn px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold cursor-pointer">
+                                ⚡ 단번에 배정
+                            </button>
+                            <button id="view-chart-btn" onclick="goToStep(4)" class="hidden retro-btn px-5 py-2.5 bg-sky-400 hover:bg-sky-300 text-[#2c1e12] text-sm font-bold cursor-pointer">
+                                📋 자리표 저장하기 ▶
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 넓은 전체 교실 무대 프레임 -->
+                    <div id="classroom-stage" class="classroom-floor relative w-full min-h-[540px] sm:min-h-[600px] p-4 sm:p-6 flex flex-col justify-between overflow-hidden select-none">
+
+                        <!-- 교실 상단: 칠판 & 오둥이 선생님 & 교실 TV -->
+                        <div class="relative flex items-start justify-between gap-2 mb-5 z-10">
+                            <div class="hidden sm:flex flex-col items-center bg-[#fffdf8] border-2 border-[#3a2618] px-3 py-1.5 shadow-[2px_2px_0px_#3a2618]">
+                                <span class="text-[10px] text-amber-700 font-bold">우리 반 급훈</span>
+                                <span class="text-xs font-bold text-[#2c1e12]">함께 웃는 우리 반</span>
+                            </div>
+
+                            <div class="flex-1 max-w-md mx-auto flex flex-col items-center">
+                                <div class="chalkboard w-full py-2.5 px-4 text-center relative">
+                                    <div class="text-[10px] text-emerald-200 mb-0.5" id="chalkboard-date"></div>
+                                    <div id="chalkboard-text" class="text-sm sm:text-base font-bold text-white tracking-wide">
+                                        두근두근 자리 바꾸는 날
+                                    </div>
+                                    <div class="absolute bottom-0 right-4 w-6 h-1.5 bg-amber-300 border border-black"></div>
+                                    <div class="absolute bottom-0 right-12 w-3 h-1 bg-white"></div>
+                                </div>
+
+                                <div class="relative -mt-1 flex flex-col items-center">
+                                    <div id="teacher-bubble" class="mb-1 px-2.5 py-0.5 bg-white border-2 border-[#3a2618] text-[11px] font-bold text-[#2c1e12] shadow-[2px_2px_0px_#3a2618]">
+                                        [🎬 자리 뽑기!] 버튼을 눌러보세요!
+                                    </div>
+                                    <div class="w-11 h-11 rounded-full bg-white border-2 border-black overflow-hidden shadow-md -mb-2 z-10">
+                                        <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                                            <rect width="200" height="200" fill="#ffe8b3" />
+                                            <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="10" />
+                                            <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
+                                            <circle cx="85" cy="95" r="5" fill="#000000" />
+                                            <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
+                                            <circle cx="115" cy="95" r="5" fill="#000000" />
+                                            <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="7" />
+                                        </svg>
+                                    </div>
+                                    <div class="w-24 h-7 bg-[#8c5228] border-2 border-[#3a2618] shadow-[0_3px_0_#3a2618] flex items-center justify-center text-[10px] text-amber-200 font-bold">
+                                        교탁
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="hidden sm:flex flex-col items-center bg-[#232738] border-[3px] border-[#11131c] px-3 py-2 shadow-[3px_3px_0px_#3a2618]">
+                                <span class="text-[11px] font-bold text-sky-300">📺 ODUNG TV</span>
+                                <span class="text-[9px] text-slate-400 mt-0.5">ON AIR</span>
+                            </div>
+                        </div>
+
+                        <!-- 교실 중앙: 책상 그리드 (8열 x 6행) -->
+                        <div id="desks-grid" class="relative z-10 grid grid-cols-8 gap-1.5 sm:gap-2.5 my-auto px-1 sm:px-6">
+                            <!-- JS로 책상 슬롯 렌더링 -->
+                        </div>
+
+                        <!-- 교실 좌측 하단 출입문 & 우측 창가 화분 데코 -->
+                        <div class="mt-5 flex items-end justify-between text-xs font-bold text-[#4a2e16] z-10">
+                            <div id="classroom-door" class="px-3 py-1.5 bg-[#7a441e] text-amber-100 border-2 border-[#3a2618] shadow-[2px_2px_0px_#3a2618] flex items-center gap-1.5">
+                                <span>🚪</span>
+                                <span>교실 뒷문 (입장)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-1 bg-white/70 border border-[#4a2e16] text-[11px]">🌱 창가 화분</span>
+                            </div>
+                        </div>
+
+                        <!-- 애니메이션용 학생 캐릭터 레이어 -->
+                        <div id="sprites-layer" class="absolute inset-0 pointer-events-none z-30"></div>
+                    </div>
+                </section>
+
+                <!-- =========================================================
+                     [STEP 4] 새 자리표 확인 및 저장/인쇄 화면
+                     ========================================================= -->
+                <section id="step-view-4" class="step-view hidden max-w-4xl mx-auto retro-panel p-5 sm:p-6">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#e5d7c3] pb-3 mb-4 no-print">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 bg-amber-400 border border-[#3a2618] text-xs font-bold">STEP 04</span>
+                            <h3 class="text-base sm:text-lg font-bold text-[#2c1e12]">새 자리표 확인 및 저장</h3>
+                        </div>
+                        <button onclick="goToStep(3)" class="retro-btn px-3.5 py-1.5 bg-white text-xs font-bold cursor-pointer">
+                            ◀ 교실 화면으로 돌아가기
+                        </button>
+                    </div>
+
+                    <!-- 시점 전환 탭 & 저장/인쇄 버튼 -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4 no-print">
+                        <div class="flex gap-2">
+                            <button id="view-student-btn" onclick="setChartPerspective('student')" class="retro-btn px-3.5 py-1.5 bg-[#2c1e12] text-white text-xs font-bold cursor-pointer">
+                                👀 학생 쪽에서 (칠판이 위)
+                            </button>
+                            <button id="view-teacher-btn" onclick="setChartPerspective('teacher')" class="retro-btn px-3.5 py-1.5 bg-[#f3eadc] text-[#2c1e12] text-xs font-bold cursor-pointer">
+                                🧑‍🏫 교탁에서 (칠판이 아래)
+                            </button>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="copySeatTableText()" class="retro-btn px-3 py-1.5 bg-sky-200 text-[#2c1e12] text-xs font-bold cursor-pointer">
+                                📋 표 복사
+                            </button>
+                            <button onclick="downloadSeatChartImage()" class="retro-btn px-3 py-1.5 bg-amber-300 text-[#2c1e12] text-xs font-bold cursor-pointer">
+                                🖼️ 그림 저장
+                            </button>
+                            <button onclick="window.print()" class="retro-btn px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold cursor-pointer">
+                                🖨️ 인쇄
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 실제 출력/캡처 영역 -->
+                    <div id="print-area" class="bg-[#fffdf8] border-[3px] border-[#3a2618] p-5 sm:p-6">
+                        <div class="text-center mb-4">
+                            <span class="inline-block px-3 py-0.5 bg-amber-300 border border-[#3a2618] text-xs font-bold mb-1">우리 반 새 자리표</span>
+                            <h4 id="chart-title-text" class="text-xl font-bold text-[#2c1e12]">새 자리표</h4>
+                            <p id="chart-date-text" class="text-xs text-stone-500 mt-0.5"></p>
+                        </div>
+
+                        <!-- 칠판 위치 (상단) -->
+                        <div id="chart-board-top" class="max-w-xs mx-auto mb-5 bg-[#1f4e3d] text-white text-center py-1.5 px-4 border-2 border-[#3a2618] text-xs font-bold">
                             칠판 / 교탁
                         </div>
-                        <div id="preview-desks-grid" class="grid grid-cols-8 gap-1.5 sm:gap-2 my-auto">
-                            <!-- JS로 미리보기/편집용 책상 렌더링 -->
-                        </div>
-                        <div class="mt-4 text-right text-[11px] font-bold text-[#4a2e16]">
-                            * 직접 꾸미기 버튼을 누르면 빈 칸을 클릭해 책상을 놓을 수 있습니다.
-                        </div>
-                    </div>
-                </div>
-            </section>
 
-            <!-- =========================================================
-                 [STEP 3] 두근두근 교실 자리뽑기 무대 화면
-                 ========================================================= -->
-            <section id="step-view-3" class="hidden flex flex-col gap-4">
-                <!-- 상단 컨트롤 & 안내 배너 -->
-                <div class="retro-panel px-4 py-3 flex flex-wrap items-center justify-between gap-3 bg-[#fff9ed]">
-                    <div class="flex items-center gap-2.5">
-                        <button onclick="goToStep(2)" id="step3-back-btn" class="retro-btn px-3 py-1.5 bg-white text-[#2c1e12] text-xs font-bold cursor-pointer">
-                            ◀ 배치 수정
-                        </button>
-                        <span id="stage-badge" class="px-2.5 py-1 bg-emerald-700 text-white text-xs font-bold border border-[#3a2618]">READY</span>
-                        <div>
-                            <h2 id="stage-title" class="text-sm sm:text-base font-bold text-[#2c1e12]">새로운 자리 새 짝꿍! 우리 반 자리 바꾸기</h2>
-                            <p id="stage-subtitle" class="text-xs text-stone-600">자리 <span id="summary-seats" class="text-amber-700 font-bold">24</span>석 · 출석 <span id="summary-students" class="text-emerald-700 font-bold">24</span>명 준비 완료!</p>
-                        </div>
-                    </div>
-
-                    <!-- 실행 버튼 그룹 -->
-                    <div class="flex flex-wrap items-center gap-2">
-                        <button id="start-anim-btn" onclick="startSeatAssignment(false)" class="retro-btn px-5 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base font-bold cursor-pointer flex items-center gap-1.5">
-                            <span>🎬 자리 뽑기!</span>
-                        </button>
-                        <button id="instant-assign-btn" onclick="startSeatAssignment(true)" class="retro-btn px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold cursor-pointer">
-                            ⚡ 단번에 배정
-                        </button>
-                        <button id="view-chart-btn" onclick="goToStep(4)" class="hidden retro-btn px-5 py-2.5 bg-sky-400 hover:bg-sky-300 text-[#2c1e12] text-sm font-bold cursor-pointer">
-                            📋 자리표 저장하기 ▶
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 넓은 전체 교실 무대 프레임 -->
-                <div id="classroom-stage" class="classroom-floor relative w-full min-h-[540px] sm:min-h-[600px] p-4 sm:p-6 flex flex-col justify-between overflow-hidden select-none">
-
-                    <!-- 교실 상단: 칠판 & 오둥이 선생님 & 교실 TV -->
-                    <div class="relative flex items-start justify-between gap-2 mb-5 z-10">
-                        <div class="hidden sm:flex flex-col items-center bg-[#fffdf8] border-2 border-[#3a2618] px-3 py-1.5 shadow-[2px_2px_0px_#3a2618]">
-                            <span class="text-[10px] text-amber-700 font-bold">우리 반 급훈</span>
-                            <span class="text-xs font-bold text-[#2c1e12]">함께 웃는 우리 반</span>
+                        <!-- 자리표 그리드 -->
+                        <div id="chart-grid-container" class="grid grid-cols-8 gap-2">
+                            <!-- JS 렌더링 -->
                         </div>
 
-                        <div class="flex-1 max-w-md mx-auto flex flex-col items-center">
-                            <div class="chalkboard w-full py-2.5 px-4 text-center relative">
-                                <div class="text-[10px] text-emerald-200 mb-0.5" id="chalkboard-date"></div>
-                                <div id="chalkboard-text" class="text-sm sm:text-base font-bold text-white tracking-wide">
-                                    두근두근 자리 바꾸는 날
-                                </div>
-                                <div class="absolute bottom-0 right-4 w-6 h-1.5 bg-amber-300 border border-black"></div>
-                                <div class="absolute bottom-0 right-12 w-3 h-1 bg-white"></div>
-                            </div>
-
-                            <div class="relative -mt-1 flex flex-col items-center">
-                                <div id="teacher-bubble" class="mb-1 px-2.5 py-0.5 bg-white border-2 border-[#3a2618] text-[11px] font-bold text-[#2c1e12] shadow-[2px_2px_0px_#3a2618]">
-                                    [🎬 자리 뽑기!] 버튼을 눌러보세요!
-                                </div>
-                                <div class="w-11 h-11 rounded-full bg-white border-2 border-black overflow-hidden shadow-md -mb-2 z-10">
-                                    <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                                        <rect width="200" height="200" fill="#ffe8b3" />
-                                        <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="10" />
-                                        <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
-                                        <circle cx="85" cy="95" r="5" fill="#000000" />
-                                        <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
-                                        <circle cx="115" cy="95" r="5" fill="#000000" />
-                                        <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="7" />
-                                    </svg>
-                                </div>
-                                <div class="w-24 h-7 bg-[#8c5228] border-2 border-[#3a2618] shadow-[0_3px_0_#3a2618] flex items-center justify-center text-[10px] text-amber-200 font-bold">
-                                    교탁
-                                </div>
-                            </div>
+                        <!-- 칠판 위치 (하단 - 교탁 시점일 때) -->
+                        <div id="chart-board-bottom" class="hidden max-w-xs mx-auto mt-5 bg-[#1f4e3d] text-white text-center py-1.5 px-4 border-2 border-[#3a2618] text-xs font-bold">
+                            칠판 / 교탁
                         </div>
 
-                        <div class="hidden sm:flex flex-col items-center bg-[#232738] border-[3px] border-[#11131c] px-3 py-2 shadow-[3px_3px_0px_#3a2618]">
-                            <span class="text-[11px] font-bold text-sky-300">📺 ODUNG TV</span>
-                            <span class="text-[9px] text-slate-400 mt-0.5">ON AIR</span>
+                        <div class="mt-5 text-center text-[11px] text-stone-400 font-bold">
+                            오둥이 자리뽑기 • ODUNG GAMES
                         </div>
                     </div>
+                </section>
 
-                    <!-- 교실 중앙: 책상 그리드 (8열 x 6행) -->
-                    <div id="desks-grid" class="relative z-10 grid grid-cols-8 gap-1.5 sm:gap-2.5 my-auto px-1 sm:px-6">
-                        <!-- JS로 책상 슬롯 렌더링 -->
-                    </div>
-
-                    <!-- 교실 좌측 하단 출입문 & 우측 창가 화분 데코 -->
-                    <div class="mt-5 flex items-end justify-between text-xs font-bold text-[#4a2e16] z-10">
-                        <div id="classroom-door" class="px-3 py-1.5 bg-[#7a441e] text-amber-100 border-2 border-[#3a2618] shadow-[2px_2px_0px_#3a2618] flex items-center gap-1.5">
-                            <span>🚪</span>
-                            <span>교실 뒷문 (입장)</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="px-2 py-1 bg-white/70 border border-[#4a2e16] text-[11px]">🌱 창가 화분</span>
-                        </div>
-                    </div>
-
-                    <!-- 애니메이션용 학생 캐릭터 레이어 -->
-                    <div id="sprites-layer" class="absolute inset-0 pointer-events-none z-30"></div>
-                </div>
-            </section>
-
-            <!-- =========================================================
-                 [STEP 4] 새 자리표 확인 및 저장/인쇄 화면
-                 ========================================================= -->
-            <section id="step-view-4" class="hidden max-w-4xl mx-auto retro-panel p-5 sm:p-6">
-                <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#e5d7c3] pb-3 mb-4 no-print">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 bg-amber-400 border border-[#3a2618] text-xs font-bold">STEP 04</span>
-                        <h3 class="text-base sm:text-lg font-bold text-[#2c1e12]">새 자리표 확인 및 저장</h3>
-                    </div>
-                    <button onclick="goToStep(3)" class="retro-btn px-3.5 py-1.5 bg-white text-xs font-bold cursor-pointer">
-                        ◀ 교실 화면으로 돌아가기
-                    </button>
-                </div>
-
-                <!-- 시점 전환 탭 & 저장/인쇄 버튼 -->
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-4 no-print">
-                    <div class="flex gap-2">
-                        <button id="view-student-btn" onclick="setChartPerspective('student')" class="retro-btn px-3.5 py-1.5 bg-[#2c1e12] text-white text-xs font-bold cursor-pointer">
-                            👀 학생 쪽에서 (칠판이 위)
-                        </button>
-                        <button id="view-teacher-btn" onclick="setChartPerspective('teacher')" class="retro-btn px-3.5 py-1.5 bg-[#f3eadc] text-[#2c1e12] text-xs font-bold cursor-pointer">
-                            🧑‍🏫 교탁에서 (칠판이 아래)
-                        </button>
-                    </div>
-
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="copySeatTableText()" class="retro-btn px-3 py-1.5 bg-sky-200 text-[#2c1e12] text-xs font-bold cursor-pointer">
-                            📋 표 복사
-                        </button>
-                        <button onclick="downloadSeatChartImage()" class="retro-btn px-3 py-1.5 bg-amber-300 text-[#2c1e12] text-xs font-bold cursor-pointer">
-                            🖼️ 그림 저장
-                        </button>
-                        <button onclick="window.print()" class="retro-btn px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold cursor-pointer">
-                            🖨️ 인쇄
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 실제 출력/캡처 영역 -->
-                <div id="print-area" class="bg-[#fffdf8] border-[3px] border-[#3a2618] p-5 sm:p-6">
-                    <div class="text-center mb-4">
-                        <span class="inline-block px-3 py-0.5 bg-amber-300 border border-[#3a2618] text-xs font-bold mb-1">우리 반 새 자리표</span>
-                        <h4 id="chart-title-text" class="text-xl font-bold text-[#2c1e12]">새 자리표</h4>
-                        <p id="chart-date-text" class="text-xs text-stone-500 mt-0.5"></p>
-                    </div>
-
-                    <!-- 칠판 위치 (상단) -->
-                    <div id="chart-board-top" class="max-w-xs mx-auto mb-5 bg-[#1f4e3d] text-white text-center py-1.5 px-4 border-2 border-[#3a2618] text-xs font-bold">
-                        칠판 / 교탁
-                    </div>
-
-                    <!-- 자리표 그리드 -->
-                    <div id="chart-grid-container" class="grid grid-cols-8 gap-2">
-                        <!-- JS 렌더링 -->
-                    </div>
-
-                    <!-- 칠판 위치 (하단 - 교탁 시점일 때) -->
-                    <div id="chart-board-bottom" class="hidden max-w-xs mx-auto mt-5 bg-[#1f4e3d] text-white text-center py-1.5 px-4 border-2 border-[#3a2618] text-xs font-bold">
-                        칠판 / 교탁
-                    </div>
-
-                    <div class="mt-5 text-center text-[11px] text-stone-400 font-bold">
-                        오둥이 앉아라 자리뽑기 • ODUNG GAMES
-                    </div>
-                </div>
-            </section>
-        </div>
-    </main>
+            </div>
+        </main>
+    </div>
 
     <!-- 알림 토스트 -->
     <div id="toast-box" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
@@ -537,11 +593,13 @@
         let deskMap = Array(ROWS * COLS).fill(false); // 48칸 중 책상 배치 여부
         let seatAssignments = {}; // { cellIndex: studentObj }
         let currentPreset = 'pair3';
+        let hasCustomLayout = false;
         let isEditMode = false;
         let isAnimating = false;
+        let isTransitioning = false;
         let soundOn = true;
         let chartPerspective = 'student'; // 'student' | 'teacher'
-        window.currentZoomScale = 1; // 확대/축소 비율 상태
+        let zoomLevel = 1.0;
 
         const BUBBLE_LINES = [
             '내 자리는 어디지?',
@@ -553,7 +611,48 @@
             '여기 내 자리인가?'
         ];
 
-        // --- 2. 초기화 및 단계 전환 ---
+        // --- 2. 확대/축소(Zoom) 기능 ---
+        function changeZoom(delta) {
+            if (isAnimating) {
+                showToast('자리 뽑기 진행 중에는 배율을 바꿀 수 없습니다.');
+                return;
+            }
+            const nextZoom = Math.round((zoomLevel + delta) * 10) / 10;
+            if (nextZoom < 0.6 || nextZoom > 1.5) {
+                showToast(nextZoom < 0.6 ? '최소 60%까지 축소할 수 있습니다.' : '최대 150%까지 확대할 수 있습니다.');
+                return;
+            }
+            applyZoom(nextZoom);
+            playTone(delta > 0 ? 540 : 420, 'square', 0.05, 0, 0.04);
+        }
+
+        function resetZoom() {
+            if (isAnimating) return;
+            applyZoom(1.0);
+            playTone(480, 'square', 0.05, 0, 0.04);
+        }
+
+        function applyZoom(level) {
+            zoomLevel = level;
+            const wrapper = document.getElementById('zoom-wrapper');
+            const label = document.getElementById('zoom-label');
+            if (label) label.textContent = `${Math.round(zoomLevel * 100)}%`;
+
+            if (wrapper) {
+                if ('zoom' in wrapper.style) {
+                    wrapper.style.zoom = zoomLevel;
+                    wrapper.style.transform = '';
+                    wrapper.style.width = '';
+                } else {
+                    // Firefox 등 zoom 미지원 브라우저 폴백
+                    wrapper.style.transformOrigin = 'top left';
+                    wrapper.style.transform = `scale(${zoomLevel})`;
+                    wrapper.style.width = `${100 / zoomLevel}%`;
+                }
+            }
+        }
+
+        // --- 3. 초기화 및 단계 전환 (좌우 슬라이드 교차 애니메이션) ---
         function init() {
             const today = new Date();
             const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
@@ -562,43 +661,16 @@
 
             buildStudentsFromCount(24);
             applyPreset('pair3');
-            goToStep(1);
-        }
-
-        // --- 화면 줌(Zoom) 기능 ---
-        function setZoom(delta) {
-            if (isAnimating) {
-                showToast('자리 뽑기 중에는 화면 크기를 변경할 수 없습니다!');
-                return;
-            }
-            window.currentZoomScale += delta;
-            
-            // 소수점 연산 오류 방지
-            window.currentZoomScale = Math.round(window.currentZoomScale * 10) / 10;
-            
-            // 50% ~ 200% 사이로 제한
-            if (window.currentZoomScale < 0.5) window.currentZoomScale = 0.5;
-            if (window.currentZoomScale > 2.0) window.currentZoomScale = 2.0;
-            
-            document.getElementById('zoom-level-text').textContent = Math.round(window.currentZoomScale * 100) + '%';
-            
-            const wrapper = document.getElementById('zoom-wrapper');
-            wrapper.style.transform = `scale(${window.currentZoomScale})`;
-            
-            // 확대 시 아래쪽이 잘리지 않도록 마진으로 스크롤 공간을 추가 확보합니다.
-            if (window.currentZoomScale > 1) {
-                const extraHeight = wrapper.offsetHeight * (window.currentZoomScale - 1);
-                wrapper.style.marginBottom = `${extraHeight}px`;
-            } else {
-                wrapper.style.marginBottom = '0px';
-            }
+            updateCountsUI();
         }
 
         function goToStep(stepNum) {
-            if (isAnimating) {
-                showToast('자리 뽑기가 진행 중일 때는 이동할 수 없습니다!');
+            if (isAnimating || isTransitioning) {
+                if (isAnimating) showToast('자리 뽑기가 진행 중일 때는 이동할 수 없습니다!');
                 return;
             }
+
+            if (currentStep === stepNum) return;
 
             const presentCount = students.filter(s => !s.absent).length;
             const deskCount = deskMap.filter(Boolean).length;
@@ -622,25 +694,29 @@
                 toggleEditMode();
             }
 
+            isTransitioning = true;
+            const prevStep = currentStep;
             currentStep = stepNum;
+            const isForward = stepNum > prevStep;
 
-            // 뷰 전환
+            const outClass = isForward ? 'anim-slide-out-left' : 'anim-slide-out-right';
+            const inClass = isForward ? 'anim-slide-in-right' : 'anim-slide-in-left';
+
+            // 상단 스텝 탭 하이라이트 변경
             for (let i = 1; i <= 4; i++) {
-                const view = document.getElementById(`step-view-${i}`);
                 const tab = document.getElementById(`step-tab-${i}`);
                 const badge = tab.querySelector('span:first-child');
 
                 if (i === stepNum) {
-                    view.classList.remove('hidden');
                     tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer';
                     badge.className = 'px-1.5 py-0.5 bg-[#2c1e12] text-amber-300 text-[11px]';
                 } else {
-                    view.classList.add('hidden');
                     tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer';
                     badge.className = 'px-1.5 py-0.5 bg-stone-500 text-white text-[11px]';
                 }
             }
 
+            // 단계별 콘텐츠 미리 준비
             if (stepNum === 2) {
                 if (!hasCustomLayout) {
                     applyPreset(currentPreset);
@@ -654,10 +730,29 @@
             }
 
             updateCountsUI();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            const prevView = document.getElementById(`step-view-${prevStep}`);
+            const nextView = document.getElementById(`step-view-${stepNum}`);
+
+            prevView.classList.remove('anim-slide-in-right', 'anim-slide-in-left', 'anim-slide-out-left', 'anim-slide-out-right');
+            nextView.classList.remove('anim-slide-in-right', 'anim-slide-in-left', 'anim-slide-out-left', 'anim-slide-out-right');
+
+            nextView.classList.remove('hidden');
+            prevView.classList.add(outClass);
+            nextView.classList.add(inClass);
+
+            playTone(isForward ? 520 : 420, 'square', 0.05, 0, 0.04);
+
+            setTimeout(() => {
+                prevView.classList.add('hidden');
+                prevView.classList.remove(outClass);
+                nextView.classList.remove(inClass);
+                isTransitioning = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 340);
         }
 
-        // --- 3. 참가자 관리 (번호/이름 & 출석/결석) ---
+        // --- 4. 참가자 관리 (번호/이름 & 출석/결석) ---
         function switchInputMode(mode) {
             if (isAnimating) return;
             inputMode = mode;
@@ -764,9 +859,7 @@
             document.getElementById('summary-students').textContent = presentCount;
         }
 
-        // --- 4. 7가지 교실 배치 프리셋 & 직접 꾸미기 ---
-        let hasCustomLayout = false;
-
+        // --- 5. 7가지 교실 배치 프리셋 & 직접 꾸미기 ---
         function applyPreset(presetName) {
             if (isAnimating) return;
             currentPreset = presetName;
@@ -915,7 +1008,7 @@
             }
         }
 
-        // --- 5. 교실 무대 렌더링 및 애니메이션 연출 ---
+        // --- 6. 교실 무대 렌더링 및 애니메이션 연출 ---
         function renderDesksGrid() {
             const grid = document.getElementById('desks-grid');
             if (!grid) return;
@@ -1022,13 +1115,13 @@
                 const stageEl = document.getElementById('classroom-stage');
                 const stageRect = stageEl.getBoundingClientRect();
                 const doorRect = document.getElementById('classroom-door').getBoundingClientRect();
-                
-                // ZOOM 비율(Scale)이 적용되어 있을 때 실제 픽셀 좌표를 보정합니다.
-                const scale = window.currentZoomScale;
 
-                // 뒷문 입구 좌표 계산 (Scale 보정)
-                const doorX = (doorRect.left - stageRect.left) / scale + (doorRect.width / scale) / 2;
-                const doorY = (doorRect.top - stageRect.top) / scale + (doorRect.height / scale) / 2;
+                // Zoom 배율이 적용되어 있을 때도 정확히 좌표 계산
+                const scaleFactor = zoomLevel || 1;
+                const stageW = stageRect.width / scaleFactor;
+                const stageH = stageRect.height / scaleFactor;
+                const doorX = (doorRect.left - stageRect.left + doorRect.width / 2) / scaleFactor;
+                const doorY = (doorRect.top - stageRect.top + doorRect.height / 2) / scaleFactor;
 
                 const activeSprites = [];
                 const enterGap = Math.max(45, Math.min(95, Math.floor(1100 / pairs.length)));
@@ -1054,11 +1147,10 @@
                     spritesLayer.appendChild(el);
                     activeSprites.push({ el, pair: p });
 
-                    // 문 밖에서 문 안쪽 복도로 한 걸음 걸어 들어오기 (Scale 보정)
                     requestAnimationFrame(() => {
                         el.style.opacity = '1';
-                        const enterX = doorX + 35 + Math.random() * ((stageRect.width / scale) * 0.55);
-                        const enterY = doorY - 35 - Math.random() * ((stageRect.height / scale) * 0.45);
+                        const enterX = doorX + 35 + Math.random() * (stageW * 0.55);
+                        const enterY = doorY - 35 - Math.random() * (stageH * 0.45);
                         el.style.left = `${enterX}px`;
                         el.style.top = `${enterY}px`;
                     });
@@ -1069,12 +1161,11 @@
 
                 await sleep(360);
 
-                // 교실 중앙 복도를 돌아다니며 자리 탐색 (2회 랜덤 이동 - Scale 보정)
                 teacherBubble.textContent = '어디가 내 자리일까? 두근두근!';
                 for (let wander = 0; wander < 2; wander++) {
                     activeSprites.forEach((sp) => {
-                        const randX = (stageRect.width / scale) * (0.14 + Math.random() * 0.72);
-                        const randY = (stageRect.height / scale) * (0.28 + Math.random() * 0.54);
+                        const randX = stageW * (0.14 + Math.random() * 0.72);
+                        const randY = stageH * (0.28 + Math.random() * 0.54);
                         sp.el.style.left = `${randX}px`;
                         sp.el.style.top = `${randY}px`;
                     });
@@ -1082,7 +1173,6 @@
                     await sleep(430);
                 }
 
-                // 배정된 랜덤 책상으로 한 명씩 달려가 착석! (Scale 보정)
                 teacherBubble.textContent = '자리 발표! 자기 책상으로 착석!!';
                 const sitGap = Math.max(40, Math.min(95, Math.floor(1000 / activeSprites.length)));
 
@@ -1090,11 +1180,10 @@
                     const sp = activeSprites[i];
                     sp.el.classList.add('sprinting');
                     const targetCell = document.querySelector(`#desks-grid [data-cell-idx="${sp.pair.seatIdx}"]`);
-                    
                     if (targetCell) {
                         const cellRect = targetCell.getBoundingClientRect();
-                        const tx = (cellRect.left - stageRect.left) / scale + (cellRect.width / scale) / 2;
-                        const ty = (cellRect.top - stageRect.top) / scale + (cellRect.height / scale) / 2;
+                        const tx = (cellRect.left - stageRect.left + cellRect.width / 2) / scaleFactor;
+                        const ty = (cellRect.top - stageRect.top + cellRect.height / 2) / scaleFactor;
                         sp.el.style.left = `${tx}px`;
                         sp.el.style.top = `${ty}px`;
                     }
@@ -1127,7 +1216,7 @@
             instantBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
 
-        // --- 6. STEP 4 자리표 확인 및 저장/인쇄 ---
+        // --- 7. STEP 4 자리표 확인 및 저장/인쇄 ---
         function setChartPerspective(perspective) {
             chartPerspective = perspective;
             const stuBtn = document.getElementById('view-student-btn');
@@ -1283,7 +1372,7 @@
             showToast('자리표 이미지가 저장되었습니다!');
         }
 
-        // --- 7. 효과음 & 유틸리티 ---
+        // --- 8. 효과음 & 유틸리티 ---
         let audioCtx = null;
         function playTone(freq, type = 'square', duration = 0.08, delay = 0, vol = 0.06) {
             if (!soundOn) return;
