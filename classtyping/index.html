@@ -24,6 +24,35 @@
         * {
             box-sizing: border-box;
             font-family: 'Galmuri11', monospace, sans-serif;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        *::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
+        html, body {
+            background-color: #16111d;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: #f8fafc;
+            min-height: 100vh;
+            min-height: 100dvh;
+            width: 100%;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         body {
@@ -364,18 +393,6 @@
             display: block;
             image-rendering: pixelated;
         }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #120f24;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #2e295e;
-            border-radius: 3px;
-        }
     </style>
 </head>
 <body class="p-2.5 sm:p-5">
@@ -425,7 +442,11 @@
                         대기 중
                     </span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <button id="serverStatusBtn" type="button" title="Firebase 실시간 서버 연결 상태 및 설정"
+                        class="text-[11px] sm:text-xs bg-[#0f0c21] border border-amber-500/60 hover:border-yellow-400 text-amber-300 px-2 py-1 rounded transition">
+                        🟡 로컬 모드
+                    </button>
                     <button id="openHofHeaderBtn" type="button"
                         class="text-xs bg-[#0f0c21] border border-amber-400/60 hover:border-yellow-400 text-amber-300 px-2.5 py-1 rounded transition">
                         🏆 명예의 전당
@@ -434,6 +455,35 @@
                         class="text-xs bg-[#0f0c21] border border-[#2e295e] hover:border-yellow-400 text-slate-200 px-2.5 py-1 rounded transition">
                         🔊 ON
                     </button>
+                </div>
+            </div>
+
+            <!-- Firebase Server Setup Modal -->
+            <div id="firebaseSetupModal" class="hidden absolute inset-0 bg-[#090714]/94 z-40 rounded-md flex-col items-center justify-center p-4 sm:p-6 text-left">
+                <div class="w-full max-w-lg bg-[#171433] border-2 border-yellow-400 rounded-md p-4 sm:p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-[#2e295e] pb-2">
+                        <h3 class="text-base sm:text-lg font-bold text-yellow-400">⚙️ 실시간 서버(Firebase) 연결</h3>
+                        <span id="modalConnStatus" class="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">미연결 (로컬)</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        선생님 PC와 학생 스마트폰이 <strong class="text-cyan-300">서로 다른 기기</strong>에서 실시간으로 접속하려면 Firebase 설정이 필요합니다. (모든 기기가 접속하려면 HTML 코드 상단의 <code class="text-yellow-300">MANUAL_FIREBASE_CONFIG</code>에 붙여넣어 배포하세요.)
+                    </p>
+                    <div>
+                        <label class="block text-xs text-yellow-400 mb-1">▶ Firebase Config 붙여넣기 (테스트용 즉시 연결)</label>
+                        <textarea id="firebaseConfigInput" rows="5"
+                            placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", "appId": "..."}'
+                            class="typing-input w-full p-2.5 rounded text-xs font-mono leading-relaxed"></textarea>
+                    </div>
+                    <div class="flex gap-2 pt-1">
+                        <button id="applyFirebaseConfigBtn" type="button"
+                            class="pixel-btn flex-1 bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-xs sm:text-sm py-2.5 px-4 rounded">
+                            연결 적용하기
+                        </button>
+                        <button id="closeFirebaseModalBtn" type="button"
+                            class="pixel-btn bg-[#25204a] hover:bg-[#312b61] text-slate-200 font-bold text-xs sm:text-sm py-2.5 px-4 rounded">
+                            닫기
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -606,11 +656,17 @@
 
                         <!-- Joined Students Real-Time Roster -->
                         <div class="flex-1 bg-[#0f0c21] border-2 border-[#2e295e] rounded-md p-3.5 flex flex-col">
-                            <div class="flex items-center justify-between border-b border-[#231f47] pb-2 mb-2.5">
+                            <div class="flex items-center justify-between border-b border-[#231f47] pb-2 mb-2.5 gap-2">
                                 <span class="text-xs text-cyan-300 font-bold">🚀 탑승 완료한 학생 우주선</span>
-                                <span class="text-xs bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 px-2 py-0.5 rounded font-bold">
-                                    <span id="lobbyStudentCount">0</span>명 대기 중
-                                </span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="addDemoBotsBtn" type="button"
+                                        class="text-[11px] bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/60 text-indigo-200 px-2 py-0.5 rounded transition cursor-pointer">
+                                        + 테스트 학생 3명
+                                    </button>
+                                    <span class="text-xs bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 px-2 py-0.5 rounded font-bold">
+                                        <span id="lobbyStudentCount">0</span>명 대기 중
+                                    </span>
+                                </div>
                             </div>
                             <div id="lobbyStudentsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[150px] overflow-y-auto">
                                 <div class="col-span-full text-center text-xs text-slate-400 py-8">
@@ -666,7 +722,7 @@
                 </div>
 
                 <!-- Teacher Space Race Track Canvas -->
-                <div id="teacherCanvasWrapper" class="relative w-full h-[360px] sm:h-[430px] bg-[#090714] border-2 border-[#2e295e] rounded overflow-y-auto overflow-x-hidden">
+                <div id="teacherCanvasWrapper" class="relative w-full h-[320px] sm:h-[380px] bg-[#090714] border-2 border-[#2e295e] rounded overflow-y-auto overflow-x-hidden">
                     <canvas id="teacherCanvas"></canvas>
                 </div>
             </div>
@@ -856,7 +912,7 @@
                 </div>
 
                 <!-- Gameplay Canvas -->
-                <div id="canvasWrapper" class="relative w-full h-[270px] sm:h-[350px] bg-[#090714] border-2 border-[#2e295e] rounded overflow-hidden mb-2.5">
+                <div id="canvasWrapper" class="relative w-full h-[250px] sm:h-[320px] bg-[#090714] border-2 border-[#2e295e] rounded overflow-hidden mb-2.5">
                     <canvas id="gameCanvas"></canvas>
                     <!-- Lv.N UP! Floating Banner (Shows for 2s before 3-Skill Modal opens) -->
                     <div id="levelUpBanner" class="hidden pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-[#090714]/45 z-20">
@@ -974,13 +1030,25 @@
         // ==========================================
         // 1. BACKEND SYNC LAYER (FIRESTORE + LOCAL FALLBACK)
         // ==========================================
+        // ★ 연결된 Firebase 프로젝트 설정 (classtyping-2a9a3)
+        const MANUAL_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBWP4uPs5tVufwyz83XM1MVBfPGY61g-jo",
+            authDomain: "classtyping-2a9a3.firebaseapp.com",
+            projectId: "classtyping-2a9a3",
+            storageBucket: "classtyping-2a9a3.firebasestorage.app",
+            messagingSenderId: "145624297399",
+            appId: "1:145624297399:web:974c2d56442b9126a98232",
+            measurementId: "G-N09Q2D8XC7"
+        };
+
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'odung-speed-typing';
+        let firebaseAppInstance = null;
         let db = null;
         let auth = null;
         let currentUser = null;
         let useFirestore = false;
 
-        // Local BroadcastChannel + Memory fallback if running outside Firebase environment
+        // Local BroadcastChannel + Memory fallback if running without Firebase
         const localChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('odung_typing_sync') : null;
         const localStore = {
             rooms: {},
@@ -988,26 +1056,140 @@
             hof: []
         };
 
+        function updateConnectionStatusUI() {
+            const btn = document.getElementById('serverStatusBtn');
+            const modalBadge = document.getElementById('modalConnStatus');
+            if (useFirestore && currentUser) {
+                if (btn) {
+                    btn.textContent = '🟢 실시간 서버 연결됨';
+                    btn.className = 'text-[11px] sm:text-xs bg-emerald-950/80 border border-emerald-400/70 text-emerald-300 px-2 py-1 rounded transition';
+                }
+                if (modalBadge) {
+                    modalBadge.textContent = '🟢 클라우드 연결됨 (다중 기기 가능)';
+                    modalBadge.className = 'text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300';
+                }
+            } else {
+                if (btn) {
+                    btn.textContent = '🟡 로컬 테스트 모드';
+                    btn.className = 'text-[11px] sm:text-xs bg-[#0f0c21] border border-amber-500/60 hover:border-yellow-400 text-amber-300 px-2 py-1 rounded transition';
+                }
+                if (modalBadge) {
+                    modalBadge.textContent = '🟡 미연결 (같은 브라우저만 가능)';
+                    modalBadge.className = 'text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300';
+                }
+            }
+        }
+
+        function parseFirebaseConfigText(raw) {
+            const trimmed = String(raw || '').trim();
+            if (!trimmed) return null;
+            try {
+                const parsed = JSON.parse(trimmed);
+                if (parsed && parsed.apiKey && parsed.projectId) return parsed;
+            } catch (e) {}
+
+            const keys = ['apiKey', 'authDomain', 'databaseURL', 'projectId', 'storageBucket', 'messagingSenderId', 'appId', 'measurementId'];
+            const extracted = {};
+            for (const k of keys) {
+                const match = trimmed.match(new RegExp(`${k}\\s*:\\s*["']([^"']+)["']`));
+                if (match) extracted[k] = match[1];
+            }
+            return (extracted.apiKey && extracted.projectId) ? extracted : null;
+        }
+
+        async function connectWithFirebaseConfig(firebaseConfig) {
+            try {
+                if (!firebaseConfig || !firebaseConfig.apiKey) return false;
+                firebaseAppInstance = initializeApp(firebaseConfig, `odung_app_${Date.now()}`);
+                auth = getAuth(firebaseAppInstance);
+                db = getFirestore(firebaseAppInstance);
+
+                // RULE 3: Authenticate FIRST before any Firestore queries
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && firebaseConfig === defaultEnvConfig) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                currentUser = auth.currentUser;
+                useFirestore = Boolean(currentUser);
+                updateConnectionStatusUI();
+                return useFirestore;
+            } catch (err) {
+                console.warn('Firebase connection failed:', err);
+                useFirestore = false;
+                updateConnectionStatusUI();
+                if (err && err.code === 'auth/operation-not-allowed') {
+                    showToast('⚠️ Firebase 콘솔의 Authentication에서 [익명 로그인]을 활성화해주세요!');
+                }
+                return false;
+            }
+        }
+
+        let defaultEnvConfig = null;
         async function initBackend() {
             try {
+                if (MANUAL_FIREBASE_CONFIG && MANUAL_FIREBASE_CONFIG.apiKey) {
+                    await connectWithFirebaseConfig(MANUAL_FIREBASE_CONFIG);
+                    return;
+                }
                 if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                    const firebaseConfig = JSON.parse(__firebase_config);
-                    const app = initializeApp(firebaseConfig);
-                    auth = getAuth(app);
-                    db = getFirestore(app);
-
-                    // RULE 3: Authenticate FIRST before any Firestore queries
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                    currentUser = auth.currentUser;
-                    useFirestore = Boolean(currentUser);
+                    defaultEnvConfig = JSON.parse(__firebase_config);
+                    await connectWithFirebaseConfig(defaultEnvConfig);
+                    return;
                 }
             } catch (err) {
                 console.warn('Firestore init fallback to local mode:', err);
-                useFirestore = false;
+            }
+            useFirestore = false;
+            updateConnectionStatusUI();
+        }
+        let localChannelListener = null;
+        function subscribeToRoom(roomCode) {
+            cleanupRoomListeners();
+
+            if (useFirestore && currentUser) {
+                appState.unsubRoom = onSnapshot(getRoomDocRef(roomCode), (snap) => {
+                    if (snap.exists()) {
+                        handleRoomSnapshot(snap.data());
+                    }
+                }, (err) => console.error('Room listener error:', err));
+
+                // RULE 2: Fetch collection simply without complex where/orderBy, filter & sort in JS
+                appState.unsubPlayers = onSnapshot(getPlayersColRef(), (snapshot) => {
+                    const roomPlayers = [];
+                    snapshot.forEach(docSnap => {
+                        const d = docSnap.data();
+                        if (d.roomCode === roomCode) {
+                            roomPlayers.push(d);
+                        }
+                    });
+                    handlePlayersListUpdate(roomPlayers);
+                }, (err) => console.error('Players listener error:', err));
+            } else if (localChannel) {
+                if (localChannelListener) {
+                    localChannel.removeEventListener('message', localChannelListener);
+                }
+                localChannelListener = (ev) => {
+                    const msg = ev.data;
+                    if (!msg) return;
+                    if (msg.type === 'query_room' && msg.roomCode === roomCode && appState.role === 'teacher' && appState.roomData) {
+                        localChannel.postMessage({ type: 'room_update', roomCode, data: appState.roomData });
+                        // Also broadcast current players in local mode
+                        Object.values(localStore.players)
+                            .filter(p => p.roomCode === roomCode)
+                            .forEach(p => localChannel.postMessage({ type: 'player_update', roomCode, playerId: p.playerId, data: p }));
+                    } else if (msg.type === 'room_update' && msg.roomCode === roomCode) {
+                        localStore.rooms[roomCode] = msg.data;
+                        handleRoomSnapshot(msg.data);
+                    } else if (msg.type === 'player_update' && msg.roomCode === roomCode) {
+                        localStore.players[`${roomCode}_${msg.playerId}`] = msg.data;
+                        handlePlayersListUpdate(Object.values(localStore.players).filter(p => p.roomCode === roomCode));
+                    } else if (msg.type === 'hof_update') {
+                        localStore.hof.push(msg.record);
+                        renderHallOfFameTable(localStore.hof);
+                    }
+                };
+                localChannel.addEventListener('message', localChannelListener);
             }
         }
 
@@ -1530,46 +1712,6 @@
             }
         }
 
-        function subscribeToRoom(roomCode) {
-            cleanupRoomListeners();
-
-            if (useFirestore && currentUser) {
-                appState.unsubRoom = onSnapshot(getRoomDocRef(roomCode), (snap) => {
-                    if (snap.exists()) {
-                        handleRoomSnapshot(snap.data());
-                    }
-                }, (err) => console.error('Room listener error:', err));
-
-                // RULE 2: Fetch collection simply without complex where/orderBy, filter & sort in JS
-                appState.unsubPlayers = onSnapshot(getPlayersColRef(), (snapshot) => {
-                    const roomPlayers = [];
-                    snapshot.forEach(docSnap => {
-                        const d = docSnap.data();
-                        if (d.roomCode === roomCode) {
-                            roomPlayers.push(d);
-                        }
-                    });
-                    handlePlayersListUpdate(roomPlayers);
-                }, (err) => console.error('Players listener error:', err));
-            } else if (localChannel) {
-                localChannel.onmessage = (ev) => {
-                    const msg = ev.data;
-                    if (msg.type === 'query_room' && msg.roomCode === roomCode && appState.role === 'teacher' && appState.roomData) {
-                        localChannel.postMessage({ type: 'room_update', roomCode, data: appState.roomData });
-                    } else if (msg.type === 'room_update' && msg.roomCode === roomCode) {
-                        localStore.rooms[roomCode] = msg.data;
-                        handleRoomSnapshot(msg.data);
-                    } else if (msg.type === 'player_update' && msg.roomCode === roomCode) {
-                        localStore.players[`${roomCode}_${msg.playerId}`] = msg.data;
-                        handlePlayersListUpdate(Object.values(localStore.players).filter(p => p.roomCode === roomCode));
-                    } else if (msg.type === 'hof_update') {
-                        localStore.hof.push(msg.record);
-                        renderHallOfFameTable(localStore.hof);
-                    }
-                };
-            }
-        }
-
         async function fetchRoomForVerification(roomCode) {
             if (useFirestore && currentUser) {
                 const snap = await getDoc(getRoomDocRef(roomCode));
@@ -1895,6 +2037,7 @@
 
         let teacherRaceAnimId = null;
         let teacherEndTimeout = null;
+        let demoBotIntervalId = null;
         const teacherCanvas = document.getElementById('teacherCanvas');
         const tCtx = teacherCanvas.getContext('2d');
         const teacherCanvasWrapper = document.getElementById('teacherCanvasWrapper');
@@ -1915,6 +2058,30 @@
         function startTeacherRaceLoop(room) {
             cancelAnimationFrame(teacherRaceAnimId);
             clearTimeout(teacherEndTimeout);
+            clearInterval(demoBotIntervalId);
+
+            // Simulate progress for any demo bots added in lobby
+            demoBotIntervalId = setInterval(() => {
+                if (appState.currentView !== 'teacherRace') {
+                    clearInterval(demoBotIntervalId);
+                    return;
+                }
+                const bots = appState.playersList.filter(p => p.isBot);
+                bots.forEach(bot => {
+                    if (Math.random() < 0.55) {
+                        const addWords = 1;
+                        const newWords = (bot.wordsDestroyed || 0) + addWords;
+                        const newScore = (bot.score || 0) + 120 + Math.floor(Math.random() * 140);
+                        writePlayerState(appState.roomCode, bot.playerId, {
+                            ...bot,
+                            wordsDestroyed: newWords,
+                            score: newScore,
+                            cpm: 210 + Math.floor(Math.random() * 90),
+                            bossActive: newScore >= 1000 && newScore % 1000 < 450
+                        });
+                    }
+                });
+            }, 1300);
 
             const durationSec = room.duration || 60;
             const startAt = room.startAt || Date.now();
@@ -2075,6 +2242,7 @@
 
         async function finishTeacherRace() {
             cancelAnimationFrame(teacherRaceAnimId);
+            clearInterval(demoBotIntervalId);
             sfx.gameOver();
             await writeRoomState(appState.roomCode, { status: 'finished' });
             showTeacherPodium(true);
@@ -2201,7 +2369,10 @@
                 const roomData = await fetchRoomForVerification(roomCode);
 
                 if (!roomData) {
-                    showStudentJoinError(`방 코드 [${roomCode}]를 찾을 수 없습니다. 선생님이 방을 먼저 생성했는지 확인해주세요!`);
+                    const modeHint = !useFirestore
+                        ? ' (현재 로컬 모드입니다. 다른 기기에서 접속하려면 상단 [🟡 로컬 테스트 모드]를 눌러 Firebase 서버를 연결해주세요!)'
+                        : ' 선생님이 방을 먼저 생성했는지 확인해주세요!';
+                    showStudentJoinError(`방 코드 [${roomCode}]를 찾을 수 없습니다.${modeHint}`);
                     return;
                 }
 
@@ -3334,6 +3505,65 @@
         // ==========================================
         document.getElementById('selectTeacherBtn').addEventListener('click', () => openTeacherSetup());
         document.getElementById('selectStudentBtn').addEventListener('click', () => openStudentMode());
+
+        // Server Status & Firebase Setup Modal Events
+        document.getElementById('serverStatusBtn').addEventListener('click', () => {
+            updateConnectionStatusUI();
+            const modal = document.getElementById('firebaseSetupModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        });
+        document.getElementById('closeFirebaseModalBtn').addEventListener('click', () => {
+            const modal = document.getElementById('firebaseSetupModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        });
+        document.getElementById('applyFirebaseConfigBtn').addEventListener('click', async () => {
+            const raw = document.getElementById('firebaseConfigInput').value;
+            const parsed = parseFirebaseConfigText(raw);
+            if (!parsed) {
+                showToast('⚠️ 올바른 Firebase Config 형식(apiKey, projectId 포함)을 입력해주세요!');
+                return;
+            }
+            const ok = await connectWithFirebaseConfig(parsed);
+            if (ok) {
+                sfx.bonus();
+                showToast('🟢 Firebase 실시간 서버에 연결되었습니다!');
+                const modal = document.getElementById('firebaseSetupModal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                appState.unsubHof = null;
+                subscribeToHallOfFame();
+                if (appState.roomCode) {
+                    subscribeToRoom(appState.roomCode);
+                    if (appState.role === 'teacher' && appState.roomData) {
+                        await writeRoomState(appState.roomCode, appState.roomData);
+                    }
+                }
+            }
+        });
+
+        // Add Demo Student Bots in Teacher Lobby for Instant Testing
+        document.getElementById('addDemoBotsBtn').addEventListener('click', async () => {
+            if (!appState.roomCode) return;
+            const botNames = ['김쿼카', '이오둥', '박타자'];
+            sfx.bonus();
+            for (let i = 0; i < botNames.length; i++) {
+                const botId = `bot_${i + 1}`;
+                await writePlayerState(appState.roomCode, botId, {
+                    name: botNames[i],
+                    isBot: true,
+                    schoolName: appState.schoolName,
+                    classCode: appState.classCode,
+                    wordsDestroyed: 0,
+                    score: 0,
+                    cpm: 0,
+                    maxCombo: 0,
+                    joinedAt: Date.now() + i
+                });
+            }
+            showToast('🤖 테스트 학생 3명(김쿼카, 이오둥, 박타자)이 우주선에 탑승했습니다!');
+        });
 
         // Enforce numeric-only input on Grade/Class fields
         document.getElementById('teacherClassInput').addEventListener('input', (e) => {
