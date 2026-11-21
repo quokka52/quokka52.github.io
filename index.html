@@ -402,7 +402,6 @@
                 iconBg: 'from-slate-950 via-indigo-950 to-black',
                 icon: quokkaSpaceshipSvg,
                 actionLabel: '▶ 게임 시작하기',
-                showCardStartBtn: true,
                 isReady: true
             },
             {
@@ -528,15 +527,9 @@
                             ${tagsHtml}
                         </div>
 
-                        ${game.showCardStartBtn ? `
-                            <a href="${game.url}" onclick="event.stopPropagation()" class="mt-3 w-full py-2 bg-amber-400 hover:bg-amber-300 text-[#121629] font-bold text-xs sm:text-sm border-2 border-black shadow-[3px_3px_0px_#000] active:translate-y-0.5 transition-all">
-                                ${game.actionLabel || '▶ 게임 시작하기'}
-                            </a>
-                        ` : `
-                            <div class="mt-3 text-[10px] text-slate-500 group-hover:text-amber-300 transition-colors tracking-widest">
-                                [ 클릭해서 상세보기 ]
-                            </div>
-                        `}
+                        <div class="mt-3 text-[10px] text-slate-500 group-hover:text-amber-300 transition-colors tracking-widest">
+                            [ 클릭해서 상세보기 ]
+                        </div>
                     </div>
                 `;
                 gamesGrid.appendChild(card);
@@ -561,7 +554,9 @@
 
             // 데이터 채우기
             document.getElementById('modal-game-number').textContent = game.gameNumber;
-            document.getElementById('modal-icon').textContent = game.icon;
+            const modalIconEl = document.getElementById('modal-icon');
+            modalIconEl.className = 'text-4xl flex items-center justify-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]';
+            modalIconEl.innerHTML = game.icon;
             document.getElementById('modal-icon-bg').className = `w-full h-full bg-gradient-to-br ${game.iconBg} flex items-center justify-center border border-black/40`;
             document.getElementById('modal-title').textContent = game.title;
             document.getElementById('modal-category-text').textContent = getCategoryText(game.category);
