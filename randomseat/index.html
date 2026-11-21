@@ -7,17 +7,11 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='40' fill='%23FFA400'/%3E%3Cpath d='M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z' fill='%23FFFFFF' stroke='%23000000' stroke-width='9' stroke-linejoin='round'/%3E%3Cellipse cx='85' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='85' cy='95' r='4.5' fill='%23000000'/%3E%3Cellipse cx='115' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='115' cy='95' r='4.5' fill='%23000000'/%3E%3Cpath d='M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z' fill='%23FFA400' stroke='%23000000' stroke-width='6.5' stroke-linejoin='round'/%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css');
-
-        @font-face {
-            font-family: 'Galmuri11';
-            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2506-1@1.0/Galmuri11-Bold.woff2') format('woff2');
-            font-weight: 700;
-            font-display: swap;
-        }
+        /* 주아체(Jua) 폰트 로드 */
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
 
         body {
-            font-family: 'Galmuri11', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Jua', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #f6efe2;
             background-image:
                 linear-gradient(90deg, rgba(139, 94, 52, 0.07) 1px, transparent 1px),
@@ -29,11 +23,13 @@
         .retro-panel {
             background-color: #fffdf8;
             border: 3px solid #3a2618;
+            border-radius: 14px;
             box-shadow: 4px 4px 0px #3a2618;
         }
 
         .retro-btn {
             border: 2.5px solid #3a2618;
+            border-radius: 10px;
             box-shadow: 3px 3px 0px #3a2618;
             transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
@@ -65,13 +61,15 @@
                     rgba(130, 74, 30, 0.12) 180px
                 );
             border: 4px solid #4a2e16;
+            border-radius: 14px;
             box-shadow: inset 0 0 24px rgba(74, 46, 22, 0.35);
         }
 
-        /* 픽셀 칠판 */
+        /* 칠판 */
         .chalkboard {
             background-color: #1f4e3d;
             border: 4px solid #6b4226;
+            border-radius: 10px;
             box-shadow: 0 4px 0 #3a2312, inset 0 0 10px rgba(0, 0, 0, 0.4);
         }
 
@@ -79,6 +77,7 @@
         .desk-unit {
             background: linear-gradient(180deg, #f3c48b 0%, #dca05d 100%);
             border: 2.5px solid #4a2e16;
+            border-radius: 10px;
             box-shadow: 0 3px 0 #4a2e16;
             transition: transform 0.15s ease, background-color 0.15s ease;
         }
@@ -127,7 +126,7 @@
             grid-template-areas: "stack";
             overflow-x: hidden;
             width: 100%;
-            padding: 4px;
+            padding: 2px;
         }
         .step-view {
             grid-area: stack;
@@ -183,75 +182,75 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-amber-300 selection:text-stone-900">
 
-    <!-- 확대/축소(Zoom)가 적용되는 전체 래퍼 -->
-    <div id="zoom-wrapper" class="w-full flex-grow flex flex-col transition-all duration-150">
-
-        <!-- 상단 헤더 -->
-        <header class="max-w-7xl w-full mx-auto px-4 pt-4 pb-3 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl overflow-hidden bg-[#FFA400] flex items-center justify-center border-[3px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618]">
-                    <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="200" height="200" fill="#FFA400" />
-                        <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin="round" />
-                        <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
-                        <circle cx="85" cy="95" r="4.5" fill="#000000" />
-                        <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
-                        <circle cx="115" cy="95" r="4.5" fill="#000000" />
-                        <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="6.5" stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 bg-emerald-700 text-amber-200 text-[11px] font-bold border border-[#3a2618]">두근두근 자리 바꾸는 날</span>
-                        <span class="text-xs text-stone-600 font-bold">ODUNG GAMES</span>
-                    </div>
-                    <h1 class="text-xl sm:text-2xl font-bold text-[#2c1e12] tracking-tight mt-0.5">오둥이 자리뽑기</h1>
-                </div>
+    <!-- 상단 헤더 -->
+    <header class="max-w-7xl w-full mx-auto px-4 pt-4 pb-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl overflow-hidden bg-[#FFA400] flex items-center justify-center border-[3px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618]">
+                <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="200" height="200" fill="#FFA400" />
+                    <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin="round" />
+                    <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
+                    <circle cx="85" cy="95" r="4.5" fill="#000000" />
+                    <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
+                    <circle cx="115" cy="95" r="4.5" fill="#000000" />
+                    <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="6.5" stroke-linejoin="round" />
+                </svg>
             </div>
-
-            <!-- 우측 컨트롤: 화면 확대/축소 + 효과음 ON/OFF -->
-            <div class="flex items-center gap-2">
-                <div class="flex items-center bg-[#fffdf8] border-[2.5px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618]" title="화면 배율 확대/축소">
-                    <button onclick="changeZoom(-0.1)" class="px-2.5 py-1 bg-[#f3eadc] hover:bg-amber-200 text-[#2c1e12] text-xs font-bold border-r-2 border-[#3a2618] cursor-pointer" title="화면 축소">
-                        -
-                    </button>
-                    <button onclick="resetZoom()" id="zoom-label" class="px-2.5 py-1 text-xs font-bold text-[#2c1e12] hover:bg-amber-100 min-w-[54px] text-center cursor-pointer" title="100% 기본 크기로 복귀">
-                        100%
-                    </button>
-                    <button onclick="changeZoom(0.1)" class="px-2.5 py-1 bg-[#f3eadc] hover:bg-amber-200 text-[#2c1e12] text-xs font-bold border-l-2 border-[#3a2618] cursor-pointer" title="화면 확대">
-                        +
-                    </button>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md bg-emerald-700 text-amber-200 text-xs border border-[#3a2618]">두근두근 자리 바꾸는 날</span>
+                    <span class="text-xs text-stone-600">ODUNG GAMES</span>
                 </div>
+                <h1 class="text-2xl sm:text-3xl text-[#2c1e12] tracking-tight mt-0.5">오둥이 자리뽑기</h1>
+            </div>
+        </div>
 
-                <button id="sound-btn" onclick="toggleSound()" class="retro-btn px-3 py-1.5 bg-amber-300 text-[#2c1e12] text-xs font-bold cursor-pointer">
-                    🔊 효과음 ON
+        <!-- 화면 배율(확대/축소) 및 효과음 컨트롤 -->
+        <div class="flex items-center gap-2">
+            <div class="flex items-center bg-[#fffdf8] border-[2.5px] border-[#3a2618] rounded-xl shadow-[3px_3px_0px_#3a2618] overflow-hidden" title="화면 배율 확대/축소">
+                <button onclick="changeZoom(-0.1)" class="px-2.5 py-1.5 hover:bg-amber-100 text-[#2c1e12] text-sm border-r-2 border-[#3a2618] cursor-pointer" title="화면 축소">
+                    −
+                </button>
+                <button onclick="resetZoom()" id="zoom-label" class="px-2.5 py-1.5 text-xs text-amber-800 hover:bg-amber-50 min-w-[52px] text-center cursor-pointer" title="100% 기본 크기로 복귀">
+                    100%
+                </button>
+                <button onclick="changeZoom(0.1)" class="px-2.5 py-1.5 hover:bg-amber-100 text-[#2c1e12] text-sm border-l-2 border-[#3a2618] cursor-pointer" title="화면 확대">
+                    +
                 </button>
             </div>
-        </header>
+
+            <button id="sound-btn" onclick="toggleSound()" class="retro-btn px-3.5 py-1.5 bg-amber-300 text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
+                🔊 효과음 ON
+            </button>
+        </div>
+    </header>
+
+    <!-- 확대/축소(Zoom)가 적용되는 메인 래퍼 -->
+    <div id="zoom-wrapper" class="w-full flex-grow flex flex-col transition-all duration-150">
 
         <!-- 상단 4단계 스텝 네비게이션 바 -->
         <nav class="max-w-6xl w-full mx-auto px-4 mb-5">
             <div class="retro-panel p-2.5 grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#fff9ed]">
-                <button onclick="goToStep(1)" id="step-tab-1" class="step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span class="px-1.5 py-0.5 bg-[#2c1e12] text-amber-300 text-[11px]">01</span>
+                <button onclick="goToStep(1)" id="step-tab-1" class="step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-300 text-[11px]">01</span>
                     <span>우리 반 친구들</span>
                 </button>
-                <button onclick="goToStep(2)" id="step-tab-2" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span class="px-1.5 py-0.5 bg-stone-500 text-white text-[11px]">02</span>
+                <button onclick="goToStep(2)" id="step-tab-2" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]">02</span>
                     <span>자리 배치 선택</span>
                 </button>
-                <button onclick="goToStep(3)" id="step-tab-3" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span class="px-1.5 py-0.5 bg-stone-500 text-white text-[11px]">03</span>
+                <button onclick="goToStep(3)" id="step-tab-3" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]">03</span>
                     <span>교실 자리뽑기</span>
                 </button>
-                <button onclick="goToStep(4)" id="step-tab-4" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span class="px-1.5 py-0.5 bg-stone-500 text-white text-[11px]">04</span>
+                <button onclick="goToStep(4)" id="step-tab-4" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]">04</span>
                     <span>자리표 저장</span>
                 </button>
             </div>
         </nav>
 
-        <!-- 메인 단계별 컨테이너 (좌우 슬라이드 교차 영역) -->
+        <!-- 메인 단계별 컨테이너 (좌우 교차 슬라이드 애니메이션 영역) -->
         <main class="max-w-6xl w-full mx-auto px-4 pb-12 flex-grow">
             <div class="step-container">
 
@@ -261,59 +260,59 @@
                 <section id="step-view-1" class="step-view max-w-2xl mx-auto retro-panel p-5 sm:p-7">
                     <div class="flex items-center justify-between border-b-2 border-[#e5d7c3] pb-3 mb-5">
                         <div>
-                            <span class="inline-block px-2 py-0.5 bg-amber-400 border border-[#3a2618] text-xs font-bold mb-1">STEP 01</span>
-                            <h2 class="text-lg sm:text-xl font-bold text-[#2c1e12]">우리 반 친구들을 등록해 주세요</h2>
+                            <span class="inline-block px-2.5 py-0.5 rounded-md bg-amber-400 border border-[#3a2618] text-xs mb-1">STEP 01</span>
+                            <h2 class="text-xl sm:text-2xl text-[#2c1e12]">우리 반 친구들을 등록해 주세요</h2>
                         </div>
-                        <div class="px-3 py-1.5 bg-[#f7f0e4] border-2 border-[#3a2618] text-xs sm:text-sm font-bold text-emerald-700">
-                            출석 <span id="present-count-badge" class="text-base">24</span>명
+                        <div class="px-3.5 py-1.5 rounded-xl bg-[#f7f0e4] border-2 border-[#3a2618] text-xs sm:text-sm text-emerald-700">
+                            출석 <span id="present-count-badge" class="text-lg">24</span>명
                         </div>
                     </div>
 
                     <!-- 번호로 / 이름으로 탭 -->
                     <div class="grid grid-cols-2 gap-3 mb-5">
-                        <button id="mode-num-btn" onclick="switchInputMode('number')" class="retro-btn py-2.5 bg-[#2c1e12] text-white text-sm font-bold cursor-pointer">
+                        <button id="mode-num-btn" onclick="switchInputMode('number')" class="retro-btn py-2.5 bg-[#2c1e12] text-white text-sm sm:text-base cursor-pointer">
                             🔢 번호로 설정
                         </button>
-                        <button id="mode-name-btn" onclick="switchInputMode('name')" class="retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm font-bold cursor-pointer">
+                        <button id="mode-name-btn" onclick="switchInputMode('name')" class="retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm sm:text-base cursor-pointer">
                             ✏️ 이름으로 설정
                         </button>
                     </div>
 
                     <!-- 번호 입력 모드 -->
                     <div id="input-number-box" class="mb-5">
-                        <p class="text-xs sm:text-sm text-stone-600 text-center mb-2.5 font-bold">우리 반은 총 몇 명인가요?</p>
-                        <div class="flex items-center justify-center gap-6 bg-[#f7f0e4] border-2 border-[#3a2618] py-4 px-6">
-                            <button onclick="changeStudentCount(-1)" class="retro-btn w-11 h-11 bg-white text-xl font-bold flex items-center justify-center cursor-pointer">-</button>
-                            <div class="text-3xl font-bold text-[#2c1e12] min-w-[96px] text-center">
-                                <span id="num-count-display">24</span><span class="text-base ml-1">명</span>
+                        <p class="text-sm text-stone-600 text-center mb-2.5">우리 반은 총 몇 명인가요?</p>
+                        <div class="flex items-center justify-center gap-6 bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl py-4 px-6">
+                            <button onclick="changeStudentCount(-1)" class="retro-btn w-11 h-11 bg-white text-xl flex items-center justify-center cursor-pointer">-</button>
+                            <div class="text-3xl text-[#2c1e12] min-w-[96px] text-center">
+                                <span id="num-count-display">24</span><span class="text-lg ml-1">명</span>
                             </div>
-                            <button onclick="changeStudentCount(1)" class="retro-btn w-11 h-11 bg-white text-xl font-bold flex items-center justify-center cursor-pointer">+</button>
+                            <button onclick="changeStudentCount(1)" class="retro-btn w-11 h-11 bg-white text-xl flex items-center justify-center cursor-pointer">+</button>
                         </div>
                     </div>
 
                     <!-- 이름 입력 모드 -->
                     <div id="input-name-box" class="hidden mb-5">
                         <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-xs sm:text-sm font-bold text-stone-700">학생 이름 명단 (줄바꿈 또는 쉼표로 구분)</span>
-                            <button onclick="applyNameList(false)" class="retro-btn px-3 py-1 bg-amber-400 text-xs font-bold cursor-pointer">명단 반영</button>
+                            <span class="text-xs sm:text-sm text-stone-700">학생 이름 명단 (줄바꿈 또는 쉼표로 구분)</span>
+                            <button onclick="applyNameList(false)" class="retro-btn px-3 py-1 bg-amber-400 text-xs cursor-pointer">명단 반영</button>
                         </div>
-                        <textarea id="name-list-textarea" rows="5" oninput="applyNameList(true)" onchange="applyNameList(false)" placeholder="김오둥&#10;이수달&#10;박하늘&#10;정다은" class="w-full bg-[#f7f0e4] border-2 border-[#3a2618] p-3 text-sm text-[#2c1e12] font-bold focus:outline-none focus:border-amber-500"></textarea>
+                        <textarea id="name-list-textarea" rows="5" oninput="applyNameList(true)" onchange="applyNameList(false)" placeholder="김오둥&#10;이수달&#10;박하늘&#10;정다은" class="w-full bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl p-3 text-base text-[#2c1e12] focus:outline-none focus:border-amber-500"></textarea>
                     </div>
 
                     <!-- 출석/결석 토글 칩 그리드 -->
                     <div class="mb-6">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs text-stone-600 font-bold">💡 이름(번호)을 누르면 당일 결석생으로 제외됩니다</span>
-                            <button onclick="resetAbsent()" class="text-xs text-emerald-700 underline font-bold cursor-pointer">전원 출석</button>
+                            <span class="text-xs sm:text-sm text-stone-600">💡 이름(번호)을 누르면 당일 결석생으로 제외됩니다</span>
+                            <button onclick="resetAbsent()" class="text-xs sm:text-sm text-emerald-700 underline cursor-pointer">전원 출석</button>
                         </div>
-                        <div id="student-chips-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-[210px] overflow-y-auto p-3 bg-[#f7f0e4] border-2 border-[#3a2618]">
+                        <div id="student-chips-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-[210px] overflow-y-auto p-3 bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl">
                             <!-- JS 렌더링 -->
                         </div>
                     </div>
 
                     <!-- 다음 단계 이동 버튼 -->
-                    <div class="flex justify-end pt-2 border-t-2 border-[#e5d7c3]">
-                        <button onclick="goToStep(2)" class="retro-btn px-6 py-3 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base font-bold cursor-pointer flex items-center gap-2">
+                    <div class="flex justify-end pt-3 border-t-2 border-[#e5d7c3]">
+                        <button onclick="goToStep(2)" class="retro-btn px-6 py-3 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base cursor-pointer flex items-center gap-2">
                             <span>다음 단계: 자리 배치 선택</span>
                             <span>▶</span>
                         </button>
@@ -328,10 +327,10 @@
                     <div class="lg:col-span-5 retro-panel p-5 flex flex-col gap-4">
                         <div class="flex items-center justify-between border-b-2 border-[#e5d7c3] pb-3">
                             <div>
-                                <span class="inline-block px-2 py-0.5 bg-amber-400 border border-[#3a2618] text-xs font-bold mb-1">STEP 02</span>
-                                <h2 class="text-base sm:text-lg font-bold text-[#2c1e12]">교실 책상 배치 선택</h2>
+                                <span class="inline-block px-2.5 py-0.5 rounded-md bg-amber-400 border border-[#3a2618] text-xs mb-1">STEP 02</span>
+                                <h2 class="text-lg sm:text-xl text-[#2c1e12]">교실 책상 배치 선택</h2>
                             </div>
-                            <div class="text-right text-xs font-bold">
+                            <div class="text-right text-xs sm:text-sm">
                                 <div class="text-emerald-700">출석 <span id="step2-present-count">24</span>명</div>
                                 <div class="text-amber-700">책상 <span id="desk-count-badge">24</span>석</div>
                             </div>
@@ -339,46 +338,46 @@
 
                         <!-- 7가지 프리셋 버튼 -->
                         <div class="grid grid-cols-3 gap-2">
-                            <button onclick="applyPreset('pair3')" data-preset="pair3" class="preset-btn retro-btn p-2.5 bg-amber-200 text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                            <button onclick="applyPreset('pair3')" data-preset="pair3" class="preset-btn retro-btn p-2.5 bg-amber-200 text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
                                 <span class="text-base">👥👥👥</span>
                                 <span>짝꿍 3분단</span>
                             </button>
-                            <button onclick="applyPreset('pair4')" data-preset="pair4" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                            <button onclick="applyPreset('pair4')" data-preset="pair4" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
                                 <span class="text-base">👥👥👥👥</span>
                                 <span>짝꿍 4분단</span>
                             </button>
-                            <button onclick="applyPreset('single')" data-preset="single" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                            <button onclick="applyPreset('single')" data-preset="single" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
                                 <span class="text-base">🧍🧍🧍🧍</span>
                                 <span>혼자 앉기</span>
                             </button>
-                            <button onclick="applyPreset('group3')" data-preset="group3" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                            <button onclick="applyPreset('group3')" data-preset="group3" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
                                 <span class="text-base">☘️</span>
                                 <span>3인 책상</span>
                             </button>
-                            <button onclick="applyPreset('group4')" data-preset="group4" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                            <button onclick="applyPreset('group4')" data-preset="group4" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
                                 <span class="text-base">🍀</span>
                                 <span>4인 모둠</span>
                             </button>
-                            <button onclick="applyPreset('group6')" data-preset="group6" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                            <button onclick="applyPreset('group6')" data-preset="group6" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
                                 <span class="text-base">🍱</span>
                                 <span>6인 모둠</span>
                             </button>
-                            <button onclick="applyPreset('ushape')" data-preset="ushape" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs font-bold flex flex-col items-center gap-1 cursor-pointer col-span-3">
+                            <button onclick="applyPreset('ushape')" data-preset="ushape" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer col-span-3">
                                 <span class="text-base">🧲 ㄷ자 배치</span>
                             </button>
                         </div>
 
                         <!-- 직접 꾸미기 토글 -->
-                        <button id="edit-layout-btn" onclick="toggleEditMode()" class="retro-btn w-full py-2.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm font-bold cursor-pointer flex items-center justify-center gap-1.5">
+                        <button id="edit-layout-btn" onclick="toggleEditMode()" class="retro-btn w-full py-2.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-1.5">
                             <span>🛠️ 자리 직접 꾸미기 (책상 추가/제거)</span>
                         </button>
 
                         <!-- 이전 / 다음 단계 버튼 -->
                         <div class="flex items-center justify-between gap-2 pt-3 border-t-2 border-[#e5d7c3]">
-                            <button onclick="goToStep(1)" class="retro-btn px-4 py-2.5 bg-white text-[#2c1e12] text-xs sm:text-sm font-bold cursor-pointer">
+                            <button onclick="goToStep(1)" class="retro-btn px-4 py-2.5 bg-white text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
                                 ◀ 이전
                             </button>
-                            <button onclick="goToStep(3)" class="retro-btn flex-1 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-xs sm:text-sm font-bold cursor-pointer">
+                            <button onclick="goToStep(3)" class="retro-btn flex-1 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
                                 다음: 교실 자리뽑기 ▶
                             </button>
                         </div>
@@ -387,17 +386,17 @@
                     <!-- 우측: 배치 미리보기 및 직접 편집 교실 판 (7칸) -->
                     <div class="lg:col-span-7 retro-panel p-4 bg-[#fff9ed]">
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs sm:text-sm font-bold text-[#2c1e12]" id="preview-guide-text">📐 선택한 책상 배치 미리보기</span>
-                            <span class="text-xs text-stone-500 font-bold">8열 × 6행 교실</span>
+                            <span class="text-sm text-[#2c1e12]" id="preview-guide-text">📐 선택한 책상 배치 미리보기</span>
+                            <span class="text-xs text-stone-500">8열 × 6행 교실</span>
                         </div>
                         <div class="classroom-floor p-4 sm:p-5 flex flex-col justify-between min-h-[410px]">
-                            <div class="chalkboard max-w-xs w-full mx-auto py-1.5 px-4 text-center text-white text-xs font-bold mb-5">
+                            <div class="chalkboard max-w-xs w-full mx-auto py-1.5 px-4 text-center text-white text-sm mb-5">
                                 칠판 / 교탁
                             </div>
                             <div id="preview-desks-grid" class="grid grid-cols-8 gap-1.5 sm:gap-2 my-auto">
                                 <!-- JS로 미리보기/편집용 책상 렌더링 -->
                             </div>
-                            <div class="mt-4 text-right text-[11px] font-bold text-[#4a2e16]">
+                            <div class="mt-4 text-right text-xs text-[#4a2e16]">
                                 * 직접 꾸미기 버튼을 누르면 빈 칸을 클릭해 책상을 놓을 수 있습니다.
                             </div>
                         </div>
@@ -411,25 +410,25 @@
                     <!-- 상단 컨트롤 & 안내 배너 -->
                     <div class="retro-panel px-4 py-3 flex flex-wrap items-center justify-between gap-3 bg-[#fff9ed]">
                         <div class="flex items-center gap-2.5">
-                            <button onclick="goToStep(2)" id="step3-back-btn" class="retro-btn px-3 py-1.5 bg-white text-[#2c1e12] text-xs font-bold cursor-pointer">
+                            <button onclick="goToStep(2)" id="step3-back-btn" class="retro-btn px-3 py-1.5 bg-white text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
                                 ◀ 배치 수정
                             </button>
-                            <span id="stage-badge" class="px-2.5 py-1 bg-emerald-700 text-white text-xs font-bold border border-[#3a2618]">READY</span>
+                            <span id="stage-badge" class="px-2.5 py-1 rounded-md bg-emerald-700 text-white text-xs border border-[#3a2618]">READY</span>
                             <div>
-                                <h2 id="stage-title" class="text-sm sm:text-base font-bold text-[#2c1e12]">새로운 자리 새 짝꿍! 우리 반 자리 바꾸기</h2>
-                                <p id="stage-subtitle" class="text-xs text-stone-600">자리 <span id="summary-seats" class="text-amber-700 font-bold">24</span>석 · 출석 <span id="summary-students" class="text-emerald-700 font-bold">24</span>명 준비 완료!</p>
+                                <h2 id="stage-title" class="text-base sm:text-lg text-[#2c1e12]">새로운 자리 새 짝꿍! 우리 반 자리 바꾸기</h2>
+                                <p id="stage-subtitle" class="text-xs sm:text-sm text-stone-600">자리 <span id="summary-seats" class="text-amber-700">24</span>석 · 출석 <span id="summary-students" class="text-emerald-700">24</span>명 준비 완료!</p>
                             </div>
                         </div>
 
                         <!-- 실행 버튼 그룹 -->
                         <div class="flex flex-wrap items-center gap-2">
-                            <button id="start-anim-btn" onclick="startSeatAssignment(false)" class="retro-btn px-5 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base font-bold cursor-pointer flex items-center gap-1.5">
+                            <button id="start-anim-btn" onclick="startSeatAssignment(false)" class="retro-btn px-5 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base cursor-pointer flex items-center gap-1.5">
                                 <span>🎬 자리 뽑기!</span>
                             </button>
-                            <button id="instant-assign-btn" onclick="startSeatAssignment(true)" class="retro-btn px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold cursor-pointer">
+                            <button id="instant-assign-btn" onclick="startSeatAssignment(true)" class="retro-btn px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm cursor-pointer">
                                 ⚡ 단번에 배정
                             </button>
-                            <button id="view-chart-btn" onclick="goToStep(4)" class="hidden retro-btn px-5 py-2.5 bg-sky-400 hover:bg-sky-300 text-[#2c1e12] text-sm font-bold cursor-pointer">
+                            <button id="view-chart-btn" onclick="goToStep(4)" class="hidden retro-btn px-5 py-2.5 bg-sky-400 hover:bg-sky-300 text-[#2c1e12] text-sm sm:text-base cursor-pointer">
                                 📋 자리표 저장하기 ▶
                             </button>
                         </div>
@@ -440,15 +439,15 @@
 
                         <!-- 교실 상단: 칠판 & 오둥이 선생님 & 교실 TV -->
                         <div class="relative flex items-start justify-between gap-2 mb-5 z-10">
-                            <div class="hidden sm:flex flex-col items-center bg-[#fffdf8] border-2 border-[#3a2618] px-3 py-1.5 shadow-[2px_2px_0px_#3a2618]">
-                                <span class="text-[10px] text-amber-700 font-bold">우리 반 급훈</span>
-                                <span class="text-xs font-bold text-[#2c1e12]">함께 웃는 우리 반</span>
+                            <div class="hidden sm:flex flex-col items-center bg-[#fffdf8] border-2 border-[#3a2618] rounded-xl px-3 py-1.5 shadow-[2px_2px_0px_#3a2618]">
+                                <span class="text-[11px] text-amber-700">우리 반 급훈</span>
+                                <span class="text-xs sm:text-sm text-[#2c1e12]">함께 웃는 우리 반</span>
                             </div>
 
                             <div class="flex-1 max-w-md mx-auto flex flex-col items-center">
                                 <div class="chalkboard w-full py-2.5 px-4 text-center relative">
-                                    <div class="text-[10px] text-emerald-200 mb-0.5" id="chalkboard-date"></div>
-                                    <div id="chalkboard-text" class="text-sm sm:text-base font-bold text-white tracking-wide">
+                                    <div class="text-xs text-emerald-200 mb-0.5" id="chalkboard-date"></div>
+                                    <div id="chalkboard-text" class="text-base sm:text-lg text-white tracking-wide">
                                         두근두근 자리 바꾸는 날
                                     </div>
                                     <div class="absolute bottom-0 right-4 w-6 h-1.5 bg-amber-300 border border-black"></div>
@@ -456,7 +455,7 @@
                                 </div>
 
                                 <div class="relative -mt-1 flex flex-col items-center">
-                                    <div id="teacher-bubble" class="mb-1 px-2.5 py-0.5 bg-white border-2 border-[#3a2618] text-[11px] font-bold text-[#2c1e12] shadow-[2px_2px_0px_#3a2618]">
+                                    <div id="teacher-bubble" class="mb-1 px-3 py-0.5 rounded-full bg-white border-2 border-[#3a2618] text-xs text-[#2c1e12] shadow-[2px_2px_0px_#3a2618]">
                                         [🎬 자리 뽑기!] 버튼을 눌러보세요!
                                     </div>
                                     <div class="w-11 h-11 rounded-full bg-white border-2 border-black overflow-hidden shadow-md -mb-2 z-10">
@@ -470,15 +469,15 @@
                                             <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="7" />
                                         </svg>
                                     </div>
-                                    <div class="w-24 h-7 bg-[#8c5228] border-2 border-[#3a2618] shadow-[0_3px_0_#3a2618] flex items-center justify-center text-[10px] text-amber-200 font-bold">
+                                    <div class="w-24 h-7 rounded-lg bg-[#8c5228] border-2 border-[#3a2618] shadow-[0_3px_0_#3a2618] flex items-center justify-center text-xs text-amber-200">
                                         교탁
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="hidden sm:flex flex-col items-center bg-[#232738] border-[3px] border-[#11131c] px-3 py-2 shadow-[3px_3px_0px_#3a2618]">
-                                <span class="text-[11px] font-bold text-sky-300">📺 ODUNG TV</span>
-                                <span class="text-[9px] text-slate-400 mt-0.5">ON AIR</span>
+                            <div class="hidden sm:flex flex-col items-center bg-[#232738] border-[3px] border-[#11131c] rounded-xl px-3 py-2 shadow-[3px_3px_0px_#3a2618]">
+                                <span class="text-xs text-sky-300">📺 ODUNG TV</span>
+                                <span class="text-[10px] text-slate-400 mt-0.5">ON AIR</span>
                             </div>
                         </div>
 
@@ -488,13 +487,13 @@
                         </div>
 
                         <!-- 교실 좌측 하단 출입문 & 우측 창가 화분 데코 -->
-                        <div class="mt-5 flex items-end justify-between text-xs font-bold text-[#4a2e16] z-10">
-                            <div id="classroom-door" class="px-3 py-1.5 bg-[#7a441e] text-amber-100 border-2 border-[#3a2618] shadow-[2px_2px_0px_#3a2618] flex items-center gap-1.5">
+                        <div class="mt-5 flex items-end justify-between text-xs sm:text-sm text-[#4a2e16] z-10">
+                            <div id="classroom-door" class="px-3.5 py-1.5 rounded-xl bg-[#7a441e] text-amber-100 border-2 border-[#3a2618] shadow-[2px_2px_0px_#3a2618] flex items-center gap-1.5">
                                 <span>🚪</span>
                                 <span>교실 뒷문 (입장)</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-1 bg-white/70 border border-[#4a2e16] text-[11px]">🌱 창가 화분</span>
+                                <span class="px-2.5 py-1 rounded-xl bg-white/75 border border-[#4a2e16] text-xs">🌱 창가 화분</span>
                             </div>
                         </div>
 
@@ -509,10 +508,10 @@
                 <section id="step-view-4" class="step-view hidden max-w-4xl mx-auto retro-panel p-5 sm:p-6">
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#e5d7c3] pb-3 mb-4 no-print">
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 bg-amber-400 border border-[#3a2618] text-xs font-bold">STEP 04</span>
-                            <h3 class="text-base sm:text-lg font-bold text-[#2c1e12]">새 자리표 확인 및 저장</h3>
+                            <span class="px-2.5 py-0.5 rounded-md bg-amber-400 border border-[#3a2618] text-xs">STEP 04</span>
+                            <h3 class="text-lg sm:text-xl text-[#2c1e12]">새 자리표 확인 및 저장</h3>
                         </div>
-                        <button onclick="goToStep(3)" class="retro-btn px-3.5 py-1.5 bg-white text-xs font-bold cursor-pointer">
+                        <button onclick="goToStep(3)" class="retro-btn px-3.5 py-1.5 bg-white text-xs sm:text-sm cursor-pointer">
                             ◀ 교실 화면으로 돌아가기
                         </button>
                     </div>
@@ -520,37 +519,37 @@
                     <!-- 시점 전환 탭 & 저장/인쇄 버튼 -->
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-4 no-print">
                         <div class="flex gap-2">
-                            <button id="view-student-btn" onclick="setChartPerspective('student')" class="retro-btn px-3.5 py-1.5 bg-[#2c1e12] text-white text-xs font-bold cursor-pointer">
+                            <button id="view-student-btn" onclick="setChartPerspective('student')" class="retro-btn px-3.5 py-1.5 bg-[#2c1e12] text-white text-xs sm:text-sm cursor-pointer">
                                 👀 학생 쪽에서 (칠판이 위)
                             </button>
-                            <button id="view-teacher-btn" onclick="setChartPerspective('teacher')" class="retro-btn px-3.5 py-1.5 bg-[#f3eadc] text-[#2c1e12] text-xs font-bold cursor-pointer">
+                            <button id="view-teacher-btn" onclick="setChartPerspective('teacher')" class="retro-btn px-3.5 py-1.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
                                 🧑‍🏫 교탁에서 (칠판이 아래)
                             </button>
                         </div>
 
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="copySeatTableText()" class="retro-btn px-3 py-1.5 bg-sky-200 text-[#2c1e12] text-xs font-bold cursor-pointer">
+                            <button onclick="copySeatTableText()" class="retro-btn px-3.5 py-1.5 bg-sky-200 text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
                                 📋 표 복사
                             </button>
-                            <button onclick="downloadSeatChartImage()" class="retro-btn px-3 py-1.5 bg-amber-300 text-[#2c1e12] text-xs font-bold cursor-pointer">
+                            <button onclick="downloadSeatChartImage()" class="retro-btn px-3.5 py-1.5 bg-amber-300 text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
                                 🖼️ 그림 저장
                             </button>
-                            <button onclick="window.print()" class="retro-btn px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold cursor-pointer">
+                            <button onclick="window.print()" class="retro-btn px-3.5 py-1.5 bg-emerald-600 text-white text-xs sm:text-sm cursor-pointer">
                                 🖨️ 인쇄
                             </button>
                         </div>
                     </div>
 
                     <!-- 실제 출력/캡처 영역 -->
-                    <div id="print-area" class="bg-[#fffdf8] border-[3px] border-[#3a2618] p-5 sm:p-6">
+                    <div id="print-area" class="bg-[#fffdf8] border-[3px] border-[#3a2618] rounded-xl p-5 sm:p-6">
                         <div class="text-center mb-4">
-                            <span class="inline-block px-3 py-0.5 bg-amber-300 border border-[#3a2618] text-xs font-bold mb-1">우리 반 새 자리표</span>
-                            <h4 id="chart-title-text" class="text-xl font-bold text-[#2c1e12]">새 자리표</h4>
-                            <p id="chart-date-text" class="text-xs text-stone-500 mt-0.5"></p>
+                            <span class="inline-block px-3 py-0.5 rounded-full bg-amber-300 border border-[#3a2618] text-xs mb-1">우리 반 새 자리표</span>
+                            <h4 id="chart-title-text" class="text-2xl text-[#2c1e12]">새 자리표</h4>
+                            <p id="chart-date-text" class="text-xs sm:text-sm text-stone-500 mt-0.5"></p>
                         </div>
 
                         <!-- 칠판 위치 (상단) -->
-                        <div id="chart-board-top" class="max-w-xs mx-auto mb-5 bg-[#1f4e3d] text-white text-center py-1.5 px-4 border-2 border-[#3a2618] text-xs font-bold">
+                        <div id="chart-board-top" class="max-w-xs mx-auto mb-5 rounded-lg bg-[#1f4e3d] text-white text-center py-1.5 px-4 border-2 border-[#3a2618] text-sm">
                             칠판 / 교탁
                         </div>
 
@@ -560,11 +559,11 @@
                         </div>
 
                         <!-- 칠판 위치 (하단 - 교탁 시점일 때) -->
-                        <div id="chart-board-bottom" class="hidden max-w-xs mx-auto mt-5 bg-[#1f4e3d] text-white text-center py-1.5 px-4 border-2 border-[#3a2618] text-xs font-bold">
+                        <div id="chart-board-bottom" class="hidden max-w-xs mx-auto mt-5 rounded-lg bg-[#1f4e3d] text-white text-center py-1.5 px-4 border-2 border-[#3a2618] text-sm">
                             칠판 / 교탁
                         </div>
 
-                        <div class="mt-5 text-center text-[11px] text-stone-400 font-bold">
+                        <div class="mt-5 text-center text-xs text-stone-400">
                             오둥이 자리뽑기 • ODUNG GAMES
                         </div>
                     </div>
@@ -576,9 +575,9 @@
 
     <!-- 알림 토스트 -->
     <div id="toast-box" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
-        <div class="bg-[#2c1e12] border-2 border-amber-400 text-white px-5 py-2.5 shadow-[4px_4px_0px_rgba(0,0,0,0.4)] flex items-center gap-2">
+        <div class="bg-[#2c1e12] border-2 border-amber-400 rounded-xl text-white px-5 py-2.5 shadow-[4px_4px_0px_rgba(0,0,0,0.4)] flex items-center gap-2">
             <span>🦆</span>
-            <span id="toast-msg" class="text-xs sm:text-sm font-bold text-amber-300">알림</span>
+            <span id="toast-msg" class="text-xs sm:text-sm text-amber-300">알림</span>
         </div>
     </div>
 
@@ -716,12 +715,12 @@
 
                 if (i === stepNum) {
                     view.classList.remove('hidden');
-                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer';
-                    badge.className = 'px-1.5 py-0.5 bg-[#2c1e12] text-amber-300 text-[11px]';
+                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
+                    badge.className = 'px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-300 text-[11px]';
                 } else {
                     view.classList.add('hidden');
-                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer';
-                    badge.className = 'px-1.5 py-0.5 bg-stone-500 text-white text-[11px]';
+                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
+                    badge.className = 'px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]';
                 }
             }
             updateCountsUI();
@@ -764,20 +763,18 @@
             const outClass = isForward ? 'anim-slide-out-left' : 'anim-slide-out-right';
             const inClass = isForward ? 'anim-slide-in-right' : 'anim-slide-in-left';
 
-            // 상단 스텝 탭 상태 즉시 반영
             for (let i = 1; i <= 4; i++) {
                 const tab = document.getElementById(`step-tab-${i}`);
                 const badge = tab.querySelector('span:first-child');
                 if (i === stepNum) {
-                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer';
-                    badge.className = 'px-1.5 py-0.5 bg-[#2c1e12] text-amber-300 text-[11px]';
+                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
+                    badge.className = 'px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-300 text-[11px]';
                 } else {
-                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer';
-                    badge.className = 'px-1.5 py-0.5 bg-stone-500 text-white text-[11px]';
+                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
+                    badge.className = 'px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]';
                 }
             }
 
-            // 단계별 콘텐츠 사전 렌더링
             if (stepNum === 2) {
                 if (!hasCustomLayout) {
                     applyPreset(currentPreset);
@@ -801,6 +798,8 @@
             prevView.classList.add(outClass);
             nextView.classList.add(inClass);
 
+            playTone(isForward ? 560 : 480, 'square', 0.05, 0, 0.04);
+
             setTimeout(() => {
                 prevView.classList.add('hidden');
                 prevView.classList.remove(outClass);
@@ -818,13 +817,13 @@
             const nameBox = document.getElementById('input-name-box');
 
             if (mode === 'number') {
-                numBtn.className = 'retro-btn py-2.5 bg-[#2c1e12] text-white text-sm font-bold cursor-pointer';
-                nameBtn.className = 'retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm font-bold cursor-pointer';
+                numBtn.className = 'retro-btn py-2.5 bg-[#2c1e12] text-white text-sm sm:text-base cursor-pointer';
+                nameBtn.className = 'retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm sm:text-base cursor-pointer';
                 numBox.classList.remove('hidden');
                 nameBox.classList.add('hidden');
             } else {
-                nameBtn.className = 'retro-btn py-2.5 bg-[#2c1e12] text-white text-sm font-bold cursor-pointer';
-                numBtn.className = 'retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm font-bold cursor-pointer';
+                nameBtn.className = 'retro-btn py-2.5 bg-[#2c1e12] text-white text-sm sm:text-base cursor-pointer';
+                numBtn.className = 'retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm sm:text-base cursor-pointer';
                 nameBox.classList.remove('hidden');
                 numBox.classList.add('hidden');
             }
@@ -915,7 +914,7 @@
                     ? 'bg-stone-300 border-stone-500 text-stone-500 line-through opacity-70'
                     : 'bg-white border-[#3a2618] text-[#2c1e12] hover:bg-amber-100 shadow-[2px_2px_0px_#3a2618]';
                 return `
-                    <button type="button" onclick="toggleAbsent(${s.id})" class="px-1.5 py-2 border-2 text-xs font-bold truncate cursor-pointer transition-all ${cls}" title="${s.absent ? '결석 (클릭 시 출석)' : '출석 (클릭 시 결석)'}">
+                    <button type="button" onclick="toggleAbsent(${s.id})" class="px-1.5 py-2 border-2 rounded-lg text-xs sm:text-sm truncate cursor-pointer transition-all ${cls}" title="${s.absent ? '결석 (클릭 시 출석)' : '출석 (클릭 시 결석)'}">
                         ${escapeHtml(s.label)}
                     </button>
                 `;
@@ -1031,11 +1030,11 @@
             const btn = document.getElementById('edit-layout-btn');
             const guide = document.getElementById('preview-guide-text');
             if (isEditMode) {
-                btn.className = 'retro-btn w-full py-2.5 bg-amber-400 text-[#2c1e12] text-xs sm:text-sm font-bold cursor-pointer flex items-center justify-center gap-1.5';
+                btn.className = 'retro-btn w-full py-2.5 bg-amber-400 text-[#2c1e12] text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-1.5';
                 btn.innerHTML = '<span>✅ 자리 꾸미기 완료 (클릭하여 종료)</span>';
                 guide.textContent = '🛠️ 교실 바닥 칸을 클릭하여 책상을 추가하거나 제거하세요!';
             } else {
-                btn.className = 'retro-btn w-full py-2.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm font-bold cursor-pointer flex items-center justify-center gap-1.5';
+                btn.className = 'retro-btn w-full py-2.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-1.5';
                 btn.innerHTML = '<span>🛠️ 자리 직접 꾸미기 (책상 추가/제거)</span>';
                 guide.textContent = '📐 선택한 책상 배치 미리보기';
             }
@@ -1067,12 +1066,12 @@
                     seatOrder++;
                     cell.className = `desk-unit h-11 sm:h-12 flex flex-col items-center justify-center relative select-none ${isEditMode ? 'cursor-pointer edit-hover' : ''}`;
                     cell.innerHTML = `
-                        <span class="text-[10px] font-bold text-[#6b3e19]">${seatOrder}번석</span>
-                        <span class="text-xs font-bold text-[#2c1e12]">🪑</span>
+                        <span class="text-[11px] text-[#6b3e19]">${seatOrder}번석</span>
+                        <span class="text-xs text-[#2c1e12]">🪑</span>
                     `;
                 } else {
                     cell.className = `desk-unit empty-slot h-11 sm:h-12 flex items-center justify-center relative select-none ${isEditMode ? 'cursor-pointer edit-hover' : ''}`;
-                    cell.innerHTML = isEditMode ? `<span class="text-xs text-[#4a2e16]/70 font-bold">+</span>` : '';
+                    cell.innerHTML = isEditMode ? `<span class="text-sm text-[#4a2e16]/70">+</span>` : '';
                 }
 
                 if (isEditMode) {
@@ -1100,14 +1099,14 @@
                     cell.className = 'desk-unit h-14 sm:h-16 flex flex-col items-center justify-center p-1 relative';
                     if (assigned) {
                         cell.innerHTML = `
-                            <div class="seated-pop w-full h-full bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm">
+                            <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm">
                                 <span class="text-[10px] leading-none mb-0.5">🦆</span>
-                                <span class="text-[11px] sm:text-xs font-bold text-[#2c1e12] truncate w-full text-center">${escapeHtml(assigned.label)}</span>
+                                <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(assigned.label)}</span>
                             </div>
                         `;
                     } else {
                         cell.innerHTML = `
-                            <span class="text-[10px] font-bold text-[#6b3e19]/80">${seatOrder}</span>
+                            <span class="text-xs text-[#6b3e19]/80">${seatOrder}</span>
                         `;
                     }
                 } else {
@@ -1166,7 +1165,7 @@
             instantBtn.classList.add('opacity-50', 'cursor-not-allowed');
             viewChartBtn.classList.add('hidden');
             stageBadge.textContent = 'RUNNING';
-            stageBadge.className = 'px-2.5 py-1 bg-amber-500 text-[#2c1e12] text-xs font-bold border border-[#3a2618]';
+            stageBadge.className = 'px-2.5 py-1 rounded-md bg-amber-500 text-[#2c1e12] text-xs border border-[#3a2618]';
 
             const shuffledStudents = fisherYatesShuffle(presentStudents);
             const shuffledSeats = fisherYatesShuffle(activeDeskIndices);
@@ -1212,11 +1211,11 @@
                     const line = BUBBLE_LINES[Math.floor(Math.random() * BUBBLE_LINES.length)];
 
                     el.innerHTML = `
-                        ${showSpeech ? `<div class="mb-0.5 px-1.5 py-0.5 bg-white border border-[#3a2618] text-[9px] font-bold text-[#2c1e12] whitespace-nowrap shadow-sm">${line}</div>` : ''}
+                        ${showSpeech ? `<div class="mb-0.5 px-2 py-0.5 rounded-full bg-white border border-[#3a2618] text-[10px] text-[#2c1e12] whitespace-nowrap shadow-sm">${line}</div>` : ''}
                         <div class="sprite-body w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center shadow-md text-sm">
                             🦆
                         </div>
-                        <span class="mt-0.5 px-1 bg-[#2c1e12] text-amber-200 text-[9px] font-bold rounded-sm whitespace-nowrap">${escapeHtml(p.student.label)}</span>
+                        <span class="mt-0.5 px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-200 text-[10px] whitespace-nowrap">${escapeHtml(p.student.label)}</span>
                     `;
                     spritesLayer.appendChild(el);
                     activeSprites.push({ el, pair: p });
@@ -1281,7 +1280,7 @@
             }
 
             stageBadge.textContent = 'COMPLETE';
-            stageBadge.className = 'px-2.5 py-1 bg-sky-400 text-[#2c1e12] text-xs font-bold border border-[#3a2618]';
+            stageBadge.className = 'px-2.5 py-1 rounded-md bg-sky-400 text-[#2c1e12] text-xs border border-[#3a2618]';
             teacherBubble.textContent = `총 ${pairs.length}명 랜덤 자리 배정 완료! [📋 자리표 저장하기]를 눌러 확인하세요!`;
             viewChartBtn.classList.remove('hidden');
 
@@ -1302,13 +1301,13 @@
             const bottomBoard = document.getElementById('chart-board-bottom');
 
             if (perspective === 'student') {
-                stuBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#2c1e12] text-white text-xs font-bold cursor-pointer';
-                teaBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#f3eadc] text-[#2c1e12] text-xs font-bold cursor-pointer';
+                stuBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#2c1e12] text-white text-xs sm:text-sm cursor-pointer';
+                teaBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm cursor-pointer';
                 topBoard.classList.remove('hidden');
                 bottomBoard.classList.add('hidden');
             } else {
-                teaBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#2c1e12] text-white text-xs font-bold cursor-pointer';
-                stuBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#f3eadc] text-[#2c1e12] text-xs font-bold cursor-pointer';
+                teaBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#2c1e12] text-white text-xs sm:text-sm cursor-pointer';
+                stuBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm cursor-pointer';
                 topBoard.classList.add('hidden');
                 bottomBoard.classList.remove('hidden');
             }
@@ -1333,16 +1332,16 @@
                 const box = document.createElement('div');
 
                 if (hasDesk && stu) {
-                    box.className = 'h-14 sm:h-16 bg-amber-50 border-2 border-[#3a2618] shadow-[2px_2px_0px_#3a2618] flex flex-col items-center justify-center p-1';
+                    box.className = 'h-14 sm:h-16 rounded-xl bg-amber-50 border-2 border-[#3a2618] shadow-[2px_2px_0px_#3a2618] flex flex-col items-center justify-center p-1';
                     box.innerHTML = `
-                        <span class="text-[10px] text-amber-700 font-bold">🦆</span>
-                        <span class="text-xs sm:text-sm font-bold text-[#2c1e12] truncate w-full text-center">${escapeHtml(stu.label)}</span>
+                        <span class="text-[10px] text-amber-700">🦆</span>
+                        <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(stu.label)}</span>
                     `;
                 } else if (hasDesk) {
-                    box.className = 'h-14 sm:h-16 bg-stone-100 border-2 border-stone-400 flex items-center justify-center text-[11px] text-stone-400 font-bold';
+                    box.className = 'h-14 sm:h-16 rounded-xl bg-stone-100 border-2 border-stone-400 flex items-center justify-center text-xs text-stone-400';
                     box.textContent = '빈 자리';
                 } else {
-                    box.className = 'h-14 sm:h-16 border border-dashed border-stone-200';
+                    box.className = 'h-14 sm:h-16 rounded-xl border border-dashed border-stone-200';
                 }
                 container.appendChild(box);
             });
@@ -1393,13 +1392,13 @@
             ctx.strokeRect(16, 16, w - 32, h - 32);
 
             ctx.fillStyle = '#2c1e12';
-            ctx.font = 'bold 30px sans-serif';
+            ctx.font = '32px "Jua", sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('우리 반 새 자리표', w / 2, 72);
 
             ctx.fillStyle = '#78716c';
-            ctx.font = '16px sans-serif';
-            ctx.fillText(document.getElementById('chart-date-text').textContent, w / 2, 100);
+            ctx.font = '18px "Jua", sans-serif';
+            ctx.fillText(document.getElementById('chart-date-text').textContent, w / 2, 102);
 
             const boardY = chartPerspective === 'student' ? 120 : 665;
             ctx.fillStyle = '#1f4e3d';
@@ -1408,8 +1407,8 @@
             ctx.lineWidth = 3;
             ctx.strokeRect(w / 2 - 150, boardY, 300, 38);
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 16px sans-serif';
-            ctx.fillText('칠판 / 교탁', w / 2, boardY + 25);
+            ctx.font = '18px "Jua", sans-serif';
+            ctx.fillText('칠판 / 교탁', w / 2, boardY + 26);
 
             const startX = 60;
             const startY = chartPerspective === 'student' ? 185 : 130;
@@ -1436,8 +1435,8 @@
                         ctx.strokeRect(x, y, cellW, cellH);
 
                         ctx.fillStyle = stu ? '#2c1e12' : '#a8a29e';
-                        ctx.font = 'bold 18px sans-serif';
-                        ctx.fillText(stu ? stu.label : '빈 자리', x + cellW / 2, y + 44);
+                        ctx.font = '20px "Jua", sans-serif';
+                        ctx.fillText(stu ? stu.label : '빈 자리', x + cellW / 2, y + 45);
                     }
                 });
             });
@@ -1480,11 +1479,11 @@
             const btn = document.getElementById('sound-btn');
             if (soundOn) {
                 btn.textContent = '🔊 효과음 ON';
-                btn.className = 'retro-btn px-3 py-1.5 bg-amber-300 text-[#2c1e12] text-xs font-bold cursor-pointer';
+                btn.className = 'retro-btn px-3.5 py-1.5 bg-amber-300 text-[#2c1e12] text-xs sm:text-sm cursor-pointer';
                 playTone(660, 'square', 0.08, 0, 0.06);
             } else {
                 btn.textContent = '🔇 효과음 OFF';
-                btn.className = 'retro-btn px-3 py-1.5 bg-stone-300 text-stone-600 text-xs font-bold cursor-pointer';
+                btn.className = 'retro-btn px-3.5 py-1.5 bg-stone-300 text-stone-600 text-xs sm:text-sm cursor-pointer';
             }
         }
 
