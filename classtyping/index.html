@@ -371,7 +371,6 @@
             image-rendering: pixelated;
         }
 
-        /* QR Code Container Styling */
         #qrcodeBox img, #qrcodeBox canvas {
             margin: 0 auto;
             display: block;
@@ -429,7 +428,7 @@
                 <div class="flex items-center gap-1.5 sm:gap-2">
                     <button id="serverStatusBtn" type="button" title="Firebase 실시간 서버 연결 상태 및 설정"
                         class="text-[11px] sm:text-xs bg-[#0f0c21] border border-amber-500/60 hover:border-yellow-400 text-amber-300 px-2 py-1 rounded transition">
-                        🟡 로컬 모드
+                        🟡 연결 중...
                     </button>
                     <button id="openHofHeaderBtn" type="button"
                         class="text-xs bg-[#0f0c21] border border-amber-400/60 hover:border-yellow-400 text-amber-300 px-2.5 py-1 rounded transition">
@@ -447,14 +446,14 @@
                 <div class="w-full max-w-lg bg-[#171433] border-2 border-yellow-400 rounded-md p-4 sm:p-5 space-y-3">
                     <div class="flex items-center justify-between border-b border-[#2e295e] pb-2">
                         <h3 class="text-base sm:text-lg font-bold text-yellow-400">⚙️ 실시간 서버(Firebase) 연결</h3>
-                        <span id="modalConnStatus" class="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">미연결 (로컬)</span>
+                        <span id="modalConnStatus" class="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">미연결</span>
                     </div>
                     <p class="text-xs text-slate-300 leading-relaxed">
-                        선생님 PC와 학생 스마트폰이 <strong class="text-cyan-300">서로 다른 기기</strong>에서 실시간으로 접속하려면 Firebase 설정이 필요합니다. (모든 기기가 접속하려면 HTML 코드 상단의 <code class="text-yellow-300">MANUAL_FIREBASE_CONFIG</code>에 붙여넣어 배포하세요.)
+                        선생님 PC와 학생 스마트폰이 <strong class="text-cyan-300">서로 다른 기기</strong>에서 실시간으로 접속하려면 Firebase 설정이 필요합니다. (현재 프로젝트 설정이 기본 내장되어 있습니다.)
                     </p>
                     <div>
-                        <label class="block text-xs text-yellow-400 mb-1">▶ Firebase Config 붙여넣기 (테스트용 즉시 연결)</label>
-                        <textarea id="firebaseConfigInput" rows="5"
+                        <label class="block text-xs text-yellow-400 mb-1">▶ 다른 Firebase Config 적용 (선택사항)</label>
+                        <textarea id="firebaseConfigInput" rows="4"
                             placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", "appId": "..."}'
                             class="typing-input w-full p-2.5 rounded text-xs font-mono leading-relaxed"></textarea>
                     </div>
@@ -528,7 +527,7 @@
                         class="pixel-btn bg-cyan-400 hover:bg-cyan-300 text-[#0f172a] p-5 rounded-md flex flex-col items-center justify-center gap-2 text-center">
                         <span class="text-3xl">🧑‍🎓</span>
                         <span class="text-lg sm:text-xl font-bold">학생용</span>
-                        <span class="text-xs text-[#0f172a] font-normal">방 번호(4자리) 입력 · 이름 등록 후 참가</span>
+                        <span class="text-xs text-[#0f172a] font-normal">학급 정보 · 방 번호(4자리) 입력 후 참가</span>
                     </button>
                 </div>
 
@@ -1007,7 +1006,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import {
-            getFirestore, doc, setDoc, getDoc, updateDoc, addDoc,
+            getFirestore, doc, setDoc, getDoc, addDoc,
             onSnapshot, collection
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -1028,9 +1027,9 @@
         let firebaseAppInstance = null;
         let db = null;
         let auth = null;
-        let currentUser = null;
         let useFirestore = false;
         let backendInitPromise = null;
+        let defaultEnvConfig = null;
 
         // Local BroadcastChannel + Memory fallback if running without Firebase
         const localChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('odung_typing_sync') : null;
@@ -1063,7 +1062,7 @@
                 }
             }
         }
-// ... existing code ... -->
+
         async function connectWithFirebaseConfig(firebaseConfig) {
             try {
                 if (!firebaseConfig || !firebaseConfig.apiKey) return false;
@@ -1071,7 +1070,7 @@
                 db = getFirestore(firebaseAppInstance);
                 useFirestore = Boolean(db);
 
-                // Try optional auth (Firestore Test Mode works even if Anonymous Auth is disabled in console)
+                // Optional auth (Firestore Test Mode works even if Anonymous Auth is disabled)
                 try {
                     auth = getAuth(firebaseAppInstance);
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && firebaseConfig === defaultEnvConfig) {
@@ -1079,10 +1078,8 @@
                     } else {
                         await signInAnonymously(auth);
                     }
-                    currentUser = auth.currentUser;
                 } catch (authErr) {
                     console.info('Optional auth skipped, using Firestore directly:', authErr?.code || authErr);
-                    currentUser = null;
                 }
 
                 updateConnectionStatusUI();
@@ -1096,7 +1093,6 @@
             }
         }
 
-        let defaultEnvConfig = null;
         async function initBackend() {
             try {
                 if (MANUAL_FIREBASE_CONFIG && MANUAL_FIREBASE_CONFIG.apiKey) {
@@ -1115,7 +1111,243 @@
             updateConnectionStatusUI();
         }
 
+        // Firestore Collection / Document Path Helpers (Strict even/odd segment rules)
+        function getRoomDocRef(roomCode) {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
+        }
+
+        function getPlayersColRef() {
+            return collection(db, 'artifacts', appId, 'public', 'data', 'players');
+        }
+
+        function getPlayerDocRef(roomCode, playerId) {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'players', `${roomCode}_${playerId}`);
+        }
+
+        function getHofColRef() {
+            return collection(db, 'artifacts', appId, 'public', 'data', 'hallOfFame');
+        }
+
+        // ==========================================
+        // 2. APPLICATION STATE & WORD DICTIONARY
+        // ==========================================
+        const WORDS_KO = [
+            '쿼카', '우주선', '오둥이', '타자왕', '별빛', '은하수', '로켓', '혜성',
+            '행성', '인공위성', '무지개', '번개', '소행성', '우주정거장', '초신성',
+            '태양계', '블랙홀', '달빛', '별똥별', '탐사선', '망원경', '오락실',
+            '승리', '도전', '협동', '최고속도', '광속돌파', '우주비행사', '지구촌',
+            '별자리', '토성고리', '화성탐사', '목성', '수성', '금성', '천왕성', '해왕성'
+        ];
+
+        const WORDS_EN = [
+            'QUOKKA', 'ROCKET', 'GALAXY', 'STAR', 'PLANET', 'COMET', 'METEOR',
+            'ORBIT', 'COSMOS', 'NEBULA', 'APOLLO', 'SATURN', 'JUPITER', 'MARS',
+            'VENUS', 'MERCURY', 'ARCADE', 'TYPING', 'SPEED', 'WINNER', 'CHAMPION',
+            'LASER', 'SHIELD', 'BOOST', 'FEVER', 'PIXEL', 'RETRO', 'SPACE', 'FUTURE'
+        ];
+
+        const BOSS_WORDS_KO = [
+            '우리반타자왕', '초광속우주선', '쿼카대장출격', '은하계수호자',
+            '무적의타자실력', '전광석화타격', '우주해적격퇴', '최강타자마스터'
+        ];
+
+        const BOSS_WORDS_EN = [
+            'SUPERSONIC', 'STARFIGHTER', 'GALAXYKING', 'HYPERDRIVE',
+            'MECHABOSS', 'QUOKKAHOME', 'LIGHTSPEED', 'CHAMPIONSHIP'
+        ];
+
+        const BOSS_PROFILES = [
+            { name: 'Lv.1 우주 해적 메카냥', color: '#f43f5e', baseHp: 120 },
+            { name: 'Lv.2 암흑 성운 드래곤', color: '#a855f7', baseHp: 180 },
+            { name: 'Lv.3 초거대 블랙홀 코어', color: '#38bdf8', baseHp: 250 },
+            { name: 'Lv.4 은하계 최종 함대장', color: '#facc15', baseHp: 330 }
+        ];
+
+        const appState = {
+            role: null, // 'teacher' | 'student'
+            roomCode: '',
+            schoolName: '',
+            classCode: '',
+            duration: 60,
+            lang: 'ko',
+            roomStatus: 'idle', // 'idle' | 'lobby' | 'countdown' | 'playing' | 'ended'
+            countdownStartAt: 0,
+            raceStartAt: 0,
+            players: [],
+            hofRecords: [],
+            previousScreenId: 'roleSelectScreen',
+            // Student specific identity
+            playerId: '',
+            playerName: '',
+            // Subscriptions
+            unsubRoom: null,
+            unsubPlayers: null,
+            unsubHof: null
+        };
+
+        // ==========================================
+        // 3. RETRO SOUND SYNTHESIZER (WEB AUDIO API)
+        // ==========================================
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function ensureAudio() {
+            if (!soundEnabled) return null;
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+            return audioCtx;
+        }
+
+        function playTone(freq, type = 'square', duration = 0.08, vol = 0.08, delay = 0) {
+            const ctx = ensureAudio();
+            if (!ctx) return;
+            try {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+                gain.gain.setValueAtTime(vol, ctx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ctx.currentTime + delay);
+                osc.stop(ctx.currentTime + delay + duration);
+            } catch (e) {}
+        }
+
+        const sfx = {
+            click: () => playTone(520, 'square', 0.05, 0.06),
+            error: () => {
+                playTone(180, 'sawtooth', 0.12, 0.08, 0);
+                playTone(140, 'sawtooth', 0.14, 0.08, 0.09);
+            },
+            hit: () => {
+                playTone(660, 'square', 0.06, 0.07, 0);
+                playTone(880, 'square', 0.08, 0.07, 0.05);
+            },
+            bossHit: () => {
+                playTone(300, 'sawtooth', 0.07, 0.09, 0);
+                playTone(740, 'square', 0.09, 0.09, 0.04);
+            },
+            bossDefeat: () => {
+                [523, 659, 784, 1046].forEach((f, i) => playTone(f, 'square', 0.11, 0.09, i * 0.06));
+            },
+            levelUp: () => {
+                [440, 554, 659, 880].forEach((f, i) => playTone(f, 'triangle', 0.12, 0.1, i * 0.07));
+            },
+            countdown: (final = false) => {
+                playTone(final ? 880 : 440, 'square', final ? 0.25 : 0.12, 0.09);
+            }
+        };
+
+        // ==========================================
+        // 4. UI NAVIGATION & HELPERS
+        // ==========================================
+        const ALL_SCREENS = [
+            'roleSelectScreen',
+            'teacherSetupScreen',
+            'teacherLobbyScreen',
+            'teacherRaceScreen',
+            'teacherPodiumScreen',
+            'studentJoinScreen',
+            'studentGameScreen',
+            'studentResultScreen',
+            'hallOfFameScreen'
+        ];
+
+        function showScreen(screenId) {
+            ALL_SCREENS.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (id === screenId) {
+                    el.classList.remove('hidden');
+                    el.classList.add('flex');
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                }
+            });
+            if (screenId !== 'hallOfFameScreen') {
+                appState.previousScreenId = screenId;
+            }
+        }
+
+        let toastTimeout = null;
+        function showToast(msg, duration = 2600) {
+            const box = document.getElementById('toastBox');
+            if (!box) return;
+            box.textContent = msg;
+            box.classList.remove('hidden');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                box.classList.add('hidden');
+            }, duration);
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function normalizeSchoolName(name) {
+            return String(name || '').trim().replace(/\s+/g, '').toLowerCase();
+        }
+
+        function normalizeClassCode(code) {
+            return String(code || '').replace(/[^0-9]/g, '');
+        }
+
+        function buildStudentJoinUrl(roomCode) {
+            try {
+                const loc = window.location;
+                if (loc && (loc.protocol === 'http:' || loc.protocol === 'https:') && loc.hostname && !loc.href.includes('srcdoc')) {
+                    return `${loc.origin}${loc.pathname}?room=${roomCode}`;
+                }
+            } catch (e) {}
+            return `https://AI.Gemini.com/?room=${roomCode}`;
+        }
+
+        function updateHostUrlParam(roomCode) {
+            try {
+                const loc = window.location;
+                if (loc && (loc.protocol === 'http:' || loc.protocol === 'https:') && !loc.href.includes('srcdoc')) {
+                    const url = new URL(loc.href);
+                    url.searchParams.delete('room');
+                    url.searchParams.set('host', roomCode);
+                    window.history.replaceState({}, '', url.toString());
+                }
+            } catch (e) {}
+        }
+
+        // ==========================================
+        // 5. ROOM & PLAYER REALTIME SYNCHRONIZATION
+        // ==========================================
         let localChannelListener = null;
+
+        function cleanupRoomListeners() {
+            if (appState.unsubRoom) {
+                appState.unsubRoom();
+                appState.unsubRoom = null;
+            }
+            if (appState.unsubPlayers) {
+                appState.unsubPlayers();
+                appState.unsubPlayers = null;
+            }
+            if (localChannel && localChannelListener) {
+                localChannel.removeEventListener('message', localChannelListener);
+                localChannelListener = null;
+            }
+        }
+
         function subscribeToRoom(roomCode) {
             cleanupRoomListeners();
 
@@ -1126,7 +1358,6 @@
                     }
                 }, (err) => console.error('Room listener error:', err));
 
-                // RULE 2: Fetch collection simply without complex where/orderBy, filter & sort in JS
                 appState.unsubPlayers = onSnapshot(getPlayersColRef(), (snapshot) => {
                     const roomPlayers = [];
                     snapshot.forEach(docSnap => {
@@ -1138,7 +1369,27 @@
                     handlePlayersListUpdate(roomPlayers);
                 }, (err) => console.error('Players listener error:', err));
             } else if (localChannel) {
-// ... existing code ... -->
+                localChannelListener = (ev) => {
+                    const msg = ev.data;
+                    if (!msg || msg.roomCode !== roomCode) return;
+                    if (msg.type === 'room_update') {
+                        localStore.rooms[roomCode] = msg.data;
+                        handleRoomSnapshot(msg.data);
+                    } else if (msg.type === 'player_update') {
+                        localStore.players[`${roomCode}_${msg.playerId}`] = msg.data;
+                        handlePlayersListUpdate(Object.values(localStore.players).filter(p => p.roomCode === roomCode));
+                    } else if (msg.type === 'query_room' && appState.role === 'teacher' && appState.roomCode === roomCode) {
+                        localChannel.postMessage({
+                            type: 'room_update',
+                            roomCode,
+                            data: localStore.rooms[roomCode]
+                        });
+                    }
+                };
+                localChannel.addEventListener('message', localChannelListener);
+            }
+        }
+
         async function writeRoomState(roomCode, data) {
             if (backendInitPromise) await backendInitPromise;
             const payload = { ...data, roomCode, updatedAt: Date.now() };
@@ -1173,6 +1424,44 @@
             }
         }
 
+        async function fetchRoomForVerification(roomCode) {
+            if (backendInitPromise) await backendInitPromise;
+            if (useFirestore && db) {
+                try {
+                    const snap = await getDoc(getRoomDocRef(roomCode));
+                    return snap.exists() ? snap.data() : null;
+                } catch (err) {
+                    console.error('Firestore fetchRoomForVerification error:', err);
+                    return null;
+                }
+            }
+            if (localStore.rooms[roomCode]) {
+                return localStore.rooms[roomCode];
+            }
+            if (localChannel) {
+                return await new Promise((resolve) => {
+                    let resolved = false;
+                    const tempHandler = (ev) => {
+                        if (ev.data && ev.data.type === 'room_update' && ev.data.roomCode === roomCode) {
+                            resolved = true;
+                            localChannel.removeEventListener('message', tempHandler);
+                            localStore.rooms[roomCode] = ev.data.data;
+                            resolve(ev.data.data);
+                        }
+                    };
+                    localChannel.addEventListener('message', tempHandler);
+                    localChannel.postMessage({ type: 'query_room', roomCode });
+                    setTimeout(() => {
+                        if (!resolved) {
+                            localChannel.removeEventListener('message', tempHandler);
+                            resolve(null);
+                        }
+                    }, 450);
+                });
+            }
+            return null;
+        }
+
         async function saveToHallOfFame(entry) {
             if (backendInitPromise) await backendInitPromise;
             const record = {
@@ -1196,21 +1485,6 @@
             }
         }
 
-        async function fetchRoomForVerification(roomCode) {
-            if (backendInitPromise) await backendInitPromise;
-            if (useFirestore && db) {
-                try {
-                    const snap = await getDoc(getRoomDocRef(roomCode));
-                    return snap.exists() ? snap.data() : null;
-                } catch (err) {
-                    console.error('Firestore fetchRoomForVerification error:', err);
-                    return null;
-                }
-            }
-            if (localStore.rooms[roomCode]) {
-                return localStore.rooms[roomCode];
-            }
-// ... existing code ... -->
         function subscribeToHallOfFame() {
             if (appState.unsubHof) return;
             if (useFirestore && db) {
@@ -1224,13 +1498,1669 @@
                 renderHallOfFameTable(localStore.hof);
             }
         }
-// ... existing code ... -->
+
+        function renderHallOfFameTable(records) {
+            const tbody = document.getElementById('hofTableBody');
+            if (!tbody) return;
+            const sorted = [...(records || [])].sort((a, b) => {
+                if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+                return (b.wordsDestroyed || 0) - (a.wordsDestroyed || 0);
+            }).slice(0, 20);
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">아직 등록된 명예의 전당 기록이 없습니다. 첫 챔피언이 되어보세요!</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sorted.map((rec, idx) => {
+                const rankBadge = idx === 0 ? '👑 1위' : idx === 1 ? '🥈 2위' : idx === 2 ? '🥉 3위' : `${idx + 1}위`;
+                const rowHighlight = idx === 0 ? 'bg-yellow-400/10 text-yellow-300 font-bold' : 'text-slate-200';
+                return `
+                    <tr class="${rowHighlight}">
+                        <td class="py-2.5 px-3 text-center">${rankBadge}</td>
+                        <td class="py-2.5 px-3 font-bold">${escapeHtml(rec.name)}</td>
+                        <td class="py-2.5 px-3 text-right text-cyan-300">${rec.wordsDestroyed || 0}칸</td>
+                        <td class="py-2.5 px-3 text-right text-yellow-400">${(rec.score || 0).toLocaleString()}점</td>
+                        <td class="py-2.5 px-3 text-right text-slate-400 hidden sm:table-cell">${rec.cpm || 0} 타/분</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ==========================================
+        // 6. ROOM SNAPSHOT & PLAYERS ROSTER HANDLERS
+        // ==========================================
+        let countdownTimerHandle = null;
+
+        function handleRoomSnapshot(roomData) {
+            if (!roomData) return;
+            const prevStatus = appState.roomStatus;
+            appState.roomStatus = roomData.status || 'lobby';
+            appState.duration = roomData.duration || 60;
+            appState.lang = roomData.lang || 'ko';
+            appState.schoolName = roomData.schoolName || appState.schoolName;
+            appState.classCode = roomData.classCode || appState.classCode;
+
+            if (appState.roomStatus === 'countdown' && prevStatus !== 'countdown') {
+                appState.countdownStartAt = roomData.countdownStartAt || Date.now();
+                startSynchronizedCountdown();
+            } else if (appState.roomStatus === 'playing' && prevStatus !== 'playing' && prevStatus !== 'countdown') {
+                // Direct join into active match
+                if (appState.role === 'teacher') {
+                    beginTeacherLiveRace(roomData.raceStartAt || Date.now());
+                } else if (appState.role === 'student') {
+                    beginStudentGameplay(roomData.raceStartAt || Date.now());
+                }
+            } else if (appState.roomStatus === 'ended' && prevStatus !== 'ended') {
+                if (appState.role === 'teacher') {
+                    finishTeacherRace();
+                } else if (appState.role === 'student') {
+                    finishStudentGame();
+                }
+            } else if (appState.roomStatus === 'lobby' && prevStatus === 'ended') {
+                // Rematch reset
+                if (appState.role === 'teacher') {
+                    showScreen('teacherLobbyScreen');
+                } else if (appState.role === 'student') {
+                    showScreen('studentJoinScreen');
+                    document.getElementById('studentJoinForm').classList.add('hidden');
+                    document.getElementById('studentWaitingBox').classList.remove('hidden');
+                    document.getElementById('studentWaitingBox').classList.add('flex');
+                }
+            }
+        }
+
+        function handlePlayersListUpdate(playersList) {
+            // Sort by joinedAt ascending for consistent lanes
+            const sortedByJoin = [...playersList].sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
+            appState.players = sortedByJoin;
+
+            // Update Teacher Lobby Roster
+            const countEl = document.getElementById('lobbyStudentCount');
+            const gridEl = document.getElementById('lobbyStudentsGrid');
+            const startBtn = document.getElementById('teacherStartRaceBtn');
+            const peerEl = document.getElementById('studentLobbyPeerCount');
+
+            if (countEl) countEl.textContent = String(sortedByJoin.length);
+            if (peerEl) peerEl.textContent = String(sortedByJoin.length);
+
+            if (startBtn) {
+                if (sortedByJoin.length < 2) {
+                    startBtn.textContent = `▶ 단체 게임 시작! (최소 2명 필요 · 현재 ${sortedByJoin.length}명)`;
+                } else {
+                    startBtn.textContent = `▶ 단체 게임 시작! (${sortedByJoin.length}명 전원 출격)`;
+                }
+            }
+
+            if (gridEl) {
+                if (sortedByJoin.length === 0) {
+                    gridEl.innerHTML = `<div class="col-span-full text-center text-xs text-slate-400 py-8">학생들이 학급 정보와 방 번호를 입력하면 이곳에 우주선이 나타납니다!</div>`;
+                } else {
+                    gridEl.innerHTML = sortedByJoin.map((p, idx) => `
+                        <div class="bg-[#171433] border border-cyan-400/50 rounded px-2.5 py-2 flex items-center gap-2">
+                            <span class="text-base">🐹</span>
+                            <div class="min-w-0 flex-1 text-left">
+                                <div class="text-xs font-bold text-white truncate">${escapeHtml(p.name)}</div>
+                                <div class="text-[10px] text-cyan-300">레인 #${idx + 1} 대기중</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // Update Student Final Rank if on result screen
+            if (appState.role === 'student' && appState.roomStatus === 'ended') {
+                updateStudentFinalRankDisplay();
+            }
+        }
+
+        function startSynchronizedCountdown() {
+            if (countdownTimerHandle) clearInterval(countdownTimerHandle);
+            const overlay = document.getElementById('countdownOverlay');
+            const numEl = document.getElementById('countdownNumber');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            let step = 3;
+            numEl.textContent = '3';
+            numEl.classList.remove('countdown-pop');
+            void numEl.offsetWidth;
+            numEl.classList.add('countdown-pop');
+            sfx.countdown(false);
+
+            countdownTimerHandle = setInterval(() => {
+                step -= 1;
+                if (step > 0) {
+                    numEl.textContent = String(step);
+                    numEl.classList.remove('countdown-pop');
+                    void numEl.offsetWidth;
+                    numEl.classList.add('countdown-pop');
+                    sfx.countdown(false);
+                } else if (step === 0) {
+                    numEl.textContent = 'START!';
+                    numEl.classList.remove('countdown-pop');
+                    void numEl.offsetWidth;
+                    numEl.classList.add('countdown-pop');
+                    sfx.countdown(true);
+                } else {
+                    clearInterval(countdownTimerHandle);
+                    countdownTimerHandle = null;
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('flex');
+
+                    const now = Date.now();
+                    if (appState.role === 'teacher') {
+                        writeRoomState(appState.roomCode, {
+                            status: 'playing',
+                            raceStartAt: now
+                        });
+                        beginTeacherLiveRace(now);
+                    } else if (appState.role === 'student') {
+                        beginStudentGameplay(now);
+                    }
+                }
+            }, 850);
+        }
+
+        // ==========================================
+        // 7. TEACHER FLOW & LIVE SPACESHIP 관제 CANVAS
+        // ==========================================
+        let teacherRaceAnimId = null;
+        let teacherBotSimInterval = null;
+        let teacherRaceEnded = false;
+
+        function openTeacherLobby(roomCode, schoolName, classCode) {
+            appState.role = 'teacher';
+            appState.roomCode = roomCode;
+            appState.schoolName = schoolName;
+            appState.classCode = classCode;
+            appState.roomStatus = 'lobby';
+            appState.players = [];
+
+            const badge = document.getElementById('roleBadge');
+            badge.textContent = `👨‍🏫 선생님 (방 ${roomCode})`;
+            badge.classList.remove('hidden');
+
+            document.getElementById('lobbyClassInfoDisplay').textContent = `🏫 ${schoolName} · ${classCode}반`;
+            document.getElementById('roomCodeDisplay').textContent = roomCode;
+
+            const joinUrl = buildStudentJoinUrl(roomCode);
+            document.getElementById('joinUrlDisplay').textContent = joinUrl;
+            updateHostUrlParam(roomCode);
+
+            // Render QR Code
+            const qrBox = document.getElementById('qrcodeBox');
+            qrBox.innerHTML = '';
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrBox, {
+                    text: joinUrl,
+                    width: 140,
+                    height: 140,
+                    colorDark: '#0f0c21',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            }
+
+            subscribeToRoom(roomCode);
+            writeRoomState(roomCode, {
+                status: 'lobby',
+                schoolName,
+                classCode,
+                duration: appState.duration,
+                lang: appState.lang
+            });
+
+            showScreen('teacherLobbyScreen');
+        }
+
+        function beginTeacherLiveRace(startTime) {
+            teacherRaceEnded = false;
+            appState.roomStatus = 'playing';
+            appState.raceStartAt = startTime || Date.now();
+
+            document.getElementById('tHudRoom').textContent = appState.roomCode;
+            showScreen('teacherRaceScreen');
+
+            // Simulate demo bots if teacher added test students
+            if (teacherBotSimInterval) clearInterval(teacherBotSimInterval);
+            teacherBotSimInterval = setInterval(() => {
+                if (appState.roomStatus !== 'playing') return;
+                appState.players.forEach(p => {
+                    if (p.isBot && Math.random() < 0.45) {
+                        const nextWords = (p.wordsDestroyed || 0) + 1;
+                        const nextScore = (p.score || 0) + 110 + Math.floor(Math.random() * 50);
+                        const bossActive = (nextScore % 1000) < 280 && nextScore >= 1000;
+                        writePlayerState(appState.roomCode, p.playerId, {
+                            ...p,
+                            wordsDestroyed: nextWords,
+                            score: nextScore,
+                            cpm: 210 + Math.floor(Math.random() * 140),
+                            bossActive
+                        });
+                    }
+                });
+            }, 1300);
+
+            if (teacherRaceAnimId) cancelAnimationFrame(teacherRaceAnimId);
+            const loop = () => {
+                if (appState.roomStatus !== 'playing') return;
+                const elapsed = (Date.now() - appState.raceStartAt) / 1000;
+                const remaining = Math.max(0, appState.duration - elapsed);
+
+                document.getElementById('tHudTimer').textContent = `${remaining.toFixed(1)}s`;
+                document.getElementById('tHudCount').textContent = `${appState.players.length}대`;
+
+                const ranked = [...appState.players].sort((a, b) => {
+                    if ((b.wordsDestroyed || 0) !== (a.wordsDestroyed || 0)) return (b.wordsDestroyed || 0) - (a.wordsDestroyed || 0);
+                    return (b.score || 0) - (a.score || 0);
+                });
+                document.getElementById('tHudLeader').textContent = ranked.length > 0
+                    ? `${ranked[0].name} (${ranked[0].wordsDestroyed || 0}칸)`
+                    : '-';
+
+                renderTeacherRaceCanvas();
+
+                if (remaining <= 0 && !teacherRaceEnded) {
+                    finishTeacherRace();
+                    return;
+                }
+                teacherRaceAnimId = requestAnimationFrame(loop);
+            };
+            teacherRaceAnimId = requestAnimationFrame(loop);
+        }
+
+        function renderTeacherRaceCanvas() {
+            const wrapper = document.getElementById('teacherCanvasWrapper');
+            const canvas = document.getElementById('teacherCanvas');
+            if (!wrapper || !canvas) return;
+
+            const players = appState.players;
+            const laneHeight = 64;
+            const minHeight = wrapper.clientHeight || 340;
+            const totalHeight = Math.max(minHeight, players.length * laneHeight + 48);
+            const width = wrapper.clientWidth || 700;
+
+            if (canvas.width !== width || canvas.height !== totalHeight) {
+                canvas.width = width;
+                canvas.height = totalHeight;
+            }
+
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, width, totalHeight);
+
+            // Deep Space Grid Background
+            ctx.fillStyle = '#090714';
+            ctx.fillRect(0, 0, width, totalHeight);
+
+            const trackStartX = 115;
+            const trackEndX = width - 48;
+            const trackSpan = Math.max(120, trackEndX - trackStartX);
+            const maxSteps = Math.max(25, Math.ceil(appState.duration * 0.55));
+
+            // Draw Finish Line
+            ctx.strokeStyle = 'rgba(250, 204, 21, 0.55)';
+            ctx.setLineDash([6, 6]);
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(trackEndX, 16);
+            ctx.lineTo(trackEndX, totalHeight - 16);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#facc15';
+            ctx.font = 'bold 11px Galmuri11, monospace';
+            ctx.fillText('GOAL', trackEndX - 16, 13);
+
+            // Draw Each Student Lane
+            players.forEach((p, idx) => {
+                const yTop = 24 + idx * laneHeight;
+                const yCenter = yTop + laneHeight / 2;
+
+                // Alternating Lane Tint
+                ctx.fillStyle = idx % 2 === 0 ? 'rgba(255,255,255,0.025)' : 'rgba(56,189,248,0.02)';
+                ctx.fillRect(8, yTop + 2, width - 16, laneHeight - 4);
+
+                // Lane Divider
+                ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(8, yTop + laneHeight);
+                ctx.lineTo(width - 8, yTop + laneHeight);
+                ctx.stroke();
+
+                // Student Name Plate on Left
+                ctx.fillStyle = '#f8fafc';
+                ctx.font = 'bold 13px Galmuri11, monospace';
+                const displayName = (p.name || '학생').slice(0, 7);
+                ctx.fillText(displayName, 16, yCenter - 3);
+
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = '11px Galmuri11, monospace';
+                ctx.fillText(`${p.wordsDestroyed || 0}칸 · ${p.score || 0}점`, 16, yCenter + 14);
+
+                // Dotted Track Line
+                ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+                ctx.setLineDash([4, 6]);
+                ctx.beginPath();
+                ctx.moveTo(trackStartX, yCenter);
+                ctx.lineTo(trackEndX, yCenter);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Compute Spaceship Position
+                const steps = p.wordsDestroyed || 0;
+                const progress = Math.min(1, steps / maxSteps);
+                const shipX = trackStartX + progress * trackSpan;
+
+                // Thruster Flame
+                const flameLen = 10 + Math.sin(Date.now() * 0.03 + idx) * 5;
+                ctx.fillStyle = '#f97316';
+                ctx.beginPath();
+                ctx.moveTo(shipX - 18, yCenter - 5);
+                ctx.lineTo(shipX - 18 - flameLen, yCenter);
+                ctx.lineTo(shipX - 18, yCenter + 5);
+                ctx.closePath();
+                ctx.fill();
+
+                // Spaceship Hull
+                ctx.fillStyle = '#38bdf8';
+                ctx.beginPath();
+                ctx.moveTo(shipX + 20, yCenter);
+                ctx.lineTo(shipX - 14, yCenter - 13);
+                ctx.lineTo(shipX - 18, yCenter);
+                ctx.lineTo(shipX - 14, yCenter + 13);
+                ctx.closePath();
+                ctx.fill();
+
+                // Quokka Pilot Dome
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath();
+                ctx.arc(shipX + 1, yCenter, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#78350f';
+                ctx.beginPath();
+                ctx.arc(shipX + 1, yCenter + 1, 5.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Boss Fighting Badge above Spaceship
+                if (p.bossActive) {
+                    ctx.fillStyle = '#f43f5e';
+                    ctx.fillRect(shipX - 28, yCenter - 28, 56, 14);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 9px Galmuri11, monospace';
+                    ctx.fillText('👾BOSS교전', shipX - 25, yCenter - 18);
+                }
+            });
+        }
+
+        function finishTeacherRace() {
+            if (teacherRaceEnded) return;
+            teacherRaceEnded = true;
+            appState.roomStatus = 'ended';
+
+            if (teacherRaceAnimId) cancelAnimationFrame(teacherRaceAnimId);
+            if (teacherBotSimInterval) clearInterval(teacherBotSimInterval);
+
+            writeRoomState(appState.roomCode, { status: 'ended' });
+
+            // Sort Final Rankings (by steps/wordsDestroyed first, then score)
+            const ranked = [...appState.players].sort((a, b) => {
+                if ((b.wordsDestroyed || 0) !== (a.wordsDestroyed || 0)) return (b.wordsDestroyed || 0) - (a.wordsDestroyed || 0);
+                return (b.score || 0) - (a.score || 0);
+            });
+
+            // Populate Podium 1st, 2nd, 3rd
+            const first = ranked[0] || { name: '-', wordsDestroyed: 0, score: 0 };
+            const second = ranked[1] || { name: '-', wordsDestroyed: 0, score: 0 };
+            const third = ranked[2] || { name: '-', wordsDestroyed: 0, score: 0 };
+
+            document.getElementById('podium1Name').textContent = first.name;
+            document.getElementById('podium1Steps').textContent = `${first.wordsDestroyed || 0}칸 전진`;
+            document.getElementById('podium1Score').textContent = `${(first.score || 0).toLocaleString()}점`;
+
+            document.getElementById('podium2Name').textContent = second.name;
+            document.getElementById('podium2Steps').textContent = `${second.wordsDestroyed || 0}칸 전진`;
+            document.getElementById('podium2Score').textContent = `${(second.score || 0).toLocaleString()}점`;
+
+            document.getElementById('podium3Name').textContent = third.name;
+            document.getElementById('podium3Steps').textContent = `${third.wordsDestroyed || 0}칸 전진`;
+            document.getElementById('podium3Score').textContent = `${(third.score || 0).toLocaleString()}점`;
+
+            const fullListEl = document.getElementById('podiumFullList');
+            fullListEl.innerHTML = ranked.map((p, idx) => `
+                <div class="flex items-center justify-between bg-[#171433] px-3 py-1.5 rounded">
+                    <span><strong class="text-yellow-400">${idx + 1}위</strong> ${escapeHtml(p.name)}</span>
+                    <span class="text-cyan-300">${p.wordsDestroyed || 0}칸 · ${(p.score || 0).toLocaleString()}점</span>
+                </div>
+            `).join('');
+
+            // Save Top 3 to Hall of Fame
+            ranked.slice(0, 3).forEach(p => {
+                if ((p.score || 0) > 0) {
+                    saveToHallOfFame({
+                        name: p.name,
+                        wordsDestroyed: p.wordsDestroyed || 0,
+                        score: p.score || 0,
+                        cpm: p.cpm || 0,
+                        roomCode: appState.roomCode
+                    });
+                }
+            });
+
+            sfx.bossDefeat();
+            showScreen('teacherPodiumScreen');
+        }
+
+        // ==========================================
+        // 8. STUDENT GAMEPLAY ENGINE (BOSSES, EXP, SKILLS, AWAKENING)
+        // ==========================================
+        const AUTO_TYPER_SPECS = {
+            1: { interval: 10.0, count: 1, desc: '10초마다 단어 1개 자동 격추' },
+            2: { interval: 6.0,  count: 1, desc: '6초마다 단어 1개 자동 격추' },
+            3: { interval: 3.0,  count: 2, desc: '3초마다 단어 2개 자동 격추' },
+            4: { interval: 3.0,  count: 3, desc: '3초마다 단어 3개 자동 격추' },
+            5: { interval: 1.0,  count: 3, desc: '1초마다 단어 3개 자동 격추' }
+        };
+
+        const studentGame = {
+            active: false,
+            pausedForSkill: false,
+            startTime: 0,
+            lastFrameTime: 0,
+            score: 0,
+            wordsDestroyed: 0,
+            combo: 0,
+            maxCombo: 0,
+            totalTypedChars: 0,
+            totalAttempts: 0,
+            // Level & EXP
+            level: 1,
+            exp: 0,
+            nextLevelExp: 6,
+            levelUpTimer: null,
+            // Skills
+            skills: {
+                autoTyper: 0,   // Max 5
+                aiCore: 0,      // Max 5 (Support: cooldown reduction + awakening pair)
+                plasmaAmp: 0,   // Max 5 (Support: bonus boss damage & score)
+                expBoost: 0,    // Max 5 (Support: bonus EXP per word)
+                chainLaser: 0,  // Max 5 (Active: periodic laser zap)
+                cryoField: 0    // Max 5 (Support: slows falling words)
+            },
+            awakenedAuto: false,
+            autoTyperTimer: 0,
+            chainLaserTimer: 0,
+            awakenedTimer: 0,
+            // Boss every 1,000 pts
+            nextBossScoreThreshold: 1000,
+            bossCount: 0,
+            boss: null, // { name, color, hp, maxHp, x, y }
+            // Entities
+            words: [],
+            particles: [],
+            beams: [],
+            popups: [],
+            spawnTimer: 0,
+            lastSyncTime: 0,
+            animId: null
+        };
+
+        function resetStudentGameState() {
+            studentGame.active = false;
+            studentGame.pausedForSkill = false;
+            studentGame.score = 0;
+            studentGame.wordsDestroyed = 0;
+            studentGame.combo = 0;
+            studentGame.maxCombo = 0;
+            studentGame.totalTypedChars = 0;
+            studentGame.totalAttempts = 0;
+            studentGame.level = 1;
+            studentGame.exp = 0;
+            studentGame.nextLevelExp = 6;
+            if (studentGame.levelUpTimer) clearTimeout(studentGame.levelUpTimer);
+            studentGame.levelUpTimer = null;
+
+            studentGame.skills = {
+                autoTyper: 0,
+                aiCore: 0,
+                plasmaAmp: 0,
+                expBoost: 0,
+                chainLaser: 0,
+                cryoField: 0
+            };
+            studentGame.awakenedAuto = false;
+            studentGame.autoTyperTimer = 0;
+            studentGame.chainLaserTimer = 0;
+            studentGame.awakenedTimer = 0;
+
+            studentGame.nextBossScoreThreshold = 1000;
+            studentGame.bossCount = 0;
+            studentGame.boss = null;
+
+            studentGame.words = [];
+            studentGame.particles = [];
+            studentGame.beams = [];
+            studentGame.popups = [];
+            studentGame.spawnTimer = 0;
+            studentGame.lastSyncTime = 0;
+
+            document.getElementById('levelUpBanner').classList.add('hidden');
+            document.getElementById('skillSelectModal').classList.add('hidden');
+            document.getElementById('skillSelectModal').classList.remove('flex');
+            document.getElementById('awakenedIndicator').classList.add('hidden');
+        }
+
+        function beginStudentGameplay(startTime) {
+            resetStudentGameState();
+            studentGame.active = true;
+            studentGame.startTime = startTime || Date.now();
+            studentGame.lastFrameTime = performance.now();
+
+            document.getElementById('studentPilotHud').textContent = `🐹 ${appState.playerName}`;
+            showScreen('studentGameScreen');
+
+            const input = document.getElementById('wordInput');
+            input.value = '';
+            setTimeout(() => input.focus(), 60);
+
+            updateStudentHud();
+            spawnStudentWord();
+            spawnStudentWord();
+
+            if (studentGame.animId) cancelAnimationFrame(studentGame.animId);
+            const loop = (now) => {
+                if (!studentGame.active) return;
+                const dt = Math.min(0.1, (now - studentGame.lastFrameTime) / 1000);
+                studentGame.lastFrameTime = now;
+
+                updateStudentGame(dt);
+                renderStudentGameCanvas();
+
+                studentGame.animId = requestAnimationFrame(loop);
+            };
+            studentGame.animId = requestAnimationFrame(loop);
+        }
+
+        function pickRandomWord(isBoss = false) {
+            const lang = appState.lang || 'ko';
+            if (isBoss) {
+                if (lang === 'en') return BOSS_WORDS_EN[Math.floor(Math.random() * BOSS_WORDS_EN.length)];
+                if (lang === 'mix') {
+                    const pool = [...BOSS_WORDS_KO, ...BOSS_WORDS_EN];
+                    return pool[Math.floor(Math.random() * pool.length)];
+                }
+                return BOSS_WORDS_KO[Math.floor(Math.random() * BOSS_WORDS_KO.length)];
+            } else {
+                if (lang === 'en') return WORDS_EN[Math.floor(Math.random() * WORDS_EN.length)];
+                if (lang === 'mix') {
+                    const pool = [...WORDS_KO, ...WORDS_EN];
+                    return pool[Math.floor(Math.random() * pool.length)];
+                }
+                return WORDS_KO[Math.floor(Math.random() * WORDS_KO.length)];
+            }
+        }
+
+        function spawnStudentWord() {
+            const wrapper = document.getElementById('canvasWrapper');
+            const width = wrapper ? wrapper.clientWidth : 600;
+            const isBoss = Boolean(studentGame.boss);
+            const text = pickRandomWord(isBoss && Math.random() < 0.55);
+
+            // Prevent duplicate identical active words
+            if (studentGame.words.some(w => w.text === text)) return;
+
+            const margin = 65;
+            const x = margin + Math.random() * Math.max(80, width - margin * 2);
+            const baseSpeed = isBoss ? (46 + Math.random() * 24) : (34 + Math.random() * 20);
+            const slowFactor = Math.max(0.55, 1 - studentGame.skills.cryoField * 0.08);
+
+            studentGame.words.push({
+                text,
+                x,
+                y: isBoss ? 68 : 22,
+                speed: baseSpeed * slowFactor,
+                isBossWord: isBoss
+            });
+        }
+
+        function checkBossSpawn() {
+            if (!studentGame.boss && studentGame.score >= studentGame.nextBossScoreThreshold) {
+                const profile = BOSS_PROFILES[studentGame.bossCount % BOSS_PROFILES.length];
+                const scale = 1 + Math.floor(studentGame.bossCount / BOSS_PROFILES.length) * 0.4;
+                const maxHp = Math.round(profile.baseHp * scale);
+
+                studentGame.boss = {
+                    name: `${profile.name} (#${studentGame.bossCount + 1})`,
+                    color: profile.color,
+                    hp: maxHp,
+                    maxHp
+                };
+                studentGame.bossCount += 1;
+                studentGame.nextBossScoreThreshold += 1000;
+
+                // Spawn immediate wave of boss words
+                spawnStudentWord();
+                spawnStudentWord();
+                showToast(`👾 개인 보스 등장! 긴 단어를 격추해 큰 데미지를 주세요!`);
+                syncStudentProgress(true);
+            }
+        }
+
+        function destroyWordEntity(wordObj, source = 'manual') {
+            const idx = studentGame.words.indexOf(wordObj);
+            if (idx === -1) return;
+            studentGame.words.splice(idx, 1);
+
+            const len = wordObj.text.length;
+            studentGame.wordsDestroyed += 1;
+
+            if (source === 'manual') {
+                studentGame.combo += 1;
+                if (studentGame.combo > studentGame.maxCombo) studentGame.maxCombo = studentGame.combo;
+                studentGame.totalTypedChars += len;
+            }
+
+            const feverMult = studentGame.combo >= 8 ? 2 : 1;
+            const plasmaMult = 1 + studentGame.skills.plasmaAmp * 0.15;
+            const lengthScoreBonus = len * 25;
+            const gainedScore = Math.round((80 + lengthScoreBonus + studentGame.combo * 8) * feverMult * plasmaMult);
+            studentGame.score += gainedScore;
+
+            // Visual particles & beam
+            const wrapper = document.getElementById('canvasWrapper');
+            const cw = wrapper ? wrapper.clientWidth : 600;
+            const ch = wrapper ? wrapper.clientHeight : 280;
+
+            studentGame.beams.push({
+                x1: cw / 2,
+                y1: ch - 24,
+                x2: wordObj.x,
+                y2: wordObj.y,
+                color: source === 'manual' ? '#facc15' : '#38bdf8',
+                life: 0.22
+            });
+
+            for (let i = 0; i < 10; i++) {
+                const angle = (Math.PI * 2 * i) / 10;
+                const spd = 40 + Math.random() * 80;
+                studentGame.particles.push({
+                    x: wordObj.x,
+                    y: wordObj.y,
+                    vx: Math.cos(angle) * spd,
+                    vy: Math.sin(angle) * spd,
+                    color: source === 'manual' ? '#facc15' : '#4ade80',
+                    life: 0.45
+                });
+            }
+
+            studentGame.popups.push({
+                x: wordObj.x,
+                y: wordObj.y - 8,
+                text: `+${gainedScore}${source !== 'manual' ? ' AUTO' : ''}`,
+                color: source === 'manual' ? '#facc15' : '#4ade80',
+                life: 0.75
+            });
+
+            // Boss Damage proportional to word length
+            if (studentGame.boss) {
+                const bossDamage = Math.round(len * 14 * plasmaMult);
+                studentGame.boss.hp = Math.max(0, studentGame.boss.hp - bossDamage);
+
+                studentGame.beams.push({
+                    x1: wordObj.x,
+                    y1: wordObj.y,
+                    x2: cw / 2,
+                    y2: 34,
+                    color: '#f43f5e',
+                    life: 0.28
+                });
+
+                studentGame.popups.push({
+                    x: cw / 2 + (Math.random() * 50 - 25),
+                    y: 48,
+                    text: `-${bossDamage} HP!`,
+                    color: '#fb7185',
+                    life: 0.8
+                });
+
+                sfx.bossHit();
+
+                if (studentGame.boss.hp <= 0) {
+                    const clearBonus = 350;
+                    studentGame.score += clearBonus;
+                    studentGame.wordsDestroyed += 3; // +3 extra spaceship steps!
+                    studentGame.boss = null;
+                    sfx.bossDefeat();
+                    showToast(`🎉 개인 보스 격파! +${clearBonus}점 & 우주선 +3칸 전진!`);
+                }
+            } else {
+                sfx.hit();
+            }
+
+            // Check if score crossed 1,000-pt milestone
+            checkBossSpawn();
+
+            // Gain EXP & Trigger Level Up
+            const expGain = 1 + studentGame.skills.expBoost * 0.35;
+            studentGame.exp += expGain;
+            if (studentGame.exp >= studentGame.nextLevelExp) {
+                studentGame.exp -= studentGame.nextLevelExp;
+                studentGame.level += 1;
+                studentGame.nextLevelExp = Math.round(6 + (studentGame.level - 1) * 2.5);
+                triggerLevelUpSequence(studentGame.level);
+            }
+
+            updateStudentHud();
+            syncStudentProgress(false);
+        }
+
+        function triggerLevelUpSequence(newLevel) {
+            sfx.levelUp();
+            const banner = document.getElementById('levelUpBanner');
+            const bannerText = document.getElementById('levelUpBannerText');
+            bannerText.textContent = `Lv.${newLevel} UP!`;
+            banner.classList.remove('hidden');
+
+            if (studentGame.levelUpTimer) clearTimeout(studentGame.levelUpTimer);
+            // Show Lv.N UP! for 2 seconds, then open 3-skill choice modal
+            studentGame.levelUpTimer = setTimeout(() => {
+                banner.classList.add('hidden');
+                if (studentGame.active) {
+                    openSkillSelectionModal(newLevel);
+                }
+            }, 2000);
+        }
+
+        function buildSkillPool() {
+            const s = studentGame.skills;
+            const pool = [];
+
+            // Awakening Evolution Card if Auto-Typer Lv.5 + AI Core >= 1
+            if (s.autoTyper >= 5 && s.aiCore >= 1 && !studentGame.awakenedAuto) {
+                pool.push({
+                    id: 'awakeningAuto',
+                    isAwakening: true,
+                    icon: '🌟',
+                    title: '[각성] 무한 오토 매트릭스',
+                    badge: 'AWAKENING',
+                    desc: '자동 타자 Lv.5 + 초전도 AI 코어 융합! 등장하는 단어를 0.25초마다 끊임없이 연속 격추합니다!'
+                });
+            }
+
+            if (s.autoTyper < 5) {
+                const nextLv = s.autoTyper + 1;
+                pool.push({
+                    id: 'autoTyper',
+                    icon: '🤖',
+                    title: `자동 타자 (Lv.${nextLv})`,
+                    badge: nextLv === 5 ? 'MAX' : `Lv.${nextLv}/5`,
+                    desc: AUTO_TYPER_SPECS[nextLv].desc
+                });
+            }
+
+            if (s.aiCore < 5) {
+                const nextLv = s.aiCore + 1;
+                pool.push({
+                    id: 'aiCore',
+                    icon: '⚡',
+                    title: `초전도 AI 코어 (Lv.${nextLv})`,
+                    badge: '보조 스킬',
+                    desc: `자동 스킬 재사용 대기시간 -${nextLv * 12}% 감소 (자동 타자 각성 재료!)`
+                });
+            }
+
+            if (s.plasmaAmp < 5) {
+                const nextLv = s.plasmaAmp + 1;
+                pool.push({
+                    id: 'plasmaAmp',
+                    icon: '🔋',
+                    title: `플라즈마 증폭기 (Lv.${nextLv})`,
+                    badge: '보조 스킬',
+                    desc: `보스 공격 데미지 및 획득 점수 +${nextLv * 15}% 상승`
+                });
+            }
+
+            if (s.chainLaser < 5) {
+                const nextLv = s.chainLaser + 1;
+                pool.push({
+                    id: 'chainLaser',
+                    icon: '🔫',
+                    title: `연쇄 레이저 포탑 (Lv.${nextLv})`,
+                    badge: `Lv.${nextLv}/5`,
+                    desc: `${Math.max(2.5, 7 - nextLv).toFixed(1)}초마다 화면 하단 위험 단어를 즉시 소멸`
+                });
+            }
+
+            if (s.expBoost < 5) {
+                const nextLv = s.expBoost + 1;
+                pool.push({
+                    id: 'expBoost',
+                    icon: '📚',
+                    title: `경험치 부스터 (Lv.${nextLv})`,
+                    badge: '보조 스킬',
+                    desc: `단어 격추 시 경험치 획득량 +${nextLv * 35}% 증가`
+                });
+            }
+
+            if (s.cryoField < 5) {
+                const nextLv = s.cryoField + 1;
+                pool.push({
+                    id: 'cryoField',
+                    icon: '❄️',
+                    title: `빙결 중력장 (Lv.${nextLv})`,
+                    badge: '보조 스킬',
+                    desc: `떨어지는 모든 단어의 하강 속도 -${nextLv * 8}% 감속`
+                });
+            }
+
+            // Ensure at least 3 choices
+            while (pool.length < 3) {
+                pool.push({
+                    id: 'bonusScore',
+                    icon: '💎',
+                    title: '긴급 에너지 보급 (+500점)',
+                    badge: '즉시 발동',
+                    desc: '즉시 500점을 획득하고 우주선이 2칸 추가 전진합니다!'
+                });
+            }
+
+            // Keep Awakening first if present, shuffle rest
+            const awakening = pool.filter(c => c.isAwakening);
+            const others = pool.filter(c => !c.isAwakening).sort(() => Math.random() - 0.5);
+            return [...awakening, ...others].slice(0, 3);
+        }
+
+        let currentSkillChoices = [];
+
+        function openSkillSelectionModal(levelNum) {
+            studentGame.pausedForSkill = true;
+            currentSkillChoices = buildSkillPool();
+
+            document.getElementById('skillModalTitle').textContent = `⚡ Lv.${levelNum} 달성! 스킬을 선택하세요`;
+            const grid = document.getElementById('skillCardsGrid');
+            grid.innerHTML = currentSkillChoices.map((card, idx) => `
+                <button type="button" data-skill-idx="${idx}"
+                    class="skill-card ${card.isAwakening ? 'awakening-card' : ''} rounded-md p-3.5 text-left flex flex-col justify-between gap-2">
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-2xl">${card.icon}</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded font-bold ${card.isAwakening ? 'bg-yellow-400 text-[#141129]' : 'bg-cyan-500/20 text-cyan-300'}">
+                                [${idx + 1}] ${card.badge}
+                            </span>
+                        </div>
+                        <div class="text-sm font-bold text-white mb-1">${card.title}</div>
+                        <p class="text-[11px] text-slate-300 leading-relaxed">${card.desc}</p>
+                    </div>
+                </button>
+            `).join('');
+
+            grid.querySelectorAll('[data-skill-idx]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = Number(btn.getAttribute('data-skill-idx'));
+                    applySelectedSkill(idx);
+                });
+            });
+
+            const modal = document.getElementById('skillSelectModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function applySelectedSkill(idx) {
+            const chosen = currentSkillChoices[idx];
+            if (!chosen) return;
+
+            if (chosen.id === 'awakeningAuto') {
+                studentGame.awakenedAuto = true;
+                document.getElementById('awakenedIndicator').classList.remove('hidden');
+                showToast('🌟 [각성] 무한 오토 매트릭스 발동! 나오는 단어를 연속 격추합니다!');
+            } else if (chosen.id === 'bonusScore') {
+                studentGame.score += 500;
+                studentGame.wordsDestroyed += 2;
+                checkBossSpawn();
+            } else if (studentGame.skills[chosen.id] !== undefined) {
+                studentGame.skills[chosen.id] = Math.min(5, studentGame.skills[chosen.id] + 1);
+            }
+
+            sfx.hit();
+            currentSkillChoices = [];
+            studentGame.pausedForSkill = false;
+
+            const modal = document.getElementById('skillSelectModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            updateStudentHud();
+            const input = document.getElementById('wordInput');
+            if (input) input.focus();
+        }
+
+        function autoDestroyLowestWords(count) {
+            if (studentGame.words.length === 0) return;
+            const sorted = [...studentGame.words].sort((a, b) => b.y - a.y);
+            const targets = sorted.slice(0, count);
+            targets.forEach(w => destroyWordEntity(w, 'auto'));
+        }
+
+        function updateStudentGame(dt) {
+            const elapsed = (Date.now() - studentGame.startTime) / 1000;
+            const remaining = Math.max(0, appState.duration - elapsed);
+            document.getElementById('hudTimer').textContent = `${remaining.toFixed(1)}s`;
+
+            if (remaining <= 0) {
+                finishStudentGame();
+                return;
+            }
+
+            if (studentGame.pausedForSkill) return;
+
+            // Spawn words continuously (faster during boss fight or awakened auto)
+            studentGame.spawnTimer += dt;
+            const spawnInterval = studentGame.awakenedAuto ? 0.35 : (studentGame.boss ? 0.95 : 1.45);
+            const maxActiveWords = studentGame.boss ? 9 : 7;
+            if (studentGame.spawnTimer >= spawnInterval && studentGame.words.length < maxActiveWords) {
+                studentGame.spawnTimer = 0;
+                spawnStudentWord();
+            }
+
+            // Skill 1: Awakened Infinite Auto-Matrix
+            if (studentGame.awakenedAuto) {
+                studentGame.awakenedTimer += dt;
+                if (studentGame.awakenedTimer >= 0.25) {
+                    studentGame.awakenedTimer = 0;
+                    if (studentGame.words.length === 0) spawnStudentWord();
+                    autoDestroyLowestWords(1);
+                }
+            } else if (studentGame.skills.autoTyper > 0) {
+                // Normal Auto-Typer Lv.1 ~ Lv.5
+                const spec = AUTO_TYPER_SPECS[studentGame.skills.autoTyper];
+                const cdr = Math.max(0.4, 1 - studentGame.skills.aiCore * 0.12);
+                studentGame.autoTyperTimer += dt;
+                if (studentGame.autoTyperTimer >= spec.interval * cdr) {
+                    studentGame.autoTyperTimer = 0;
+                    autoDestroyLowestWords(spec.count);
+                }
+            }
+
+            // Skill 2: Chain Laser Turret
+            if (studentGame.skills.chainLaser > 0) {
+                const cdr = Math.max(0.4, 1 - studentGame.skills.aiCore * 0.12);
+                const interval = Math.max(2.5, 7 - studentGame.skills.chainLaser) * cdr;
+                studentGame.chainLaserTimer += dt;
+                if (studentGame.chainLaserTimer >= interval) {
+                    studentGame.chainLaserTimer = 0;
+                    autoDestroyLowestWords(1);
+                }
+            }
+
+            // Move falling words
+            const wrapper = document.getElementById('canvasWrapper');
+            const ch = wrapper ? wrapper.clientHeight : 280;
+            for (let i = studentGame.words.length - 1; i >= 0; i--) {
+                const w = studentGame.words[i];
+                w.y += w.speed * dt;
+                if (w.y >= ch - 28) {
+                    studentGame.words.splice(i, 1);
+                    studentGame.combo = 0;
+                    updateStudentHud();
+                }
+            }
+
+            // Update beams, particles, popups
+            studentGame.beams.forEach(b => b.life -= dt);
+            studentGame.beams = studentGame.beams.filter(b => b.life > 0);
+
+            studentGame.particles.forEach(p => {
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.life -= dt;
+            });
+            studentGame.particles = studentGame.particles.filter(p => p.life > 0);
+
+            studentGame.popups.forEach(p => {
+                p.y -= 24 * dt;
+                p.life -= dt;
+            });
+            studentGame.popups = studentGame.popups.filter(p => p.life > 0);
+
+            // Periodic sync to teacher screen
+            if (Date.now() - studentGame.lastSyncTime > 900) {
+                syncStudentProgress(false);
+            }
+        }
+
+        function updateStudentHud() {
+            document.getElementById('hudSteps').textContent = `${studentGame.wordsDestroyed}칸`;
+            document.getElementById('hudScore').textContent = studentGame.score.toLocaleString();
+            document.getElementById('hudCombo').textContent = String(studentGame.combo);
+
+            // EXP Bar
+            document.getElementById('hudLevelBadge').textContent = `Lv.${studentGame.level}`;
+            const curExpDisplay = Math.floor(studentGame.exp);
+            document.getElementById('hudExpText').textContent = `EXP ${curExpDisplay} / ${studentGame.nextLevelExp}개`;
+            const pct = Math.min(100, Math.round((studentGame.exp / studentGame.nextLevelExp) * 100));
+            document.getElementById('hudExpBar').style.width = `${pct}%`;
+
+            // Equipped Skills Chips
+            const chips = [];
+            if (studentGame.awakenedAuto) {
+                chips.push(`<span class="bg-yellow-400 text-[#141129] font-bold px-1.5 py-0.5 rounded">🌟각성오토</span>`);
+            } else if (studentGame.skills.autoTyper > 0) {
+                chips.push(`<span class="bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded">🤖자동Lv.${studentGame.skills.autoTyper}</span>`);
+            }
+            if (studentGame.skills.aiCore > 0) chips.push(`<span class="bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">⚡코어Lv.${studentGame.skills.aiCore}</span>`);
+            if (studentGame.skills.plasmaAmp > 0) chips.push(`<span class="bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded">🔋증폭Lv.${studentGame.skills.plasmaAmp}</span>`);
+            if (studentGame.skills.chainLaser > 0) chips.push(`<span class="bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">🔫레이저Lv.${studentGame.skills.chainLaser}</span>`);
+            if (studentGame.skills.expBoost > 0) chips.push(`<span class="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">📚경험치Lv.${studentGame.skills.expBoost}</span>`);
+            if (studentGame.skills.cryoField > 0) chips.push(`<span class="bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded">❄️빙결Lv.${studentGame.skills.cryoField}</span>`);
+
+            document.getElementById('hudEquippedSkills').innerHTML = chips.length > 0
+                ? chips.join('')
+                : `<span class="text-slate-400">보유 스킬: 없음</span>`;
+
+            // Fever & CPM
+            const frame = document.getElementById('arcadeFrame');
+            const feverEl = document.getElementById('feverIndicator');
+            if (studentGame.combo >= 8) {
+                frame.classList.add('fever-active');
+                feverEl.classList.remove('hidden');
+            } else {
+                frame.classList.remove('fever-active');
+                feverEl.classList.add('hidden');
+            }
+
+            const elapsedMin = Math.max(0.05, (Date.now() - studentGame.startTime) / 60000);
+            const cpm = Math.round((studentGame.totalTypedChars * 2.2) / elapsedMin);
+            document.getElementById('hudCpm').textContent = `${cpm} 타/분`;
+        }
+
+        function syncStudentProgress(force = false) {
+            if (!appState.roomCode || !appState.playerId) return;
+            if (!force && Date.now() - studentGame.lastSyncTime < 650) return;
+            studentGame.lastSyncTime = Date.now();
+
+            const elapsedMin = Math.max(0.05, (Date.now() - studentGame.startTime) / 60000);
+            const cpm = Math.round((studentGame.totalTypedChars * 2.2) / elapsedMin);
+
+            writePlayerState(appState.roomCode, appState.playerId, {
+                name: appState.playerName,
+                wordsDestroyed: studentGame.wordsDestroyed,
+                score: studentGame.score,
+                cpm,
+                bossActive: Boolean(studentGame.boss)
+            });
+        }
+
+        function renderStudentGameCanvas() {
+            const wrapper = document.getElementById('canvasWrapper');
+            const canvas = document.getElementById('gameCanvas');
+            if (!wrapper || !canvas) return;
+
+            const width = wrapper.clientWidth || 600;
+            const height = wrapper.clientHeight || 280;
+            if (canvas.width !== width || canvas.height !== height) {
+                canvas.width = width;
+                canvas.height = height;
+            }
+
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#090714';
+            ctx.fillRect(0, 0, width, height);
+
+            // Subtle Starfield
+            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            for (let i = 0; i < 24; i++) {
+                const sx = (i * 97) % width;
+                const sy = ((i * 53) + Math.floor(Date.now() * 0.02)) % height;
+                ctx.fillRect(sx, sy, 2, 2);
+            }
+
+            // Personal Boss Header & HP Bar
+            if (studentGame.boss) {
+                const b = studentGame.boss;
+                const barW = Math.min(340, width - 40);
+                const barX = (width - barW) / 2;
+
+                ctx.fillStyle = 'rgba(15, 12, 33, 0.9)';
+                ctx.fillRect(barX - 8, 6, barW + 16, 44);
+                ctx.strokeStyle = b.color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(barX - 8, 6, barW + 16, 44);
+
+                ctx.fillStyle = b.color;
+                ctx.font = 'bold 12px Galmuri11, monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(`👾 ${b.name} (${b.hp}/${b.maxHp})`, width / 2, 22);
+
+                ctx.fillStyle = '#1e1b4b';
+                ctx.fillRect(barX, 29, barW, 12);
+                const hpRatio = Math.max(0, b.hp / b.maxHp);
+                ctx.fillStyle = b.color;
+                ctx.fillRect(barX, 29, barW * hpRatio, 12);
+            }
+
+            // Laser Beams
+            studentGame.beams.forEach(beam => {
+                ctx.strokeStyle = beam.color;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(beam.x1, beam.y1);
+                ctx.lineTo(beam.x2, beam.y2);
+                ctx.stroke();
+            });
+
+            // Falling Words with Retro CRT Chromatic Aberration
+            ctx.font = 'bold 16px Galmuri11, monospace';
+            ctx.textAlign = 'center';
+            studentGame.words.forEach(w => {
+                const padX = 12;
+                const textW = ctx.measureText(w.text).width;
+                const boxW = textW + padX * 2;
+                const boxH = 28;
+
+                ctx.fillStyle = w.isBossWord ? 'rgba(136, 19, 55, 0.88)' : 'rgba(23, 20, 51, 0.9)';
+                ctx.fillRect(w.x - boxW / 2, w.y - 18, boxW, boxH);
+                ctx.strokeStyle = w.isBossWord ? '#fb7185' : '#38bdf8';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(w.x - boxW / 2, w.y - 18, boxW, boxH);
+
+                // CRT RGB Chromatic Aberration Text
+                ctx.fillStyle = 'rgba(244, 63, 94, 0.75)';
+                ctx.fillText(w.text, w.x - 1.3, w.y + 1);
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.75)';
+                ctx.fillText(w.text, w.x + 1.3, w.y + 1);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(w.text, w.x, w.y + 1);
+            });
+
+            // Particles
+            studentGame.particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+            });
+
+            // Score / Damage Popups
+            ctx.font = 'bold 13px Galmuri11, monospace';
+            studentGame.popups.forEach(pop => {
+                ctx.fillStyle = 'rgba(244, 63, 94, 0.7)';
+                ctx.fillText(pop.text, pop.x - 1, pop.y);
+                ctx.fillStyle = pop.color;
+                ctx.fillText(pop.text, pop.x, pop.y);
+            });
+
+            // Bottom Player Quokka Spaceship Turret
+            const shipX = width / 2;
+            const shipY = height - 20;
+            ctx.fillStyle = '#facc15';
+            ctx.beginPath();
+            ctx.moveTo(shipX, shipY - 16);
+            ctx.lineTo(shipX - 18, shipY + 10);
+            ctx.lineTo(shipX + 18, shipY + 10);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.textAlign = 'left';
+        }
+
+        function handleStudentWordSubmit() {
+            if (!studentGame.active || studentGame.pausedForSkill) return;
+            const input = document.getElementById('wordInput');
+            const val = input.value.trim();
+            if (!val) return;
+
+            studentGame.totalAttempts += 1;
+            const match = studentGame.words.find(w => w.text.toLowerCase() === val.toLowerCase());
+            if (match) {
+                input.value = '';
+                destroyWordEntity(match, 'manual');
+            } else {
+                sfx.error();
+                input.value = '';
+                input.classList.remove('shake');
+                void input.offsetWidth;
+                input.classList.add('shake');
+                studentGame.combo = 0;
+                updateStudentHud();
+            }
+        }
+
+        function finishStudentGame() {
+            if (!studentGame.active) return;
+            studentGame.active = false;
+            if (studentGame.animId) cancelAnimationFrame(studentGame.animId);
+            if (studentGame.levelUpTimer) clearTimeout(studentGame.levelUpTimer);
+
+            document.getElementById('arcadeFrame').classList.remove('fever-active');
+            document.getElementById('skillSelectModal').classList.add('hidden');
+            document.getElementById('skillSelectModal').classList.remove('flex');
+
+            const elapsedMin = Math.max(0.05, appState.duration / 60);
+            const cpm = Math.round((studentGame.totalTypedChars * 2.2) / elapsedMin);
+            const acc = studentGame.totalAttempts > 0
+                ? Math.min(100, Math.round((studentGame.wordsDestroyed / studentGame.totalAttempts) * 100))
+                : 100;
+
+            document.getElementById('sResSteps').textContent = `${studentGame.wordsDestroyed}칸`;
+            document.getElementById('sResScore').textContent = `${studentGame.score.toLocaleString()}점`;
+            document.getElementById('sResCpm').textContent = `${cpm} 타`;
+            document.getElementById('sResAcc').textContent = `${studentGame.maxCombo} / ${acc}%`;
+
+            syncStudentProgress(true);
+            updateStudentFinalRankDisplay();
+            showScreen('studentResultScreen');
+        }
+
+        function updateStudentFinalRankDisplay() {
+            const ranked = [...appState.players].sort((a, b) => {
+                if ((b.wordsDestroyed || 0) !== (a.wordsDestroyed || 0)) return (b.wordsDestroyed || 0) - (a.wordsDestroyed || 0);
+                return (b.score || 0) - (a.score || 0);
+            });
+            const myIdx = ranked.findIndex(p => p.playerId === appState.playerId);
+            const badge = document.getElementById('studentFinalRankBadge');
+            if (badge) {
+                if (myIdx >= 0) {
+                    const medal = myIdx === 0 ? '👑 ' : myIdx === 1 ? '🥈 ' : myIdx === 2 ? '🥉 ' : '';
+                    badge.textContent = `${medal}최종 순위: ${ranked.length}명 중 ${myIdx + 1}위!`;
+                } else {
+                    badge.textContent = `전진 ${studentGame.wordsDestroyed}칸 · ${studentGame.score.toLocaleString()}점 달성!`;
+                }
+            }
+        }
+
+        // ==========================================
+        // 9. EVENT LISTENERS & WINDOW BOOTSTRAP
+        // ==========================================
+        function bindAllEventListeners() {
+            // Top Header Controls
+            document.getElementById('homeLogoBtn').addEventListener('click', () => {
+                sfx.click();
+                cleanupRoomListeners();
+                studentGame.active = false;
+                if (teacherRaceAnimId) cancelAnimationFrame(teacherRaceAnimId);
+                if (teacherBotSimInterval) clearInterval(teacherBotSimInterval);
+                document.getElementById('roleBadge').classList.add('hidden');
+                showScreen('roleSelectScreen');
+            });
+
+            document.getElementById('serverStatusBtn').addEventListener('click', () => {
+                sfx.click();
+                const modal = document.getElementById('firebaseSetupModal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            });
+
+            document.getElementById('closeFirebaseModalBtn').addEventListener('click', () => {
+                sfx.click();
+                const modal = document.getElementById('firebaseSetupModal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            });
+
+            document.getElementById('applyFirebaseConfigBtn').addEventListener('click', async () => {
+                sfx.click();
+                const raw = document.getElementById('firebaseConfigInput').value.trim();
+                try {
+                    const parsed = JSON.parse(raw);
+                    const ok = await connectWithFirebaseConfig(parsed);
+                    if (ok) {
+                        showToast('🟢 새 Firebase 서버에 성공적으로 연결되었습니다!');
+                        const modal = document.getElementById('firebaseSetupModal');
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                    } else {
+                        showToast('⚠️ Firebase 설정 형식을 확인해주세요.');
+                    }
+                } catch (e) {
+                    showToast('⚠️ 유효한 JSON 형식의 Config를 붙여넣어 주세요.');
+                }
+            });
+
+            document.getElementById('openHofHeaderBtn').addEventListener('click', () => {
+                sfx.click();
+                subscribeToHallOfFame();
+                renderHallOfFameTable(appState.hofRecords.length ? appState.hofRecords : localStore.hof);
+                showScreen('hallOfFameScreen');
+            });
+
+            document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
+                soundEnabled = !soundEnabled;
+                e.currentTarget.textContent = soundEnabled ? '🔊 ON' : '🔇 OFF';
+                if (soundEnabled) sfx.click();
+            });
+
+            // Role Selection Screen
+            document.getElementById('selectTeacherBtn').addEventListener('click', () => {
+                sfx.click();
+                showScreen('teacherSetupScreen');
+                setTimeout(() => document.getElementById('teacherSchoolInput').focus(), 50);
+            });
+
+            document.getElementById('selectStudentBtn').addEventListener('click', () => {
+                sfx.click();
+                document.getElementById('studentJoinForm').classList.remove('hidden');
+                document.getElementById('studentWaitingBox').classList.add('hidden');
+                document.getElementById('studentWaitingBox').classList.remove('flex');
+                document.getElementById('studentJoinErrorBox').classList.add('hidden');
+                showScreen('studentJoinScreen');
+            });
+
+            document.getElementById('selectHofBtn').addEventListener('click', () => {
+                sfx.click();
+                subscribeToHallOfFame();
+                renderHallOfFameTable(appState.hofRecords.length ? appState.hofRecords : localStore.hof);
+                showScreen('hallOfFameScreen');
+            });
+
+            // Teacher Class Code Setup Screen
+            document.getElementById('teacherClassInput').addEventListener('input', (e) => {
+                e.target.value = normalizeClassCode(e.target.value);
+            });
+
+            document.getElementById('createClassRoomBtn').addEventListener('click', () => {
+                const schoolRaw = document.getElementById('teacherSchoolInput').value.trim();
+                const classRaw = normalizeClassCode(document.getElementById('teacherClassInput').value);
+
+                if (!schoolRaw) {
+                    sfx.error();
+                    showToast('⚠️ 학교 이름을 입력해주세요!');
+                    document.getElementById('teacherSchoolInput').focus();
+                    return;
+                }
+                if (!classRaw) {
+                    sfx.error();
+                    showToast('⚠️ 학년, 반을 숫자로만 입력해주세요!');
+                    document.getElementById('teacherClassInput').focus();
+                    return;
+                }
+
+                sfx.click();
+                const randomCode = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+                openTeacherLobby(randomCode, schoolRaw, classRaw);
+            });
+
+            document.getElementById('teacherSetupBackBtn').addEventListener('click', () => {
+                sfx.click();
+                showScreen('roleSelectScreen');
+            });
+
+            // Teacher Lobby Controls
+            document.querySelectorAll('.dur-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    sfx.click();
+                    document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    appState.duration = Number(btn.getAttribute('data-duration')) || 60;
+                    if (appState.roomCode) writeRoomState(appState.roomCode, { duration: appState.duration });
+                });
+            });
+
+            document.querySelectorAll('.t-lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    sfx.click();
+                    document.querySelectorAll('.t-lang-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    appState.lang = btn.getAttribute('data-lang') || 'ko';
+                    if (appState.roomCode) writeRoomState(appState.roomCode, { lang: appState.lang });
+                });
+            });
+
+            document.getElementById('copyJoinLinkBtn').addEventListener('click', () => {
+                sfx.click();
+                const text = document.getElementById('joinUrlDisplay').textContent;
+                const temp = document.createElement('textarea');
+                temp.value = text;
+                document.body.appendChild(temp);
+                temp.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('📋 학생 입장 주소가 복사되었습니다!');
+                } catch (e) {
+                    showToast('주소를 직접 선택해 복사해주세요.');
+                }
+                document.body.removeChild(temp);
+            });
+
+            document.getElementById('addDemoBotsBtn').addEventListener('click', async () => {
+                sfx.click();
+                const botNames = ['쿼카1호', '별빛탐험대', '은하수기사'];
+                for (let i = 0; i < botNames.length; i++) {
+                    const botId = `bot_${Date.now()}_${i}`;
+                    await writePlayerState(appState.roomCode, botId, {
+                        name: botNames[i],
+                        wordsDestroyed: 0,
+                        score: 0,
+                        cpm: 0,
+                        bossActive: false,
+                        isBot: true,
+                        joinedAt: Date.now() + i
+                    });
+                }
+                showToast('🤖 테스트 학생 3명이 우주선에 탑승했습니다!');
+            });
+
+            document.getElementById('teacherStartRaceBtn').addEventListener('click', async () => {
+                if (appState.players.length < 2) {
+                    sfx.error();
+                    const btn = document.getElementById('teacherStartRaceBtn');
+                    btn.classList.remove('shake');
+                    void btn.offsetWidth;
+                    btn.classList.add('shake');
+                    showToast('⚠️ 최소 2명 이상의 참여자가 있어야 게임을 시작할 수 있습니다!');
+                    return;
+                }
+                sfx.click();
+                const countdownStartAt = Date.now();
+                await writeRoomState(appState.roomCode, {
+                    status: 'countdown',
+                    countdownStartAt,
+                    duration: appState.duration,
+                    lang: appState.lang
+                });
+                startSynchronizedCountdown();
+            });
+
+            document.getElementById('teacherLeaveLobbyBtn').addEventListener('click', () => {
+                sfx.click();
+                cleanupRoomListeners();
+                document.getElementById('roleBadge').classList.add('hidden');
+                showScreen('roleSelectScreen');
+            });
+
+            document.getElementById('teacherForceEndBtn').addEventListener('click', () => {
+                sfx.click();
+                finishTeacherRace();
+            });
+
+            document.getElementById('teacherRematchBtn').addEventListener('click', async () => {
+                sfx.click();
+                for (const p of appState.players) {
+                    await writePlayerState(appState.roomCode, p.playerId, {
+                        ...p,
+                        wordsDestroyed: 0,
+                        score: 0,
+                        cpm: 0,
+                        bossActive: false
+                    });
+                }
+                await writeRoomState(appState.roomCode, { status: 'lobby' });
+                showScreen('teacherLobbyScreen');
+            });
+
+            document.getElementById('podiumHofBtn').addEventListener('click', () => {
+                sfx.click();
+                subscribeToHallOfFame();
+                renderHallOfFameTable(appState.hofRecords.length ? appState.hofRecords : localStore.hof);
+                showScreen('hallOfFameScreen');
+            });
+
+            document.getElementById('podiumHomeBtn').addEventListener('click', () => {
+                sfx.click();
+                cleanupRoomListeners();
+                document.getElementById('roleBadge').classList.add('hidden');
+                showScreen('roleSelectScreen');
+            });
+
+            // Student Join Form & Verification
+            document.getElementById('studentClassInput').addEventListener('input', (e) => {
+                e.target.value = normalizeClassCode(e.target.value);
+            });
+
+            document.getElementById('studentRoomInput').addEventListener('input', (e) => {
+                e.target.value = normalizeClassCode(e.target.value);
+            });
+
+            document.getElementById('studentJoinSubmitBtn').addEventListener('click', async () => {
+                const schoolRaw = document.getElementById('studentSchoolInput').value.trim();
+                const classRaw = normalizeClassCode(document.getElementById('studentClassInput').value);
+                const roomRaw = normalizeClassCode(document.getElementById('studentRoomInput').value).padStart(4, '0');
+                const nameRaw = document.getElementById('studentNameInput').value.trim();
+                const errBox = document.getElementById('studentJoinErrorBox');
+
+                const showJoinError = (msg) => {
+                    sfx.error();
+                    errBox.textContent = msg;
+                    errBox.classList.remove('hidden');
+                };
+
+                if (!schoolRaw) return showJoinError('⚠️ 학교 이름을 입력해주세요.');
+                if (!classRaw) return showJoinError('⚠️ 학년, 반을 숫자로만 입력해주세요.');
+                if (document.getElementById('studentRoomInput').value.trim().length !== 4) {
+                    return showJoinError('⚠️ 4자리 방 번호를 정확히 입력해주세요.');
+                }
+                if (!nameRaw) return showJoinError('⚠️ 학생 이름(닉네임)을 입력해주세요.');
+
+                errBox.classList.add('hidden');
+                const submitBtn = document.getElementById('studentJoinSubmitBtn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = '🔍 학급 코드 및 방 확인 중...';
+
+                const roomData = await fetchRoomForVerification(roomRaw);
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 우주선 탑승 완료!';
+
+                if (!roomData) {
+                    return showJoinError(`❌ [${roomRaw}]번 방을 찾을 수 없습니다. 선생님이 먼저 방을 생성했는지 확인해주세요!`);
+                }
+
+                const teacherSchoolNorm = normalizeSchoolName(roomData.schoolName);
+                const studentSchoolNorm = normalizeSchoolName(schoolRaw);
+                const teacherClassNorm = normalizeClassCode(roomData.classCode);
+
+                if (teacherSchoolNorm !== studentSchoolNorm || teacherClassNorm !== classRaw) {
+                    return showJoinError(
+                        `🚫 학급 정보가 일치하지 않아 입장할 수 없습니다! (학교 이름과 학년·반 숫자를 선생님 화면과 똑같이 입력해주세요)`
+                    );
+                }
+
+                // Success! Register Student in Room
+                sfx.hit();
+                appState.role = 'student';
+                appState.roomCode = roomRaw;
+                appState.schoolName = roomData.schoolName;
+                appState.classCode = roomData.classCode;
+                appState.playerName = nameRaw;
+                appState.playerId = `stu_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+
+                const badge = document.getElementById('roleBadge');
+                badge.textContent = `🧑‍🎓 ${nameRaw} (방 ${roomRaw})`;
+                badge.classList.remove('hidden');
+
+                document.getElementById('joinedClassLabel').textContent = `🏫 ${roomData.schoolName} · ${roomData.classCode}반`;
+                document.getElementById('joinedRoomLabel').textContent = roomRaw;
+                document.getElementById('joinedNameLabel').textContent = nameRaw;
+
+                document.getElementById('studentJoinForm').classList.add('hidden');
+                document.getElementById('studentWaitingBox').classList.remove('hidden');
+                document.getElementById('studentWaitingBox').classList.add('flex');
+
+                subscribeToRoom(roomRaw);
+                await writePlayerState(roomRaw, appState.playerId, {
+                    name: nameRaw,
+                    wordsDestroyed: 0,
+                    score: 0,
+                    cpm: 0,
+                    bossActive: false,
+                    joinedAt: Date.now()
+                });
+            });
+
+            document.getElementById('studentBackHomeBtn').addEventListener('click', () => {
+                sfx.click();
+                showScreen('roleSelectScreen');
+            });
+
+            // Student Gameplay Input & Skill Selection Hotkeys
+            document.getElementById('wordInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleStudentWordSubmit();
+                }
+            });
+
+            document.getElementById('fireBtn').addEventListener('click', () => {
+                handleStudentWordSubmit();
+                document.getElementById('wordInput').focus();
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (studentGame.pausedForSkill && currentSkillChoices.length > 0) {
+                    if (e.key === '1') applySelectedSkill(0);
+                    else if (e.key === '2') applySelectedSkill(1);
+                    else if (e.key === '3') applySelectedSkill(2);
+                }
+            });
+
+            // Student Result Buttons
+            document.getElementById('studentWaitRematchBtn').addEventListener('click', () => {
+                sfx.click();
+                showScreen('studentJoinScreen');
+                document.getElementById('studentJoinForm').classList.add('hidden');
+                document.getElementById('studentWaitingBox').classList.remove('hidden');
+                document.getElementById('studentWaitingBox').classList.add('flex');
+            });
+
+            document.getElementById('studentResultHofBtn').addEventListener('click', () => {
+                sfx.click();
+                subscribeToHallOfFame();
+                renderHallOfFameTable(appState.hofRecords.length ? appState.hofRecords : localStore.hof);
+                showScreen('hallOfFameScreen');
+            });
+
+            // Hall of Fame Close
+            document.getElementById('closeHofBtn').addEventListener('click', () => {
+                sfx.click();
+                showScreen(appState.previousScreenId || 'roleSelectScreen');
+            });
+        }
+
         // Boot sequence on window load
         window.onload = async function () {
+            bindAllEventListeners();
             backendInitPromise = initBackend();
             await backendInitPromise;
             subscribeToHallOfFame();
 
             // Check URL parameters (?room=XXXX or ?host=XXXX)
             try {
-// ... existing code ... -->
+                const params = new URLSearchParams(window.location.search);
+                const roomParam = params.get('room');
+                const hostParam = params.get('host');
+
+                if (roomParam && /^\d{4}$/.test(roomParam)) {
+                    document.getElementById('studentRoomInput').value = roomParam;
+                    showScreen('studentJoinScreen');
+                } else if (hostParam && /^\d{4}$/.test(hostParam)) {
+                    const existing = await fetchRoomForVerification(hostParam);
+                    if (existing) {
+                        openTeacherLobby(hostParam, existing.schoolName || '우리학교', existing.classCode || '101');
+                    } else {
+                        showScreen('teacherSetupScreen');
+                    }
+                }
+            } catch (e) {}
+        };
+    </script>
+</body>
+</html>
