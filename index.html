@@ -276,6 +276,86 @@
     </footer>
 
     <script>
+        // 우주선에 탄 픽셀 아트 쿼카 SVG 아이콘 (우리반 타자왕 전용)
+        const quokkaSpaceshipSvg = `
+            <svg viewBox="0 0 32 32" class="w-16 h-16" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" aria-label="우주선에 탄 쿼카">
+                <!-- 우주 배경 별 -->
+                <rect x="4" y="5" width="1" height="1" fill="#fde047"/>
+                <rect x="27" y="7" width="1" height="1" fill="#7dd3fc"/>
+                <rect x="6" y="26" width="1" height="1" fill="#f472b6"/>
+                <rect x="26" y="25" width="1" height="1" fill="#fde047"/>
+
+                <!-- 우주선 외곽선 -->
+                <path d="M13 5h6v1h2v1h2v2h1v2h1v6h2v1h2v2h1v4h-3v1h-3v-1h-2v1h-3v2h-1v2h-2v-2h-1v-2h-3v-1h-2v1H5v-1H2v-4h1v-2h2v-1h2v-6h1V9h1V7h2V6h2V5z" fill="#291512"/>
+
+                <!-- 우주선 상단 및 측면 선체 (실버/화이트) -->
+                <rect x="13" y="6" width="6" height="1" fill="#e2e8f0"/>
+                <rect x="11" y="7" width="10" height="1" fill="#cbd5e1"/>
+                <rect x="10" y="8" width="2" height="1" fill="#f8fafc"/>
+                <rect x="20" y="8" width="2" height="1" fill="#94a3b8"/>
+                <rect x="9" y="9" width="2" height="3" fill="#f8fafc"/>
+                <rect x="21" y="9" width="2" height="3" fill="#94a3b8"/>
+                <rect x="8" y="12" width="2" height="7" fill="#e2e8f0"/>
+                <rect x="22" y="12" width="2" height="7" fill="#94a3b8"/>
+
+                <!-- 양쪽 날개 & 빨간 포인트 -->
+                <rect x="6" y="18" width="2" height="5" fill="#cbd5e1"/>
+                <rect x="24" y="18" width="2" height="5" fill="#94a3b8"/>
+                <rect x="6" y="19" width="2" height="1" fill="#ef4444"/>
+                <rect x="24" y="19" width="2" height="1" fill="#dc2626"/>
+                <rect x="4" y="20" width="2" height="3" fill="#f8fafc"/>
+                <rect x="26" y="20" width="2" height="3" fill="#cbd5e1"/>
+                <rect x="3" y="22" width="1" height="2" fill="#ef4444"/>
+                <rect x="28" y="22" width="1" height="2" fill="#dc2626"/>
+
+                <!-- 유리 돔 캐노피 -->
+                <rect x="12" y="8" width="8" height="1" fill="#bae6fd"/>
+                <rect x="11" y="9" width="10" height="3" fill="#7dd3fc"/>
+                <rect x="10" y="12" width="12" height="8" fill="#38bdf8"/>
+                <rect x="11" y="20" width="10" height="2" fill="#7dd3fc"/>
+
+                <!-- 조종석 계기판 & 불빛 -->
+                <rect x="10" y="14" width="2" height="5" fill="#334155"/>
+                <rect x="20" y="14" width="2" height="5" fill="#334155"/>
+                <rect x="10" y="15" width="1" height="1" fill="#ef4444"/>
+                <rect x="10" y="17" width="1" height="1" fill="#22c55e"/>
+                <rect x="21" y="15" width="1" height="1" fill="#ef4444"/>
+                <rect x="21" y="17" width="1" height="1" fill="#eab308"/>
+
+                <!-- 하단 선체 & 중앙 추진기 -->
+                <rect x="9" y="21" width="14" height="2" fill="#cbd5e1"/>
+                <rect x="11" y="23" width="10" height="1" fill="#94a3b8"/>
+                <rect x="14" y="22" width="4" height="1" fill="#334155"/>
+                <rect x="14" y="22" width="1" height="1" fill="#22c55e"/>
+                <rect x="15" y="22" width="1" height="1" fill="#38bdf8"/>
+                <rect x="17" y="22" width="1" height="1" fill="#ef4444"/>
+                <rect x="15" y="24" width="2" height="2" fill="#f8fafc"/>
+                <rect x="15" y="26" width="2" height="2" fill="#ef4444"/>
+
+                <!-- 쿼카 외곽선 -->
+                <path d="M12 8h2v1h4V8h2v3h1v4h-1v1h1v5h-9v-1H8v-1h3v-3h1v-1h-1v-4h1V8z" fill="#451a03"/>
+
+                <!-- 쿼카 귀 & 얼굴 -->
+                <rect x="12" y="9" width="2" height="1" fill="#92400e"/>
+                <rect x="18" y="9" width="2" height="1" fill="#92400e"/>
+                <rect x="12" y="10" width="8" height="3" fill="#b45309"/>
+                <rect x="14" y="11" width="1" height="1" fill="#09090b"/>
+                <rect x="17" y="11" width="1" height="1" fill="#09090b"/>
+                <rect x="15" y="12" width="2" height="1" fill="#09090b"/>
+
+                <!-- 쿼카 볼 & 웃는 입 -->
+                <rect x="12" y="13" width="8" height="2" fill="#fde68a"/>
+                <rect x="15" y="14" width="2" height="1" fill="#78350f"/>
+
+                <!-- 쿼카 몸통, 배, 팔, 꼬리 -->
+                <rect x="12" y="15" width="8" height="6" fill="#b45309"/>
+                <rect x="13" y="16" width="6" height="5" fill="#fed7aa"/>
+                <rect x="12" y="16" width="2" height="1" fill="#92400e"/>
+                <rect x="18" y="16" width="2" height="1" fill="#92400e"/>
+                <rect x="9" y="19" width="3" height="1" fill="#92400e"/>
+            </svg>
+        `;
+
         // 게임 및 도구 데이터 목록
         const gamesList = [
             {
@@ -309,19 +389,21 @@
                 isReady: false
             },
             {
-                id: 'coming-soon-2',
+                id: 'classtyping',
                 gameNumber: 'GAME 03',
-                title: '스피드 타자 왕',
-                description: '제한 시간 안에 떨어지는 단어들을 빠르게 입력해 방어하는 타자 게임입니다.',
-                url: '#coming-soon',
+                title: '우리반 타자왕',
+                description: '우주선을 탄 쿼카와 함께 날아오는 단어들을 빠르게 입력해 방어하는 우리 반 신나는 타자 대결 게임입니다!',
+                url: 'https://quokka52.github.io/classtyping/',
                 category: 'arcade',
-                subBadge: '★ 출시 예정',
-                tags: ['#타자연습', '#시간도전'],
+                subBadge: '★ 우주 타자 디펜스',
+                tags: ['#우리반타자왕', '#타자연습', '#우주선쿼카'],
                 themeColor: '#fbbf24', // 네온 옐로우
-                glowColor: 'rgba(251, 191, 36, 0.25)',
-                iconBg: 'from-blue-400 to-indigo-500',
-                icon: '⌨️',
-                isReady: false
+                glowColor: 'rgba(251, 191, 36, 0.28)',
+                iconBg: 'from-slate-950 via-indigo-950 to-black',
+                icon: quokkaSpaceshipSvg,
+                actionLabel: '▶ 게임 시작하기',
+                showCardStartBtn: true,
+                isReady: true
             },
             {
                 id: 'randompicker',
@@ -420,7 +502,7 @@
                         <!-- 중앙 픽셀 아이콘 프레임 -->
                         <div class="w-24 h-24 mb-5 bg-[#120e24] border-2 border-[#3b3363] p-2 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
                             <div class="w-full h-full bg-gradient-to-br ${game.iconBg} flex items-center justify-center border border-black/40">
-                                <span class="text-4xl drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
+                                <span class="text-4xl flex items-center justify-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
                                     ${game.icon}
                                 </span>
                             </div>
@@ -446,9 +528,15 @@
                             ${tagsHtml}
                         </div>
 
-                        <div class="mt-3 text-[10px] text-slate-500 group-hover:text-amber-300 transition-colors tracking-widest">
-                            [ 클릭해서 상세보기 ]
-                        </div>
+                        ${game.showCardStartBtn ? `
+                            <a href="${game.url}" onclick="event.stopPropagation()" class="mt-3 w-full py-2 bg-amber-400 hover:bg-amber-300 text-[#121629] font-bold text-xs sm:text-sm border-2 border-black shadow-[3px_3px_0px_#000] active:translate-y-0.5 transition-all">
+                                ${game.actionLabel || '▶ 게임 시작하기'}
+                            </a>
+                        ` : `
+                            <div class="mt-3 text-[10px] text-slate-500 group-hover:text-amber-300 transition-colors tracking-widest">
+                                [ 클릭해서 상세보기 ]
+                            </div>
+                        `}
                     </div>
                 `;
                 gamesGrid.appendChild(card);
