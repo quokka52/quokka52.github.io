@@ -451,16 +451,19 @@
             border-radius: 0px;
         }
 
+        .damage-flash {
+            animation: damageFlashAnim 0.3s ease;
+        }
+
+        @keyframes damageFlashAnim {
+            0%, 100% { box-shadow: 0 0 0 4px #0d0b1a, 0 12px 40px rgba(0, 0, 0, 0.75); }
+            50% { border-color: #f43f5e; box-shadow: 0 0 32px rgba(244, 63, 94, 0.8), inset 0 0 30px rgba(244, 63, 94, 0.45); }
+        }
+
         canvas {
             display: block;
             width: 100%;
             height: 100%;
-            image-rendering: pixelated;
-        }
-
-        #qrcodeBox img, #qrcodeBox canvas {
-            margin: 0 auto;
-            display: block;
             image-rendering: pixelated;
         }
     </style>
@@ -485,34 +488,6 @@
                 <span>GAME 03</span>
             </div>
 
-            <!-- Synchronized 3-2-1 Countdown Overlay -->
-            <div id="countdownOverlay" class="hidden absolute inset-0 bg-[#090714]/90 z-30 rounded-md flex-col items-center justify-center text-center p-4">
-                <div class="text-xs sm:text-sm text-cyan-300 tracking-widest mb-2">전원 출격 준비!</div>
-                <div id="countdownNumber" class="text-6xl sm:text-8xl font-bold text-yellow-400 drop-shadow-[0_4px_0_#000]">3</div>
-                <div class="text-xs sm:text-sm text-slate-300 mt-4">카운트다운이 끝나면 동시에 시작됩니다!</div>
-            </div>
-
-            <!-- Kicked by Teacher Retro Pixel Modal -->
-            <div id="kickedPixelModal" class="hidden absolute inset-0 bg-[#090714]/95 z-40 rounded-md flex-col items-center justify-center p-4 text-center">
-                <div class="pixel-kicked-box w-full max-w-md p-6 sm:p-7 flex flex-col items-center">
-                    <div class="bg-[#ff4d94] text-[#090714] text-xs font-bold px-3 py-1 mb-4 tracking-widest">
-                        SYSTEM NOTICE
-                    </div>
-                    <div class="text-3xl sm:text-4xl mb-3">🚫</div>
-                    <h3 class="text-lg sm:text-2xl font-bold text-[#ff4d94] tracking-wide mb-2">
-                        선생님께서 내보내셨습니다
-                    </h3>
-                    <p class="text-xs sm:text-sm text-slate-300 mb-6 leading-relaxed">
-                        방에서 퇴장 처리되었습니다.<br/>
-                        아래 확인 버튼을 누르면 첫 화면으로 이동합니다.
-                    </p>
-                    <button id="kickedConfirmBtn" type="button"
-                        class="pixel-kick-btn w-full max-w-xs py-3 px-5 text-sm sm:text-base">
-                        확인
-                    </button>
-                </div>
-            </div>
-
             <!-- Level Up 3-Skill Selection Modal (Appears 2 seconds after Lv.N UP!) -->
             <div id="skillSelectModal" class="hidden absolute inset-0 bg-[#090714]/92 z-30 rounded-md flex-col items-center justify-center p-4 sm:p-6 text-center">
                 <div class="text-xs text-yellow-400 tracking-widest mb-1">SKILL UPGRADE</div>
@@ -529,7 +504,7 @@
                         오둥오락실
                     </button>
                     <span class="text-xs text-slate-500 hidden sm:inline">| ODUNG ARCADE</span>
-                    <span id="roleBadge" class="hidden text-[11px] bg-indigo-500/20 border border-indigo-400/50 text-indigo-300 px-2 py-0.5 rounded">
+                    <span id="playerInfoBadge" class="hidden text-[11px] bg-indigo-500/20 border border-indigo-400/50 text-indigo-300 px-2 py-0.5 rounded">
                         대기 중
                     </span>
                 </div>
@@ -557,7 +532,7 @@
                         <span id="modalConnStatus" class="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">미연결</span>
                     </div>
                     <p class="text-xs text-slate-300 leading-relaxed">
-                        선생님 PC와 학생 스마트폰이 <strong class="text-cyan-300">서로 다른 기기</strong>에서 실시간으로 접속하려면 Firebase 설정이 필요합니다. (현재 프로젝트 설정이 기본 내장되어 있습니다.)
+                        여러 기기에서 명예의 전당 기록을 실시간으로 공유하려면 Firebase 설정이 필요합니다. (현재 프로젝트 설정이 기본 내장되어 있습니다.)
                     </p>
                     <div>
                         <label class="block text-xs text-yellow-400 mb-1">▶ 다른 Firebase Config 적용 (선택사항)</label>
@@ -579,407 +554,107 @@
             </div>
 
             <!-- ==========================================
-                 VIEW 1: INITIAL ROLE SELECTION (선생님용 / 학생용)
+                 VIEW 1: ENTRY SCREEN (학급 코드 / 반 / 닉네임 입력)
             =========================================== -->
-            <div id="roleSelectScreen" class="flex flex-col items-center text-center py-2 sm:py-4">
-                <!-- Icon Box -->
-                <div class="relative mb-3">
-                    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-[#0f0c21] border-4 border-[#27224d] p-1.5 rounded shadow-inner mx-auto">
-                        <div class="w-full h-full rounded-sm bg-gradient-to-b from-[#4f9cf9] to-[#6366f1] flex items-center justify-center relative overflow-hidden">
-                            <svg class="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-[0_3px_0_rgba(15,23,42,0.5)]" viewBox="0 0 32 24" fill="none">
-                                <rect x="2" y="4" width="28" height="16" rx="2" fill="#e2e8f0"/>
-                                <rect x="2" y="18" width="28" height="3" rx="1" fill="#94a3b8"/>
-                                <rect x="5" y="7" width="2" height="2" fill="#64748b"/>
-                                <rect x="8" y="7" width="2" height="2" fill="#64748b"/>
-                                <rect x="11" y="7" width="2" height="2" fill="#64748b"/>
-                                <rect x="14" y="7" width="2" height="2" fill="#64748b"/>
-                                <rect x="17" y="7" width="2" height="2" fill="#64748b"/>
-                                <rect x="20" y="7" width="2" height="2" fill="#64748b"/>
-                                <rect x="23" y="7" width="4" height="2" fill="#64748b"/>
-                                <rect x="5" y="10" width="3" height="2" fill="#64748b"/>
-                                <rect x="9" y="10" width="2" height="2" fill="#64748b"/>
-                                <rect x="12" y="10" width="2" height="2" fill="#64748b"/>
-                                <rect x="15" y="10" width="2" height="2" fill="#64748b"/>
-                                <rect x="18" y="10" width="2" height="2" fill="#64748b"/>
-                                <rect x="21" y="10" width="2" height="2" fill="#64748b"/>
-                                <rect x="24" y="10" width="3" height="2" fill="#64748b"/>
-                                <rect x="5" y="13" width="3" height="2" fill="#64748b"/>
-                                <rect x="9" y="13" width="13" height="2" fill="#64748b"/>
-                                <rect x="23" y="13" width="4" height="2" fill="#64748b"/>
-                            </svg>
+            <div id="entryScreen" class="flex flex-col md:flex-row items-center justify-between gap-6 py-2 sm:py-4">
+                <!-- Left Column: Emoji/Icon, Title, Subtitle -->
+                <div class="w-full md:w-5/12 flex flex-col items-center md:items-start text-center md:text-left justify-center px-1">
+                    <!-- Icon Box -->
+                    <div class="relative mb-3">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-[#0f0c21] border-4 border-[#27224d] p-1.5 rounded shadow-inner mx-auto md:mx-0">
+                            <div class="w-full h-full rounded-sm bg-gradient-to-b from-[#4f9cf9] to-[#6366f1] flex items-center justify-center relative overflow-hidden">
+                                <svg class="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-[0_3px_0_rgba(15,23,42,0.5)]" viewBox="0 0 32 24" fill="none">
+                                    <rect x="2" y="4" width="28" height="16" rx="2" fill="#e2e8f0"/>
+                                    <rect x="2" y="18" width="28" height="3" rx="1" fill="#94a3b8"/>
+                                    <rect x="5" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="8" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="11" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="14" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="17" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="20" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="23" y="7" width="4" height="2" fill="#64748b"/>
+                                    <rect x="5" y="10" width="3" height="2" fill="#64748b"/>
+                                    <rect x="9" y="10" width="2" height="2" fill="#64748b"/>
+                                    <rect x="12" y="10" width="2" height="2" fill="#64748b"/>
+                                    <rect x="15" y="10" width="2" height="2" fill="#64748b"/>
+                                    <rect x="18" y="10" width="2" height="2" fill="#64748b"/>
+                                    <rect x="21" y="10" width="2" height="2" fill="#64748b"/>
+                                    <rect x="24" y="10" width="3" height="2" fill="#64748b"/>
+                                    <rect x="5" y="13" width="3" height="2" fill="#64748b"/>
+                                    <rect x="9" y="13" width="13" height="2" fill="#64748b"/>
+                                    <rect x="23" y="13" width="4" height="2" fill="#64748b"/>
+                                </svg>
+                            </div>
                         </div>
-                    </div>
-                    <span class="inline-block mt-2 text-[11px] bg-amber-500/20 border border-amber-400/60 text-amber-300 px-2.5 py-0.5 rounded">
-                        🐹 우주선 쿼카 단체 레이스 에디션
-                    </span>
-                </div>
-
-                <!-- Title -->
-                <h1 class="text-2xl sm:text-4xl font-bold text-white tracking-wide mb-2 drop-shadow-[0_2px_0_#090712]">
-                    우리반 타자왕
-                </h1>
-                <p class="text-xs sm:text-sm text-slate-300 max-w-lg leading-relaxed mb-6 px-2">
-                    선생님이 방을 개설하고 QR 코드로 학생들이 입장해, 떨어지는 단어를 격추하며 우주선 쿼카를 전진시키는 실시간 단체 타자 대결!
-                </p>
-
-                <!-- 2 Primary Role Buttons: 선생님용 / 학생용 -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl mb-5">
-                    <button id="selectTeacherBtn" type="button"
-                        class="pixel-btn bg-yellow-400 hover:bg-yellow-300 text-[#141129] p-5 rounded-md flex flex-col items-center justify-center gap-2 text-center">
-                        <span class="text-3xl">👨‍🏫</span>
-                        <span class="text-lg sm:text-xl font-bold">선생님용</span>
-                        <span class="text-xs text-[#1e1b4b] font-normal">방 생성 · QR 공유 · 실시간 우주선 관제</span>
-                    </button>
-
-                    <button id="selectStudentBtn" type="button"
-                        class="pixel-btn bg-cyan-400 hover:bg-cyan-300 text-[#0f172a] p-5 rounded-md flex flex-col items-center justify-center gap-2 text-center">
-                        <span class="text-3xl">🧑‍🎓</span>
-                        <span class="text-lg sm:text-xl font-bold">학생용</span>
-                        <span class="text-xs text-[#0f172a] font-normal">학급 정보 · 방 번호(4자리) 입력 후 참가</span>
-                    </button>
-                </div>
-
-                <!-- Hall of Fame Button -->
-                <button id="selectHofBtn" type="button"
-                    class="pixel-btn w-full max-w-xl bg-[#25204a] hover:bg-[#312b61] text-amber-300 font-bold text-sm sm:text-base py-3 px-5 rounded-md flex items-center justify-center gap-2">
-                    <span>🏆</span>
-                    <span>명예의 전당 (역대 최고 기록 보기)</span>
-                </button>
-            </div>
-
-            <!-- ==========================================
-                 VIEW 1.5: TEACHER CLASS CODE CREATION (학급 코드 생성)
-            =========================================== -->
-            <div id="teacherSetupScreen" class="hidden flex-col items-center text-center py-3">
-                <div class="text-xs text-yellow-400 tracking-widest mb-1">TEACHER CLASS SETUP</div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">🏫 학급 코드 생성</h2>
-                <p class="text-xs sm:text-sm text-slate-300 max-w-md mb-5">
-                    방을 만들기 전에 학교 이름과 학년·반을 입력해주세요.<br/>
-                    <span class="text-amber-300">동일한 학교 이름과 학년·반을 입력한 학생만</span> 입장할 수 있습니다.
-                </p>
-
-                <div class="w-full max-w-md bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-4 sm:p-5 space-y-4 text-left">
-                    <div>
-                        <label class="block text-xs text-yellow-400 mb-1.5">▶ 학교 이름</label>
-                        <input id="teacherSchoolInput" type="text" maxlength="20"
-                            placeholder="여기에 학교 이름을 적으세요"
-                            class="typing-input w-full py-2.5 px-4 rounded text-base sm:text-lg text-center" />
+                        <span class="inline-block mt-2.5 text-[11px] bg-amber-500/20 border border-amber-400/60 text-amber-300 px-2.5 py-0.5 rounded">
+                            🐹 우주선 쿼카 아케이드 서바이벌
+                        </span>
                     </div>
 
-                    <div>
-                        <label class="block text-xs text-yellow-400 mb-1.5">▶ 학년, 반 (숫자만 입력)</label>
-                        <input id="teacherClassInput" type="text" inputmode="numeric" maxlength="6"
-                            placeholder="학년, 반을 숫자로만 적으세요"
-                            class="typing-input w-full py-2.5 px-4 rounded text-base sm:text-lg font-bold text-center tracking-widest" />
-                        <div class="text-[11px] text-slate-400 mt-1 text-center">
-                            예) 3학년 2반 → <span class="text-cyan-300 font-bold">302</span> 또는 <span class="text-cyan-300 font-bold">32</span>
-                        </div>
-                    </div>
-
-                    <button id="createClassRoomBtn" type="button"
-                        class="pixel-btn w-full bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-base sm:text-lg py-3 px-5 rounded">
-                        🚀 방 생성하기 (4자리 방 코드 발급)
-                    </button>
-
-                    <button id="teacherSetupBackBtn" type="button"
-                        class="w-full text-xs text-slate-400 hover:text-slate-200 pt-1 text-center cursor-pointer">
-                        ← 역할 선택으로 돌아가기
-                    </button>
+                    <!-- Title -->
+                    <h1 class="text-2xl sm:text-4xl font-bold text-white tracking-wide mb-2 drop-shadow-[0_2px_0_#090712]">
+                        우리반 타자왕
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        학급 코드와 반, 닉네임을 입력하고 떨어지는 단어를 격추하세요!
+                    </p>
                 </div>
-            </div>
 
-            <!-- ==========================================
-                 VIEW 2: TEACHER LOBBY (방 생성 & QR 코드)
-            =========================================== -->
-            <div id="teacherLobbyScreen" class="hidden flex-col">
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
-                    <!-- Left: Room Code & QR Code -->
-                    <div class="md:col-span-5 bg-[#0f0c21] border-2 border-[#2e295e] rounded-md p-4 flex flex-col items-center justify-center text-center">
-                        <div id="lobbyClassInfoDisplay" class="text-xs font-bold bg-amber-500/20 border border-amber-400/60 text-amber-300 px-3 py-1 rounded mb-2">
-                            🏫 학교명 · 학년반
-                        </div>
-                        <div class="text-xs text-cyan-300 mb-1">참여 방 번호 (4자리)</div>
-                        <div id="roomCodeDisplay" class="text-4xl sm:text-5xl font-bold text-yellow-400 tracking-[0.2em] mb-3 bg-[#171433] border-2 border-yellow-400/60 px-4 py-2 rounded">
-                            0000
-                        </div>
-
-                        <!-- QR Code Frame -->
-                        <div class="bg-white p-2.5 rounded-md border-4 border-yellow-400 shadow-md mb-2.5">
-                            <div id="qrcodeBox" class="w-[148px] h-[148px] flex items-center justify-center"></div>
+                <!-- Right Column: Class Code, Class Room, Nickname, Start & Hall of Fame -->
+                <div class="w-full md:w-7/12 flex flex-col items-stretch">
+                    <!-- Unified Entry Form: 학급 코드 / 반 / 닉네임 -->
+                    <div class="w-full bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-4 sm:p-5 space-y-3 text-left mb-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-xs text-yellow-400 mb-1">▶ 학급 코드</label>
+                                <input id="entryClassCodeInput" type="text" maxlength="20"
+                                    placeholder="학급 코드를 입력하세요"
+                                    class="typing-input w-full py-2 px-3 rounded text-sm sm:text-base text-center" />
+                            </div>
+                            <div>
+                                <label class="block text-xs text-yellow-400 mb-1">▶ 반</label>
+                                <input id="entryClassRoomInput" type="text" maxlength="12"
+                                    placeholder="반을 입력하세요 (예: 3-2)"
+                                    class="typing-input w-full py-2 px-3 rounded text-sm sm:text-base text-center" />
+                            </div>
                         </div>
 
-                        <div id="joinUrlDisplay" class="text-[11px] text-slate-300 break-all bg-[#171433] border border-[#2e295e] px-2.5 py-1.5 rounded w-full mb-2">
-                            https://AI.Gemini.com/?room=0000
+                        <div>
+                            <label class="block text-xs text-yellow-400 mb-1">▶ 닉네임</label>
+                            <input id="entryNicknameInput" type="text" maxlength="12"
+                                placeholder="닉네임을 입력하세요"
+                                class="typing-input w-full py-2 px-3.5 rounded text-sm sm:text-base text-center" />
                         </div>
-                        <button id="copyJoinLinkBtn" type="button"
-                            class="pixel-btn w-full bg-[#25204a] hover:bg-[#312b61] text-yellow-300 text-xs py-2 px-3 rounded">
-                            📋 학생 입장 주소 복사하기
+
+                        <!-- Language Selection -->
+                        <div class="flex items-center justify-between pt-1">
+                            <span class="text-xs text-cyan-300">▶ 단어 언어</span>
+                            <div class="flex gap-1.5">
+                                <button type="button" data-lang="ko" class="lang-btn option-pill active px-2.5 py-1 rounded text-xs font-bold">한글</button>
+                                <button type="button" data-lang="en" class="lang-btn option-pill px-2.5 py-1 rounded text-xs font-bold">영문</button>
+                                <button type="button" data-lang="mix" class="lang-btn option-pill px-2.5 py-1 rounded text-xs font-bold">한/영 혼합</button>
+                            </div>
+                        </div>
+
+                        <button id="startGameBtn" type="button"
+                            class="pixel-btn w-full bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-base sm:text-lg py-3 px-5 rounded">
+                            ▶ 게임 시작!
                         </button>
                     </div>
 
-                    <!-- Right: Settings & Joined Students List -->
-                    <div class="md:col-span-7 flex flex-col gap-3">
-                        <!-- Match Settings -->
-                        <div class="bg-[#0f0c21] border-2 border-[#2e295e] rounded-md p-3.5 space-y-3">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <span class="text-xs text-yellow-400">▶ 제한 시간 설정</span>
-                                <div class="flex flex-wrap gap-1.5">
-                                    <button type="button" data-duration="60" class="dur-btn option-pill active px-2.5 py-1 rounded text-xs font-bold">1분</button>
-                                    <button type="button" data-duration="120" class="dur-btn option-pill px-2.5 py-1 rounded text-xs font-bold">2분</button>
-                                    <button type="button" data-duration="300" class="dur-btn option-pill px-2.5 py-1 rounded text-xs font-bold">5분</button>
-                                    <button type="button" data-duration="600" class="dur-btn option-pill px-2.5 py-1 rounded text-xs font-bold">10분</button>
-                                    <button type="button" data-duration="1200" class="dur-btn option-pill px-2.5 py-1 rounded text-xs font-bold">20분</button>
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <span class="text-xs text-yellow-400">▶ 단어 언어 설정</span>
-                                <div class="flex gap-1.5">
-                                    <button type="button" data-lang="ko" class="t-lang-btn option-pill active px-2.5 py-1 rounded text-xs font-bold">한글</button>
-                                    <button type="button" data-lang="en" class="t-lang-btn option-pill px-2.5 py-1 rounded text-xs font-bold">영문</button>
-                                    <button type="button" data-lang="mix" class="t-lang-btn option-pill px-2.5 py-1 rounded text-xs font-bold">한/영 혼합</button>
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5 border-t border-[#231f47]">
-                                <span class="text-xs text-rose-400">▶ 개인 보스 & 스킬 시스템</span>
-                                <span class="text-[11px] bg-rose-500/15 border border-rose-400/50 text-rose-200 px-2.5 py-0.5 rounded">
-                                    👾 1,000점마다 보스 · 6개 격추 시 레벨업!
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Joined Students Real-Time Roster -->
-                        <div class="flex-1 bg-[#0f0c21] border-2 border-[#2e295e] rounded-md p-3.5 flex flex-col">
-                            <div class="flex items-center justify-between border-b border-[#231f47] pb-2 mb-2.5 gap-2">
-                                <span class="text-xs text-cyan-300 font-bold">🚀 탑승 완료한 학생 우주선 <span class="text-[10px] text-slate-400 font-normal">(클릭하여 관리)</span></span>
-                                <div class="flex items-center gap-1.5">
-                                    <button id="addDemoBotsBtn" type="button"
-                                        class="text-[11px] bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/60 text-indigo-200 px-2 py-0.5 rounded transition cursor-pointer">
-                                        + 테스트 학생 3명
-                                    </button>
-                                    <span class="text-xs bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 px-2 py-0.5 rounded font-bold">
-                                        <span id="lobbyStudentCount">0</span>명 대기 중
-                                    </span>
-                                </div>
-                            </div>
-                            <div id="lobbyStudentsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[150px] overflow-y-auto">
-                                <div class="col-span-full text-center text-xs text-slate-400 py-8">
-                                    학생들이 학급 정보와 방 번호를 입력하면 이곳에 우주선이 나타납니다!
-                                </div>
-                            </div>
-
-                            <!-- Selected Participant Pixel Action Bar (쉬움 / 어려움 / 내보내기 / 닫기) -->
-                            <div id="participantActionBar" class="hidden pixel-action-bar mt-2.5 p-2.5 flex-wrap items-center justify-between gap-2">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span id="selectedPlayerNameLabel" class="text-xs sm:text-sm font-bold text-[#ff4d94] px-1">
-                                        ㅇㅇ
-                                    </span>
-                                    <div class="flex items-center gap-1.5">
-                                        <button id="setDiffEasyBtn" type="button" class="pixel-diff-btn active px-2.5 py-1 text-xs">
-                                            쉬움
-                                        </button>
-                                        <button id="setDiffHardBtn" type="button" class="pixel-diff-btn px-2.5 py-1 text-xs">
-                                            어려움
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <button id="kickSelectedPlayerBtn" type="button" class="pixel-kick-btn px-3 py-1 text-xs">
-                                        내보내기
-                                    </button>
-                                    <button id="closeParticipantBarBtn" type="button" class="pixel-close-btn px-2.5 py-1 text-xs">
-                                        닫기
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Teacher Lobby Bottom Actions -->
-                <div class="flex flex-col sm:flex-row gap-2.5">
-                    <button id="teacherStartRaceBtn" type="button"
-                        class="pixel-btn flex-1 bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-base sm:text-lg py-3 px-6 rounded">
-                        ▶ 단체 게임 시작! (최소 2명 필요 · 현재 0명)
-                    </button>
-                    <button id="teacherLeaveLobbyBtn" type="button"
-                        class="pixel-btn bg-[#25204a] hover:bg-[#312b61] text-slate-200 font-bold text-xs sm:text-sm py-3 px-4 rounded">
-                        나가기
+                    <!-- Hall of Fame Button -->
+                    <button id="entryHofBtn" type="button"
+                        class="pixel-btn w-full bg-[#25204a] hover:bg-[#312b61] text-amber-300 font-bold text-sm sm:text-base py-3 px-5 rounded-md flex items-center justify-center gap-2">
+                        <span>🏆</span>
+                        <span>명예의 전당</span>
                     </button>
                 </div>
             </div>
 
             <!-- ==========================================
-                 VIEW 3: TEACHER LIVE RACE TRACK (실시간 우주선 전진 관제)
+                 VIEW 2: ACTIVE GAMEPLAY SCREEN
             =========================================== -->
-            <div id="teacherRaceScreen" class="hidden flex-col">
-                <!-- Teacher Live HUD -->
-                <div class="grid grid-cols-4 gap-2 mb-3">
-                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2.5 py-1.5 text-center">
-                        <div class="text-[10px] text-slate-400">ROOM</div>
-                        <div id="tHudRoom" class="text-sm sm:text-base font-bold text-yellow-400">0000</div>
-                    </div>
-                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2.5 py-1.5 text-center">
-                        <div class="text-[10px] text-slate-400">남은 시간</div>
-                        <div id="tHudTimer" class="text-sm sm:text-base font-bold text-cyan-300">01:00</div>
-                    </div>
-                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2.5 py-1.5 text-center">
-                        <div class="text-[10px] text-slate-400">참여 우주선</div>
-                        <div id="tHudCount" class="text-sm sm:text-base font-bold text-emerald-400">0대</div>
-                    </div>
-                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2.5 py-1.5 text-center">
-                        <div class="text-[10px] text-slate-400">현재 1위</div>
-                        <div id="tHudLeader" class="text-xs sm:text-sm font-bold text-rose-400 truncate">-</div>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between text-[11px] text-slate-300 px-1 mb-2">
-                    <span>💡 학생이 단어 1개를 격추할 때마다 해당 학생의 우주선이 <strong class="text-yellow-400">1칸씩 전진</strong>합니다!</span>
-                    <button id="teacherForceEndBtn" type="button" class="text-rose-400 hover:text-rose-300 underline cursor-pointer">
-                        경기 종료 및 순위 발표
-                    </button>
-                </div>
-
-                <!-- Teacher Space Race Track Canvas -->
-                <div id="teacherCanvasWrapper" class="relative w-full h-[320px] sm:h-[380px] bg-[#090714] border-2 border-[#2e295e] rounded overflow-y-auto overflow-x-hidden">
-                    <canvas id="teacherCanvas"></canvas>
-                </div>
-            </div>
-
-            <!-- ==========================================
-                 VIEW 4: TEACHER TOP 3 PODIUM (시간 종료 후 1~3위 발표)
-            =========================================== -->
-            <div id="teacherPodiumScreen" class="hidden flex-col items-center text-center py-2">
-                <div class="text-xs text-yellow-400 tracking-widest mb-1">TIME UP! FINAL RESULTS</div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-5">🏆 우리반 타자왕 TOP 3 시상대</h2>
-
-                <!-- Top 3 Podium Pedestals (2nd - 1st - 3rd) -->
-                <div class="grid grid-cols-3 gap-2 sm:gap-4 items-end w-full max-w-2xl mb-5 px-1">
-                    <!-- 2nd Place -->
-                    <div id="podium2" class="bg-[#0f0c21] border-2 border-slate-300 rounded-t-md p-2.5 sm:p-3 flex flex-col items-center justify-end min-h-[155px] shadow-[0_0_15px_rgba(203,213,225,0.2)]">
-                        <div class="text-2xl mb-1">🥈</div>
-                        <div class="text-xs font-bold text-slate-300 mb-1">2위</div>
-                        <div id="podium2Name" class="text-sm sm:text-base font-bold text-white truncate max-w-full mb-1">-</div>
-                        <div id="podium2Steps" class="text-xs text-cyan-300 font-bold">0칸 전진</div>
-                        <div id="podium2Score" class="text-[11px] text-slate-400">0점</div>
-                    </div>
-
-                    <!-- 1st Place -->
-                    <div id="podium1" class="bg-gradient-to-b from-amber-500/20 to-[#0f0c21] border-2 border-yellow-400 rounded-t-md p-3 sm:p-4 flex flex-col items-center justify-end min-h-[195px] shadow-[0_0_25px_rgba(250,204,21,0.35)]">
-                        <div class="text-3xl sm:text-4xl mb-1 animate-bounce">👑</div>
-                        <div class="text-xs sm:text-sm font-bold text-yellow-400 mb-1">1위 CHAMPION</div>
-                        <div id="podium1Name" class="text-base sm:text-lg font-bold text-white truncate max-w-full mb-1">-</div>
-                        <div id="podium1Steps" class="text-xs sm:text-sm text-yellow-300 font-bold">0칸 전진</div>
-                        <div id="podium1Score" class="text-xs text-amber-200">0점</div>
-                    </div>
-
-                    <!-- 3rd Place -->
-                    <div id="podium3" class="bg-[#0f0c21] border-2 border-amber-600 rounded-t-md p-2.5 sm:p-3 flex flex-col items-center justify-end min-h-[135px] shadow-[0_0_15px_rgba(217,119,6,0.2)]">
-                        <div class="text-2xl mb-1">🥉</div>
-                        <div class="text-xs font-bold text-amber-500 mb-1">3위</div>
-                        <div id="podium3Name" class="text-sm sm:text-base font-bold text-white truncate max-w-full mb-1">-</div>
-                        <div id="podium3Steps" class="text-xs text-cyan-300 font-bold">0칸 전진</div>
-                        <div id="podium3Score" class="text-[11px] text-slate-400">0점</div>
-                    </div>
-                </div>
-
-                <!-- Full Ranking Summary -->
-                <div class="w-full max-w-2xl bg-[#0f0c21] border border-[#2a2554] rounded p-3 mb-4 max-h-[140px] overflow-y-auto text-left">
-                    <div class="text-xs text-slate-400 mb-2">전체 참여 학생 기록 (명예의 전당 자동 등록 완료)</div>
-                    <div id="podiumFullList" class="space-y-1.5 text-xs"></div>
-                </div>
-
-                <!-- Podium Action Buttons -->
-                <div class="flex flex-col sm:flex-row gap-2.5 w-full max-w-2xl">
-                    <button id="teacherRematchBtn" type="button"
-                        class="pixel-btn flex-1 bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-sm py-3 px-4 rounded">
-                        ↻ 새 게임 하기 (대기실로)
-                    </button>
-                    <button id="podiumHofBtn" type="button"
-                        class="pixel-btn flex-1 bg-amber-500 hover:bg-amber-400 text-[#141129] font-bold text-sm py-3 px-4 rounded">
-                        🏆 명예의 전당 확인
-                    </button>
-                    <button id="podiumHomeBtn" type="button"
-                        class="pixel-btn bg-[#25204a] hover:bg-[#312b61] text-white font-bold text-sm py-3 px-4 rounded">
-                        방 나가기
-                    </button>
-                </div>
-            </div>
-
-            <!-- ==========================================
-                 VIEW 5: STUDENT JOIN & WAITING LOBBY
-            =========================================== -->
-            <div id="studentJoinScreen" class="hidden flex-col items-center text-center py-3">
-                <div class="text-xs text-cyan-300 tracking-widest mb-1">STUDENT BOARDING PASS</div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">🧑‍🎓 우주선 탑승하기</h2>
-
-                <!-- Join Form -->
-                <div id="studentJoinForm" class="w-full max-w-md bg-[#0f0c21] border-2 border-[#2e295e] rounded-md p-4 sm:p-5 space-y-3.5 text-left">
-                    <div>
-                        <label class="block text-xs text-yellow-400 mb-1">▶ 학교 이름</label>
-                        <input id="studentSchoolInput" type="text" maxlength="20"
-                            placeholder="여기에 학교 이름을 적으세요"
-                            class="typing-input w-full py-2 px-3.5 rounded text-sm sm:text-base text-center" />
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <div>
-                            <label class="block text-xs text-yellow-400 mb-1">▶ 학년, 반 (숫자만)</label>
-                            <input id="studentClassInput" type="text" inputmode="numeric" maxlength="6"
-                                placeholder="학년, 반을 숫자로만 적으세요"
-                                class="typing-input w-full py-2 px-2.5 rounded text-sm sm:text-base font-bold text-center tracking-wider" />
-                        </div>
-                        <div>
-                            <label class="block text-xs text-yellow-400 mb-1">▶ 방 코드 4자리</label>
-                            <input id="studentRoomInput" type="text" inputmode="numeric" maxlength="4" placeholder="예: 0482"
-                                class="typing-input w-full py-2 px-2.5 rounded text-base sm:text-lg font-bold text-center tracking-[0.25em]" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-yellow-400 mb-1">▶ 학생 이름 (닉네임)</label>
-                        <input id="studentNameInput" type="text" maxlength="10" placeholder="이름을 입력하세요 (최대 10자)"
-                            class="typing-input w-full py-2 px-3.5 rounded text-sm sm:text-base text-center" />
-                    </div>
-
-                    <!-- Validation / Mismatch Error Banner -->
-                    <div id="studentJoinErrorBox" class="hidden bg-rose-950/90 border border-rose-500 text-rose-200 text-xs p-2.5 rounded leading-relaxed">
-                    </div>
-
-                    <button id="studentJoinSubmitBtn" type="button"
-                        class="pixel-btn w-full bg-cyan-400 hover:bg-cyan-300 text-[#0f172a] font-bold text-base sm:text-lg py-3 px-5 rounded">
-                        🚀 우주선 탑승 완료!
-                    </button>
-                    <button id="studentBackHomeBtn" type="button"
-                        class="w-full text-xs text-slate-400 hover:text-slate-200 pt-1 text-center cursor-pointer">
-                        ← 역할 선택으로 돌아가기
-                    </button>
-                </div>
-
-                <!-- Waiting Lobby (Shown after joining) -->
-                <div id="studentWaitingBox" class="hidden w-full max-w-md bg-[#0f0c21] border-2 border-cyan-400/70 rounded-md p-5 flex-col items-center text-center">
-                    <div id="joinedClassLabel" class="text-xs font-bold bg-amber-500/20 border border-amber-400/60 text-amber-300 px-3 py-1 rounded mb-2">
-                        🏫 학교명 · 학년반
-                    </div>
-                    <div class="text-xs bg-cyan-500/20 border border-cyan-400 text-cyan-300 px-3 py-1 rounded mb-3">
-                        방 번호 <strong id="joinedRoomLabel" class="text-yellow-300">0000</strong> 탑승 완료!
-                    </div>
-                    <div class="text-4xl mb-2 animate-bounce">🐹🚀</div>
-                    <div class="text-lg font-bold text-white mb-1">
-                        파일럿: <span id="joinedNameLabel" class="text-yellow-400">학생</span>
-                    </div>
-                    <p class="text-xs text-slate-300 mb-4 animate-pulse">
-                        선생님이 단체 게임 시작을 누를 때까지 대기 중입니다...
-                    </p>
-                    <div class="w-full bg-[#171433] border border-[#2e295e] rounded p-3 text-xs text-slate-300">
-                        현재 함께 대기 중인 우주선: <strong id="studentLobbyPeerCount" class="text-emerald-400">1</strong>대
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==========================================
-                 VIEW 6: STUDENT ACTIVE GAMEPLAY
-            =========================================== -->
-            <div id="studentGameScreen" class="hidden flex-col">
+            <div id="gameScreen" class="hidden flex-col">
                 <!-- Top EXP Level Gauge & Equipped Skills Bar -->
                 <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-3 py-2 mb-2">
                     <div class="flex items-center justify-between text-xs mb-1">
@@ -998,15 +673,15 @@
                     </div>
                 </div>
 
-                <!-- Student Top HUD -->
+                <!-- Top 4-Card HUD -->
                 <div class="grid grid-cols-4 gap-2 mb-2">
                     <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
-                        <div class="text-[10px] text-slate-400">전진 칸수</div>
-                        <div id="hudSteps" class="text-sm sm:text-base font-bold text-emerald-400">0칸</div>
+                        <div class="text-[10px] text-slate-400">생명 (HP)</div>
+                        <div id="hudLives" class="text-sm sm:text-base font-bold text-rose-400 tracking-wider">❤️❤️❤️</div>
                     </div>
                     <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
-                        <div class="text-[10px] text-slate-400">TIME</div>
-                        <div id="hudTimer" class="text-sm sm:text-base font-bold text-cyan-300">01:00</div>
+                        <div class="text-[10px] text-slate-400">생존 시간</div>
+                        <div id="hudSurvivalTime" class="text-sm sm:text-base font-bold text-cyan-300">00:00</div>
                     </div>
                     <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
                         <div class="text-[10px] text-slate-400">SCORE</div>
@@ -1014,19 +689,20 @@
                     </div>
                     <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
                         <div class="text-[10px] text-slate-400">COMBO</div>
-                        <div id="hudCombo" class="text-sm sm:text-base font-bold text-rose-400">0</div>
+                        <div id="hudCombo" class="text-sm sm:text-base font-bold text-emerald-400">0</div>
                     </div>
                 </div>
 
                 <!-- Sub Status Strip -->
                 <div class="flex items-center justify-between text-[11px] text-slate-400 px-1 mb-2">
                     <div class="flex items-center gap-3">
+                        <span>격추: <strong id="hudKills" class="text-emerald-300">0개</strong></span>
                         <span>속도: <strong id="hudCpm" class="text-slate-200">0 타/분</strong></span>
                         <span id="feverIndicator" class="hidden text-rose-400 font-bold animate-pulse">🔥 FEVER x2</span>
                         <span id="freezeIndicator" class="hidden text-cyan-300 font-bold">❄️ FREEZE!</span>
                         <span id="awakenedIndicator" class="hidden text-yellow-300 font-bold animate-pulse">🌟 각성 오토 발동중!</span>
                     </div>
-                    <span id="studentPilotHud" class="text-amber-300">🐹 파일럿</span>
+                    <span id="pilotHudLabel" class="text-amber-300">🐹 파일럿</span>
                 </div>
 
                 <!-- Gameplay Canvas -->
@@ -1047,7 +723,7 @@
                 <div class="flex items-center gap-2">
                     <div class="relative flex-1">
                         <input id="wordInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                            placeholder="단어를 입력하면 우주선이 1칸 전진합니다!"
+                            placeholder="단어가 바닥에 닿기 전에 입력해서 격추하세요!"
                             class="typing-input w-full py-2.5 sm:py-3 px-3 rounded text-base sm:text-lg text-center tracking-wider" />
                     </div>
                     <button id="fireBtn" type="button"
@@ -1058,61 +734,92 @@
             </div>
 
             <!-- ==========================================
-                 VIEW 7: STUDENT RESULT SCREEN
+                 VIEW 3: GAME OVER / RESTART SCREEN (죽었을 때)
             =========================================== -->
-            <div id="studentResultScreen" class="hidden flex-col items-center text-center py-3">
-                <div class="text-xs text-yellow-400 tracking-widest mb-1">MISSION COMPLETE</div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">경기 종료!</h2>
-                <div id="studentFinalRankBadge" class="inline-block bg-yellow-400/15 border border-yellow-400 text-yellow-300 text-sm sm:text-base font-bold px-4 py-1.5 rounded mb-4">
-                    최종 순위 집계 중...
+            <div id="gameOverScreen" class="hidden flex-col items-center text-center py-3">
+                <div class="text-xs text-rose-400 tracking-widest mb-1">GAME OVER</div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">💥 우주선이 파괴되었습니다!</h2>
+                <div id="gameOverHofNotice" class="inline-block bg-emerald-500/15 border border-emerald-400 text-emerald-300 text-xs sm:text-sm font-bold px-4 py-1.5 rounded mb-4">
+                    🏆 명예의 전당에 기록이 등록되었습니다!
                 </div>
 
                 <div class="w-full max-w-md grid grid-cols-2 gap-2.5 mb-5">
                     <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
-                        <div class="text-[11px] text-slate-400">전진한 칸수</div>
-                        <div id="sResSteps" class="text-lg sm:text-xl font-bold text-emerald-400 mt-0.5">0칸</div>
+                        <div class="text-[11px] text-slate-400">격추 단어 수</div>
+                        <div id="resKills" class="text-lg sm:text-xl font-bold text-emerald-400 mt-0.5">0개</div>
                     </div>
                     <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
                         <div class="text-[11px] text-slate-400">최종 점수</div>
-                        <div id="sResScore" class="text-lg sm:text-xl font-bold text-yellow-400 mt-0.5">0</div>
+                        <div id="resScore" class="text-lg sm:text-xl font-bold text-yellow-400 mt-0.5">0점</div>
                     </div>
                     <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
                         <div class="text-[11px] text-slate-400">평균 타수 (CPM)</div>
-                        <div id="sResCpm" class="text-lg sm:text-xl font-bold text-cyan-300 mt-0.5">0 타</div>
+                        <div id="resCpm" class="text-lg sm:text-xl font-bold text-cyan-300 mt-0.5">0 타</div>
                     </div>
                     <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
-                        <div class="text-[11px] text-slate-400">최대 콤보 / 정확도</div>
-                        <div id="sResAcc" class="text-lg sm:text-xl font-bold text-rose-300 mt-0.5">0 / 100%</div>
+                        <div class="text-[11px] text-slate-400">생존 시간 / 최대 콤보</div>
+                        <div id="resSurvivalCombo" class="text-lg sm:text-xl font-bold text-rose-300 mt-0.5">00:00 / 0</div>
                     </div>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-2.5 w-full max-w-md">
-                    <button id="studentWaitRematchBtn" type="button"
-                        class="pixel-btn flex-1 bg-cyan-400 hover:bg-cyan-300 text-[#0f172a] font-bold text-sm py-3 px-4 rounded">
-                        🚀 대기실로 (다음 라운드 대기)
+                    <button id="restartGameBtn" type="button"
+                        class="pixel-btn flex-1 bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-sm py-3 px-4 rounded">
+                        🔄 다시 시작하기
                     </button>
-                    <button id="studentResultHofBtn" type="button"
+                    <button id="gameOverHofBtn" type="button"
                         class="pixel-btn flex-1 bg-amber-500 hover:bg-amber-400 text-[#141129] font-bold text-sm py-3 px-4 rounded">
                         🏆 명예의 전당
+                    </button>
+                    <button id="gameOverHomeBtn" type="button"
+                        class="pixel-btn bg-[#25204a] hover:bg-[#312b61] text-white font-bold text-sm py-3 px-4 rounded">
+                        처음으로
                     </button>
                 </div>
             </div>
 
             <!-- ==========================================
-                 VIEW 8: HALL OF FAME (명예의 전당)
+                 VIEW 4: HALL OF FAME (전체 / 우리반 조회)
             =========================================== -->
             <div id="hallOfFameScreen" class="hidden flex-col items-center text-center py-2">
                 <div class="text-xs text-amber-400 tracking-widest mb-1">ODUNG ARCADE LEGENDS</div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-4">🏆 명예의 전당</h2>
+                <h2 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-3">🏆 명예의 전당</h2>
 
+                <!-- Filter Mode Toggle Buttons: 전체 / 우리반 -->
+                <div class="flex items-center justify-center gap-2 mb-3">
+                    <button id="hofTabAllBtn" type="button"
+                        class="option-pill active px-5 py-1.5 rounded text-xs sm:text-sm font-bold">
+                        전체
+                    </button>
+                    <button id="hofTabClassBtn" type="button"
+                        class="option-pill px-5 py-1.5 rounded text-xs sm:text-sm font-bold">
+                        우리반
+                    </button>
+                </div>
+
+                <!-- '우리반' Filter Bar: 학급 코드 + 반 + 조회 버튼 (Visible only when '우리반' is clicked) -->
+                <div id="hofClassFilterBar" class="hidden w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-2.5 sm:p-3 mb-3 flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <input id="hofClassCodeInput" type="text" maxlength="20"
+                        placeholder="학급 코드"
+                        class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
+                    <input id="hofClassRoomInput" type="text" maxlength="12"
+                        placeholder="반"
+                        class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
+                    <button id="hofSearchBtn" type="button"
+                        class="pixel-btn bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-xs sm:text-sm py-1.5 px-5 rounded shrink-0">
+                        조회
+                    </button>
+                </div>
+
+                <!-- Hall of Fame Leaderboard Table -->
                 <div class="w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md overflow-hidden mb-4">
-                    <div class="overflow-x-auto max-h-[320px] overflow-y-auto">
+                    <div class="overflow-x-auto max-h-[300px] overflow-y-auto">
                         <table class="w-full text-left border-collapse text-xs sm:text-sm">
                             <thead class="bg-[#1b173b] text-yellow-400 border-b-2 border-[#2e295e] sticky top-0">
                                 <tr>
                                     <th class="py-2.5 px-3 text-center w-14">순위</th>
-                                    <th class="py-2.5 px-3">이름</th>
-                                    <th class="py-2.5 px-3 text-right">전진(격추)</th>
+                                    <th class="py-2.5 px-3">닉네임 (학급·반)</th>
+                                    <th class="py-2.5 px-3 text-right">격추</th>
                                     <th class="py-2.5 px-3 text-right">점수</th>
                                     <th class="py-2.5 px-3 text-right hidden sm:table-cell">타수</th>
                                 </tr>
@@ -1135,14 +842,13 @@
     </div>
 
     <!-- ==========================================
-         FIREBASE & MULTIPLAYER APPLICATION LOGIC
+         FIREBASE & GAMEPLAY LOGIC
     =========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import {
-            getFirestore, doc, setDoc, getDoc, addDoc,
-            onSnapshot, collection
+            getFirestore, addDoc, onSnapshot, collection
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
@@ -1163,16 +869,7 @@
         let db = null;
         let auth = null;
         let useFirestore = false;
-        let backendInitPromise = null;
         let defaultEnvConfig = null;
-
-        // Local BroadcastChannel + Memory fallback if running without Firebase
-        const localChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('odung_typing_sync') : null;
-        const localStore = {
-            rooms: {},
-            players: {},
-            hof: []
-        };
 
         function updateConnectionStatusUI() {
             const btn = document.getElementById('serverStatusBtn');
@@ -1205,7 +902,6 @@
                 db = getFirestore(firebaseAppInstance);
                 useFirestore = Boolean(db);
 
-                // Optional auth (Firestore Test Mode works even if Anonymous Auth is disabled)
                 try {
                     auth = getAuth(firebaseAppInstance);
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && firebaseConfig === defaultEnvConfig) {
@@ -1244,19 +940,6 @@
             }
             useFirestore = false;
             updateConnectionStatusUI();
-        }
-
-        // Firestore Collection / Document Path Helpers (Strict even/odd segment rules)
-        function getRoomDocRef(roomCode) {
-            return doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
-        }
-
-        function getPlayersColRef() {
-            return collection(db, 'artifacts', appId, 'public', 'data', 'players');
-        }
-
-        function getPlayerDocRef(roomCode, playerId) {
-            return doc(db, 'artifacts', appId, 'public', 'data', 'players', `${roomCode}_${playerId}`);
         }
 
         function getHofColRef() {
@@ -1299,26 +982,15 @@
         ];
 
         const appState = {
-            role: null, // 'teacher' | 'student'
-            roomCode: '',
-            schoolName: '',
             classCode: '',
-            duration: 60,
+            classRoom: '',
+            nickname: '',
             lang: 'ko',
-            roomStatus: 'idle', // 'idle' | 'lobby' | 'countdown' | 'playing' | 'ended'
-            countdownStartAt: 0,
-            raceStartAt: 0,
-            players: [],
-            selectedLobbyPlayerId: null,
-            hofRecords: [],
-            previousScreenId: 'roleSelectScreen',
-            // Student specific identity
-            playerId: '',
-            playerName: '',
-            playerDifficulty: 'easy',
-            // Subscriptions
-            unsubRoom: null,
-            unsubPlayers: null,
+            hofMode: 'all', // 'all' | 'class'
+            hofFilterCode: '',
+            hofFilterRoom: '',
+            allHofRecords: [],
+            previousScreenId: 'entryScreen',
             unsubHof: null
         };
 
@@ -1363,6 +1035,9 @@
                 playTone(180, 'sawtooth', 0.12, 0.08, 0);
                 playTone(140, 'sawtooth', 0.14, 0.08, 0.09);
             },
+            gameOver: () => {
+                [330, 277, 220, 146].forEach((f, i) => playTone(f, 'sawtooth', 0.16, 0.09, i * 0.12));
+            },
             hit: () => {
                 playTone(660, 'square', 0.06, 0.07, 0);
                 playTone(880, 'square', 0.08, 0.07, 0.05);
@@ -1376,9 +1051,6 @@
             },
             levelUp: () => {
                 [440, 554, 659, 880].forEach((f, i) => playTone(f, 'triangle', 0.12, 0.1, i * 0.07));
-            },
-            countdown: (final = false) => {
-                playTone(final ? 880 : 440, 'square', final ? 0.25 : 0.12, 0.09);
             }
         };
 
@@ -1386,14 +1058,9 @@
         // 4. UI NAVIGATION & HELPERS
         // ==========================================
         const ALL_SCREENS = [
-            'roleSelectScreen',
-            'teacherSetupScreen',
-            'teacherLobbyScreen',
-            'teacherRaceScreen',
-            'teacherPodiumScreen',
-            'studentJoinScreen',
-            'studentGameScreen',
-            'studentResultScreen',
+            'entryScreen',
+            'gameScreen',
+            'gameOverScreen',
             'hallOfFameScreen'
         ];
 
@@ -1435,657 +1102,30 @@
                 .replace(/'/g, '&#39;');
         }
 
-        function normalizeSchoolName(name) {
-            return String(name || '').trim().replace(/\s+/g, '').toLowerCase();
+        function normalizeKey(val) {
+            return String(val || '').trim().replace(/\s+/g, '').toLowerCase();
         }
 
-        function normalizeClassCode(code) {
-            return String(code || '').replace(/[^0-9]/g, '');
+        function formatElapsedMMSS(seconds) {
+            const total = Math.max(0, Math.floor(seconds));
+            const mins = Math.floor(total / 60);
+            const secs = total % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         }
 
-        function formatTimerDisplay(seconds) {
-            const safeSec = Math.max(0, seconds);
-            if (safeSec >= 60) {
-                const mins = Math.floor(safeSec / 60);
-                const secs = Math.floor(safeSec % 60);
-                return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-            }
-            return `${safeSec.toFixed(1)}s`;
-        }
-
-        function buildStudentJoinUrl(roomCode) {
-            try {
-                const url = new URL(window.location.href.split('?')[0]);
-                url.searchParams.set('room', roomCode);
-                if (appState.schoolName) url.searchParams.set('school', appState.schoolName);
-                if (appState.classCode) url.searchParams.set('class', appState.classCode);
-                return url.toString();
-            } catch (_) {
-                return `${window.location.origin}/?room=${roomCode}`;
-            }
-        }
-
-        function updateRoleBadge() {
-            const badge = document.getElementById('roleBadge');
+        function updatePlayerInfoBadge() {
+            const badge = document.getElementById('playerInfoBadge');
             if (!badge) return;
-            if (!appState.role) {
+            if (!appState.nickname) {
                 badge.classList.add('hidden');
                 return;
             }
             badge.classList.remove('hidden');
-            badge.textContent = appState.role === 'teacher'
-                ? `👨‍🏫 선생님 (${appState.schoolName} ${appState.classCode})`
-                : `🧑‍🎓 ${appState.playerName || '학생'}`;
+            badge.textContent = `🏫 ${appState.classCode} · ${appState.classRoom} · ${appState.nickname}`;
         }
 
         // ==========================================
-        // 5. UNIFIED DATA SYNC READ / WRITE / SUBSCRIBE
-        // ==========================================
-        async function fetchRoomOnce(roomCode) {
-            if (useFirestore && db) {
-                try {
-                    const snap = await getDoc(getRoomDocRef(roomCode));
-                    if (snap.exists()) return snap.data();
-                } catch (e) {
-                    console.warn('Firestore fetchRoomOnce error:', e);
-                }
-            }
-            try {
-                const raw = localStorage.getItem(`odung_room_${roomCode}`);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    return parsed.room || null;
-                }
-            } catch (_) {}
-            return localStore.rooms[roomCode] || null;
-        }
-
-        async function writeRoomState(roomCode, data) {
-            localStore.rooms[roomCode] = {
-                ...(localStore.rooms[roomCode] || {}),
-                ...data,
-                kickedIds: {
-                    ...((localStore.rooms[roomCode] && localStore.rooms[roomCode].kickedIds) || {}),
-                    ...(data.kickedIds || {})
-                }
-            };
-            try {
-                const raw = localStorage.getItem(`odung_room_${roomCode}`);
-                const bundle = raw ? JSON.parse(raw) : { room: {}, players: {} };
-                bundle.room = localStore.rooms[roomCode];
-                localStorage.setItem(`odung_room_${roomCode}`, JSON.stringify(bundle));
-                if (localChannel) localChannel.postMessage({ type: 'sync', roomCode });
-            } catch (_) {}
-
-            if (useFirestore && db) {
-                try {
-                    await setDoc(getRoomDocRef(roomCode), data, { merge: true });
-                } catch (e) {
-                    console.warn('Firestore writeRoomState error:', e);
-                }
-            }
-        }
-
-        async function writePlayerState(roomCode, playerId, data) {
-            const key = `${roomCode}_${playerId}`;
-            localStore.players[key] = {
-                ...(localStore.players[key] || {}),
-                ...data,
-                roomCode,
-                playerId
-            };
-            try {
-                const raw = localStorage.getItem(`odung_room_${roomCode}`);
-                const bundle = raw ? JSON.parse(raw) : { room: localStore.rooms[roomCode] || {}, players: {} };
-                bundle.players = bundle.players || {};
-                bundle.players[playerId] = localStore.players[key];
-                localStorage.setItem(`odung_room_${roomCode}`, JSON.stringify(bundle));
-                if (localChannel) localChannel.postMessage({ type: 'sync', roomCode });
-            } catch (_) {}
-
-            if (useFirestore && db) {
-                try {
-                    await setDoc(getPlayerDocRef(roomCode, playerId), {
-                        ...data,
-                        roomCode,
-                        playerId
-                    }, { merge: true });
-                } catch (e) {
-                    console.warn('Firestore writePlayerState error:', e);
-                }
-            }
-        }
-
-        function subscribeToRoom(roomCode) {
-            if (appState.unsubRoom) { appState.unsubRoom(); appState.unsubRoom = null; }
-            if (appState.unsubPlayers) { appState.unsubPlayers(); appState.unsubPlayers = null; }
-
-            if (useFirestore && db) {
-                appState.unsubRoom = onSnapshot(getRoomDocRef(roomCode), (snap) => {
-                    if (snap.exists()) handleRoomSnapshot(snap.data());
-                }, (err) => console.warn('Room snapshot error:', err));
-
-                appState.unsubPlayers = onSnapshot(getPlayersColRef(), (snap) => {
-                    const list = [];
-                    snap.forEach(d => {
-                        const val = d.data();
-                        if (val && val.roomCode === roomCode) list.push(val);
-                    });
-                    handlePlayersListUpdate(list);
-                }, (err) => console.warn('Players snapshot error:', err));
-            }
-
-            const syncLocal = () => {
-                try {
-                    const raw = localStorage.getItem(`odung_room_${roomCode}`);
-                    if (!raw) return;
-                    const bundle = JSON.parse(raw);
-                    if (bundle.room) handleRoomSnapshot(bundle.room);
-                    if (bundle.players) handlePlayersListUpdate(Object.values(bundle.players));
-                } catch (_) {}
-            };
-
-            const onMsg = (ev) => {
-                if (ev.data && ev.data.roomCode === roomCode) syncLocal();
-            };
-            const onStorage = (ev) => {
-                if (ev.key === `odung_room_${roomCode}`) syncLocal();
-            };
-            if (localChannel) localChannel.addEventListener('message', onMsg);
-            window.addEventListener('storage', onStorage);
-            syncLocal();
-
-            const prevUnsub = appState.unsubRoom;
-            appState.unsubRoom = () => {
-                if (prevUnsub) prevUnsub();
-                if (localChannel) localChannel.removeEventListener('message', onMsg);
-                window.removeEventListener('storage', onStorage);
-            };
-        }
-
-        // ==========================================
-        // 6. TEACHER LOBBY, PARTICIPANT MANAGEMENT & RACE
-        // ==========================================
-        let countdownIntervalId = null;
-        let teacherRaceAnimId = null;
-        let teacherRaceEnded = false;
-
-        function generateRoomCode() {
-            return String(Math.floor(Math.random() * 10000)).padStart(4, '0');
-        }
-
-        function renderQrCode(url) {
-            const box = document.getElementById('qrcodeBox');
-            if (!box) return;
-            box.innerHTML = '';
-            try {
-                if (window.QRCode) {
-                    new QRCode(box, {
-                        text: url,
-                        width: 140,
-                        height: 140,
-                        colorDark: '#090712',
-                        colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.L
-                    });
-                }
-            } catch (_) {}
-        }
-
-        async function handleCreateClassRoom() {
-            const schoolRaw = document.getElementById('teacherSchoolInput').value.trim();
-            const classRaw = normalizeClassCode(document.getElementById('teacherClassInput').value);
-
-            if (!schoolRaw) {
-                sfx.error();
-                showToast('⚠️ 학교 이름을 입력해주세요!');
-                return;
-            }
-            if (!classRaw) {
-                sfx.error();
-                showToast('⚠️ 학년, 반을 숫자로만 입력해주세요!');
-                return;
-            }
-
-            const roomCode = generateRoomCode();
-            appState.role = 'teacher';
-            appState.schoolName = schoolRaw;
-            appState.classCode = classRaw;
-            appState.roomCode = roomCode;
-            appState.duration = 60;
-            appState.lang = 'ko';
-            appState.roomStatus = 'lobby';
-            appState.players = [];
-            appState.selectedLobbyPlayerId = null;
-            teacherRaceEnded = false;
-
-            updateRoleBadge();
-
-            const joinUrl = buildStudentJoinUrl(roomCode);
-            document.getElementById('lobbyClassInfoDisplay').textContent = `🏫 ${schoolRaw} · ${classRaw}반`;
-            document.getElementById('roomCodeDisplay').textContent = roomCode;
-            document.getElementById('joinUrlDisplay').textContent = joinUrl;
-            renderQrCode(joinUrl);
-
-            syncTeacherOptionPills();
-
-            await writeRoomState(roomCode, {
-                roomCode,
-                schoolName: schoolRaw,
-                classCode: classRaw,
-                duration: 60,
-                lang: 'ko',
-                status: 'lobby',
-                countdownStartAt: 0,
-                raceStartAt: 0,
-                kickedIds: {},
-                createdAt: Date.now()
-            });
-
-            subscribeToRoom(roomCode);
-            sfx.levelUp();
-            showScreen('teacherLobbyScreen');
-            showToast(`✅ ${schoolRaw} (${classRaw}반) 방 번호 ${roomCode} 생성 완료!`);
-        }
-
-        function syncTeacherOptionPills() {
-            document.querySelectorAll('.dur-btn').forEach(btn => {
-                btn.classList.toggle('active', Number(btn.dataset.duration) === appState.duration);
-            });
-            document.querySelectorAll('.t-lang-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.lang === appState.lang);
-            });
-        }
-
-        function handlePlayersListUpdate(list) {
-            // Check if current student was kicked by the teacher
-            if (appState.role === 'student' && appState.playerId) {
-                const me = list.find(p => p.playerId === appState.playerId);
-                if (me && me.kicked) {
-                    handleStudentKicked();
-                    return;
-                }
-                if (me && me.difficulty) {
-                    appState.playerDifficulty = me.difficulty;
-                }
-            }
-
-            const activePlayers = list.filter(p => !p.kicked);
-            const sorted = [...activePlayers].sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
-            appState.players = sorted;
-
-            const count = sorted.length;
-            const countEl = document.getElementById('lobbyStudentCount');
-            if (countEl) countEl.textContent = String(count);
-
-            const peerEl = document.getElementById('studentLobbyPeerCount');
-            if (peerEl) peerEl.textContent = String(Math.max(1, count));
-
-            const startBtn = document.getElementById('teacherStartRaceBtn');
-            if (startBtn) {
-                startBtn.textContent = count < 2
-                    ? `▶ 단체 게임 시작! (최소 2명 필요 · 현재 ${count}명)`
-                    : `▶ 단체 게임 시작! (${count}명 전원 출발)`;
-            }
-
-            const grid = document.getElementById('lobbyStudentsGrid');
-            if (grid) {
-                if (count === 0) {
-                    grid.innerHTML = `
-                        <div class="col-span-full text-center text-xs text-slate-400 py-8">
-                            학생들이 학급 정보와 방 번호를 입력하면 이곳에 우주선이 나타납니다!
-                        </div>`;
-                } else {
-                    grid.innerHTML = sorted.map(p => {
-                        const isSelected = appState.selectedLobbyPlayerId === p.playerId;
-                        const diffLabel = p.difficulty === 'hard' ? '어려움' : '쉬움';
-                        const diffBadgeClass = p.difficulty === 'hard'
-                            ? 'bg-rose-500/25 border-rose-400/60 text-rose-300'
-                            : 'bg-sky-400/20 border-sky-400/60 text-sky-300';
-                        return `
-                            <button type="button" data-player-id="${escapeHtml(p.playerId)}"
-                                class="pixel-participant-card ${isSelected ? 'selected' : ''} px-2.5 py-2 flex items-center justify-between gap-1.5 text-left">
-                                <span class="text-xs font-bold text-[#ff4d94] truncate">${escapeHtml(p.name)}</span>
-                                <span class="text-[10px] border px-1.5 py-0.5 shrink-0 ${diffBadgeClass}">
-                                    ${diffLabel}
-                                </span>
-                            </button>
-                        `;
-                    }).join('');
-
-                    grid.querySelectorAll('button[data-player-id]').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            sfx.click();
-                            const pid = btn.dataset.playerId;
-                            appState.selectedLobbyPlayerId =
-                                appState.selectedLobbyPlayerId === pid ? null : pid;
-                            handlePlayersListUpdate(appState.players);
-                        });
-                    });
-                }
-            }
-
-            renderParticipantActionBar();
-
-            if (appState.roomStatus === 'ended' && appState.role === 'student') {
-                updateStudentResultRank();
-            }
-        }
-
-        function renderParticipantActionBar() {
-            const bar = document.getElementById('participantActionBar');
-            if (!bar) return;
-            const selected = appState.players.find(p => p.playerId === appState.selectedLobbyPlayerId);
-            if (!selected) {
-                appState.selectedLobbyPlayerId = null;
-                bar.classList.add('hidden');
-                bar.classList.remove('flex');
-                return;
-            }
-
-            document.getElementById('selectedPlayerNameLabel').textContent = selected.name;
-            const easyBtn = document.getElementById('setDiffEasyBtn');
-            const hardBtn = document.getElementById('setDiffHardBtn');
-            if (selected.difficulty === 'hard') {
-                easyBtn.classList.remove('active');
-                hardBtn.classList.add('active');
-            } else {
-                easyBtn.classList.add('active');
-                hardBtn.classList.remove('active');
-            }
-
-            bar.classList.remove('hidden');
-            bar.classList.add('flex');
-        }
-
-        function handleStudentKicked() {
-            if (countdownIntervalId) { clearInterval(countdownIntervalId); countdownIntervalId = null; }
-            stopStudentGame();
-
-            if (appState.unsubRoom) { appState.unsubRoom(); appState.unsubRoom = null; }
-            if (appState.unsubPlayers) { appState.unsubPlayers(); appState.unsubPlayers = null; }
-
-            document.getElementById('countdownOverlay').classList.add('hidden');
-            document.getElementById('countdownOverlay').classList.remove('flex');
-            document.getElementById('skillSelectModal').classList.add('hidden');
-            document.getElementById('skillSelectModal').classList.remove('flex');
-            document.getElementById('levelUpBanner').classList.add('hidden');
-
-            sfx.error();
-            const modal = document.getElementById('kickedPixelModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function handleRoomSnapshot(data) {
-            if (!data) return;
-
-            if (
-                appState.role === 'student' &&
-                appState.playerId &&
-                data.kickedIds &&
-                data.kickedIds[appState.playerId]
-            ) {
-                handleStudentKicked();
-                return;
-            }
-
-            const prevStatus = appState.roomStatus;
-            appState.roomStatus = data.status || 'lobby';
-            if (data.duration) appState.duration = Number(data.duration);
-            if (data.lang) appState.lang = data.lang;
-            if (data.countdownStartAt) appState.countdownStartAt = data.countdownStartAt;
-            if (data.raceStartAt) appState.raceStartAt = data.raceStartAt;
-
-            if (appState.role === 'teacher') {
-                syncTeacherOptionPills();
-            }
-
-            if (appState.roomStatus === 'countdown' && prevStatus !== 'countdown') {
-                startSynchronizedCountdown();
-            } else if (appState.roomStatus === 'playing' && prevStatus !== 'playing') {
-                document.getElementById('countdownOverlay').classList.add('hidden');
-                document.getElementById('countdownOverlay').classList.remove('flex');
-                if (appState.role === 'teacher') {
-                    startTeacherLiveRace();
-                } else if (appState.role === 'student') {
-                    startStudentGame();
-                }
-            } else if (appState.roomStatus === 'ended' && prevStatus !== 'ended') {
-                if (appState.role === 'teacher') {
-                    finishTeacherRace();
-                } else if (appState.role === 'student') {
-                    finishStudentGame();
-                }
-            } else if (appState.roomStatus === 'lobby' && prevStatus !== 'lobby') {
-                if (appState.role === 'teacher') {
-                    teacherRaceEnded = false;
-                    showScreen('teacherLobbyScreen');
-                } else if (appState.role === 'student' && appState.playerId) {
-                    stopStudentGame();
-                    showScreen('studentJoinScreen');
-                    document.getElementById('studentJoinForm').classList.add('hidden');
-                    document.getElementById('studentWaitingBox').classList.remove('hidden');
-                    document.getElementById('studentWaitingBox').classList.add('flex');
-                }
-            }
-        }
-
-        function startSynchronizedCountdown() {
-            const overlay = document.getElementById('countdownOverlay');
-            const numEl = document.getElementById('countdownNumber');
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-
-            if (countdownIntervalId) clearInterval(countdownIntervalId);
-            let lastNum = -1;
-
-            const tick = async () => {
-                const startAt = appState.countdownStartAt || Date.now();
-                const elapsed = (Date.now() - startAt) / 1000;
-                const rem = Math.ceil(3 - elapsed);
-
-                if (rem > 0) {
-                    if (rem !== lastNum) {
-                        lastNum = rem;
-                        numEl.textContent = String(rem);
-                        numEl.classList.remove('countdown-pop');
-                        void numEl.offsetWidth;
-                        numEl.classList.add('countdown-pop');
-                        sfx.countdown(false);
-                    }
-                } else {
-                    clearInterval(countdownIntervalId);
-                    countdownIntervalId = null;
-                    numEl.textContent = 'GO!';
-                    sfx.countdown(true);
-                    if (appState.role === 'teacher') {
-                        await writeRoomState(appState.roomCode, {
-                            status: 'playing',
-                            raceStartAt: Date.now()
-                        });
-                    }
-                }
-            };
-            tick();
-            countdownIntervalId = setInterval(tick, 100);
-        }
-
-        function startTeacherLiveRace() {
-            teacherRaceEnded = false;
-            showScreen('teacherRaceScreen');
-            document.getElementById('tHudRoom').textContent = appState.roomCode;
-
-            if (teacherRaceAnimId) cancelAnimationFrame(teacherRaceAnimId);
-            let lastBotTick = Date.now();
-
-            const loop = () => {
-                if (appState.roomStatus !== 'playing') return;
-                const now = Date.now();
-                const elapsed = (now - appState.raceStartAt) / 1000;
-                const remaining = Math.max(0, appState.duration - elapsed);
-
-                document.getElementById('tHudTimer').textContent = formatTimerDisplay(remaining);
-                document.getElementById('tHudCount').textContent = `${appState.players.length}대`;
-
-                // Advance demo bots if any
-                if (now - lastBotTick > 850) {
-                    lastBotTick = now;
-                    appState.players.forEach(p => {
-                        if (p.isDemo) {
-                            p.wordsDestroyed = (p.wordsDestroyed || 0) + 1;
-                            p.score = (p.score || 0) + Math.floor(85 + Math.random() * 45);
-                        }
-                    });
-                }
-
-                const sorted = [...appState.players].sort((a, b) => (b.wordsDestroyed || 0) - (a.wordsDestroyed || 0) || (b.score || 0) - (a.score || 0));
-                document.getElementById('tHudLeader').textContent = sorted[0]
-                    ? `${sorted[0].name} (${sorted[0].wordsDestroyed || 0}칸)`
-                    : '-';
-
-                renderTeacherTrackCanvas(sorted);
-
-                if (remaining <= 0 && !teacherRaceEnded) {
-                    finishTeacherRace();
-                    return;
-                }
-                teacherRaceAnimId = requestAnimationFrame(loop);
-            };
-            teacherRaceAnimId = requestAnimationFrame(loop);
-        }
-
-        function renderTeacherTrackCanvas(sortedPlayers) {
-            const canvas = document.getElementById('teacherCanvas');
-            const wrapper = document.getElementById('teacherCanvasWrapper');
-            if (!canvas || !wrapper) return;
-
-            const laneHeight = 56;
-            const totalHeight = Math.max(wrapper.clientHeight, sortedPlayers.length * laneHeight + 24);
-            if (canvas.width !== wrapper.clientWidth || canvas.height !== totalHeight) {
-                canvas.width = Math.max(300, wrapper.clientWidth);
-                canvas.height = totalHeight;
-            }
-
-            const ctx = canvas.getContext('2d');
-            const w = canvas.width;
-            const h = canvas.height;
-
-            ctx.fillStyle = '#090714';
-            ctx.fillRect(0, 0, w, h);
-
-            // Grid ticks (every 5 steps)
-            const maxSteps = Math.max(25, ...sortedPlayers.map(p => p.wordsDestroyed || 0));
-            const startX = 95;
-            const endX = w - 65;
-            const trackWidth = Math.max(120, endX - startX);
-
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
-            ctx.lineWidth = 1;
-            for (let s = 0; s <= maxSteps; s += 5) {
-                const gx = startX + (s / maxSteps) * trackWidth;
-                ctx.beginPath();
-                ctx.moveTo(gx, 0);
-                ctx.lineTo(gx, h);
-                ctx.stroke();
-            }
-
-            // Finish / Leader Line
-            ctx.strokeStyle = 'rgba(250, 204, 21, 0.45)';
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(endX, 8);
-            ctx.lineTo(endX, h - 8);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            sortedPlayers.forEach((p, idx) => {
-                const y = 14 + idx * laneHeight + laneHeight * 0.5;
-
-                // Lane divider
-                ctx.strokeStyle = 'rgba(59, 53, 117, 0.35)';
-                ctx.beginPath();
-                ctx.moveTo(10, y + laneHeight * 0.46);
-                ctx.lineTo(w - 10, y + laneHeight * 0.46);
-                ctx.stroke();
-
-                // Rank & Pilot Name on Left
-                ctx.fillStyle = idx === 0 ? '#facc15' : '#e2e8f0';
-                ctx.font = 'bold 12px Galmuri11, monospace';
-                ctx.textAlign = 'left';
-                ctx.fillText(`${idx + 1}. ${p.name}`, 12, y + 4);
-
-                const steps = p.wordsDestroyed || 0;
-                const shipX = startX + Math.min(1, steps / maxSteps) * trackWidth;
-
-                // Flame
-                ctx.fillStyle = '#f43f5e';
-                ctx.fillRect(shipX - 24, y - 3, 8 + Math.random() * 6, 6);
-
-                // Pixel Quokka Spaceship
-                ctx.fillStyle = idx === 0 ? '#facc15' : '#38bdf8';
-                ctx.fillRect(shipX - 14, y - 9, 22, 18);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(shipX + 8, y - 5, 7, 10);
-                // Quokka cockpit window
-                ctx.fillStyle = '#d97706';
-                ctx.fillRect(shipX - 4, y - 5, 8, 8);
-
-                // Step & Score Tag
-                ctx.fillStyle = '#4ade80';
-                ctx.font = 'bold 11px Galmuri11, monospace';
-                ctx.fillText(`${steps}칸 (${p.score || 0}점)`, Math.min(shipX + 20, w - 110), y + 4);
-            });
-        }
-
-        async function finishTeacherRace() {
-            if (teacherRaceEnded) return;
-            teacherRaceEnded = true;
-            if (teacherRaceAnimId) { cancelAnimationFrame(teacherRaceAnimId); teacherRaceAnimId = null; }
-
-            await writeRoomState(appState.roomCode, {
-                status: 'ended',
-                endedAt: Date.now()
-            });
-
-            const sorted = [...appState.players].sort((a, b) => (b.wordsDestroyed || 0) - (a.wordsDestroyed || 0) || (b.score || 0) - (a.score || 0));
-            sfx.bossDefeat();
-            showScreen('teacherPodiumScreen');
-
-            const setSlot = (num, player) => {
-                document.getElementById(`podium${num}Name`).textContent = player ? player.name : '-';
-                document.getElementById(`podium${num}Steps`).textContent = player ? `${player.wordsDestroyed || 0}칸 전진` : '0칸 전진';
-                document.getElementById(`podium${num}Score`).textContent = player ? `${player.score || 0}점` : '0점';
-            };
-            setSlot(1, sorted[0]);
-            setSlot(2, sorted[1]);
-            setSlot(3, sorted[2]);
-
-            document.getElementById('podiumFullList').innerHTML = sorted.map((p, i) => `
-                <div class="flex items-center justify-between bg-[#171433] px-2.5 py-1.5 rounded border border-[#2a2554]">
-                    <span><strong class="text-yellow-400">${i + 1}위</strong> ${escapeHtml(p.name)}</span>
-                    <span class="text-cyan-300">${p.wordsDestroyed || 0}칸 · <strong class="text-yellow-300">${p.score || 0}점</strong></span>
-                </div>
-            `).join('');
-
-            // Save top 3 to Hall of Fame
-            for (const p of sorted.slice(0, 3)) {
-                if ((p.score || 0) > 0) {
-                    await saveHallOfFameEntry({
-                        name: p.name,
-                        schoolName: appState.schoolName,
-                        classCode: appState.classCode,
-                        wordsDestroyed: p.wordsDestroyed || 0,
-                        score: p.score || 0,
-                        cpm: p.cpm || 0,
-                        createdAt: Date.now()
-                    });
-                }
-            }
-        }
-
-        // ==========================================
-        // 7. STUDENT JOIN & GAMEPLAY (EXP, AUTO-TYPER, AWAKENING, BOSS)
+        // 5. SURVIVAL GAMEPLAY (EXP, AUTO-TYPER, AWAKENING, BOSS, DEATH)
         // ==========================================
         const SKILL_POOL = [
             {
@@ -2148,19 +1188,19 @@
             }
         ];
 
-        const studentGame = {
+        const game = {
             active: false,
             pausedForSkill: false,
             startTime: 0,
             lastFrameTime: 0,
             animId: null,
+            lives: 3,
+            maxLives: 3,
             wordsDestroyed: 0,
             score: 0,
             combo: 0,
             maxCombo: 0,
             totalTypedChars: 0,
-            totalAttempts: 0,
-            successfulHits: 0,
             level: 1,
             exp: 0,
             expToNext: 6,
@@ -2176,133 +1216,57 @@
             meteorTimer: 0,
             spawnTimer: 0,
             levelUpTimerId: null,
-            lastSyncAt: 0,
             currentChoices: []
         };
 
-        async function handleStudentJoin() {
-            const schoolRaw = document.getElementById('studentSchoolInput').value.trim();
-            const classRaw = normalizeClassCode(document.getElementById('studentClassInput').value);
-            const roomCode = document.getElementById('studentRoomInput').value.trim();
-            const nameRaw = document.getElementById('studentNameInput').value.trim();
-            const errBox = document.getElementById('studentJoinErrorBox');
-
-            if (!schoolRaw || !classRaw || !roomCode || !nameRaw) {
-                sfx.error();
-                errBox.textContent = '⚠️ 학교 이름, 학년·반, 방 코드 4자리, 이름을 모두 입력해주세요.';
-                errBox.classList.remove('hidden');
-                return;
-            }
-            if (!/^\d{4}$/.test(roomCode)) {
-                sfx.error();
-                errBox.textContent = '⚠️ 방 코드는 4자리 숫자입니다.';
-                errBox.classList.remove('hidden');
-                return;
-            }
-
-            const room = await fetchRoomOnce(roomCode);
-            if (!room) {
-                sfx.error();
-                errBox.textContent = '⚠️ 해당 방 코드를 찾을 수 없습니다. 선생님이 방을 먼저 생성했는지 확인하세요.';
-                errBox.classList.remove('hidden');
-                return;
-            }
-
-            if (
-                normalizeSchoolName(room.schoolName) !== normalizeSchoolName(schoolRaw) ||
-                normalizeClassCode(room.classCode) !== classRaw
-            ) {
-                sfx.error();
-                errBox.textContent = '🚫 방 코드가 같아도 학교 이름 또는 학년·반이 다르면 접속할 수 없습니다!';
-                errBox.classList.remove('hidden');
-                return;
-            }
-
-            errBox.classList.add('hidden');
-
-            const playerId = 'stu_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
-            appState.role = 'student';
-            appState.roomCode = roomCode;
-            appState.schoolName = room.schoolName;
-            appState.classCode = room.classCode;
-            appState.duration = Number(room.duration || 60);
-            appState.lang = room.lang || 'ko';
-            appState.playerId = playerId;
-            appState.playerName = nameRaw;
-            appState.playerDifficulty = 'easy';
-            appState.roomStatus = room.status || 'lobby';
-
-            updateRoleBadge();
-
-            await writePlayerState(roomCode, playerId, {
-                playerId,
-                name: nameRaw,
-                wordsDestroyed: 0,
-                score: 0,
-                cpm: 0,
-                difficulty: 'easy',
-                kicked: false,
-                joinedAt: Date.now()
-            });
-
-            document.getElementById('studentJoinForm').classList.add('hidden');
-            document.getElementById('studentWaitingBox').classList.remove('hidden');
-            document.getElementById('studentWaitingBox').classList.add('flex');
-            document.getElementById('joinedClassLabel').textContent = `🏫 ${room.schoolName} · ${room.classCode}반`;
-            document.getElementById('joinedRoomLabel').textContent = roomCode;
-            document.getElementById('joinedNameLabel').textContent = nameRaw;
-
-            subscribeToRoom(roomCode);
-            sfx.levelUp();
-
-            if (room.status === 'playing') {
-                startStudentGame();
-            }
+        function stopGame() {
+            game.active = false;
+            game.pausedForSkill = false;
+            if (game.animId) { cancelAnimationFrame(game.animId); game.animId = null; }
+            if (game.levelUpTimerId) { clearTimeout(game.levelUpTimerId); game.levelUpTimerId = null; }
         }
 
-        function stopStudentGame() {
-            studentGame.active = false;
-            studentGame.pausedForSkill = false;
-            if (studentGame.animId) { cancelAnimationFrame(studentGame.animId); studentGame.animId = null; }
-            if (studentGame.levelUpTimerId) { clearTimeout(studentGame.levelUpTimerId); studentGame.levelUpTimerId = null; }
-        }
+        function startNewGame() {
+            stopGame();
+            showScreen('gameScreen');
 
-        function startStudentGame() {
-            stopStudentGame();
-            showScreen('studentGameScreen');
+            game.active = true;
+            game.pausedForSkill = false;
+            game.startTime = Date.now();
+            game.lastFrameTime = performance.now();
+            game.lives = 3;
+            game.maxLives = 3;
+            game.wordsDestroyed = 0;
+            game.score = 0;
+            game.combo = 0;
+            game.maxCombo = 0;
+            game.totalTypedChars = 0;
+            game.level = 1;
+            game.exp = 0;
+            game.expToNext = 6;
+            game.nextBossScore = 1000;
+            game.bossTier = 0;
+            game.boss = null;
+            game.words = [];
+            game.lasers = [];
+            game.particles = [];
+            game.skills = {};
+            game.awakened = false;
+            game.autoTimer = 0;
+            game.meteorTimer = 0;
+            game.spawnTimer = 0;
 
-            studentGame.active = true;
-            studentGame.pausedForSkill = false;
-            studentGame.startTime = appState.raceStartAt || Date.now();
-            studentGame.lastFrameTime = performance.now();
-            studentGame.wordsDestroyed = 0;
-            studentGame.score = 0;
-            studentGame.combo = 0;
-            studentGame.maxCombo = 0;
-            studentGame.totalTypedChars = 0;
-            studentGame.totalAttempts = 0;
-            studentGame.successfulHits = 0;
-            studentGame.level = 1;
-            studentGame.exp = 0;
-            studentGame.expToNext = 6;
-            studentGame.nextBossScore = 1000;
-            studentGame.bossTier = 0;
-            studentGame.boss = null;
-            studentGame.words = [];
-            studentGame.lasers = [];
-            studentGame.particles = [];
-            studentGame.skills = {};
-            studentGame.awakened = false;
-            studentGame.autoTimer = 0;
-            studentGame.meteorTimer = 0;
-            studentGame.spawnTimer = 0;
-
-            document.getElementById('studentPilotHud').textContent = `🐹 ${appState.playerName}`;
+            document.getElementById('pilotHudLabel').textContent =
+                `🐹 ${appState.classCode} ${appState.classRoom} · ${appState.nickname}`;
             document.getElementById('feverIndicator').classList.add('hidden');
             document.getElementById('freezeIndicator').classList.add('hidden');
             document.getElementById('awakenedIndicator').classList.add('hidden');
+            document.getElementById('arcadeFrame').classList.remove('fever-active');
+            document.getElementById('skillSelectModal').classList.add('hidden');
+            document.getElementById('skillSelectModal').classList.remove('flex');
+            document.getElementById('levelUpBanner').classList.add('hidden');
 
-            updateStudentGameHud();
+            updateGameHud();
 
             const input = document.getElementById('wordInput');
             input.value = '';
@@ -2313,23 +1277,24 @@
             spawnWordEnemy();
 
             const loop = (now) => {
-                if (!studentGame.active) return;
-                const dt = Math.min(0.08, (now - studentGame.lastFrameTime) / 1000);
-                studentGame.lastFrameTime = now;
+                if (!game.active) return;
+                const dt = Math.min(0.08, (now - game.lastFrameTime) / 1000);
+                game.lastFrameTime = now;
 
-                if (!studentGame.pausedForSkill) {
-                    updateStudentGame(dt);
+                if (!game.pausedForSkill) {
+                    updateGame(dt);
                 }
-                renderStudentGameCanvas();
-                studentGame.animId = requestAnimationFrame(loop);
+                renderGameCanvas();
+                if (game.active) {
+                    game.animId = requestAnimationFrame(loop);
+                }
             };
-            studentGame.animId = requestAnimationFrame(loop);
+            game.animId = requestAnimationFrame(loop);
         }
 
         function pickWordFromBank(isBoss = false) {
             const lang = appState.lang || 'ko';
-            const hardMode = appState.playerDifficulty === 'hard';
-            if (isBoss || (hardMode && Math.random() < 0.45)) {
+            if (isBoss) {
                 if (lang === 'en') return BOSS_WORDS_EN[Math.floor(Math.random() * BOSS_WORDS_EN.length)];
                 if (lang === 'mix') {
                     const m = [...BOSS_WORDS_KO, ...BOSS_WORDS_EN];
@@ -2348,16 +1313,16 @@
         function spawnWordEnemy() {
             const canvas = document.getElementById('gameCanvas');
             const w = canvas?.clientWidth || 640;
-            const isBoss = Boolean(studentGame.boss);
+            const isBoss = Boolean(game.boss);
             const text = pickWordFromBank(isBoss && Math.random() < 0.4);
             const margin = 72;
             const x = margin + Math.random() * Math.max(80, w - margin * 2);
-            const diffSpeed = appState.playerDifficulty === 'hard' ? 14 : 0;
-            const cryoLv = studentGame.skills.cryo_field || 0;
-            const baseSpd = (isBoss ? 48 + Math.random() * 20 : 35 + Math.random() * 22) + diffSpeed;
+            const cryoLv = game.skills.cryo_field || 0;
+            const survivalBonusSpd = Math.min(35, ((Date.now() - game.startTime) / 1000) * 0.35);
+            const baseSpd = (isBoss ? 44 + Math.random() * 18 : 34 + Math.random() * 20) + survivalBonusSpd;
             const speed = baseSpd * Math.max(0.45, 1 - cryoLv * 0.09);
 
-            studentGame.words.push({
+            game.words.push({
                 id: Math.random().toString(36).slice(2),
                 text,
                 x,
@@ -2367,33 +1332,33 @@
         }
 
         function checkBossSpawn() {
-            if (!studentGame.boss && studentGame.score >= studentGame.nextBossScore) {
-                const profile = BOSS_PROFILES[studentGame.bossTier % BOSS_PROFILES.length];
-                const scale = 1 + Math.floor(studentGame.bossTier / BOSS_PROFILES.length) * 0.4;
+            if (!game.boss && game.score >= game.nextBossScore) {
+                const profile = BOSS_PROFILES[game.bossTier % BOSS_PROFILES.length];
+                const scale = 1 + Math.floor(game.bossTier / BOSS_PROFILES.length) * 0.4;
                 const maxHp = Math.round(profile.baseHp * scale);
-                studentGame.bossTier += 1;
-                studentGame.boss = {
+                game.bossTier += 1;
+                game.boss = {
                     name: profile.name,
                     color: profile.color,
                     hp: maxHp,
                     maxHp
                 };
-                studentGame.nextBossScore += 1000;
-                showToast(`👾 개인 보스 [${profile.name}] 출현!`);
+                game.nextBossScore += 1000;
+                showToast(`👾 보스 [${profile.name}] 출현!`);
             }
         }
 
         function destroyEnemyWord(wordObj, source = 'manual') {
-            const idx = studentGame.words.findIndex(w => w.id === wordObj.id);
+            const idx = game.words.findIndex(w => w.id === wordObj.id);
             if (idx === -1) return false;
-            const target = studentGame.words[idx];
-            studentGame.words.splice(idx, 1);
+            const target = game.words[idx];
+            game.words.splice(idx, 1);
 
             const canvas = document.getElementById('gameCanvas');
             const shipX = (canvas?.clientWidth || 640) * 0.5;
             const shipY = (canvas?.clientHeight || 300) - 32;
 
-            studentGame.lasers.push({
+            game.lasers.push({
                 x1: shipX,
                 y1: shipY,
                 x2: target.x,
@@ -2405,7 +1370,7 @@
             for (let i = 0; i < 10; i++) {
                 const ang = (Math.PI * 2 * i) / 10;
                 const spd = 40 + Math.random() * 85;
-                studentGame.particles.push({
+                game.particles.push({
                     x: target.x,
                     y: target.y,
                     vx: Math.cos(ang) * spd,
@@ -2415,20 +1380,20 @@
                 });
             }
 
-            studentGame.wordsDestroyed += 1;
-            studentGame.totalTypedChars += target.text.length;
+            game.wordsDestroyed += 1;
+            game.totalTypedChars += target.text.length;
 
-            const feverMult = studentGame.combo >= 10 ? 2 : 1;
-            const plasmaLv = studentGame.skills.plasma_amp || 0;
+            const feverMult = game.combo >= 10 ? 2 : 1;
+            const plasmaLv = game.skills.plasma_amp || 0;
             const scoreMult = feverMult * (1 + plasmaLv * 0.1);
             const pts = Math.round((75 + target.text.length * 20) * scoreMult);
-            studentGame.score += pts;
+            game.score += pts;
 
             // Boss Damage
-            if (studentGame.boss) {
+            if (game.boss) {
                 const dmg = Math.round((15 + target.text.length * 6) * (1 + plasmaLv * 0.25));
-                studentGame.boss.hp -= dmg;
-                studentGame.lasers.push({
+                game.boss.hp -= dmg;
+                game.lasers.push({
                     x1: target.x,
                     y1: target.y,
                     x2: shipX,
@@ -2436,12 +1401,15 @@
                     color: '#facc15',
                     alpha: 1
                 });
-                if (studentGame.boss.hp <= 0) {
-                    const bonus = 450 + studentGame.bossTier * 120;
-                    studentGame.score += bonus;
+                if (game.boss.hp <= 0) {
+                    const bonus = 450 + game.bossTier * 120;
+                    game.score += bonus;
+                    if (game.lives < game.maxLives) {
+                        game.lives += 1;
+                    }
                     sfx.bossDefeat();
-                    showToast(`💥 보스 격파! 보너스 +${bonus}점!`);
-                    studentGame.boss = null;
+                    showToast(`💥 보스 격파! +${bonus}점 & 생명 회복!`);
+                    game.boss = null;
                 } else {
                     sfx.bossHit();
                 }
@@ -2450,21 +1418,20 @@
             }
 
             // Chain Laser on manual shot
-            const chainLv = studentGame.skills.chain_laser || 0;
-            if (source === 'manual' && chainLv > 0 && studentGame.words.length > 0) {
-                const extraTargets = studentGame.words.slice(0, chainLv);
+            const chainLv = game.skills.chain_laser || 0;
+            if (source === 'manual' && chainLv > 0 && game.words.length > 0) {
+                const extraTargets = game.words.slice(0, chainLv);
                 extraTargets.forEach(ew => destroyEnemyWord(ew, 'chain'));
             }
 
             // EXP & Level Up Check
-            const expLv = studentGame.skills.exp_booster || 0;
-            studentGame.exp += 1 + expLv * 0.25;
+            const expLv = game.skills.exp_booster || 0;
+            game.exp += 1 + expLv * 0.25;
 
             checkBossSpawn();
-            updateStudentGameHud();
-            syncStudentStatsToServer();
+            updateGameHud();
 
-            if (studentGame.exp >= studentGame.expToNext && !studentGame.pausedForSkill && !studentGame.levelUpTimerId) {
+            if (game.exp >= game.expToNext && !game.pausedForSkill && !game.levelUpTimerId) {
                 triggerLevelUpSequence();
             }
 
@@ -2472,36 +1439,35 @@
         }
 
         function triggerLevelUpSequence() {
-            studentGame.exp = Math.max(0, studentGame.exp - studentGame.expToNext);
-            studentGame.level += 1;
-            studentGame.expToNext = Math.round(6 + (studentGame.level - 1) * 2.5);
-            updateStudentGameHud();
+            game.exp = Math.max(0, game.exp - game.expToNext);
+            game.level += 1;
+            game.expToNext = Math.round(6 + (game.level - 1) * 2.5);
+            updateGameHud();
 
             sfx.levelUp();
             const banner = document.getElementById('levelUpBanner');
-            document.getElementById('levelUpBannerText').textContent = `Lv.${studentGame.level} UP!`;
+            document.getElementById('levelUpBannerText').textContent = `Lv.${game.level} UP!`;
             banner.classList.remove('hidden');
 
-            // 2 seconds later, open 3-skill choice modal
-            studentGame.levelUpTimerId = setTimeout(() => {
-                studentGame.levelUpTimerId = null;
+            game.levelUpTimerId = setTimeout(() => {
+                game.levelUpTimerId = null;
                 banner.classList.add('hidden');
-                if (!studentGame.active) return;
+                if (!game.active) return;
                 openSkillChoiceModal();
             }, 2000);
         }
 
         function openSkillChoiceModal() {
-            studentGame.pausedForSkill = true;
+            game.pausedForSkill = true;
             const choices = [];
 
-            const autoLv = studentGame.skills.auto_typer || 0;
-            const hasSupport = (studentGame.skills.ai_core || 0) > 0 ||
-                               (studentGame.skills.plasma_amp || 0) > 0 ||
-                               (studentGame.skills.exp_booster || 0) > 0 ||
-                               (studentGame.skills.cryo_field || 0) > 0;
+            const autoLv = game.skills.auto_typer || 0;
+            const hasSupport = (game.skills.ai_core || 0) > 0 ||
+                               (game.skills.plasma_amp || 0) > 0 ||
+                               (game.skills.exp_booster || 0) > 0 ||
+                               (game.skills.cryo_field || 0) > 0;
 
-            if (!studentGame.awakened && autoLv >= 5 && hasSupport) {
+            if (!game.awakened && autoLv >= 5 && hasSupport) {
                 choices.push({
                     id: 'awakening_auto',
                     name: '🌟 [각성] 무한 오토 매트릭스',
@@ -2512,12 +1478,12 @@
                 });
             }
 
-            const candidates = SKILL_POOL.filter(s => (studentGame.skills[s.id] || 0) < s.maxLv)
+            const candidates = SKILL_POOL.filter(s => (game.skills[s.id] || 0) < s.maxLv)
                 .sort(() => Math.random() - 0.5);
 
             for (const sk of candidates) {
                 if (choices.length >= 3) break;
-                const nextLv = (studentGame.skills[sk.id] || 0) + 1;
+                const nextLv = (game.skills[sk.id] || 0) + 1;
                 choices.push({
                     id: sk.id,
                     name: sk.name,
@@ -2530,17 +1496,17 @@
 
             while (choices.length < 3) {
                 choices.push({
-                    id: 'bonus_energy',
-                    name: '보너스 에너지 코어',
-                    icon: '💎',
+                    id: 'repair_hull',
+                    name: '우주선 긴급 수리',
+                    icon: '💖',
                     isAwakening: false,
-                    lvLabel: '+500점 즉시 획득',
-                    desc: '우주선 에너지를 충전해 즉시 500점을 획득합니다.'
+                    lvLabel: '생명 +1 & +500점',
+                    desc: '우주선 체력을 1칸 회복하고 보너스 500점을 획득합니다.'
                 });
             }
 
-            studentGame.currentChoices = choices;
-            document.getElementById('skillModalTitle').textContent = `⚡ Lv.${studentGame.level} 달성! 스킬을 선택하세요`;
+            game.currentChoices = choices;
+            document.getElementById('skillModalTitle').textContent = `⚡ Lv.${game.level} 달성! 스킬을 선택하세요`;
 
             const grid = document.getElementById('skillCardsGrid');
             grid.innerHTML = choices.map((c, idx) => `
@@ -2562,7 +1528,7 @@
 
             grid.querySelectorAll('button[data-skill-idx]').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    selectStudentSkill(Number(btn.dataset.skillIdx));
+                    selectSkill(Number(btn.dataset.skillIdx));
                 });
             });
 
@@ -2571,52 +1537,58 @@
             modal.classList.add('flex');
         }
 
-        function selectStudentSkill(idx) {
-            const picked = studentGame.currentChoices[idx];
+        function selectSkill(idx) {
+            const picked = game.currentChoices[idx];
             if (!picked) return;
 
             sfx.click();
             if (picked.id === 'awakening_auto') {
-                studentGame.awakened = true;
+                game.awakened = true;
                 document.getElementById('awakenedIndicator').classList.remove('hidden');
                 showToast('🌟 [각성] 무한 오토 매트릭스 발동!');
-            } else if (picked.id === 'bonus_energy') {
-                studentGame.score += 500;
+            } else if (picked.id === 'repair_hull') {
+                game.lives = Math.min(game.maxLives, game.lives + 1);
+                game.score += 500;
                 checkBossSpawn();
             } else {
-                studentGame.skills[picked.id] = (studentGame.skills[picked.id] || 0) + 1;
-                showToast(`${picked.icon} ${picked.name} Lv.${studentGame.skills[picked.id]} 장착!`);
+                game.skills[picked.id] = (game.skills[picked.id] || 0) + 1;
+                showToast(`${picked.icon} ${picked.name} Lv.${game.skills[picked.id]} 장착!`);
             }
 
-            studentGame.pausedForSkill = false;
-            studentGame.lastFrameTime = performance.now();
+            game.pausedForSkill = false;
+            game.lastFrameTime = performance.now();
 
             const modal = document.getElementById('skillSelectModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
 
-            updateStudentGameHud();
-            syncStudentStatsToServer();
+            updateGameHud();
             document.getElementById('wordInput').focus();
         }
 
-        function updateStudentGameHud() {
-            document.getElementById('hudLevelBadge').textContent = `Lv.${studentGame.level}`;
-            document.getElementById('hudExpText').textContent = `EXP ${Math.floor(studentGame.exp)} / ${studentGame.expToNext}개`;
-            const pct = Math.min(100, (studentGame.exp / Math.max(1, studentGame.expToNext)) * 100);
+        function updateGameHud() {
+            document.getElementById('hudLevelBadge').textContent = `Lv.${game.level}`;
+            document.getElementById('hudExpText').textContent = `EXP ${Math.floor(game.exp)} / ${game.expToNext}개`;
+            const pct = Math.min(100, (game.exp / Math.max(1, game.expToNext)) * 100);
             document.getElementById('hudExpBar').style.width = `${pct}%`;
 
-            document.getElementById('hudSteps').textContent = `${studentGame.wordsDestroyed}칸`;
-            document.getElementById('hudScore').textContent = String(studentGame.score);
-            document.getElementById('hudCombo').textContent = String(studentGame.combo);
+            const hearts = '❤️'.repeat(Math.max(0, game.lives)) + '🖤'.repeat(Math.max(0, game.maxLives - game.lives));
+            document.getElementById('hudLives').textContent = hearts;
 
-            const elapsedMins = Math.max(0.05, (Date.now() - studentGame.startTime) / 60000);
-            const cpm = Math.round((studentGame.totalTypedChars * 2.2) / elapsedMins);
+            document.getElementById('hudKills').textContent = `${game.wordsDestroyed}개`;
+            document.getElementById('hudScore').textContent = String(game.score);
+            document.getElementById('hudCombo').textContent = String(game.combo);
+
+            const elapsedSec = (Date.now() - game.startTime) / 1000;
+            document.getElementById('hudSurvivalTime').textContent = formatElapsedMMSS(elapsedSec);
+
+            const elapsedMins = Math.max(0.05, elapsedSec / 60);
+            const cpm = Math.round((game.totalTypedChars * 2.2) / elapsedMins);
             document.getElementById('hudCpm').textContent = `${cpm} 타/분`;
 
             const frame = document.getElementById('arcadeFrame');
             const feverEl = document.getElementById('feverIndicator');
-            if (studentGame.combo >= 10) {
+            if (game.combo >= 10) {
                 feverEl.classList.remove('hidden');
                 frame.classList.add('fever-active');
             } else {
@@ -2625,7 +1597,7 @@
             }
 
             const freezeEl = document.getElementById('freezeIndicator');
-            if ((studentGame.skills.cryo_field || 0) > 0) {
+            if ((game.skills.cryo_field || 0) > 0) {
                 freezeEl.classList.remove('hidden');
             } else {
                 freezeEl.classList.add('hidden');
@@ -2633,52 +1605,46 @@
 
             const skillsBar = document.getElementById('hudEquippedSkills');
             const tags = [];
-            if (studentGame.awakened) {
+            if (game.awakened) {
                 tags.push(`<span class="bg-yellow-400 text-[#141129] font-bold px-1.5 py-0.5 rounded">👑 무한 오토 [각성]</span>`);
             }
             SKILL_POOL.forEach(sk => {
-                const lv = studentGame.skills[sk.id] || 0;
+                const lv = game.skills[sk.id] || 0;
                 if (lv > 0) {
                     tags.push(`<span class="bg-[#1b173b] border border-[#3b3575] text-cyan-300 px-1.5 py-0.5 rounded">${sk.icon} ${sk.name} Lv.${lv}</span>`);
                 }
             });
             skillsBar.innerHTML = tags.length > 0
                 ? tags.join('')
-                : `<span class="text-slate-400">보유 스킬: 없음 (단어 ${studentGame.expToNext}개 격추 시 스킬 선택!)</span>`;
+                : `<span class="text-slate-400">보유 스킬: 없음 (단어 ${game.expToNext}개 격추 시 스킬 선택!)</span>`;
         }
 
-        function updateStudentGame(dt) {
-            const elapsed = (Date.now() - studentGame.startTime) / 1000;
-            const remaining = Math.max(0, appState.duration - elapsed);
-            document.getElementById('hudTimer').textContent = formatTimerDisplay(remaining);
-
-            if (remaining <= 0) {
-                finishStudentGame();
-                return;
-            }
+        function updateGame(dt) {
+            const elapsedSec = (Date.now() - game.startTime) / 1000;
+            document.getElementById('hudSurvivalTime').textContent = formatElapsedMMSS(elapsedSec);
 
             const canvas = document.getElementById('gameCanvas');
             const h = canvas?.clientHeight || 300;
 
-            // Spawn words
-            studentGame.spawnTimer += dt;
-            const spawnInterval = studentGame.awakened ? 0.42 : Math.max(0.85, 1.8 - studentGame.level * 0.08);
-            if (studentGame.spawnTimer >= spawnInterval || studentGame.words.length === 0) {
-                studentGame.spawnTimer = 0;
+            // Spawn falling words
+            game.spawnTimer += dt;
+            const spawnInterval = game.awakened ? 0.42 : Math.max(0.75, 1.75 - game.level * 0.08);
+            if (game.spawnTimer >= spawnInterval || game.words.length === 0) {
+                game.spawnTimer = 0;
                 spawnWordEnemy();
             }
 
             // AI Core Cooldown Reduction
-            const aiLv = studentGame.skills.ai_core || 0;
+            const aiLv = game.skills.ai_core || 0;
             const cdr = Math.max(0.45, 1 - aiLv * 0.1);
 
             // Auto Typer & Awakening
-            const autoLv = studentGame.skills.auto_typer || 0;
-            if (studentGame.awakened) {
-                studentGame.autoTimer += dt;
-                if (studentGame.autoTimer >= 0.22 && studentGame.words.length > 0) {
-                    studentGame.autoTimer = 0;
-                    const lowest = [...studentGame.words].sort((a, b) => b.y - a.y)[0];
+            const autoLv = game.skills.auto_typer || 0;
+            if (game.awakened) {
+                game.autoTimer += dt;
+                if (game.autoTimer >= 0.22 && game.words.length > 0) {
+                    game.autoTimer = 0;
+                    const lowest = [...game.words].sort((a, b) => b.y - a.y)[0];
                     if (lowest) destroyEnemyWord(lowest, 'awakened');
                 }
             } else if (autoLv > 0) {
@@ -2687,52 +1653,64 @@
                 const cd = (intervals[autoLv] || 10) * cdr;
                 const burst = counts[autoLv] || 1;
 
-                studentGame.autoTimer += dt;
-                if (studentGame.autoTimer >= cd && studentGame.words.length > 0) {
-                    studentGame.autoTimer = 0;
-                    const targets = [...studentGame.words].sort((a, b) => b.y - a.y).slice(0, burst);
+                game.autoTimer += dt;
+                if (game.autoTimer >= cd && game.words.length > 0) {
+                    game.autoTimer = 0;
+                    const targets = [...game.words].sort((a, b) => b.y - a.y).slice(0, burst);
                     targets.forEach(t => destroyEnemyWord(t, 'auto'));
                 }
             }
 
             // Meteor Shower Skill
-            const meteorLv = studentGame.skills.meteor_shower || 0;
+            const meteorLv = game.skills.meteor_shower || 0;
             if (meteorLv > 0) {
                 const mCd = Math.max(3, 9 - meteorLv) * cdr;
-                studentGame.meteorTimer += dt;
-                if (studentGame.meteorTimer >= mCd && studentGame.words.length > 0) {
-                    studentGame.meteorTimer = 0;
-                    const targets = [...studentGame.words].slice(0, meteorLv + 1);
+                game.meteorTimer += dt;
+                if (game.meteorTimer >= mCd && game.words.length > 0) {
+                    game.meteorTimer = 0;
+                    const targets = [...game.words].slice(0, meteorLv + 1);
                     targets.forEach(t => destroyEnemyWord(t, 'meteor'));
                 }
             }
 
-            // Move falling words
-            for (let i = studentGame.words.length - 1; i >= 0; i--) {
-                const w = studentGame.words[i];
+            // Move falling words & check bottom defense line breach
+            for (let i = game.words.length - 1; i >= 0; i--) {
+                const w = game.words[i];
                 w.y += w.speed * dt;
-                if (w.y > h - 46) {
-                    studentGame.words.splice(i, 1);
-                    studentGame.combo = 0;
-                    updateStudentGameHud();
+                if (w.y > h - 42) {
+                    game.words.splice(i, 1);
+                    game.combo = 0;
+                    game.lives = Math.max(0, game.lives - 1);
+
+                    sfx.error();
+                    const frame = document.getElementById('arcadeFrame');
+                    frame.classList.add('damage-flash');
+                    setTimeout(() => frame.classList.remove('damage-flash'), 300);
+
+                    updateGameHud();
+
+                    if (game.lives <= 0) {
+                        handlePlayerDeath();
+                        return;
+                    }
                 }
             }
 
             // Fade lasers & particles
-            for (let i = studentGame.lasers.length - 1; i >= 0; i--) {
-                studentGame.lasers[i].alpha -= dt * 4.5;
-                if (studentGame.lasers[i].alpha <= 0) studentGame.lasers.splice(i, 1);
+            for (let i = game.lasers.length - 1; i >= 0; i--) {
+                game.lasers[i].alpha -= dt * 4.5;
+                if (game.lasers[i].alpha <= 0) game.lasers.splice(i, 1);
             }
-            for (let i = studentGame.particles.length - 1; i >= 0; i--) {
-                const pt = studentGame.particles[i];
+            for (let i = game.particles.length - 1; i >= 0; i--) {
+                const pt = game.particles[i];
                 pt.x += pt.vx * dt;
                 pt.y += pt.vy * dt;
                 pt.life -= dt;
-                if (pt.life <= 0) studentGame.particles.splice(i, 1);
+                if (pt.life <= 0) game.particles.splice(i, 1);
             }
         }
 
-        function renderStudentGameCanvas() {
+        function renderGameCanvas() {
             const canvas = document.getElementById('gameCanvas');
             if (!canvas) return;
             const rect = canvas.parentElement.getBoundingClientRect();
@@ -2756,22 +1734,31 @@
                 ctx.fillRect(sx, sy, 2, 2);
             }
 
-            // Personal Boss at Top
-            if (studentGame.boss) {
+            // Defense Line near bottom
+            ctx.strokeStyle = 'rgba(244, 63, 94, 0.35)';
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            ctx.moveTo(0, h - 42);
+            ctx.lineTo(w, h - 42);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Boss at Top
+            if (game.boss) {
                 const bx = w * 0.5;
                 const by = 40;
                 ctx.fillStyle = '#171433';
                 ctx.fillRect(bx - 88, by - 22, 176, 40);
-                ctx.strokeStyle = studentGame.boss.color;
+                ctx.strokeStyle = game.boss.color;
                 ctx.lineWidth = 2;
                 ctx.strokeRect(bx - 88, by - 22, 176, 40);
 
                 ctx.fillStyle = '#ffffff';
                 ctx.font = 'bold 11px Galmuri11, monospace';
                 ctx.textAlign = 'center';
-                ctx.fillText(`👾 ${studentGame.boss.name}`, bx, by - 4);
+                ctx.fillText(`👾 ${game.boss.name}`, bx, by - 4);
 
-                const hpRatio = Math.max(0, studentGame.boss.hp / studentGame.boss.maxHp);
+                const hpRatio = Math.max(0, game.boss.hp / game.boss.maxHp);
                 ctx.fillStyle = '#0b0918';
                 ctx.fillRect(bx - 74, by + 5, 148, 7);
                 ctx.fillStyle = '#facc15';
@@ -2779,7 +1766,7 @@
             }
 
             // Lasers
-            studentGame.lasers.forEach(ls => {
+            game.lasers.forEach(ls => {
                 ctx.save();
                 ctx.globalAlpha = Math.max(0, ls.alpha);
                 ctx.strokeStyle = ls.color;
@@ -2796,7 +1783,7 @@
             ctx.textAlign = 'center';
             ctx.font = 'bold 14px Galmuri11, monospace';
 
-            studentGame.words.forEach(word => {
+            game.words.forEach(word => {
                 const isPrefix = typed.length > 0 && word.text.startsWith(typed);
                 const tw = ctx.measureText(word.text).width;
                 const bw = tw + 22;
@@ -2814,109 +1801,88 @@
             });
 
             // Particles
-            studentGame.particles.forEach(pt => {
+            game.particles.forEach(pt => {
                 ctx.fillStyle = pt.color;
                 ctx.fillRect(pt.x - 2, pt.y - 2, 4, 4);
             });
 
             // Quokka Spaceship at Bottom
             const sx = w * 0.5;
-            const sy = h - 26;
-            ctx.fillStyle = studentGame.awakened ? '#facc15' : '#38bdf8';
+            const sy = h - 22;
+            ctx.fillStyle = game.awakened ? '#facc15' : '#38bdf8';
             ctx.fillRect(sx - 16, sy - 10, 32, 20);
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(sx - 6, sy - 18, 12, 8);
-            // Quokka face inside cockpit
             ctx.fillStyle = '#d97706';
             ctx.fillRect(sx - 6, sy - 4, 12, 10);
         }
 
-        function handleStudentFireWord() {
-            if (!studentGame.active || studentGame.pausedForSkill) return;
+        function handleFireWord() {
+            if (!game.active || game.pausedForSkill) return;
             const input = document.getElementById('wordInput');
             const val = input.value.trim();
             if (!val) return;
 
-            studentGame.totalAttempts += 1;
-            const matches = studentGame.words
+            const matches = game.words
                 .filter(w => w.text === val)
                 .sort((a, b) => b.y - a.y);
 
             if (matches.length > 0) {
                 input.value = '';
-                studentGame.successfulHits += 1;
-                studentGame.combo += 1;
-                studentGame.maxCombo = Math.max(studentGame.maxCombo, studentGame.combo);
+                game.combo += 1;
+                game.maxCombo = Math.max(game.maxCombo, game.combo);
                 destroyEnemyWord(matches[0], 'manual');
             } else {
-                studentGame.combo = 0;
+                game.combo = 0;
                 sfx.error();
                 input.classList.add('shake');
                 setTimeout(() => input.classList.remove('shake'), 300);
-                updateStudentGameHud();
+                updateGameHud();
             }
         }
 
-        function syncStudentStatsToServer() {
-            const now = Date.now();
-            if (now - studentGame.lastSyncAt < 650) return;
-            studentGame.lastSyncAt = now;
-            if (!appState.roomCode || !appState.playerId) return;
+        // ==========================================
+        // 6. PLAYER DEATH -> RECORD TO HALL OF FAME
+        // ==========================================
+        async function handlePlayerDeath() {
+            stopGame();
+            sfx.gameOver();
 
-            const elapsedMins = Math.max(0.05, (now - studentGame.startTime) / 60000);
-            const cpm = Math.round((studentGame.totalTypedChars * 2.2) / elapsedMins);
-
-            writePlayerState(appState.roomCode, appState.playerId, {
-                playerId: appState.playerId,
-                name: appState.playerName,
-                wordsDestroyed: studentGame.wordsDestroyed,
-                score: studentGame.score,
-                cpm
-            });
-        }
-
-        function finishStudentGame() {
-            stopStudentGame();
             document.getElementById('arcadeFrame').classList.remove('fever-active');
             document.getElementById('skillSelectModal').classList.add('hidden');
             document.getElementById('skillSelectModal').classList.remove('flex');
             document.getElementById('levelUpBanner').classList.add('hidden');
 
-            const elapsedMins = Math.max(0.05, appState.duration / 60);
-            const cpm = Math.round((studentGame.totalTypedChars * 2.2) / elapsedMins);
-            const acc = studentGame.totalAttempts > 0
-                ? Math.round((studentGame.successfulHits / studentGame.totalAttempts) * 100)
-                : 100;
+            const elapsedSec = Math.max(1, (Date.now() - game.startTime) / 1000);
+            const elapsedMins = Math.max(0.05, elapsedSec / 60);
+            const cpm = Math.round((game.totalTypedChars * 2.2) / elapsedMins);
 
-            writePlayerState(appState.roomCode, appState.playerId, {
-                playerId: appState.playerId,
-                name: appState.playerName,
-                wordsDestroyed: studentGame.wordsDestroyed,
-                score: studentGame.score,
-                cpm
-            });
+            document.getElementById('resKills').textContent = `${game.wordsDestroyed}개`;
+            document.getElementById('resScore').textContent = `${game.score}점`;
+            document.getElementById('resCpm').textContent = `${cpm} 타`;
+            document.getElementById('resSurvivalCombo').textContent = `${formatElapsedMMSS(elapsedSec)} / ${game.maxCombo}`;
 
-            document.getElementById('sResSteps').textContent = `${studentGame.wordsDestroyed}칸`;
-            document.getElementById('sResScore').textContent = String(studentGame.score);
-            document.getElementById('sResCpm').textContent = `${cpm} 타`;
-            document.getElementById('sResAcc').textContent = `${studentGame.maxCombo} / ${acc}%`;
+            const noticeEl = document.getElementById('gameOverHofNotice');
+            if (appState.classCode && appState.classRoom && appState.nickname) {
+                await saveHallOfFameEntry({
+                    classCode: appState.classCode,
+                    classRoom: appState.classRoom,
+                    nickname: appState.nickname,
+                    wordsDestroyed: game.wordsDestroyed,
+                    score: game.score,
+                    cpm,
+                    createdAt: Date.now()
+                });
+                noticeEl.textContent = `🏆 [${appState.classCode} · ${appState.classRoom}] ${appState.nickname} 기록이 명예의 전당에 등록되었습니다!`;
+            } else {
+                noticeEl.textContent = '게임 종료! 다시 시작하려면 아래 버튼을 누르세요.';
+            }
 
-            updateStudentResultRank();
-            showScreen('studentResultScreen');
-        }
-
-        function updateStudentResultRank() {
-            const sorted = [...appState.players].sort((a, b) => (b.wordsDestroyed || 0) - (a.wordsDestroyed || 0) || (b.score || 0) - (a.score || 0));
-            const idx = sorted.findIndex(p => p.playerId === appState.playerId);
-            const badge = document.getElementById('studentFinalRankBadge');
-            if (!badge) return;
-            badge.textContent = idx >= 0
-                ? `🏅 최종 순위: 전체 ${sorted.length}명 중 ${idx + 1}위!`
-                : `🏅 미션 완료! (${studentGame.wordsDestroyed}칸 전진)`;
+            showScreen('gameOverScreen');
         }
 
         // ==========================================
-        // 8. HALL OF FAME (명예의 전당)
+        // 7. HALL OF FAME ('전체' / '우리반' 학급코드+반 조회)
         // ==========================================
         async function saveHallOfFameEntry(entry) {
             try {
@@ -2924,100 +1890,161 @@
                 const arr = raw ? JSON.parse(raw) : [];
                 arr.push(entry);
                 arr.sort((a, b) => (b.score || 0) - (a.score || 0));
-                localStorage.setItem('odung_hof_records', JSON.stringify(arr.slice(0, 20)));
+                localStorage.setItem('odung_hof_records', JSON.stringify(arr.slice(0, 100)));
             } catch (_) {}
 
             if (useFirestore && db) {
                 try {
                     await addDoc(getHofColRef(), entry);
-                } catch (_) {}
+                } catch (err) {
+                    console.warn('Firestore saveHallOfFameEntry error:', err);
+                }
             }
         }
 
-        async function openHallOfFameScreen() {
+        function setHofTabMode(mode) {
+            appState.hofMode = mode;
+            const allBtn = document.getElementById('hofTabAllBtn');
+            const classBtn = document.getElementById('hofTabClassBtn');
+            const filterBar = document.getElementById('hofClassFilterBar');
+
+            if (mode === 'class') {
+                allBtn.classList.remove('active');
+                classBtn.classList.add('active');
+                filterBar.classList.remove('hidden');
+                filterBar.classList.add('flex');
+
+                const codeInput = document.getElementById('hofClassCodeInput');
+                const roomInput = document.getElementById('hofClassRoomInput');
+                if (!codeInput.value && appState.classCode) codeInput.value = appState.classCode;
+                if (!roomInput.value && appState.classRoom) roomInput.value = appState.classRoom;
+
+                appState.hofFilterCode = codeInput.value.trim();
+                appState.hofFilterRoom = roomInput.value.trim();
+            } else {
+                classBtn.classList.remove('active');
+                allBtn.classList.add('active');
+                filterBar.classList.add('hidden');
+                filterBar.classList.remove('flex');
+            }
+
+            renderFilteredHofTable();
+        }
+
+        function renderFilteredHofTable() {
+            const tbody = document.getElementById('hofTableBody');
+            let list = [...appState.allHofRecords].sort((a, b) => (b.score || 0) - (a.score || 0));
+
+            if (appState.hofMode === 'class') {
+                const targetCode = normalizeKey(appState.hofFilterCode);
+                const targetRoom = normalizeKey(appState.hofFilterRoom);
+
+                if (!targetCode || !targetRoom) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-amber-300">
+                                위 칸에 <strong>학급 코드</strong>와 <strong>반</strong>을 입력한 뒤 <strong>조회</strong> 버튼을 눌러주세요!
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                list = list.filter(r =>
+                    normalizeKey(r.classCode) === targetCode &&
+                    normalizeKey(r.classRoom) === targetRoom
+                );
+
+                if (list.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-slate-400">
+                                [${escapeHtml(appState.hofFilterCode)} · ${escapeHtml(appState.hofFilterRoom)}] 반의 등록된 기록이 아직 없습니다.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+            } else {
+                list = list.slice(0, 20);
+                if (list.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-slate-400">
+                                아직 등록된 명예의 전당 기록이 없습니다.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+            }
+
+            tbody.innerHTML = list.map((r, idx) => {
+                const displayName = r.nickname || r.name || '익명';
+                const tag = (r.classCode || r.classRoom)
+                    ? `<span class="text-[10px] text-cyan-300 ml-1">(${escapeHtml(r.classCode || '')} ${escapeHtml(r.classRoom || '')})</span>`
+                    : '';
+                return `
+                    <tr class="hover:bg-[#1b173b]">
+                        <td class="py-2.5 px-3 text-center font-bold text-yellow-400">${idx + 1}</td>
+                        <td class="py-2.5 px-3 font-bold text-white">
+                            ${escapeHtml(displayName)}${tag}
+                        </td>
+                        <td class="py-2.5 px-3 text-right text-emerald-400">${r.wordsDestroyed || 0}개</td>
+                        <td class="py-2.5 px-3 text-right font-bold text-yellow-300">${r.score || 0}점</td>
+                        <td class="py-2.5 px-3 text-right text-cyan-300 hidden sm:table-cell">${r.cpm || 0} 타</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openHallOfFameScreen() {
             sfx.click();
             showScreen('hallOfFameScreen');
-            const tbody = document.getElementById('hofTableBody');
-            tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">기록을 불러오는 중...</td></tr>`;
+            setHofTabMode('all');
 
-            let records = [];
+            let localRecords = [];
             try {
                 const raw = localStorage.getItem('odung_hof_records');
-                if (raw) records = JSON.parse(raw);
+                if (raw) localRecords = JSON.parse(raw);
             } catch (_) {}
+
+            appState.allHofRecords = localRecords;
+            renderFilteredHofTable();
+
+            if (appState.unsubHof) {
+                appState.unsubHof();
+                appState.unsubHof = null;
+            }
 
             if (useFirestore && db) {
                 try {
-                    onSnapshot(getHofColRef(), (snap) => {
+                    appState.unsubHof = onSnapshot(getHofColRef(), (snap) => {
                         const remote = [];
                         snap.forEach(d => remote.push(d.data()));
-                        const combined = [...records, ...remote]
-                            .sort((a, b) => (b.score || 0) - (a.score || 0))
-                            .slice(0, 10);
-                        renderHofTable(combined);
-                    });
-                    return;
+                        const merged = [...localRecords, ...remote];
+                        // Deduplicate identical entries by createdAt + nickname + score
+                        const seen = new Set();
+                        appState.allHofRecords = merged.filter(item => {
+                            const key = `${item.createdAt || ''}_${item.nickname || item.name || ''}_${item.score || 0}`;
+                            if (seen.has(key)) return false;
+                            seen.add(key);
+                            return true;
+                        });
+                        renderFilteredHofTable();
+                    }, (err) => console.warn('HOF snapshot error:', err));
                 } catch (_) {}
             }
-            renderHofTable(records.sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 10));
-        }
-
-        function renderHofTable(list) {
-            const tbody = document.getElementById('hofTableBody');
-            if (!list || list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">아직 등록된 명예의 전당 기록이 없습니다.</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = list.map((r, idx) => `
-                <tr class="hover:bg-[#1b173b]">
-                    <td class="py-2.5 px-3 text-center font-bold text-yellow-400">${idx + 1}</td>
-                    <td class="py-2.5 px-3 font-bold text-white">
-                        ${escapeHtml(r.name)}
-                        ${r.schoolName ? `<span class="text-[10px] text-slate-400 ml-1">(${escapeHtml(r.schoolName)} ${escapeHtml(r.classCode || '')})</span>` : ''}
-                    </td>
-                    <td class="py-2.5 px-3 text-right text-emerald-400">${r.wordsDestroyed || 0}칸</td>
-                    <td class="py-2.5 px-3 text-right font-bold text-yellow-300">${r.score || 0}점</td>
-                    <td class="py-2.5 px-3 text-right text-cyan-300 hidden sm:table-cell">${r.cpm || 0} 타</td>
-                </tr>
-            `).join('');
         }
 
         // ==========================================
-        // 9. DOM EVENT BINDINGS
+        // 8. DOM EVENT BINDINGS
         // ==========================================
         window.addEventListener('DOMContentLoaded', async () => {
-            backendInitPromise = initBackend();
-            await backendInitPromise;
+            await initBackend();
 
-            // Parse QR URL parameters if present
-            try {
-                const params = new URLSearchParams(window.location.search);
-                const qRoom = params.get('room');
-                const qSchool = params.get('school');
-                const qClass = params.get('class');
-                if (qRoom || qSchool || qClass) {
-                    if (qSchool) document.getElementById('studentSchoolInput').value = qSchool;
-                    if (qClass) document.getElementById('studentClassInput').value = qClass;
-                    if (qRoom) document.getElementById('studentRoomInput').value = qRoom;
-                    showScreen('studentJoinScreen');
-                }
-            } catch (_) {}
-
-            // Header Buttons
+            // Header Home Button
             document.getElementById('homeLogoBtn').addEventListener('click', () => {
                 sfx.click();
-                if (countdownIntervalId) clearInterval(countdownIntervalId);
-                if (teacherRaceAnimId) cancelAnimationFrame(teacherRaceAnimId);
-                stopStudentGame();
-                if (appState.unsubRoom) appState.unsubRoom();
-                if (appState.unsubPlayers) appState.unsubPlayers();
-                appState.role = null;
-                appState.roomCode = '';
-                appState.roomStatus = 'idle';
-                appState.players = [];
-                appState.selectedLobbyPlayerId = null;
-                updateRoleBadge();
-                showScreen('roleSelectScreen');
+                stopGame();
+                showScreen('entryScreen');
             });
 
             document.getElementById('soundToggleBtn').addEventListener('click', () => {
@@ -3026,6 +2053,7 @@
                 if (soundEnabled) sfx.click();
             });
 
+            // Firebase Modal Controls
             document.getElementById('serverStatusBtn').addEventListener('click', () => {
                 sfx.click();
                 const m = document.getElementById('firebaseSetupModal');
@@ -3063,284 +2091,124 @@
                 }
             });
 
-            // Role Selection
-            document.getElementById('selectTeacherBtn').addEventListener('click', () => {
-                sfx.click();
-                showScreen('teacherSetupScreen');
-            });
-
-            document.getElementById('selectStudentBtn').addEventListener('click', () => {
-                sfx.click();
-                document.getElementById('studentJoinErrorBox').classList.add('hidden');
-                document.getElementById('studentJoinForm').classList.remove('hidden');
-                document.getElementById('studentWaitingBox').classList.add('hidden');
-                document.getElementById('studentWaitingBox').classList.remove('flex');
-                showScreen('studentJoinScreen');
-            });
-
-            // Teacher Class Setup
-            document.getElementById('teacherClassInput').addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            });
-
-            document.getElementById('createClassRoomBtn').addEventListener('click', handleCreateClassRoom);
-
-            document.getElementById('teacherSetupBackBtn').addEventListener('click', () => {
-                sfx.click();
-                showScreen('roleSelectScreen');
-            });
-
-            // Teacher Lobby Controls
-            document.getElementById('copyJoinLinkBtn').addEventListener('click', () => {
-                sfx.click();
-                const url = document.getElementById('joinUrlDisplay').textContent;
-                const temp = document.createElement('textarea');
-                temp.value = url;
-                document.body.appendChild(temp);
-                temp.select();
-                try { document.execCommand('copy'); } catch (_) {}
-                document.body.removeChild(temp);
-                showToast('📋 학생 입장 링크가 복사되었습니다!');
-            });
-
-            document.querySelectorAll('.dur-btn').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    sfx.click();
-                    appState.duration = Number(btn.dataset.duration);
-                    syncTeacherOptionPills();
-                    await writeRoomState(appState.roomCode, { duration: appState.duration });
-                });
-            });
-
-            document.querySelectorAll('.t-lang-btn').forEach(btn => {
-                btn.addEventListener('click', async () => {
+            // Language Option Pills on Entry Screen
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
                     sfx.click();
                     appState.lang = btn.dataset.lang;
-                    syncTeacherOptionPills();
-                    await writeRoomState(appState.roomCode, { lang: appState.lang });
-                });
-            });
-
-            document.getElementById('addDemoBotsBtn').addEventListener('click', async () => {
-                sfx.click();
-                const names = ['쿼카1호', '오둥이', '별빛탐사'];
-                for (let i = 0; i < names.length; i++) {
-                    const pid = `bot_${Date.now()}_${i}`;
-                    await writePlayerState(appState.roomCode, pid, {
-                        playerId: pid,
-                        name: names[i],
-                        wordsDestroyed: 0,
-                        score: 0,
-                        cpm: 0,
-                        difficulty: 'easy',
-                        isDemo: true,
-                        kicked: false,
-                        joinedAt: Date.now() + i
+                    document.querySelectorAll('.lang-btn').forEach(b => {
+                        b.classList.toggle('active', b.dataset.lang === appState.lang);
                     });
-                }
-                showToast('🤖 테스트 학생 3명이 탑승했습니다!');
-            });
-
-            // Participant Action Bar Controls (쉬움 / 어려움 / 내보내기 / 닫기)
-            document.getElementById('setDiffEasyBtn').addEventListener('click', async () => {
-                sfx.click();
-                const target = appState.players.find(p => p.playerId === appState.selectedLobbyPlayerId);
-                if (!target) return;
-                await writePlayerState(appState.roomCode, target.playerId, {
-                    ...target,
-                    difficulty: 'easy'
                 });
-                showToast(`📘 ${target.name} 참여자 난이도: 쉬움`);
             });
 
-            document.getElementById('setDiffHardBtn').addEventListener('click', async () => {
-                sfx.click();
-                const target = appState.players.find(p => p.playerId === appState.selectedLobbyPlayerId);
-                if (!target) return;
-                await writePlayerState(appState.roomCode, target.playerId, {
-                    ...target,
-                    difficulty: 'hard'
-                });
-                showToast(`🔥 ${target.name} 참여자 난이도: 어려움`);
-            });
+            // Entry Screen Start Game Button
+            document.getElementById('startGameBtn').addEventListener('click', () => {
+                const classCode = document.getElementById('entryClassCodeInput').value.trim();
+                const classRoom = document.getElementById('entryClassRoomInput').value.trim();
+                const nickname = document.getElementById('entryNicknameInput').value.trim();
 
-            document.getElementById('kickSelectedPlayerBtn').addEventListener('click', async () => {
-                sfx.error();
-                const target = appState.players.find(p => p.playerId === appState.selectedLobbyPlayerId);
-                if (!target) return;
-
-                appState.selectedLobbyPlayerId = null;
-                renderParticipantActionBar();
-
-                await writePlayerState(appState.roomCode, target.playerId, {
-                    ...target,
-                    kicked: true,
-                    kickedAt: Date.now()
-                });
-                await writeRoomState(appState.roomCode, {
-                    kickedIds: {
-                        [target.playerId]: Date.now()
-                    }
-                });
-                showToast(`🚫 ${target.name} 참여자를 방에서 내보냈습니다.`);
-            });
-
-            document.getElementById('closeParticipantBarBtn').addEventListener('click', () => {
-                sfx.click();
-                appState.selectedLobbyPlayerId = null;
-                renderParticipantActionBar();
-                handlePlayersListUpdate(appState.players);
-            });
-
-            // Kicked Student Modal Confirm Button
-            document.getElementById('kickedConfirmBtn').addEventListener('click', () => {
-                sfx.click();
-                const modal = document.getElementById('kickedPixelModal');
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-
-                appState.role = null;
-                appState.roomCode = '';
-                appState.playerId = '';
-                appState.playerName = '';
-                appState.players = [];
-                updateRoleBadge();
-
-                document.getElementById('studentJoinForm').classList.remove('hidden');
-                document.getElementById('studentWaitingBox').classList.add('hidden');
-                document.getElementById('studentWaitingBox').classList.remove('flex');
-
-                showScreen('roleSelectScreen');
-            });
-
-            // Teacher Start Game (Minimum 2 participants check)
-            document.getElementById('teacherStartRaceBtn').addEventListener('click', async () => {
-                const btn = document.getElementById('teacherStartRaceBtn');
-                if (appState.players.length < 2) {
+                if (!classCode || !classRoom || !nickname) {
                     sfx.error();
-                    btn.classList.add('shake');
-                    setTimeout(() => btn.classList.remove('shake'), 320);
-                    showToast('⚠️ 최소 2명 이상의 참여자가 있어야 게임을 시작할 수 있습니다!');
+                    showToast('⚠️ 학급 코드, 반, 닉네임을 모두 입력해주세요!');
                     return;
                 }
 
                 sfx.click();
-                await writeRoomState(appState.roomCode, {
-                    status: 'countdown',
-                    countdownStartAt: Date.now(),
-                    duration: appState.duration,
-                    lang: appState.lang
-                });
+                appState.classCode = classCode;
+                appState.classRoom = classRoom;
+                appState.nickname = nickname;
+                updatePlayerInfoBadge();
+                startNewGame();
             });
 
-            document.getElementById('teacherLeaveLobbyBtn').addEventListener('click', () => {
-                sfx.click();
-                document.getElementById('homeLogoBtn').click();
-            });
-
-            document.getElementById('teacherForceEndBtn').addEventListener('click', () => {
-                sfx.click();
-                finishTeacherRace();
-            });
-
-            // Teacher Rematch -> Return to Existing Room Lobby
-            document.getElementById('teacherRematchBtn').addEventListener('click', async () => {
-                sfx.click();
-                teacherRaceEnded = false;
-                appState.roomStatus = 'lobby';
-                showScreen('teacherLobbyScreen');
-                showToast('🚀 현재 방 대기실로 돌아왔습니다. 새 게임을 시작할 수 있습니다!');
-
-                await Promise.all(
-                    appState.players.map(p =>
-                        writePlayerState(appState.roomCode, p.playerId, {
-                            ...p,
-                            wordsDestroyed: 0,
-                            score: 0,
-                            cpm: 0,
-                            bossActive: false
-                        })
-                    )
-                );
-                await writeRoomState(appState.roomCode, {
-                    status: 'lobby',
-                    countdownStartAt: 0,
-                    raceStartAt: 0
-                });
-            });
-
-            document.getElementById('podiumHomeBtn').addEventListener('click', () => {
-                sfx.click();
-                document.getElementById('homeLogoBtn').click();
-            });
-
-            // Student Join & Waiting Controls
-            document.getElementById('studentClassInput').addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            });
-
-            document.getElementById('studentRoomInput').addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            });
-
-            document.getElementById('studentJoinSubmitBtn').addEventListener('click', handleStudentJoin);
-
-            document.getElementById('studentBackHomeBtn').addEventListener('click', () => {
-                sfx.click();
-                showScreen('roleSelectScreen');
-            });
-
-            document.getElementById('studentWaitRematchBtn').addEventListener('click', () => {
-                sfx.click();
-                showScreen('studentJoinScreen');
-                document.getElementById('studentJoinForm').classList.add('hidden');
-                document.getElementById('studentWaitingBox').classList.remove('hidden');
-                document.getElementById('studentWaitingBox').classList.add('flex');
-            });
-
-            // Student Gameplay Typing & Skill Shortcuts
+            // Gameplay Typing Controls
             const wordInput = document.getElementById('wordInput');
             wordInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    handleStudentFireWord();
+                    handleFireWord();
                 }
             });
 
             wordInput.addEventListener('input', () => {
-                if (!studentGame.active || studentGame.pausedForSkill) return;
+                if (!game.active || game.pausedForSkill) return;
                 const val = wordInput.value.trim();
                 if (!val) return;
-                const exact = studentGame.words.find(w => w.text === val);
+                const exact = game.words.find(w => w.text === val);
                 if (exact) {
                     wordInput.value = '';
-                    studentGame.totalAttempts += 1;
-                    studentGame.successfulHits += 1;
-                    studentGame.combo += 1;
-                    studentGame.maxCombo = Math.max(studentGame.maxCombo, studentGame.combo);
+                    game.combo += 1;
+                    game.maxCombo = Math.max(game.maxCombo, game.combo);
                     destroyEnemyWord(exact, 'manual');
                 }
             });
 
-            document.getElementById('fireBtn').addEventListener('click', handleStudentFireWord);
+            document.getElementById('fireBtn').addEventListener('click', handleFireWord);
 
             window.addEventListener('keydown', (e) => {
-                if (studentGame.pausedForSkill) {
-                    if (e.key === '1') selectStudentSkill(0);
-                    if (e.key === '2') selectStudentSkill(1);
-                    if (e.key === '3') selectStudentSkill(2);
+                if (game.pausedForSkill) {
+                    if (e.key === '1') selectSkill(0);
+                    if (e.key === '2') selectSkill(1);
+                    if (e.key === '3') selectSkill(2);
                 }
             });
 
-            // Hall of Fame Navigation
+            // Game Over (Death) Screen Controls
+            document.getElementById('restartGameBtn').addEventListener('click', () => {
+                sfx.click();
+                startNewGame();
+            });
+
+            document.getElementById('gameOverHomeBtn').addEventListener('click', () => {
+                sfx.click();
+                showScreen('entryScreen');
+            });
+
+            // Hall of Fame Controls ('전체' / '우리반' / '조회')
             document.getElementById('openHofHeaderBtn').addEventListener('click', openHallOfFameScreen);
-            document.getElementById('selectHofBtn').addEventListener('click', openHallOfFameScreen);
-            document.getElementById('podiumHofBtn').addEventListener('click', openHallOfFameScreen);
-            document.getElementById('studentResultHofBtn').addEventListener('click', openHallOfFameScreen);
+            document.getElementById('entryHofBtn').addEventListener('click', openHallOfFameScreen);
+            document.getElementById('gameOverHofBtn').addEventListener('click', openHallOfFameScreen);
+
+            document.getElementById('hofTabAllBtn').addEventListener('click', () => {
+                sfx.click();
+                setHofTabMode('all');
+            });
+
+            document.getElementById('hofTabClassBtn').addEventListener('click', () => {
+                sfx.click();
+                setHofTabMode('class');
+            });
+
+            const runClassHofSearch = () => {
+                const code = document.getElementById('hofClassCodeInput').value.trim();
+                const room = document.getElementById('hofClassRoomInput').value.trim();
+                if (!code || !room) {
+                    sfx.error();
+                    showToast('⚠️ 학급 코드와 반을 모두 입력해주세요!');
+                    return;
+                }
+                sfx.click();
+                appState.hofFilterCode = code;
+                appState.hofFilterRoom = room;
+                renderFilteredHofTable();
+            };
+
+            document.getElementById('hofSearchBtn').addEventListener('click', runClassHofSearch);
+            document.getElementById('hofClassCodeInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') runClassHofSearch();
+            });
+            document.getElementById('hofClassRoomInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') runClassHofSearch();
+            });
 
             document.getElementById('closeHofBtn').addEventListener('click', () => {
                 sfx.click();
-                showScreen(appState.previousScreenId || 'roleSelectScreen');
+                if (appState.unsubHof) {
+                    appState.unsubHof();
+                    appState.unsubHof = null;
+                }
+                showScreen(appState.previousScreenId || 'entryScreen');
             });
         });
     </script>
