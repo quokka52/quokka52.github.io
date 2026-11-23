@@ -361,7 +361,7 @@
             50% { border-color: #f43f5e; box-shadow: 0 0 32px rgba(244, 63, 94, 0.8), inset 0 0 30px rgba(244, 63, 94, 0.45); }
         }
 
-        /* Gameplay Background Blur when Math Quiz / Level-Up / Skill Modal is Open */
+        /* Gameplay Background Blur when Math Quiz / Level-Up / Skill / Boss Intro Modal is Open */
         .gameplay-modal-blur {
             filter: blur(8px) brightness(0.55);
             pointer-events: none;
@@ -369,7 +369,7 @@
             transition: filter 0.25s ease;
         }
 
-        /* Fullscreen Gameplay Container */
+        /* Full-Viewport Gameplay Container (Uses 100% of screen without OS Fullscreen) */
         .fullscreen-game-shell {
             position: fixed;
             inset: 0;
@@ -565,6 +565,50 @@
                  VIEW 2: FULLSCREEN ACTIVE GAMEPLAY SCREEN
             =========================================== -->
             <div id="gameScreen" class="hidden fullscreen-game-shell flex-col p-3 sm:p-5">
+                <!-- 0) 5-Second Boss Intro Warning Modal (Time Paused + Blurred Background + Pixel Boss Art) -->
+                <div id="bossIntroModal" class="hidden fixed inset-0 bg-[#090714]/75 backdrop-blur-md z-40 flex-col items-center justify-center p-4 sm:p-6 text-center">
+                    <div class="w-full max-w-lg bg-[#171433]/95 border-4 border-rose-500 rounded-md p-5 sm:p-6 shadow-[0_0_0_4px_#0d0b1a,0_0_45px_rgba(244,63,94,0.6)] space-y-3">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="bg-rose-500 text-white font-bold px-2.5 py-0.5 rounded animate-pulse">
+                                ⚠️ WARNING · BOSS 출현!
+                            </span>
+                            <span class="bg-amber-500/20 border border-amber-400/60 text-amber-300 px-2.5 py-0.5 rounded font-bold">
+                                ⏸ 시간 정지됨
+                            </span>
+                        </div>
+
+                        <div>
+                            <div id="bossIntroTitle" class="text-xs sm:text-sm text-cyan-300 font-bold tracking-wider mb-1">
+                                STAGE 01 · 은하계 최악의 생선 약탈자
+                            </div>
+                            <h3 id="bossIntroName" class="text-2xl sm:text-3xl font-bold text-yellow-400 drop-shadow-[0_3px_0_#000]">
+                                우주 해적 메카냥
+                            </h3>
+                        </div>
+
+                        <!-- 100% Pixel Art Boss Preview Box -->
+                        <div class="bg-[#090714] border-2 border-rose-500/80 rounded-md p-3 mx-auto w-52 h-36 flex items-center justify-center shadow-inner">
+                            <canvas id="bossIntroCanvas" width="180" height="124" class="w-full h-full"></canvas>
+                        </div>
+
+                        <div id="bossIntroStats" class="flex flex-wrap items-center justify-center gap-2 text-xs">
+                            <span class="bg-rose-950/90 border border-rose-400/70 text-rose-200 px-2.5 py-1 rounded font-bold">
+                                ❤️ HP 480
+                            </span>
+                            <span class="bg-amber-950/90 border border-amber-400/70 text-amber-200 px-2.5 py-1 rounded font-bold">
+                                🔥 체력 50% 이하 광폭화
+                            </span>
+                        </div>
+
+                        <div class="pt-1">
+                            <div class="text-xs text-slate-300 mb-1">보스 전투 시작까지</div>
+                            <div id="bossIntroCountdown" class="text-4xl sm:text-5xl font-bold text-rose-400 drop-shadow-[0_3px_0_#000]">
+                                5
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 1) 6th Grade 2nd Semester Math Quiz Modal Window (Time Paused + Blurred Background) -->
                 <div id="mathQuizModal" class="hidden fixed inset-0 bg-[#090714]/65 backdrop-blur-md z-40 flex-col items-center justify-center p-4 sm:p-6 text-center">
                     <div class="w-full max-w-xl bg-[#171433]/95 border-2 border-yellow-400 rounded-md p-5 sm:p-6 shadow-[0_0_0_4px_#0d0b1a,0_0_35px_rgba(250,204,21,0.4)]">
@@ -623,8 +667,8 @@
                     </div>
                 </div>
 
-                <!-- Gameplay Playfield Container (Blurs whenever one of the 3 modals above is open) -->
-                <div id="gamePlayfieldContainer" class="w-full max-w-6xl mx-auto flex-1 flex flex-col min-h-0">
+                <!-- Gameplay Playfield Container (Uses 100% width & height of the browser viewport) -->
+                <div id="gamePlayfieldContainer" class="w-full h-full flex-1 flex flex-col min-h-0">
                     <!-- Top EXP Level Gauge & Equipped Skills Bar -->
                     <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-3 py-2 mb-2 shrink-0">
                         <div class="flex items-center justify-between text-xs mb-1">
@@ -766,46 +810,46 @@
                 </div>
 
                 <!-- '우리반' Filter Bar: 학급 코드 + 반 + 조회 버튼 (Visible only when '우리반' is clicked) -->
-                    <div id="hofClassFilterBar" class="hidden w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-2.5 sm:p-3 mb-3 flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                        <input id="hofClassCodeInput" type="text" maxlength="20"
-                            placeholder="학급 코드"
-                            class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
-                        <input id="hofClassRoomInput" type="text" maxlength="12"
-                            placeholder="반"
-                            class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
-                        <button id="hofSearchBtn" type="button"
-                            class="pixel-btn bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-xs sm:text-sm py-1.5 px-5 rounded shrink-0">
-                            조회
-                        </button>
-                    </div>
-
-                    <!-- Hall of Fame Leaderboard Table -->
-                    <div class="w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md overflow-hidden mb-4">
-                        <div class="overflow-x-auto max-h-[300px] overflow-y-auto">
-                            <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                                <thead class="bg-[#1b173b] text-yellow-400 border-b-2 border-[#2e295e] sticky top-0">
-                                    <tr>
-                                        <th class="py-2.5 px-3 text-center w-14">순위</th>
-                                        <th class="py-2.5 px-3">닉네임 (학급·반)</th>
-                                        <th class="py-2.5 px-3 text-right">격추</th>
-                                        <th class="py-2.5 px-3 text-right">점수</th>
-                                        <th class="py-2.5 px-3 text-right hidden sm:table-cell">타수</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="hofTableBody" class="divide-y divide-[#231f47]">
-                                    <tr>
-                                        <td colspan="5" class="py-8 text-center text-slate-400">기록을 불러오는 중...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <button id="closeHofBtn" type="button"
-                        class="pixel-btn w-full max-w-xs bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-sm py-3 px-6 rounded">
-                        ← 돌아가기
+                <div id="hofClassFilterBar" class="hidden w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-2.5 sm:p-3 mb-3 flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <input id="hofClassCodeInput" type="text" maxlength="20"
+                        placeholder="학급 코드"
+                        class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
+                    <input id="hofClassRoomInput" type="text" maxlength="12"
+                        placeholder="반"
+                        class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
+                    <button id="hofSearchBtn" type="button"
+                        class="pixel-btn bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-xs sm:text-sm py-1.5 px-5 rounded shrink-0">
+                        조회
                     </button>
                 </div>
+
+                <!-- Hall of Fame Leaderboard Table -->
+                <div class="w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md overflow-hidden mb-4">
+                    <div class="overflow-x-auto max-h-[300px] overflow-y-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead class="bg-[#1b173b] text-yellow-400 border-b-2 border-[#2e295e] sticky top-0">
+                                <tr>
+                                    <th class="py-2.5 px-3 text-center w-14">순위</th>
+                                    <th class="py-2.5 px-3">닉네임 (학급·반)</th>
+                                    <th class="py-2.5 px-3 text-right">격추</th>
+                                    <th class="py-2.5 px-3 text-right">점수</th>
+                                    <th class="py-2.5 px-3 text-right hidden sm:table-cell">타수</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hofTableBody" class="divide-y divide-[#231f47]">
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-slate-400">기록을 불러오는 중...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <button id="closeHofBtn" type="button"
+                    class="pixel-btn w-full max-w-xs bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-sm py-3 px-6 rounded">
+                    ← 돌아가기
+                </button>
+            </div>
         </div>
     </div>
 
@@ -924,7 +968,7 @@
         }
 
         // ==========================================
-        // 2. APPLICATION STATE & WORD DICTIONARY
+        // 2. APPLICATION STATE & WORD / QUIZ DICTIONARY
         // ==========================================
         const WORDS_KO = [
             '쿼카', '우주선', '오둥이', '타자왕', '별빛', '은하수', '로켓', '혜성',
@@ -951,82 +995,226 @@
             'MECHABOSS', 'QUOKKAHOME', 'LIGHTSPEED', 'CHAMPIONSHIP'
         ];
 
-        const BOSS_PROFILES = [
-            { name: 'Lv.1 우주 해적 메카냥', color: '#f43f5e', baseHp: 120 },
-            { name: 'Lv.2 암흑 성운 드래곤', color: '#a855f7', baseHp: 180 },
-            { name: 'Lv.3 초거대 블랙홀 코어', color: '#38bdf8', baseHp: 250 },
-            { name: 'Lv.4 은하계 최종 함대장', color: '#facc15', baseHp: 330 }
+        const BOSS_ENRAGE_WORDS_KO = [
+            '은하계최종결전', '초신성대폭발', '절대방어막돌파', '우주해적대함대', '빛의속도로격추'
         ];
 
-        // 6th Grade 2nd Semester Math Quiz Bank (비례식과 비례배분)
-        const MATH_QUIZ_PRIMARY = [
+        const BOSS_ENRAGE_WORDS_EN = [
+            'OMEGABLASTER', 'SUPERNOVA', 'DARKMATTER', 'HYPERIONCORE', 'FINALSTRIKE'
+        ];
+
+        const BOSS_BARRAGE_KO = ['미사일', '레이저', '위험탄', '폭격', '섬광탄', '충격파'];
+        const BOSS_BARRAGE_EN = ['MISSILE', 'LASER', 'DANGER', 'BLAST', 'PLASMA', 'STRIKE'];
+
+        const BOSS_PROFILES = [
             {
-                q: "비례식 3 : 5 = 12 : □ 에서 □ 안에 들어갈 알맞은 수는 무엇일까요?",
-                choices: ["15", "20", "24", "30"],
-                answer: 1
+                id: 'mechacat',
+                stage: 'STAGE 01',
+                title: '은하계 최악의 생선 약탈자',
+                name: '우주 해적 메카냥',
+                color: '#f43f5e',
+                accent: '#facc15',
+                baseHp: 480
             },
             {
-                q: "비례식 4 : 7 = □ : 28 에서 □ 안에 들어갈 알맞은 수는 무엇일까요?",
-                choices: ["12", "14", "16", "21"],
-                answer: 2
+                id: 'nebuladragon',
+                stage: 'STAGE 02',
+                title: '별빛을 집어삼키는 심연의 화염룡',
+                name: '암흑 성운 드래곤',
+                color: '#a855f7',
+                accent: '#38bdf8',
+                baseHp: 720
             },
             {
-                q: "사탕 35개를 지민이와 서연이가 3 : 4로 비례배분하여 나누어 가졌습니다. 서연이가 가진 사탕은 몇 개일까요?",
-                choices: ["15개", "18개", "20개", "25개"],
-                answer: 2
+                id: 'blackhole',
+                stage: 'STAGE 03',
+                title: '모든 단어를 빨아들이는 중력 지배자',
+                name: '초거대 블랙홀 코어',
+                color: '#38bdf8',
+                accent: '#f43f5e',
+                baseHp: 1020
             },
             {
-                q: "비례식 □ : 9 = 8 : 12 에서 외항의 곱은 72입니다. □ 안에 들어갈 수는 무엇일까요?",
-                choices: ["4", "6", "8", "10"],
-                answer: 1
-            },
-            {
-                q: "가로와 세로의 비가 5 : 3인 직사각형 모양의 밭이 있습니다. 가로가 25m일 때 세로는 몇 m일까요?",
-                choices: ["12m", "15m", "18m", "20m"],
-                answer: 1
-            },
-            {
-                q: "공책 48권을 5 : 3으로 비례배분할 때, 더 많이 받는 쪽은 몇 권을 받게 될까요?",
-                choices: ["18권", "24권", "30권", "36권"],
-                answer: 2
-            },
-            {
-                q: "비 0.4 : 1.2 를 가장 간단한 자연수의 비로 바르게 나타낸 것은 무엇일까요?",
-                choices: ["1 : 2", "1 : 3", "2 : 3", "4 : 12"],
-                answer: 1
-            },
-            {
-                q: "밀가루와 설탕을 7 : 2의 비로 섞어 반죽 450g을 만들려고 합니다. 필요한 설탕은 몇 g일까요?",
-                choices: ["50g", "100g", "150g", "350g"],
-                answer: 1
+                id: 'omega',
+                stage: 'STAGE 04',
+                title: '우주 끝자락의 최종 타자 군주',
+                name: '은하계 황제 대마왕 오메가',
+                color: '#facc15',
+                accent: '#f43f5e',
+                baseHp: 1400
             }
         ];
 
-        const MATH_QUIZ_EASIER = [
+        // 6th Grade 2nd Semester Math Quiz Bank (비례식과 비례배분 - Standard)
+        const MATH_QUIZ_BANK = [
             {
-                q: "[보너스 쉬운 문제] 비례식 1 : 2 = 3 : □ 에서 □ 안에 들어갈 수는 무엇일까요?",
-                choices: ["4", "5", "6", "8"],
+                id: 'm1',
+                q: '비례식 3 : 5 = 12 : □ 에서 □ 안에 들어갈 알맞은 수는 무엇일까요?',
+                choices: ['15', '18', '20', '24'],
                 answer: 2
             },
             {
-                q: "[보너스 쉬운 문제] 연필 10자루를 1 : 1로 똑같이 나누면 한 사람이 몇 자루씩 가질까요?",
-                choices: ["2자루", "4자루", "5자루", "10자루"],
-                answer: 2
-            },
-            {
-                q: "[보너스 쉬운 문제] 비 2 : 4 와 비율이 같은 비는 어느 것일까요?",
-                choices: ["1 : 2", "1 : 3", "2 : 3", "3 : 4"],
-                answer: 0
-            },
-            {
-                q: "[보너스 쉬운 문제] 귤 12개를 형과 동생이 2 : 1로 나누어 가졌습니다. 동생이 가진 귤은 몇 개일까요?",
-                choices: ["2개", "4개", "6개", "8개"],
+                id: 'm2',
+                q: '사탕 35개를 지민이와 수아가 3 : 4로 비례배분할 때, 수아가 가지는 사탕은 몇 개일까요?',
+                choices: ['15개', '20개', '21개', '25개'],
                 answer: 1
             },
             {
-                q: "[보너스 쉬운 문제] 비례식 2 : 5 = 4 : □ 에서 □ 안에 들어갈 수는 무엇일까요?",
-                choices: ["6", "8", "10", "12"],
+                id: 'm3',
+                q: '비 24 : 36 을 가장 간단한 자연수의 비로 바르게 나타낸 것은 무엇일까요?',
+                choices: ['2 : 3', '3 : 4', '4 : 6', '3 : 2'],
+                answer: 0
+            },
+            {
+                id: 'm4',
+                q: '비례식 7 : 4 = □ : 20 에서 외항의 곱은 얼마일까요?',
+                choices: ['28', '80', '140', '160'],
                 answer: 2
+            },
+            {
+                id: 'm5',
+                q: '길이 54cm인 리본을 4 : 5로 나누어 가질 때, 짧은 쪽 리본의 길이는 몇 cm일까요?',
+                choices: ['18cm', '24cm', '27cm', '30cm'],
+                answer: 1
+            },
+            {
+                id: 'm6',
+                q: '비 0.4 : 1.2 를 가장 간단한 자연수의 비로 나타낸 것은 무엇일까요?',
+                choices: ['1 : 3', '2 : 5', '1 : 4', '4 : 12'],
+                answer: 0
+            },
+            {
+                id: 'm7',
+                q: '비례식 □ : 9 = 16 : 12 에서 □ 안에 알맞은 수는 무엇일까요?',
+                choices: ['10', '11', '12', '14'],
+                answer: 2
+            },
+            {
+                id: 'm8',
+                q: '연필 48자루를 5 : 3으로 비례배분할 때, 더 많이 가지는 쪽은 몇 자루를 받을까요?',
+                choices: ['18자루', '24자루', '30자루', '36자루'],
+                answer: 2
+            },
+            {
+                id: 'm9',
+                q: '가로와 세로의 비가 5 : 3인 직사각형의 가로가 25cm일 때, 세로는 몇 cm일까요?',
+                choices: ['12cm', '15cm', '18cm', '20cm'],
+                answer: 1
+            },
+            {
+                id: 'm10',
+                q: '비 1/2 : 1/3 을 가장 간단한 자연수의 비로 나타낸 것은 무엇일까요?',
+                choices: ['2 : 3', '3 : 2', '1 : 6', '6 : 1'],
+                answer: 1
+            },
+            {
+                id: 'm11',
+                q: '귤 60개를 형과 동생이 7 : 5로 나누어 가졌습니다. 형이 동생보다 몇 개 더 많이 가졌을까요?',
+                choices: ['5개', '10개', '12개', '15개'],
+                answer: 1
+            },
+            {
+                id: 'm12',
+                q: '비례식 6 : □ = 18 : 27 에서 □ 안에 들어갈 수는 무엇일까요?',
+                choices: ['7', '8', '9', '12'],
+                answer: 2
+            }
+        ];
+
+        // Easier 6th Grade 2nd Semester Math Quiz Bank (2nd Chance after 1st miss)
+        const EASY_MATH_QUIZ_BANK = [
+            {
+                id: 'e1',
+                q: '[보충 문제] 비 4 : 8 을 가장 간단한 자연수의 비로 나타내면 무엇일까요?',
+                choices: ['1 : 2', '2 : 1', '1 : 4', '2 : 3'],
+                answer: 0
+            },
+            {
+                id: 'e2',
+                q: '[보충 문제] 비례식 1 : 3 = 4 : □ 에서 □ 안에 들어갈 수는 무엇일까요?',
+                choices: ['7', '8', '12', '16'],
+                answer: 2
+            },
+            {
+                id: 'e3',
+                q: '[보충 문제] 구슬 10개를 1 : 4로 나눌 때, 1에 해당하는 구슬은 몇 개일까요?',
+                choices: ['1개', '2개', '4개', '8개'],
+                answer: 1
+            },
+            {
+                id: 'e4',
+                q: '[보충 문제] 비 10 : 15 를 가장 간단한 자연수의 비로 나타내면 무엇일까요?',
+                choices: ['1 : 2', '2 : 3', '3 : 2', '2 : 5'],
+                answer: 1
+            },
+            {
+                id: 'e5',
+                q: '[보충 문제] 비례식 2 : 5 = □ : 10 에서 □ 안에 들어갈 수는 무엇일까요?',
+                choices: ['2', '4', '5', '6'],
+                answer: 1
+            },
+            {
+                id: 'e6',
+                q: '[보충 문제] 초콜릿 12개를 1 : 2로 비례배분할 때, 더 많이 받는 쪽은 몇 개일까요?',
+                choices: ['4개', '6개', '8개', '10개'],
+                answer: 2
+            },
+            {
+                id: 'e7',
+                q: '[보충 문제] 비례식 3 : 2 = 6 : □ 에서 내항의 곱은 얼마일까요?',
+                choices: ['6', '8', '12', '18'],
+                answer: 2
+            },
+            {
+                id: 'e8',
+                q: '[보충 문제] 비 6 : 9 를 가장 간단한 자연수의 비로 나타내면 무엇일까요?',
+                choices: ['2 : 3', '3 : 2', '1 : 3', '3 : 4'],
+                answer: 0
+            }
+        ];
+
+        const SKILL_POOL = [
+            {
+                id: 'autoTurret',
+                icon: '🔫',
+                name: '쿼카 오토 포탑',
+                desc: '일정 시간마다 자동으로 레이저를 발사해 단어 1개를 즉시 격추합니다.',
+                maxLv: 5
+            },
+            {
+                id: 'scoreBoost',
+                icon: '💎',
+                name: '황금 보석 증폭기',
+                desc: '단어 격추 점수가 +25% 증가하고 보스 타격 데미지가 상승합니다.',
+                maxLv: 5
+            },
+            {
+                id: 'slowField',
+                icon: '❄️',
+                name: '중력 감속 역장',
+                desc: '단어가 아래로 떨어지는 속도를 영구적으로 12% 느리게 만듭니다.',
+                maxLv: 4
+            },
+            {
+                id: 'healHeart',
+                icon: '💖',
+                name: '우주선 긴급 수리',
+                desc: '생명(HP)을 1칸 즉시 회복합니다. (최대 체력 시 +500 보너스 점수)',
+                maxLv: 99
+            },
+            {
+                id: 'shockwave',
+                icon: '⚡',
+                name: '플라즈마 충격파',
+                desc: '화면에 떠 있는 위험 단어를 최대 3개 즉시 소멸시키고 점수를 획득합니다.',
+                maxLv: 99
+            },
+            {
+                id: 'comboShield',
+                icon: '🛡️',
+                name: '콤보 보호막',
+                desc: '오타를 입력해도 콤보가 초기화되지 않도록 보호막을 1회 충전합니다.',
+                maxLv: 5
             }
         ];
 
@@ -1035,186 +1223,140 @@
             classRoom: '',
             nickname: '',
             lang: 'ko',
-            previousScreenId: 'startScreen',
+            soundOn: true,
             hofRecords: [],
-            hofTab: 'all', // 'all' | 'class'
-            hofFilterCode: '',
-            hofFilterRoom: ''
+            hofFilterMode: 'all', // 'all' | 'class'
+            hofSearchCode: '',
+            hofSearchRoom: '',
+            previousView: 'startScreen'
         };
 
         // ==========================================
-        // 3. RETRO SOUND SYNTHESIZER (WEB AUDIO API)
+        // 3. WEB AUDIO RETRO SOUND EFFECTS
         // ==========================================
-        let soundEnabled = true;
         let audioCtx = null;
 
-        function ensureAudio() {
-            if (!soundEnabled) return null;
+        function ensureAudioCtx() {
             if (!audioCtx) {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) audioCtx = new AudioContextClass();
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
             }
             if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume().catch(() => {});
             }
-            return audioCtx;
         }
 
         function playTone(freq, type = 'square', duration = 0.08, vol = 0.08, delay = 0) {
-            const ctx = ensureAudio();
-            if (!ctx) return;
+            if (!appState.soundOn) return;
             try {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
+                ensureAudioCtx();
+                if (!audioCtx) return;
+                const now = audioCtx.currentTime + delay;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
                 osc.type = type;
-                osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
-                gain.gain.setValueAtTime(vol, ctx.currentTime + delay);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(vol, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
                 osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start(ctx.currentTime + delay);
-                osc.stop(ctx.currentTime + delay + duration);
-            } catch (e) {}
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + duration);
+            } catch (_) {}
         }
 
         const sfx = {
-            click: () => playTone(520, 'square', 0.05, 0.06),
-            error: () => {
-                playTone(180, 'sawtooth', 0.12, 0.08, 0);
-                playTone(140, 'sawtooth', 0.14, 0.08, 0.09);
+            laser: () => {
+                playTone(880, 'square', 0.07, 0.07, 0);
+                playTone(520, 'square', 0.07, 0.06, 0.03);
             },
-            hit: () => {
-                playTone(660, 'square', 0.06, 0.07, 0);
-                playTone(880, 'square', 0.08, 0.07, 0.05);
+            miss: () => {
+                playTone(180, 'sawtooth', 0.14, 0.08, 0);
+            },
+            damage: () => {
+                playTone(140, 'sawtooth', 0.2, 0.11, 0);
+                playTone(95, 'square', 0.24, 0.11, 0.08);
             },
             bossHit: () => {
-                playTone(300, 'sawtooth', 0.07, 0.09, 0);
-                playTone(740, 'square', 0.09, 0.09, 0.04);
+                playTone(320, 'square', 0.09, 0.09, 0);
+                playTone(210, 'sawtooth', 0.1, 0.08, 0.04);
             },
             bossDefeat: () => {
                 [523, 659, 784, 1046].forEach((f, i) => playTone(f, 'square', 0.11, 0.09, i * 0.06));
             },
+            bossWarning: () => {
+                playTone(220, 'sawtooth', 0.16, 0.1, 0);
+                playTone(330, 'sawtooth', 0.18, 0.1, 0.15);
+            },
             levelUp: () => {
                 [440, 554, 659, 880].forEach((f, i) => playTone(f, 'triangle', 0.12, 0.1, i * 0.07));
             },
+            quizCorrect: () => {
+                playTone(587, 'triangle', 0.09, 0.09, 0);
+                playTone(880, 'triangle', 0.14, 0.1, 0.07);
+            },
+            quizWrong: () => {
+                playTone(200, 'sawtooth', 0.15, 0.09, 0);
+                playTone(140, 'sawtooth', 0.2, 0.09, 0.1);
+            },
             gameOver: () => {
-                [392, 349, 311, 261].forEach((f, i) => playTone(f, 'sawtooth', 0.16, 0.09, i * 0.11));
+                [392, 349, 311, 261].forEach((f, i) => playTone(f, 'sawtooth', 0.18, 0.09, i * 0.14));
             }
         };
 
         // ==========================================
-        // 4. UI NAVIGATION & HELPERS
+        // 4. UI NAVIGATION, TOAST & HALL OF FAME
         // ==========================================
-        const ALL_SCREENS = [
-            'startScreen',
-            'gameScreen',
-            'gameOverScreen',
-            'hallOfFameScreen'
-        ];
-
-        function showScreen(screenId) {
-            ALL_SCREENS.forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                if (id === screenId) {
-                    el.classList.remove('hidden');
-                    if (id === 'startScreen') {
-                        el.classList.add('grid');
-                    } else {
-                        el.classList.add('flex');
-                    }
-                } else {
-                    el.classList.add('hidden');
-                    el.classList.remove('flex', 'grid');
-                }
-            });
-            if (screenId !== 'hallOfFameScreen') {
-                appState.previousScreenId = screenId;
-            }
-        }
-
-        let toastTimeout = null;
         function showToast(msg, duration = 2600) {
             const box = document.getElementById('toastBox');
             if (!box) return;
             box.textContent = msg;
             box.classList.remove('hidden');
-            if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
+            clearTimeout(box._timer);
+            box._timer = setTimeout(() => {
                 box.classList.add('hidden');
             }, duration);
         }
 
-        function escapeHtml(str) {
-            return String(str || '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
+        function switchView(viewId) {
+            const views = ['startScreen', 'gameScreen', 'gameOverScreen', 'hallOfFameScreen'];
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (id === viewId) {
+                    el.classList.remove('hidden');
+                    if (id !== 'startScreen') {
+                        el.classList.add('flex');
+                    }
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                }
+            });
 
-        function formatElapsed(seconds) {
-            const safe = Math.max(0, Math.floor(seconds));
-            const mins = Math.floor(safe / 60);
-            const secs = safe % 60;
-            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        }
-
-        function updateHeaderBadge() {
-            const badge = document.getElementById('playerInfoBadge');
-            if (!badge) return;
-            if (appState.nickname) {
-                badge.textContent = `${appState.classCode} · ${appState.classRoom} · ${appState.nickname}`;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
+            if (viewId === 'gameScreen') {
+                setTimeout(resizeGameCanvas, 20);
             }
         }
 
-        function requestGameFullscreen() {
-            try {
-                const el = document.documentElement;
-                if (!document.fullscreenElement && el.requestFullscreen) {
-                    el.requestFullscreen().catch(() => {});
-                }
-            } catch (e) {}
+        function normalizeKeyPart(str) {
+            return String(str || '').trim().toLowerCase().replace(/[^a-z0-9가-힣_-]/g, '_');
         }
 
-        function exitGameFullscreen() {
-            try {
-                if (document.fullscreenElement && document.exitFullscreen) {
-                    document.exitFullscreen().catch(() => {});
-                }
-            } catch (e) {}
-        }
-
-        function setGameplayBlur(isBlurred) {
-            const playfield = document.getElementById('gamePlayfieldContainer');
-            if (!playfield) return;
-            if (isBlurred) {
-                playfield.classList.add('gameplay-modal-blur');
-            } else {
-                playfield.classList.remove('gameplay-modal-blur');
-            }
-        }
-
-        // ==========================================
-        // 5. HALL OF FAME STORAGE & SINGLE-RECORD UPDATE
-        // ==========================================
-        function normalizeKeyPart(val) {
-            return String(val || '').trim().replace(/\s+/g, '').toLowerCase();
-        }
-
-        function makePlayerRecordKey(classCode, classRoom, nickname) {
+        function makeParticipantRecordKey(classCode, classRoom, nickname) {
             return `${normalizeKeyPart(classCode)}__${normalizeKeyPart(classRoom)}__${normalizeKeyPart(nickname)}`;
         }
 
         function loadLocalHof() {
             try {
                 const raw = localStorage.getItem(LOCAL_HOF_KEY);
-                appState.hofRecords = raw ? JSON.parse(raw) : [];
-            } catch (e) {
+                const parsed = raw ? JSON.parse(raw) : [];
+                if (Array.isArray(parsed)) {
+                    appState.hofRecords = parsed;
+                }
+            } catch (_) {
                 appState.hofRecords = [];
             }
         }
@@ -1222,119 +1364,138 @@
         function saveLocalHof() {
             try {
                 localStorage.setItem(LOCAL_HOF_KEY, JSON.stringify(appState.hofRecords));
-            } catch (e) {}
+            } catch (_) {}
         }
 
         function subscribeHallOfFame() {
             if (!useFirestore || !db) return;
-            if (unsubHof) unsubHof();
-            unsubHof = onSnapshot(getHofColRef(), (snap) => {
-                const remoteList = [];
-                snap.forEach(d => {
-                    remoteList.push({ id: d.id, ...d.data() });
+            if (unsubHof) {
+                unsubHof();
+                unsubHof = null;
+            }
+            try {
+                unsubHof = onSnapshot(getHofColRef(), (snapshot) => {
+                    const mergedMap = new Map();
+                    for (const rec of appState.hofRecords) {
+                        const k = makeParticipantRecordKey(rec.classCode, rec.classRoom, rec.nickname);
+                        mergedMap.set(k, rec);
+                    }
+                    snapshot.forEach(docSnap => {
+                        const data = docSnap.data();
+                        if (!data || !data.nickname) return;
+                        const k = makeParticipantRecordKey(data.classCode, data.classRoom, data.nickname);
+                        const existing = mergedMap.get(k);
+                        if (!existing || (data.score || 0) >= (existing.score || 0)) {
+                            mergedMap.set(k, {
+                                classCode: data.classCode || '',
+                                classRoom: data.classRoom || '',
+                                nickname: data.nickname || '',
+                                kills: Number(data.kills) || 0,
+                                score: Number(data.score) || 0,
+                                cpm: Number(data.cpm) || 0,
+                                updatedAt: Number(data.updatedAt) || Date.now()
+                            });
+                        }
+                    });
+                    appState.hofRecords = Array.from(mergedMap.values());
+                    saveLocalHof();
+                    renderHallOfFameTable();
+                }, (err) => {
+                    console.warn('Firestore snapshot warning:', err);
                 });
-                appState.hofRecords = remoteList;
-                saveLocalHof();
-                if (!document.getElementById('hallOfFameScreen').classList.contains('hidden')) {
-                    renderHallOfFame();
-                }
-            }, (err) => {
-                console.warn('Hall of Fame snapshot error:', err);
-            });
+            } catch (err) {
+                console.warn('subscribeHallOfFame failed:', err);
+            }
         }
 
-        /**
-         * Saves or updates a player's record on Game Over.
-         * If the same (classCode + classRoom + nickname) already exists:
-         *  - Updates the existing entry ONLY if the new score (or kills on tie) is higher!
-         *  - Never creates duplicate rows for the same participant.
-         */
-        async function upsertHallOfFameRecord(newEntry) {
-            const key = makePlayerRecordKey(newEntry.classCode, newEntry.classRoom, newEntry.nickname);
-            const recordPayload = {
-                recordKey: key,
-                classCode: newEntry.classCode,
-                classRoom: newEntry.classRoom,
-                nickname: newEntry.nickname,
-                kills: newEntry.kills,
-                score: newEntry.score,
-                cpm: newEntry.cpm,
-                updatedAt: Date.now()
-            };
-
-            const existingIdx = appState.hofRecords.findIndex(r =>
-                makePlayerRecordKey(r.classCode, r.classRoom, r.nickname) === key
+        // Single best-record upsert per participant (classCode + classRoom + nickname)
+        async function upsertHallOfFameRecord(entry) {
+            const key = makeParticipantRecordKey(entry.classCode, entry.classRoom, entry.nickname);
+            loadLocalHof();
+            const existingIdx = appState.hofRecords.findIndex(
+                r => makeParticipantRecordKey(r.classCode, r.classRoom, r.nickname) === key
             );
 
-            let isNewHigh = true;
-            if (existingIdx !== -1) {
+            let isNewHighScore = false;
+            if (existingIdx >= 0) {
                 const prev = appState.hofRecords[existingIdx];
-                if (newEntry.score > prev.score || (newEntry.score === prev.score && newEntry.kills > prev.kills)) {
-                    appState.hofRecords[existingIdx] = { ...prev, ...recordPayload };
+                if (entry.score > (prev.score || 0)) {
+                    appState.hofRecords[existingIdx] = { ...entry, updatedAt: Date.now() };
+                    isNewHighScore = true;
                 } else {
-                    isNewHigh = false;
+                    isNewHighScore = false;
                 }
             } else {
-                appState.hofRecords.push(recordPayload);
+                appState.hofRecords.push({ ...entry, updatedAt: Date.now() });
+                isNewHighScore = true;
             }
-
             saveLocalHof();
 
-            if (useFirestore && db && isNewHigh) {
+            if (useFirestore && db) {
                 try {
-                    const docRef = getHofDocRef(key);
-                    const snap = await getDoc(docRef);
+                    const ref = getHofDocRef(key);
+                    const snap = await getDoc(ref);
                     if (snap.exists()) {
-                        const prevRemote = snap.data();
-                        if (newEntry.score > (prevRemote.score || 0) ||
-                           (newEntry.score === (prevRemote.score || 0) && newEntry.kills > (prevRemote.kills || 0))) {
-                            await setDoc(docRef, recordPayload);
+                        const cloudPrev = snap.data();
+                        if (entry.score > (cloudPrev.score || 0)) {
+                            await setDoc(ref, { ...entry, updatedAt: Date.now() });
+                            isNewHighScore = true;
                         } else {
-                            isNewHigh = false;
+                            isNewHighScore = false;
                         }
                     } else {
-                        await setDoc(docRef, recordPayload);
+                        await setDoc(ref, { ...entry, updatedAt: Date.now() });
+                        isNewHighScore = true;
                     }
                 } catch (err) {
-                    console.warn('Firestore HoF upsert error:', err);
+                    console.warn('Cloud HOF save failed (saved locally):', err);
                 }
             }
 
-            return { isNewHigh, isExisting: existingIdx !== -1 };
+            renderHallOfFameTable();
+            return { isNewHighScore, isFirstRecord: existingIdx < 0 };
         }
 
-        function renderHallOfFame() {
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function renderHallOfFameTable() {
             const tbody = document.getElementById('hofTableBody');
             if (!tbody) return;
 
             let list = [...appState.hofRecords];
 
-            if (appState.hofTab === 'class') {
-                const fCode = normalizeKeyPart(appState.hofFilterCode);
-                const fRoom = normalizeKeyPart(appState.hofFilterRoom);
-                if (!fCode && !fRoom) {
+            if (appState.hofFilterMode === 'class') {
+                const codeQ = appState.hofSearchCode.trim().toLowerCase();
+                const roomQ = appState.hofSearchRoom.trim().toLowerCase();
+                if (!codeQ && !roomQ) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="5" class="py-8 text-center text-slate-400">
-                                위 입력칸에 <strong class="text-yellow-300">학급 코드</strong>와 <strong class="text-yellow-300">반</strong>을 적고 <strong class="text-yellow-300">조회</strong> 버튼을 눌러주세요.
+                            <td colspan="5" class="py-8 text-center text-amber-300">
+                                학급 코드와 반을 입력한 뒤 [조회] 버튼을 눌러주세요!
                             </td>
                         </tr>`;
                     return;
                 }
-                list = list.filter(r => {
-                    const matchCode = !fCode || normalizeKeyPart(r.classCode) === fCode;
-                    const matchRoom = !fRoom || normalizeKeyPart(r.classRoom) === fRoom;
+                list = list.filter(item => {
+                    const matchCode = !codeQ || String(item.classCode || '').trim().toLowerCase() === codeQ;
+                    const matchRoom = !roomQ || String(item.classRoom || '').trim().toLowerCase() === roomQ;
                     return matchCode && matchRoom;
                 });
             }
 
-            list.sort((a, b) => (b.score - a.score) || (b.kills - a.kills));
+            list.sort((a, b) => (b.score - a.score) || (b.kills - a.kills) || (b.cpm - a.cpm));
 
             if (list.length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="5" class="py-8 text-center text-slate-400">
-                            등록된 기록이 없습니다.
+                            등록된 기록이 아직 없습니다. 첫 번째 타자왕에 도전해보세요!
                         </td>
                     </tr>`;
                 return;
@@ -1342,103 +1503,154 @@
 
             tbody.innerHTML = list.map((item, idx) => {
                 const rank = idx + 1;
-                const rankBadge = rank === 1 ? '👑 1' : rank === 2 ? '🥈 2' : rank === 3 ? '🥉 3' : `${rank}`;
-                const rowHighlight = rank === 1 ? 'bg-yellow-400/10 text-yellow-200' : 'text-slate-200';
+                const rankBadge = rank === 1 ? '🥇 1' : rank === 2 ? '🥈 2' : rank === 3 ? '🥉 3' : `${rank}`;
+                const rowHighlight = rank === 1 ? 'bg-yellow-400/10' : '';
+                const classLabel = [item.classCode, item.classRoom].filter(Boolean).join(' · ');
                 return `
-                    <tr class="${rowHighlight} hover:bg-[#1b173b]/60 transition">
-                        <td class="py-2.5 px-3 text-center font-bold">${rankBadge}</td>
+                    <tr class="${rowHighlight} hover:bg-[#1b173b]/70 transition">
+                        <td class="py-2.5 px-3 text-center font-bold ${rank <= 3 ? 'text-yellow-400' : 'text-slate-300'}">${rankBadge}</td>
                         <td class="py-2.5 px-3">
-                            <span class="font-bold text-white">${escapeHtml(item.nickname)}</span>
-                            <span class="text-[11px] text-cyan-300 ml-1.5">(${escapeHtml(item.classCode)} · ${escapeHtml(item.classRoom)})</span>
+                            <div class="font-bold text-white">${escapeHtml(item.nickname)}</div>
+                            <div class="text-[11px] text-slate-400">${escapeHtml(classLabel)}</div>
                         </td>
-                        <td class="py-2.5 px-3 text-right text-emerald-400 font-bold">${item.kills || 0}개</td>
-                        <td class="py-2.5 px-3 text-right text-yellow-400 font-bold">${(item.score || 0).toLocaleString()}점</td>
-                        <td class="py-2.5 px-3 text-right text-slate-300 hidden sm:table-cell">${item.cpm || 0} 타</td>
-                    </tr>`;
+                        <td class="py-2.5 px-3 text-right text-emerald-400 font-bold">${item.kills}개</td>
+                        <td class="py-2.5 px-3 text-right text-yellow-400 font-bold">${Number(item.score).toLocaleString()}점</td>
+                        <td class="py-2.5 px-3 text-right text-cyan-300 hidden sm:table-cell">${item.cpm} 타</td>
+                    </tr>
+                `;
             }).join('');
         }
 
+        function openHallOfFame(fromView = 'startScreen') {
+            appState.previousView = fromView;
+            if (appState.classCode && !document.getElementById('hofClassCodeInput').value) {
+                document.getElementById('hofClassCodeInput').value = appState.classCode;
+            }
+            if (appState.classRoom && !document.getElementById('hofClassRoomInput').value) {
+                document.getElementById('hofClassRoomInput').value = appState.classRoom;
+            }
+            renderHallOfFameTable();
+            switchView('hallOfFameScreen');
+        }
+
         // ==========================================
-        // 6. GAMEPLAY ENGINE (WORDS, BOSS, SKILLS, MATH QUIZ)
+        // 5. CORE GAME ENGINE & QUIZ / LEVEL-UP / BOSS LOGIC
         // ==========================================
         const game = {
             active: false,
             paused: false,
             animId: null,
             lastFrameTime: 0,
-            startTime: 0,
-            pausedAccumMs: 0,
-            pauseStartedAt: 0,
-            lives: 3,
-            maxLives: 5,
+            elapsedSeconds: 0,
             score: 0,
             kills: 0,
             combo: 0,
             maxCombo: 0,
+            lives: 3,
+            maxLives: 5,
             totalTypedChars: 0,
             level: 1,
             expInLevel: 0,
             requiredForNextLevel: 6,
-            spawnTimer: 0,
             words: [],
             lasers: [],
             particles: [],
+            floatingTexts: [],
             stars: [],
             boss: null,
+            bossIntroActive: false,
+            bossIntroTimerId: null,
+            bossIntroAnimId: null,
             nextBossScore: 1000,
             bossCount: 0,
             freezeUntil: 0,
             feverUntil: 0,
-            usedPrimaryQuizIndices: new Set(),
-            usedEasierQuizIndices: new Set(),
-            currentQuiz: null,
-            isQuizRetry: false,
+            spawnTimer: 0,
+            autoTurretTimer: 0,
+            comboShieldCharges: 0,
+            isComposing: false,
+            ignoreInputUntil: 0,
+            quizState: {
+                active: false,
+                isSecondChance: false,
+                currentQuestion: null,
+                usedQuizIds: new Set()
+            },
+            levelUpTimerId: null,
+            skillChoices: [],
             skills: {
                 autoTurret: 0,
-                multiLaser: 0,
                 scoreBoost: 0,
                 slowField: 0,
+                comboShield: 0,
                 awakened: false
-            },
-            autoTurretTimer: 0
+            }
         };
 
         function getRequiredKillsForLevel(lv) {
-            // Lv.1 -> 6, Lv.2 -> 8, Lv.3 -> 10, Lv.4 -> 12 ...
             return 6 + (lv - 1) * 2;
         }
 
-        function initCanvasStars(w, h) {
-            game.stars = [];
-            for (let i = 0; i < 42; i++) {
-                game.stars.push({
-                    x: Math.random() * w,
-                    y: Math.random() * h,
-                    size: Math.random() < 0.3 ? 2 : 1,
-                    speed: 14 + Math.random() * 28,
-                    alpha: 0.35 + Math.random() * 0.65
-                });
+        function setGameplayBlur(blurred) {
+            const container = document.getElementById('gamePlayfieldContainer');
+            if (!container) return;
+            if (blurred) {
+                container.classList.add('gameplay-modal-blur');
+            } else {
+                container.classList.remove('gameplay-modal-blur');
             }
         }
 
-        function resizeGameCanvas() {
-            const wrapper = document.getElementById('canvasWrapper');
-            const canvas = document.getElementById('gameCanvas');
-            if (!wrapper || !canvas) return;
-            const rect = wrapper.getBoundingClientRect();
-            canvas.width = Math.max(300, Math.floor(rect.width));
-            canvas.height = Math.max(220, Math.floor(rect.height));
-            if (game.stars.length === 0) {
-                initCanvasStars(canvas.width, canvas.height);
+        function pauseGameForModal() {
+            game.paused = true;
+            setGameplayBlur(true);
+        }
+
+        function resumeGameFromModal() {
+            game.paused = false;
+            game.lastFrameTime = performance.now();
+            setGameplayBlur(false);
+            const input = document.getElementById('wordInput');
+            if (input && game.active) {
+                setTimeout(() => input.focus(), 30);
             }
         }
 
-        function pickRandomWord(isBoss = false) {
+        // Korean IME buffer reset so previous word's final syllable never leaks into next input
+        function clearWordInputSafely() {
+            const input = document.getElementById('wordInput');
+            if (!input) return;
+            game.isComposing = false;
+            game.ignoreInputUntil = performance.now() + 55;
+            input.value = '';
+            input.blur();
+            input.value = '';
+            setTimeout(() => {
+                if (game.active && !game.paused) {
+                    input.value = '';
+                    input.focus();
+                }
+            }, 0);
+        }
+
+        function pickRandomWord(mode = 'normal') {
             const lang = appState.lang;
-            if (isBoss) {
+            if (mode === 'boss' || mode === true) {
                 const pool = lang === 'en' ? BOSS_WORDS_EN :
                              lang === 'mix' ? [...BOSS_WORDS_KO, ...BOSS_WORDS_EN] :
                              BOSS_WORDS_KO;
+                return pool[Math.floor(Math.random() * pool.length)];
+            }
+            if (mode === 'enrage') {
+                const pool = lang === 'en' ? BOSS_ENRAGE_WORDS_EN :
+                             lang === 'mix' ? [...BOSS_ENRAGE_WORDS_KO, ...BOSS_ENRAGE_WORDS_EN] :
+                             BOSS_ENRAGE_WORDS_KO;
+                return pool[Math.floor(Math.random() * pool.length)];
+            }
+            if (mode === 'barrage') {
+                const pool = lang === 'en' ? BOSS_BARRAGE_EN :
+                             lang === 'mix' ? [...BOSS_BARRAGE_KO, ...BOSS_BARRAGE_EN] :
+                             BOSS_BARRAGE_KO;
                 return pool[Math.floor(Math.random() * pool.length)];
             }
             const pool = lang === 'en' ? WORDS_EN :
@@ -1450,7 +1662,7 @@
         function spawnFallingWord() {
             const canvas = document.getElementById('gameCanvas');
             if (!canvas) return;
-            const text = pickRandomWord(false);
+            const text = pickRandomWord('normal');
             const margin = 56;
             const x = margin + Math.random() * Math.max(40, canvas.width - margin * 2);
             const baseSpeed = 24 + (game.level - 1) * 4.5 + Math.min(28, game.kills * 0.35);
@@ -1463,43 +1675,179 @@
                 x,
                 y: 22,
                 speed: baseSpeed * slowFactor * (0.9 + Math.random() * 0.25),
-                special: isSpecialFreeze ? 'freeze' : isSpecialFever ? 'fever' : 'normal'
+                special: isSpecialFreeze ? 'freeze' : isSpecialFever ? 'fever' : 'normal',
+                isBossBarrage: false
             });
         }
 
-        function spawnBoss() {
+        function spawnBossBarrageWord(boss) {
+            const canvas = document.getElementById('gameCanvas');
+            if (!canvas || !boss) return;
+            const text = pickRandomWord('barrage');
+            const offset = (Math.random() - 0.5) * 90;
+            const x = Math.max(54, Math.min(canvas.width - 54, boss.x + offset));
+            const speed = (boss.enraged ? 56 : 42) + Math.min(20, game.level * 2);
+            game.words.push({
+                text,
+                x,
+                y: boss.y + 42,
+                speed,
+                special: 'barrage',
+                isBossBarrage: true
+            });
+        }
+
+        function addFloatingText(x, y, text, color = '#facc15') {
+            game.floatingTexts.push({
+                x,
+                y,
+                text,
+                color,
+                life: 0.85
+            });
+        }
+
+        function clearBossIntroTimers() {
+            if (game.bossIntroTimerId) {
+                clearInterval(game.bossIntroTimerId);
+                game.bossIntroTimerId = null;
+            }
+            if (game.bossIntroAnimId) {
+                cancelAnimationFrame(game.bossIntroAnimId);
+                game.bossIntroAnimId = null;
+            }
+            game.bossIntroActive = false;
+            const modal = document.getElementById('bossIntroModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function spawnBossNow(profile, cycle) {
             const canvas = document.getElementById('gameCanvas');
             if (!canvas) return;
-            const profile = BOSS_PROFILES[game.bossCount % BOSS_PROFILES.length];
-            const cycle = Math.floor(game.bossCount / BOSS_PROFILES.length) + 1;
             const maxHp = profile.baseHp * cycle;
-            game.bossCount += 1;
             game.boss = {
-                name: profile.name,
+                id: profile.id,
+                stage: profile.stage,
+                title: profile.title,
+                name: cycle > 1 ? `${profile.name} Mk.${cycle}` : profile.name,
                 color: profile.color,
+                accent: profile.accent,
                 hp: maxHp,
                 maxHp,
-                word: pickRandomWord(true),
+                word: pickRandomWord('boss'),
                 x: canvas.width / 2,
-                y: 54,
-                dir: 1
+                y: 58,
+                dir: 1,
+                enraged: false,
+                attackTimer: 2.2,
+                animTick: 0
             };
-            showToast(`👾 경고! [${profile.name}] 출현!`);
+            showToast(`👾 [${game.boss.name}] 전투 개시!`);
+        }
+
+        function triggerBossIntroAndSpawn() {
+            if (game.boss || game.bossIntroActive) return;
+            const profile = BOSS_PROFILES[game.bossCount % BOSS_PROFILES.length];
+            const cycle = Math.floor(game.bossCount / BOSS_PROFILES.length) + 1;
+            game.bossCount += 1;
+            game.bossIntroActive = true;
+
+            pauseGameForModal();
+            sfx.bossWarning();
+
+            const maxHp = profile.baseHp * cycle;
+            const displayName = cycle > 1 ? `${profile.name} Mk.${cycle}` : profile.name;
+
+            const modal = document.getElementById('bossIntroModal');
+            const titleEl = document.getElementById('bossIntroTitle');
+            const nameEl = document.getElementById('bossIntroName');
+            const statsEl = document.getElementById('bossIntroStats');
+            const countEl = document.getElementById('bossIntroCountdown');
+
+            if (titleEl) titleEl.textContent = `${profile.stage} · ${profile.title}`;
+            if (nameEl) nameEl.textContent = displayName;
+            if (statsEl) {
+                statsEl.innerHTML = `
+                    <span class="bg-rose-950/90 border border-rose-400/70 text-rose-200 px-2.5 py-1 rounded font-bold">
+                        ❤️ HP ${maxHp.toLocaleString()}
+                    </span>
+                    <span class="bg-amber-950/90 border border-amber-400/70 text-amber-200 px-2.5 py-1 rounded font-bold">
+                        🔥 50% 이하 광폭화 · 탄막 발사
+                    </span>
+                `;
+            }
+
+            let secondsLeft = 5;
+            if (countEl) countEl.textContent = String(secondsLeft);
+
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            const introCanvas = document.getElementById('bossIntroCanvas');
+            let tick = 0;
+            const renderIntroPreview = () => {
+                if (!game.bossIntroActive || !introCanvas) return;
+                const ictx = introCanvas.getContext('2d');
+                if (ictx) {
+                    ictx.clearRect(0, 0, introCanvas.width, introCanvas.height);
+                    ictx.fillStyle = '#090714';
+                    ictx.fillRect(0, 0, introCanvas.width, introCanvas.height);
+                    ictx.strokeStyle = 'rgba(244, 63, 94, 0.16)';
+                    ictx.lineWidth = 1;
+                    for (let gx = 0; gx < introCanvas.width; gx += 12) {
+                        ictx.beginPath();
+                        ictx.moveTo(gx, 0);
+                        ictx.lineTo(gx, introCanvas.height);
+                        ictx.stroke();
+                    }
+                    for (let gy = 0; gy < introCanvas.height; gy += 12) {
+                        ictx.beginPath();
+                        ictx.moveTo(0, gy);
+                        ictx.lineTo(introCanvas.width, gy);
+                        ictx.stroke();
+                    }
+                    tick += 0.08;
+                    const bobY = Math.sin(tick * 2) * 3;
+                    drawBossPixelSprite(ictx, profile.id, introCanvas.width / 2, introCanvas.height / 2 + bobY, 3, tick, false);
+                }
+                game.bossIntroAnimId = requestAnimationFrame(renderIntroPreview);
+            };
+            game.bossIntroAnimId = requestAnimationFrame(renderIntroPreview);
+
+            game.bossIntroTimerId = setInterval(() => {
+                secondsLeft -= 1;
+                if (secondsLeft > 0) {
+                    if (countEl) countEl.textContent = String(secondsLeft);
+                    playTone(440 + (5 - secondsLeft) * 80, 'square', 0.08, 0.07);
+                } else {
+                    clearBossIntroTimers();
+                    if (!game.active) {
+                        setGameplayBlur(false);
+                        return;
+                    }
+                    spawnBossNow(profile, cycle);
+                    resumeGameFromModal();
+                }
+            }, 1000);
         }
 
         function createExplosion(x, y, color = '#facc15', count = 14) {
             for (let i = 0; i < count; i++) {
                 const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
-                const speed = 50 + Math.random() * 120;
+                const speed = 40 + Math.random() * 110;
                 game.particles.push({
                     x,
                     y,
                     vx: Math.cos(angle) * speed,
                     vy: Math.sin(angle) * speed,
-                    life: 0.45 + Math.random() * 0.25,
-                    maxLife: 0.7,
+                    size: 3 + Math.floor(Math.random() * 4),
                     color,
-                    size: 2 + Math.floor(Math.random() * 3)
+                    life: 0.35 + Math.random() * 0.25
                 });
             }
         }
@@ -1509,85 +1857,266 @@
             if (!canvas) return;
             game.lasers.push({
                 x1: canvas.width / 2,
-                y1: canvas.height - 34,
+                y1: canvas.height - 56,
                 x2: targetX,
                 y2: targetY,
-                life: 0.16,
-                color
+                color,
+                life: 0.14
             });
         }
 
-        function pauseGameForModal() {
-            if (!game.paused) {
-                game.paused = true;
-                game.pauseStartedAt = Date.now();
+        // ==========================================
+        // 6. 6TH GRADE MATH QUIZ, LEVEL-UP & SKILLS
+        // ==========================================
+        function pickUniqueQuiz(bank) {
+            let candidates = bank.filter(item => !game.quizState.usedQuizIds.has(item.id));
+            if (candidates.length === 0) {
+                bank.forEach(item => game.quizState.usedQuizIds.delete(item.id));
+                candidates = [...bank];
             }
-            setGameplayBlur(true);
-            updateGameHud();
+            const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+            game.quizState.usedQuizIds.add(chosen.id);
+            return chosen;
         }
 
-        function resumeGameFromModal() {
-            if (game.paused) {
-                const pausedDelta = Date.now() - game.pauseStartedAt;
-                game.paused = false;
-                game.pausedAccumMs += pausedDelta;
-                if (game.freezeUntil > game.pauseStartedAt) {
-                    game.freezeUntil += pausedDelta;
+        function triggerMathQuiz(isSecondChance = false) {
+            pauseGameForModal();
+            const bank = isSecondChance ? EASY_MATH_QUIZ_BANK : MATH_QUIZ_BANK;
+            const qObj = pickUniqueQuiz(bank);
+            game.quizState.active = true;
+            game.quizState.isSecondChance = isSecondChance;
+            game.quizState.currentQuestion = qObj;
+
+            renderMathQuizModal();
+        }
+
+        function renderMathQuizModal() {
+            const modal = document.getElementById('mathQuizModal');
+            const badge = document.getElementById('quizAttemptBadge');
+            const title = document.getElementById('quizModalTitle');
+            const alertBanner = document.getElementById('quizAlertBanner');
+            const qText = document.getElementById('quizQuestionText');
+            const grid = document.getElementById('quizChoicesGrid');
+            const qObj = game.quizState.currentQuestion;
+            if (!modal || !qObj) return;
+
+            const targetLv = game.level + 1;
+            if (game.quizState.isSecondChance) {
+                badge.textContent = '📐 보충 문제 · 비례식과 비례배분';
+                title.textContent = `💪 한 번 더 도전! 맞히면 Lv.${targetLv} 달성!`;
+                alertBanner.textContent = '❌ 1차 문제 오답! 생명 1개가 차감되었습니다. 조금 더 쉬운 문제를 맞히면 레벨업합니다!';
+                alertBanner.classList.remove('hidden');
+            } else {
+                badge.textContent = '📐 6학년 2학기 수학 · 비례식과 비례배분';
+                title.textContent = `⚡ 레벨업 관문! 문제를 맞히면 Lv.${targetLv} 달성!`;
+                alertBanner.classList.add('hidden');
+            }
+
+            qText.textContent = qObj.q;
+            const labels = ['①', '②', '③', '④'];
+            grid.innerHTML = qObj.choices.map((choice, idx) => `
+                <button type="button" data-choice-idx="${idx}"
+                    class="quiz-choice-btn skill-card p-3 sm:p-3.5 rounded-md text-left flex items-center gap-2.5">
+                    <span class="bg-yellow-400 text-[#141129] font-bold text-xs w-6 h-6 rounded flex items-center justify-center shrink-0">
+                        ${labels[idx]}
+                    </span>
+                    <span class="text-sm sm:text-base font-bold text-white">${escapeHtml(choice)}</span>
+                </button>
+            `).join('');
+
+            grid.querySelectorAll('.quiz-choice-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = Number(btn.getAttribute('data-choice-idx'));
+                    handleQuizAnswer(idx);
+                });
+            });
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function handleQuizAnswer(choiceIndex) {
+            if (!game.quizState.active || !game.quizState.currentQuestion) return;
+            const qObj = game.quizState.currentQuestion;
+            const isCorrect = choiceIndex === qObj.answer;
+
+            if (isCorrect) {
+                sfx.quizCorrect();
+                game.quizState.active = false;
+                const quizModal = document.getElementById('mathQuizModal');
+                if (quizModal) {
+                    quizModal.classList.add('hidden');
+                    quizModal.classList.remove('flex');
                 }
-                if (game.feverUntil > game.pauseStartedAt) {
-                    game.feverUntil += pausedDelta;
+                game.level += 1;
+                game.expInLevel = 0;
+                game.requiredForNextLevel = getRequiredKillsForLevel(game.level);
+                updateHud();
+                startLevelUpCelebration(game.level);
+            } else {
+                sfx.quizWrong();
+                game.lives = Math.max(0, game.lives - 1);
+                updateHud();
+
+                if (game.lives <= 0) {
+                    game.quizState.active = false;
+                    const quizModal = document.getElementById('mathQuizModal');
+                    if (quizModal) {
+                        quizModal.classList.add('hidden');
+                        quizModal.classList.remove('flex');
+                    }
+                    setGameplayBlur(false);
+                    triggerGameOver();
+                    return;
                 }
-                game.lastFrameTime = performance.now();
-            }
-            setGameplayBlur(false);
-            updateGameHud();
-            const input = document.getElementById('wordInput');
-            if (input && game.active) {
-                setTimeout(() => input.focus(), 30);
+
+                if (!game.quizState.isSecondChance) {
+                    // 1st wrong -> deduct 1 life & present an easier problem
+                    triggerMathQuiz(true);
+                } else {
+                    // 2nd wrong -> deduct 1 life, close modal without leveling up, continue game
+                    game.quizState.active = false;
+                    game.expInLevel = 0;
+                    const quizModal = document.getElementById('mathQuizModal');
+                    if (quizModal) {
+                        quizModal.classList.add('hidden');
+                        quizModal.classList.remove('flex');
+                    }
+                    updateHud();
+                    showToast('😢 보충 문제 오답! 생명 -1, 현재 레벨로 게임을 계속합니다.');
+                    resumeGameFromModal();
+                }
             }
         }
 
-        // Safely clears Korean IME composition buffer so trailing syllable never leaks to next word
-        function clearWordInputSafely() {
-            const input = document.getElementById('wordInput');
-            if (!input) return;
-            input.value = '';
-            const wasFocused = (document.activeElement === input);
-            if (wasFocused) {
-                input.blur();
+        function startLevelUpCelebration(newLevel) {
+            sfx.levelUp();
+            const lvModal = document.getElementById('levelUpModal');
+            const bannerText = document.getElementById('levelUpBannerText');
+            if (bannerText) {
+                bannerText.textContent = `Lv.${newLevel} UP!`;
             }
-            input.value = '';
-            if (wasFocused && game.active && !game.paused) {
-                setTimeout(() => {
-                    input.value = '';
-                    input.focus();
-                }, 0);
+            if (lvModal) {
+                lvModal.classList.remove('hidden');
+                lvModal.classList.add('flex');
             }
+
+            clearTimeout(game.levelUpTimerId);
+            game.levelUpTimerId = setTimeout(() => {
+                if (lvModal) {
+                    lvModal.classList.add('hidden');
+                    lvModal.classList.remove('flex');
+                }
+                if (!game.active) {
+                    setGameplayBlur(false);
+                    return;
+                }
+                openSkillSelection(newLevel);
+            }, 2000);
         }
 
-        function triggerDamageShake() {
-            const frame = document.getElementById('arcadeFrame');
-            if (!frame) return;
-            frame.classList.remove('damage-flash');
-            void frame.offsetWidth;
-            frame.classList.add('damage-flash');
+        function openSkillSelection(newLevel) {
+            const available = SKILL_POOL.filter(s => (game.skills[s.id] || 0) < s.maxLv);
+            const shuffled = [...available].sort(() => Math.random() - 0.5);
+            game.skillChoices = shuffled.slice(0, 3);
+
+            const modal = document.getElementById('skillSelectModal');
+            const title = document.getElementById('skillModalTitle');
+            const grid = document.getElementById('skillCardsGrid');
+            if (!modal || !grid) {
+                resumeGameFromModal();
+                return;
+            }
+
+            if (title) {
+                title.textContent = `⚡ Lv.${newLevel} 달성! 스킬을 선택하세요`;
+            }
+
+            grid.innerHTML = game.skillChoices.map((skill, idx) => {
+                const curLv = game.skills[skill.id] || 0;
+                const lvTag = skill.maxLv < 99 ? `Lv.${curLv} → Lv.${curLv + 1}` : '즉시 발동';
+                return `
+                    <button type="button" data-skill-idx="${idx}"
+                        class="skill-card p-3.5 sm:p-4 rounded-md text-left flex flex-col justify-between gap-2">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-2xl">${skill.icon}</span>
+                                <span class="bg-yellow-400 text-[#141129] font-bold text-[11px] px-2 py-0.5 rounded">
+                                    [${idx + 1}] ${lvTag}
+                                </span>
+                            </div>
+                            <div class="text-sm sm:text-base font-bold text-yellow-300 mb-1">${escapeHtml(skill.name)}</div>
+                            <p class="text-[11px] sm:text-xs text-slate-300 leading-relaxed">${escapeHtml(skill.desc)}</p>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            grid.querySelectorAll('[data-skill-idx]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = Number(btn.getAttribute('data-skill-idx'));
+                    selectSkill(idx);
+                });
+            });
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         }
 
-        function updateGameHud() {
+        function selectSkill(skillIndex) {
+            const chosen = game.skillChoices[skillIndex];
+            if (!chosen) return;
+
+            if (chosen.id === 'healHeart') {
+                if (game.lives < game.maxLives) {
+                    game.lives += 1;
+                    showToast('💖 생명(HP) +1 회복!');
+                } else {
+                    game.score += 500;
+                    showToast('💖 최대 체력 보너스 +500점!');
+                }
+            } else if (chosen.id === 'shockwave') {
+                const count = Math.min(3, game.words.length);
+                for (let i = 0; i < count; i++) {
+                    destroyWordTarget(0, true);
+                }
+                showToast(`⚡ 플라즈마 충격파로 단어 ${count}개 소멸!`);
+            } else if (chosen.id === 'comboShield') {
+                game.skills.comboShield += 1;
+                game.comboShieldCharges += 1;
+                showToast('🛡️ 콤보 보호막 충전 완료!');
+            } else {
+                game.skills[chosen.id] = (game.skills[chosen.id] || 0) + 1;
+                showToast(`${chosen.icon} [${chosen.name}] 강화 완료!`);
+            }
+
+            if (game.skills.autoTurret >= 3 && !game.skills.awakened) {
+                game.skills.awakened = true;
+                showToast('🌟 각성 오토 포탑 해금!');
+            }
+
+            game.skillChoices = [];
+            const modal = document.getElementById('skillSelectModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            updateHud();
+            resumeGameFromModal();
+        }
+
+        function updateHud() {
+            const hearts = '❤️'.repeat(Math.max(0, game.lives)) + '🖤'.repeat(Math.max(0, game.maxLives - game.lives));
             const livesEl = document.getElementById('hudLives');
-            if (livesEl) {
-                livesEl.textContent = game.lives > 0 ? '❤️'.repeat(game.lives) : '💀';
-            }
+            if (livesEl) livesEl.textContent = hearts;
 
-            const effectiveNow = game.paused ? game.pauseStartedAt : Date.now();
-            const elapsedSec = game.active
-                ? (effectiveNow - game.startTime - game.pausedAccumMs) / 1000
-                : 0;
+            const mins = String(Math.floor(game.elapsedSeconds / 60)).padStart(2, '0');
+            const secs = String(Math.floor(game.elapsedSeconds % 60)).padStart(2, '0');
             const timeEl = document.getElementById('hudSurvivalTime');
-            if (timeEl) timeEl.textContent = formatElapsed(elapsedSec);
+            if (timeEl) timeEl.textContent = `${mins}:${secs}`;
 
             const scoreEl = document.getElementById('hudScore');
-            if (scoreEl) scoreEl.textContent = game.score.toLocaleString();
+            if (scoreEl) scoreEl.textContent = Math.floor(game.score).toLocaleString();
 
             const comboEl = document.getElementById('hudCombo');
             if (comboEl) comboEl.textContent = String(game.combo);
@@ -1595,7 +2124,7 @@
             const killsEl = document.getElementById('hudKills');
             if (killsEl) killsEl.textContent = `${game.kills}개`;
 
-            const cpm = elapsedSec > 1 ? Math.round((game.totalTypedChars / elapsedSec) * 60) : 0;
+            const cpm = game.elapsedSeconds > 1 ? Math.round((game.totalTypedChars / game.elapsedSeconds) * 60) : 0;
             const cpmEl = document.getElementById('hudCpm');
             if (cpmEl) cpmEl.textContent = `${cpm} 타/분`;
 
@@ -1607,665 +2136,670 @@
 
             const expBar = document.getElementById('hudExpBar');
             if (expBar) {
-                const pct = Math.min(100, Math.round((game.expInLevel / game.requiredForNextLevel) * 100));
+                const pct = Math.min(100, Math.round((game.expInLevel / Math.max(1, game.requiredForNextLevel)) * 100));
                 expBar.style.width = `${pct}%`;
             }
 
-            // Indicators
-            const feverEl = document.getElementById('feverIndicator');
-            const freezeEl = document.getElementById('freezeIndicator');
-            const awakeEl = document.getElementById('awakenedIndicator');
-            const frame = document.getElementById('arcadeFrame');
-
-            const isFever = effectiveNow < game.feverUntil;
-            if (feverEl) feverEl.classList.toggle('hidden', !isFever);
-            if (frame) frame.classList.toggle('fever-active', isFever);
-            if (freezeEl) freezeEl.classList.toggle('hidden', effectiveNow >= game.freezeUntil);
-            if (awakeEl) awakeEl.classList.toggle('hidden', !game.skills.awakened);
-
-            // Equipped skills pills
-            const skillsBox = document.getElementById('hudEquippedSkills');
-            if (skillsBox) {
+            const skillBar = document.getElementById('hudEquippedSkills');
+            if (skillBar) {
                 const tags = [];
-                if (game.skills.autoTurret > 0) tags.push(`🤖 오토포탑 Lv.${game.skills.autoTurret}`);
-                if (game.skills.multiLaser > 0) tags.push(`⚡ 연쇄레이저 Lv.${game.skills.multiLaser}`);
-                if (game.skills.scoreBoost > 0) tags.push(`💎 점수증폭 Lv.${game.skills.scoreBoost}`);
-                if (game.skills.slowField > 0) tags.push(`❄️ 감속역장 Lv.${game.skills.slowField}`);
-                if (game.skills.awakened) tags.push(`🌟 초각성`);
-                skillsBox.innerHTML = tags.length > 0
+                if (game.skills.autoTurret > 0) tags.push(`🔫포탑Lv.${game.skills.autoTurret}`);
+                if (game.skills.scoreBoost > 0) tags.push(`💎보석Lv.${game.skills.scoreBoost}`);
+                if (game.skills.slowField > 0) tags.push(`❄️감속Lv.${game.skills.slowField}`);
+                if (game.comboShieldCharges > 0) tags.push(`🛡️보호막x${game.comboShieldCharges}`);
+                skillBar.innerHTML = tags.length > 0
                     ? tags.map(t => `<span class="bg-[#1b173b] border border-cyan-400/50 text-cyan-200 px-1.5 py-0.5 rounded">${t}</span>`).join('')
-                    : `<span class="text-slate-400">보유 스킬: 없음</span>`;
+                    : '<span class="text-slate-400">보유 스킬: 없음</span>';
             }
+
+            const now = performance.now();
+            const feverEl = document.getElementById('feverIndicator');
+            if (feverEl) feverEl.classList.toggle('hidden', now >= game.feverUntil);
+
+            const freezeEl = document.getElementById('freezeIndicator');
+            if (freezeEl) freezeEl.classList.toggle('hidden', now >= game.freezeUntil);
+
+            const awakeEl = document.getElementById('awakenedIndicator');
+            if (awakeEl) awakeEl.classList.toggle('hidden', !game.skills.awakened);
         }
 
         // ==========================================
-        // 7. 6TH GRADE 2ND SEMESTER MATH QUIZ & LEVEL UP
+        // 7. WORD SHOOTING, BOSS COMBAT & GAME OVER
         // ==========================================
-        function pickNonRepeatingQuiz(pool, usedSet) {
-            if (usedSet.size >= pool.length) {
-                usedSet.clear();
-            }
-            const available = [];
-            for (let i = 0; i < pool.length; i++) {
-                if (!usedSet.has(i)) available.push(i);
-            }
-            const chosenIdx = available[Math.floor(Math.random() * available.length)];
-            usedSet.add(chosenIdx);
-            return pool[chosenIdx];
-        }
-
-        function openMathQuizForLevelUp(isRetry = false, alertMsg = '') {
-            pauseGameForModal();
-            game.isQuizRetry = isRetry;
-            const quiz = isRetry
-                ? pickNonRepeatingQuiz(MATH_QUIZ_EASIER, game.usedEasierQuizIndices)
-                : pickNonRepeatingQuiz(MATH_QUIZ_PRIMARY, game.usedPrimaryQuizIndices);
-            game.currentQuiz = quiz;
-
-            const modal = document.getElementById('mathQuizModal');
-            const badge = document.getElementById('quizAttemptBadge');
-            const title = document.getElementById('quizModalTitle');
-            const alertBanner = document.getElementById('quizAlertBanner');
-            const qText = document.getElementById('quizQuestionText');
-            const grid = document.getElementById('quizChoicesGrid');
-
-            if (badge) {
-                badge.textContent = isRetry
-                    ? '📐 6학년 2학기 수학 · 보너스 기초 비례식 문제'
-                    : '📐 6학년 2학기 수학 · 비례식과 비례배분';
-            }
-            if (title) {
-                title.textContent = `⚡ 레벨업 관문! 문제를 맞히면 Lv.${game.level + 1} 달성!`;
-            }
-            if (alertBanner) {
-                if (alertMsg) {
-                    alertBanner.textContent = alertMsg;
-                    alertBanner.classList.remove('hidden');
-                } else {
-                    alertBanner.classList.add('hidden');
-                }
-            }
-            if (qText) qText.textContent = quiz.q;
-
-            if (grid) {
-                grid.innerHTML = quiz.choices.map((choiceText, idx) => `
-                    <button type="button" data-choice-idx="${idx}"
-                        class="quiz-choice-btn skill-card p-3 rounded text-left flex items-center gap-2.5 text-xs sm:text-sm text-white">
-                        <span class="bg-yellow-400 text-[#141129] font-bold px-2 py-0.5 rounded shrink-0">${idx + 1}</span>
-                        <span>${escapeHtml(choiceText)}</span>
-                    </button>
-                `).join('');
-
-                grid.querySelectorAll('.quiz-choice-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const chosen = Number(btn.getAttribute('data-choice-idx'));
-                        handleQuizAnswer(chosen);
-                    });
-                });
-            }
-
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
-        }
-
-        function closeMathQuizModal() {
-            const modal = document.getElementById('mathQuizModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-            game.currentQuiz = null;
-        }
-
-        function handleQuizAnswer(choiceIdx) {
-            if (!game.currentQuiz) return;
-            const isCorrect = (choiceIdx === game.currentQuiz.answer);
-
-            if (isCorrect) {
-                closeMathQuizModal();
-                proceedToLevelUpCelebration();
-                return;
-            }
-
-            // Incorrect answer: deduct 1 life
-            sfx.error();
-            triggerDamageShake();
-            game.lives -= 1;
-            updateGameHud();
-
-            if (game.lives <= 0) {
-                closeMathQuizModal();
-                triggerGameOver();
-                return;
-            }
-
-            if (!game.isQuizRetry) {
-                // 1st wrong -> deduct 1 life & show easier problem
-                openMathQuizForLevelUp(
-                    true,
-                    '❌ 오답입니다! 목숨이 1개 차감되었습니다. 조금 더 쉬운 문제에 도전하세요!'
-                );
-            } else {
-                // 2nd wrong -> deduct 1 life & continue game without leveling up
-                closeMathQuizModal();
-                game.expInLevel = 0;
-                updateGameHud();
-                showToast('❌ 아쉽습니다! 목숨 1개 차감 후 현재 레벨로 게임을 계속합니다.');
-                resumeGameFromModal();
-            }
-        }
-
-        function proceedToLevelUpCelebration() {
-            pauseGameForModal();
-            game.level += 1;
-            game.expInLevel = 0;
-            game.requiredForNextLevel = getRequiredKillsForLevel(game.level);
-            sfx.levelUp();
-            updateGameHud();
-
-            const levelModal = document.getElementById('levelUpModal');
-            const bannerText = document.getElementById('levelUpBannerText');
-            if (bannerText) bannerText.textContent = `Lv.${game.level} UP!`;
-            if (levelModal) {
-                levelModal.classList.remove('hidden');
-                levelModal.classList.add('flex');
-            }
-
-            // Show Lv.N UP! window with blurred background & frozen time for 2 seconds, then open 3-skill modal
-            setTimeout(() => {
-                if (levelModal) {
-                    levelModal.classList.add('hidden');
-                    levelModal.classList.remove('flex');
-                }
-                if (!game.active) {
-                    setGameplayBlur(false);
-                    return;
-                }
-                openSkillSelectModal();
-            }, 2000);
-        }
-
-        const ALL_SKILL_POOL = [
-            {
-                id: 'autoTurret',
-                icon: '🤖',
-                name: '오토 타자 포탑',
-                desc: '일정 시간마다 가장 아래 단어를 자동으로 격추합니다.',
-                apply: () => { game.skills.autoTurret += 1; }
-            },
-            {
-                id: 'multiLaser',
-                icon: '⚡',
-                name: '연쇄 레이저포',
-                desc: '단어 격추 시 주변 단어 1개를 추가로 함께 파괴합니다.',
-                apply: () => { game.skills.multiLaser += 1; }
-            },
-            {
-                id: 'scoreBoost',
-                icon: '💎',
-                name: '점수 증폭 코어',
-                desc: '단어 격추 및 보스 타격 점수가 +35% 증가합니다.',
-                apply: () => { game.skills.scoreBoost += 1; }
-            },
-            {
-                id: 'slowField',
-                icon: '❄️',
-                name: '중력 감속 역장',
-                desc: '낙하하는 단어의 하강 속도를 영구적으로 늦춥니다.',
-                apply: () => { game.skills.slowField += 1; }
-            },
-            {
-                id: 'healShip',
-                icon: '💖',
-                name: '긴급 선체 수리',
-                desc: '생명(HP)을 즉시 1칸 회복하고 화면의 단어를 밀어냅니다.',
-                apply: () => {
-                    game.lives = Math.min(game.maxLives, game.lives + 1);
-                    game.words.forEach(w => { w.y = Math.max(20, w.y - 65); });
-                }
-            }
-        ];
-
-        let currentSkillChoices = [];
-
-        function openSkillSelectModal() {
-            pauseGameForModal();
-            const modal = document.getElementById('skillSelectModal');
-            const title = document.getElementById('skillModalTitle');
-            const grid = document.getElementById('skillCardsGrid');
-            if (title) title.textContent = `⚡ Lv.${game.level} 달성! 스킬을 선택하세요`;
-
-            const shuffled = [...ALL_SKILL_POOL].sort(() => Math.random() - 0.5).slice(0, 3);
-            const totalSkillLv = game.skills.autoTurret + game.skills.multiLaser + game.skills.scoreBoost + game.skills.slowField;
-            if (totalSkillLv >= 4 && !game.skills.awakened) {
-                shuffled[2] = {
-                    id: 'awakening',
-                    icon: '🌟',
-                    name: '초각성: 쿼카 오버드라이브',
-                    desc: '오토 포탑 속도가 2배로 폭주하고 모든 점수가 대폭 상승합니다!',
-                    awakening: true,
-                    apply: () => { game.skills.awakened = true; }
-                };
-            }
-            currentSkillChoices = shuffled;
-
-            if (grid) {
-                grid.innerHTML = shuffled.map((sk, idx) => `
-                    <button type="button" data-skill-idx="${idx}"
-                        class="skill-card-btn skill-card ${sk.awakening ? 'awakening-card' : ''} p-4 rounded-md flex flex-col items-center text-center gap-2">
-                        <div class="text-xs bg-yellow-400 text-[#141129] font-bold px-2 py-0.5 rounded">[${idx + 1}] 선택</div>
-                        <div class="text-3xl">${sk.icon}</div>
-                        <div class="text-sm sm:text-base font-bold text-yellow-300">${escapeHtml(sk.name)}</div>
-                        <div class="text-xs text-slate-300 leading-relaxed">${escapeHtml(sk.desc)}</div>
-                    </button>
-                `).join('');
-
-                grid.querySelectorAll('.skill-card-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const idx = Number(btn.getAttribute('data-skill-idx'));
-                        selectSkillChoice(idx);
-                    });
-                });
-            }
-
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
-        }
-
-        function selectSkillChoice(idx) {
-            const chosen = currentSkillChoices[idx];
-            if (!chosen) return;
-            chosen.apply();
-            currentSkillChoices = [];
-            const modal = document.getElementById('skillSelectModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-            sfx.hit();
-            updateGameHud();
-            showToast(`✨ [${chosen.name}] 스킬 장착 완료!`);
-            resumeGameFromModal();
-        }
-
-        // ==========================================
-        // 8. WORD DESTRUCTION & GAME LOOP
-        // ==========================================
-        function destroyWordAtIndex(index, isAuto = false) {
-            const target = game.words[index];
-            if (!target) return;
-
+        function destroyWordTarget(index, isAuto = false) {
+            const word = game.words[index];
+            if (!word) return;
             game.words.splice(index, 1);
-            fireLaserAt(target.x, target.y, isAuto ? '#facc15' : '#38bdf8');
-            createExplosion(target.x, target.y, target.special === 'freeze' ? '#38bdf8' : target.special === 'fever' ? '#f43f5e' : '#facc15');
 
-            if (target.special === 'freeze') {
-                game.freezeUntil = Date.now() + 4000;
-                showToast('❄️ 빙결 폭탄! 4초간 모든 단어가 정지합니다!');
-            } else if (target.special === 'fever') {
-                game.feverUntil = Date.now() + 6000;
-                showToast('🔥 피버 타임! 6초간 획득 점수 2배!');
-            }
+            const now = performance.now();
+            const isFever = now < game.feverUntil;
+            const boostMult = 1 + game.skills.scoreBoost * 0.25;
+            const comboBonus = Math.min(100, game.combo * 5);
+            const gained = Math.round((50 + word.text.length * 10 + comboBonus) * boostMult * (isFever ? 2 : 1));
 
+            game.score += gained;
             game.kills += 1;
             game.combo += 1;
             if (game.combo > game.maxCombo) game.maxCombo = game.combo;
             if (!isAuto) {
-                game.totalTypedChars += target.text.length * 2.4;
+                game.totalTypedChars += word.text.length * 2;
             }
 
-            const feverMult = Date.now() < game.feverUntil ? 2 : 1;
-            const boostMult = 1 + game.skills.scoreBoost * 0.35 + (game.skills.awakened ? 0.5 : 0);
-            const gained = Math.round((50 + target.text.length * 15 + game.combo * 5) * feverMult * boostMult);
-            game.score += gained;
+            fireLaserAt(word.x, word.y, word.isBossBarrage ? '#f43f5e' : '#38bdf8');
+            createExplosion(word.x, word.y, word.special === 'freeze' ? '#38bdf8' : '#facc15', 14);
+            addFloatingText(word.x, word.y - 10, `+${gained}`, isFever ? '#fb7185' : '#facc15');
+            sfx.laser();
 
-            // Multi-laser bonus chain hit
-            if (!isAuto && game.skills.multiLaser > 0 && game.words.length > 0) {
-                const extraIdx = 0;
-                const extra = game.words[extraIdx];
-                if (extra) {
-                    game.words.splice(extraIdx, 1);
-                    fireLaserAt(extra.x, extra.y, '#a855f7');
-                    createExplosion(extra.x, extra.y, '#a855f7', 10);
-                    game.kills += 1;
-                    game.score += Math.round(40 * feverMult * boostMult);
-                    game.expInLevel += 1;
-                }
+            if (word.special === 'freeze') {
+                game.freezeUntil = now + 4500;
+                showToast('❄️ 빙결 아이템 발동! 4.5초간 단어 정지!');
+            } else if (word.special === 'fever') {
+                game.feverUntil = now + 6000;
+                showToast('🔥 피버 타임 발동! 6초간 점수 2배!');
             }
 
-            // Boss spawn check every 1,000 points
-            if (!game.boss && game.score >= game.nextBossScore) {
-                game.nextBossScore += 1000;
-                spawnBoss();
-            }
-
-            // EXP & Level Up check (opens 6th-grade math quiz first)
-            game.expInLevel += 1;
-            updateGameHud();
-
-            if (game.expInLevel >= game.requiredForNextLevel) {
-                openMathQuizForLevelUp(false, '');
-            }
-        }
-
-        function handleWordSubmit() {
-            if (!game.active || game.paused) return;
-            const input = document.getElementById('wordInput');
-            if (!input) return;
-            const typed = input.value.trim();
-            if (!typed) return;
-
-            // 1) Check Boss word first
-            if (game.boss && typed.toLowerCase() === game.boss.word.toLowerCase()) {
-                clearWordInputSafely();
-                sfx.bossHit();
-                fireLaserAt(game.boss.x, game.boss.y, '#f43f5e');
-                createExplosion(game.boss.x, game.boss.y, '#f43f5e', 18);
-
-                const dmg = 65 + game.level * 15 + game.skills.scoreBoost * 20;
-                game.boss.hp -= dmg;
-                game.totalTypedChars += typed.length * 2.5;
-                game.combo += 1;
-                game.score += 180;
-
-                if (game.boss.hp <= 0) {
-                    sfx.bossDefeat();
-                    createExplosion(game.boss.x, game.boss.y, '#facc15', 32);
-                    showToast(`🎉 [${game.boss.name}] 격파 성공! +500점 & 생명 회복!`);
-                    game.score += 500;
-                    game.lives = Math.min(game.maxLives, game.lives + 1);
-                    game.boss = null;
-                } else {
-                    game.boss.word = pickRandomWord(true);
-                }
-                updateGameHud();
+            // Check Boss Spawn Threshold
+            if (!game.boss && !game.bossIntroActive && game.score >= game.nextBossScore) {
+                updateHud();
+                triggerBossIntroAndSpawn();
                 return;
             }
 
-            // 2) Check lowest matching falling word
-            let matchIdx = -1;
-            let lowestY = -Infinity;
+            // Check Level-Up EXP Threshold (only if no modal is active)
+            game.expInLevel += 1;
+            if (game.expInLevel >= game.requiredForNextLevel && !game.paused) {
+                updateHud();
+                triggerMathQuiz(false);
+                return;
+            }
+
+            updateHud();
+        }
+
+        function damageBoss(damageAmount) {
+            const boss = game.boss;
+            if (!boss) return;
+
+            boss.hp = Math.max(0, boss.hp - damageAmount);
+            game.totalTypedChars += boss.word.length * 2;
+            game.combo += 1;
+            if (game.combo > game.maxCombo) game.maxCombo = game.combo;
+
+            fireLaserAt(boss.x, boss.y + 16, '#f43f5e');
+            createExplosion(boss.x + (Math.random() - 0.5) * 30, boss.y + 10, '#f43f5e', 16);
+            addFloatingText(boss.x, boss.y - 24, `-${damageAmount}!`, '#fb7185');
+            sfx.bossHit();
+
+            if (boss.hp <= 0) {
+                sfx.bossDefeat();
+                createExplosion(boss.x, boss.y, '#facc15', 36);
+                game.score += 1000;
+                if (game.lives < game.maxLives) {
+                    game.lives += 1;
+                }
+                showToast(`🎉 [${boss.name}] 격파 완료! +1,000점 & 생명 회복!`);
+                game.boss = null;
+                game.nextBossScore = game.score + 1200;
+                updateHud();
+                return;
+            }
+
+            // Check 50% HP Enrage Mode
+            if (!boss.enraged && boss.hp <= boss.maxHp * 0.5) {
+                boss.enraged = true;
+                showToast(`🔥 경고! [${boss.name}] 광폭화 모드 돌입!`);
+            }
+
+            boss.word = pickRandomWord(boss.enraged ? 'enrage' : 'boss');
+            updateHud();
+        }
+
+        function handleWordSubmission(rawValue) {
+            if (!game.active || game.paused) return;
+            const typed = String(rawValue || '').trim();
+            if (!typed) return;
+
+            const normalizedTyped = typed.toLowerCase();
+
+            // 1) Check Boss Target Word first
+            if (game.boss && game.boss.word.toLowerCase() === normalizedTyped) {
+                clearWordInputSafely();
+                const dmg = 85 + game.skills.scoreBoost * 20 + Math.min(60, game.combo * 3);
+                damageBoss(dmg);
+                return;
+            }
+
+            // 2) Check Falling Words (lowest / closest to bottom first)
+            let bestIdx = -1;
+            let maxY = -Infinity;
             for (let i = 0; i < game.words.length; i++) {
-                if (game.words[i].text.toLowerCase() === typed.toLowerCase()) {
-                    if (game.words[i].y > lowestY) {
-                        lowestY = game.words[i].y;
-                        matchIdx = i;
-                    }
+                if (game.words[i].text.toLowerCase() === normalizedTyped && game.words[i].y > maxY) {
+                    maxY = game.words[i].y;
+                    bestIdx = i;
                 }
             }
 
-            if (matchIdx !== -1) {
+            if (bestIdx >= 0) {
                 clearWordInputSafely();
-                sfx.hit();
-                destroyWordAtIndex(matchIdx, false);
-            } else {
-                sfx.error();
-                game.combo = 0;
+                destroyWordTarget(bestIdx, false);
+                return;
+            }
+
+            // 3) Miss / Typo Feedback
+            clearWordInputSafely();
+            sfx.miss();
+            const input = document.getElementById('wordInput');
+            if (input) {
                 input.classList.remove('shake');
                 void input.offsetWidth;
                 input.classList.add('shake');
-                clearWordInputSafely();
-                updateGameHud();
             }
+
+            if (game.comboShieldCharges > 0) {
+                game.comboShieldCharges -= 1;
+                showToast('🛡️ 콤보 보호막이 콤보를 지켜냈습니다!');
+            } else if (game.combo > 0) {
+                game.combo = 0;
+            }
+            updateHud();
         }
 
-        function startGame() {
-            const codeVal = (document.getElementById('classCodeInput')?.value || '').trim();
-            const roomVal = (document.getElementById('classRoomInput')?.value || '').trim();
-            const nickVal = (document.getElementById('nicknameInput')?.value || '').trim();
-
-            if (!codeVal || !roomVal || !nickVal) {
-                sfx.error();
-                showToast('⚠️ 학급 코드, 반, 닉네임을 모두 입력해주세요!');
-                return;
-            }
-
-            appState.classCode = codeVal;
-            appState.classRoom = roomVal;
-            appState.nickname = nickVal;
-            updateHeaderBadge();
-
-            const pilotLabel = document.getElementById('pilotHudLabel');
-            if (pilotLabel) pilotLabel.textContent = `🐹 ${nickVal}`;
-
-            // Reset gameplay state
-            game.active = true;
-            game.paused = false;
-            game.startTime = Date.now();
-            game.lastFrameTime = performance.now();
-            game.pausedAccumMs = 0;
-            game.pauseStartedAt = 0;
-            game.lives = 3;
-            game.score = 0;
-            game.kills = 0;
+        function damagePlayer(reasonText = '단어가 방어선에 충돌했습니다!') {
+            if (!game.active) return;
+            sfx.damage();
+            game.lives = Math.max(0, game.lives - 1);
             game.combo = 0;
-            game.maxCombo = 0;
-            game.totalTypedChars = 0;
-            game.level = 1;
-            game.expInLevel = 0;
-            game.requiredForNextLevel = getRequiredKillsForLevel(1); // 6 kills for Lv.1 -> Lv.2
-            game.spawnTimer = 0.4;
-            game.words = [];
-            game.lasers = [];
-            game.particles = [];
-            game.boss = null;
-            game.nextBossScore = 1000;
-            game.bossCount = 0;
-            game.freezeUntil = 0;
-            game.feverUntil = 0;
-            game.usedPrimaryQuizIndices.clear();
-            game.usedEasierQuizIndices.clear();
-            game.currentQuiz = null;
-            game.isQuizRetry = false;
-            game.skills = {
-                autoTurret: 0,
-                multiLaser: 0,
-                scoreBoost: 0,
-                slowField: 0,
-                awakened: false
-            };
-            game.autoTurretTimer = 0;
 
-            setGameplayBlur(false);
-            const levelModal = document.getElementById('levelUpModal');
-            if (levelModal) {
-                levelModal.classList.add('hidden');
-                levelModal.classList.remove('flex');
-            }
-            closeMathQuizModal();
-            const skillModal = document.getElementById('skillSelectModal');
-            if (skillModal) {
-                skillModal.classList.add('hidden');
-                skillModal.classList.remove('flex');
+            const frame = document.getElementById('arcadeFrame');
+            if (frame) {
+                frame.classList.remove('damage-flash');
+                void frame.offsetWidth;
+                frame.classList.add('damage-flash');
             }
 
-            requestGameFullscreen();
-            showScreen('gameScreen');
-            resizeGameCanvas();
-            spawnFallingWord();
-            updateGameHud();
-
-            const wordInput = document.getElementById('wordInput');
-            if (wordInput) {
-                wordInput.value = '';
-                setTimeout(() => wordInput.focus(), 40);
+            updateHud();
+            if (game.lives <= 0) {
+                triggerGameOver();
+            } else {
+                showToast(`💥 ${reasonText} (남은 생명: ${game.lives})`);
             }
-
-            if (game.animId) cancelAnimationFrame(game.animId);
-            game.animId = requestAnimationFrame(gameLoop);
         }
 
-        function stopGame() {
+        async function triggerGameOver() {
             game.active = false;
             game.paused = false;
+            clearBossIntroTimers();
+            clearTimeout(game.levelUpTimerId);
             setGameplayBlur(false);
             if (game.animId) {
                 cancelAnimationFrame(game.animId);
                 game.animId = null;
             }
-        }
 
-        async function triggerGameOver() {
-            const elapsedSec = Math.max(1, (Date.now() - game.startTime - game.pausedAccumMs) / 1000);
-            const finalCpm = Math.round((game.totalTypedChars / elapsedSec) * 60);
-            const finalKills = game.kills;
-            const finalScore = game.score;
-            const finalCombo = game.maxCombo;
-
-            stopGame();
-            exitGameFullscreen();
             sfx.gameOver();
 
-            document.getElementById('resKills').textContent = `${finalKills}개`;
-            document.getElementById('resScore').textContent = `${finalScore.toLocaleString()}점`;
+            const finalCpm = game.elapsedSeconds > 1
+                ? Math.round((game.totalTypedChars / game.elapsedSeconds) * 60)
+                : 0;
+            const mins = String(Math.floor(game.elapsedSeconds / 60)).padStart(2, '0');
+            const secs = String(Math.floor(game.elapsedSeconds % 60)).padStart(2, '0');
+
+            document.getElementById('resKills').textContent = `${game.kills}개`;
+            document.getElementById('resScore').textContent = `${Math.floor(game.score).toLocaleString()}점`;
             document.getElementById('resCpm').textContent = `${finalCpm} 타`;
-            document.getElementById('resSurvivalCombo').textContent = `${formatElapsed(elapsedSec)} / ${finalCombo}`;
+            document.getElementById('resSurvivalCombo').textContent = `${mins}:${secs} / ${game.maxCombo}`;
 
-            showScreen('gameOverScreen');
-
-            const res = await upsertHallOfFameRecord({
+            const recordResult = await upsertHallOfFameRecord({
                 classCode: appState.classCode,
                 classRoom: appState.classRoom,
                 nickname: appState.nickname,
-                kills: finalKills,
-                score: finalScore,
+                kills: game.kills,
+                score: Math.floor(game.score),
                 cpm: finalCpm
             });
 
             const noticeEl = document.getElementById('gameOverHofNotice');
             if (noticeEl) {
-                if (res.isExisting && res.isNewHigh) {
-                    noticeEl.textContent = '🎉 기존 기록을 경신하여 명예의 전당 최고 기록이 업데이트되었습니다!';
-                } else if (res.isExisting && !res.isNewHigh) {
-                    noticeEl.textContent = '📌 기존 명예의 전당 최고 기록이 더 높아 기존 기록을 유지합니다!';
+                if (recordResult.isFirstRecord) {
+                    noticeEl.textContent = '🏆 명예의 전당에 새 기록이 등록되었습니다!';
+                    noticeEl.className = 'inline-block bg-emerald-500/15 border border-emerald-400 text-emerald-300 text-xs sm:text-sm font-bold px-4 py-1.5 rounded mb-4';
+                } else if (recordResult.isNewHighScore) {
+                    noticeEl.textContent = '🎉 개인 최고 점수 갱신! 명예의 전당 기록이 업데이트되었습니다!';
+                    noticeEl.className = 'inline-block bg-yellow-500/15 border border-yellow-400 text-yellow-300 text-xs sm:text-sm font-bold px-4 py-1.5 rounded mb-4';
                 } else {
-                    noticeEl.textContent = '🏆 명예의 전당에 새로운 기록이 등록되었습니다!';
+                    noticeEl.textContent = '📌 기존 명예의 전당 최고 기록이 더 높아 기존 기록을 유지합니다.';
+                    noticeEl.className = 'inline-block bg-slate-500/15 border border-slate-400 text-slate-300 text-xs sm:text-sm font-bold px-4 py-1.5 rounded mb-4';
                 }
+            }
+
+            switchView('gameOverScreen');
+        }
+
+        // ==========================================
+        // 8. PIXEL ART RENDERERS (QUOKKA SHIP & BOSSES)
+        // ==========================================
+        function drawQuokkaShip(ctx, cx, cy) {
+            ctx.save();
+            const p = 2; // Crisp 2x2 pixel block scale (36x28 sprite -> 72x56px)
+            const sprite = [
+                '..............KKKKKKKK..............',
+                '...........KKKWWWWWWWWKKK...........',
+                '.........KKWWSSSSSSSSSSWWKK.........',
+                '........KWWSSIIIAAAAIIISSWWK........',
+                '......KWSIIAAABBBAAAABBBAAAIISWK....',
+                '.....KWSIIAABLFLBAABBLFLBAAIISWK....',
+                '...KWSIIAAABFFFFFFFFFFFFBAAAIISWK...',
+                '...KWSIIAABLFFFFFFFFFFFFFFLBAAIISWK.',
+                '..KWSIIAAABFFFFNFFFFFFNFFFFBAAAIISWK',
+                '..KWSIIGGGABCCCCCCNNCCCCCCBAGGDIISWK',
+                'KWSIIGGEGABCCCCCBCCBCCBCCBAGGEDIISWK',
+                'KWSIIGRYGDBFFFFBFFFFBFFFFBDGGEGIISWK',
+                'KWSIIGGEGDBFFFFCCCCCCFFFFBDGRYGIISWK',
+                'KRRIIGGGGDBFFBBBCCCCBBBFFBDGGGGIIRRK',
+                'KMRIIGGGGDBFFFLBCCCCBLFFFBDGGGGIIRMK',
+                'KWWWSSSIIDBBFFCCCCCCCCFFBDDIISSSWWWK',
+                'KWWWSSSIBFFBFFCCCCCCCCFFBDDDISSSWWWK',
+                'KWWWSSSIBBFBFFFCCCCCCFFFBDDDISSSWWWK',
+                'KWWSSSSIIIDBFFBBFFFFBBFFBDIIISSSSWWK',
+                'KWWSSSKIIIIIGGGETTRRGGGGIIIIIKSSSWWK',
+                'KRRSSK.KIIIISSSSSSSSSSSSIIIIK.KSSRRK',
+                '.KMMK...KSSSWWWWWWWWWWWWSSSK...KMMK.',
+                '..KK.....KSSSSSSWWWWSSSSSSK.....KK..',
+                '..........KKSSSKWWWWKSSSKK..........',
+                '............KK.KWWWWK.KK............',
+                '...............KRRRRK...............',
+                '...............KMMMMK...............',
+                '................KKKK................'
+            ];
+
+            const palette = {
+                K: '#1c0b09', // Dark outline
+                B: '#451a03', // Quokka dark brown outline
+                F: '#8c4a1c', // Quokka main fur
+                L: '#b46528', // Quokka fur highlight
+                C: '#fbd39c', // Quokka cream belly & cheeks
+                N: '#090714', // Quokka eyes & nose
+                W: '#f1f5f9', // Bright silver-white hull
+                S: '#cbd5e1', // Silver hull shading
+                G: '#64748b', // Cockpit console slate
+                D: '#1e293b', // Dark navy cockpit interior
+                I: '#bae6fd', // Icy blue glass canopy rim
+                A: '#7dd3fc', // Sky blue glass glow
+                R: '#ef4444', // Bright red wing/thruster & LED
+                M: '#991b1b', // Deep red nozzle shading
+                E: '#22c55e', // Green dashboard LED
+                Y: '#facc15', // Yellow dashboard LED
+                T: '#38bdf8'  // Cyan dashboard LED
+            };
+
+            const cols = sprite[0].length;
+            const rows = sprite.length;
+            const startX = Math.round(cx - (cols * p) / 2);
+            const startY = Math.round(cy - (rows * p) / 2);
+
+            // Animated thruster flames beneath the 3 red nozzles
+            const flameH = Math.random() > 0.5 ? 6 : 4;
+            ctx.fillStyle = '#facc15';
+            ctx.fillRect(startX + 2 * p, startY + 22 * p, 2 * p, flameH);
+            ctx.fillRect(startX + (cols - 4) * p, startY + 22 * p, 2 * p, flameH);
+            ctx.fillStyle = '#fb7185';
+            ctx.fillRect(startX + 16 * p, startY + 28 * p, 4 * p, flameH + 2);
+
+            // Render pixel-by-pixel Quokka Spaceship
+            for (let r = 0; r < rows; r++) {
+                const rowStr = sprite[r];
+                for (let c = 0; c < cols; c++) {
+                    const ch = rowStr[c];
+                    if (ch === '.') continue;
+                    const color = palette[ch];
+                    if (!color) continue;
+                    ctx.fillStyle = color;
+                    ctx.fillRect(startX + c * p, startY + r * p, p, p);
+                }
+            }
+
+            ctx.restore();
+        }
+
+        // Authentic 100% Pixel Art Renderer for all 4 Boss Characters
+        function drawBossPixelSprite(ctx, bossId, cx, cy, scale = 3, tick = 0, enraged = false) {
+            ctx.save();
+            const p = scale;
+            const blink = Math.sin(tick * 6) > 0;
+
+            const sprites = {
+                mechacat: [
+                    '..MM..........MM..',
+                    '.MRRM........MRRM.',
+                    '.MRRMM......MMRRM.',
+                    'MMMMMMMMMMMMMMMMMM',
+                    'MSSSSSSSSSSSSSSSSM',
+                    'MSYYYYSSKKSSRRRRSM',
+                    'MSYYYYSSKKSSRRRRSM',
+                    'MSSSSSSSSSSSSSSSSM',
+                    'MMSSWWWWWWWWWWSSMM',
+                    'MRMSSWKKKKKKWSSMRM',
+                    'MRMSSSSSSSSSSSSMRM',
+                    '.MM..MMMMMMMM..MM.',
+                    '.....MRR..MRR.....'
+                ],
+                nebuladragon: [
+                    'YY..............YY',
+                    'YPY...PPPPPP...YPY',
+                    'PPPY.PDDDDDDP.YPPP',
+                    '.PPPPDDDDDDDDPPPP.',
+                    '..PDDDDDDDDDDDDP..',
+                    '.PDDCCDDDDDDCCDDP.',
+                    '.PDDCCDDDDDDCCDDP.',
+                    '..PDDDDDDDDDDDDP..',
+                    '...PDWWDDDDWWDP...',
+                    '....PDDDDDDDDP....',
+                    '...PDD.PPPP.DDP...',
+                    '..PDD........DDP..'
+                ],
+                blackhole: [
+                    '......CCCCCC......',
+                    '....CCPPPPPPCC....',
+                    '..CCPPDDDDDDPPCC..',
+                    '.CPPDDRRRRRRDDPPC.',
+                    'CPPDDRWWWWWWWRDDPC',
+                    'CPPDDRWKKKKWWRDDPC',
+                    'CPPDDRWWWWWWWRDDPC',
+                    '.CPPDDRRRRRRDDPPC.',
+                    '..CCPPDDDDDDPPCC..',
+                    '....CCPPPPPPCC....',
+                    '......CCCCCC......'
+                ],
+                omega: [
+                    '....YY..YY..YY....',
+                    '....YYYYYYYYYY....',
+                    '..MMMMMMMMMMMMMM..',
+                    '.MRRRRRRRRRRRRRRM.',
+                    'MRRWWWWMMMMWWWWRRM',
+                    'MRRWKKWMMMMWKKWRRM',
+                    'MRRWWWWMMMMWWWWRRM',
+                    'MRRRRRRRRRRRRRRRRM',
+                    '.MRRMWWMWWMWWMRRM.',
+                    'YY.MMMMMMMMMMMM.YY',
+                    'RR..MM..RR..MM..RR',
+                    '....MM..RR..MM....'
+                ]
+            };
+
+            const palette = {
+                M: enraged ? '#7f1d1d' : '#334155',
+                S: enraged ? '#fda4af' : '#94a3b8',
+                R: blink ? '#f43f5e' : '#fb7185',
+                Y: '#facc15',
+                K: '#090714',
+                W: '#f8fafc',
+                P: enraged ? '#e11d48' : '#7e22ce',
+                D: enraged ? '#4c0519' : '#1e1b4b',
+                C: '#38bdf8'
+            };
+
+            const grid = sprites[bossId] || sprites.mechacat;
+            const cols = grid[0].length;
+            const rows = grid.length;
+            const startX = Math.round(cx - (cols * p) / 2);
+            const startY = Math.round(cy - (rows * p) / 2);
+
+            for (let r = 0; r < rows; r++) {
+                const rowStr = grid[r];
+                for (let c = 0; c < cols; c++) {
+                    const ch = rowStr[c];
+                    if (ch === '.') continue;
+                    const color = palette[ch];
+                    if (!color) continue;
+                    ctx.fillStyle = color;
+                    ctx.fillRect(startX + c * p, startY + r * p, p, p);
+                }
+            }
+
+            ctx.restore();
+        }
+
+        // ==========================================
+        // 9. CANVAS RESIZING, GAME LOOP & LIFECYCLE
+        // ==========================================
+        function resizeGameCanvas() {
+            const wrapper = document.getElementById('canvasWrapper');
+            const canvas = document.getElementById('gameCanvas');
+            if (!wrapper || !canvas) return;
+            const rect = wrapper.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                canvas.width = Math.floor(rect.width);
+                canvas.height = Math.floor(rect.height);
+                if (game.stars.length === 0) {
+                    initStarfield();
+                }
+            }
+        }
+
+        function initStarfield() {
+            const canvas = document.getElementById('gameCanvas');
+            const w = canvas ? canvas.width : 800;
+            const h = canvas ? canvas.height : 500;
+            game.stars = [];
+            for (let i = 0; i < 65; i++) {
+                game.stars.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    size: Math.random() < 0.25 ? 2 : 1,
+                    speed: 12 + Math.random() * 28,
+                    alpha: 0.35 + Math.random() * 0.65
+                });
             }
         }
 
         function updateGame(dt) {
             const canvas = document.getElementById('gameCanvas');
             if (!canvas) return;
-            const now = Date.now();
-            const isFrozen = now < game.freezeUntil;
+            const w = canvas.width;
+            const h = canvas.height;
+            const now = performance.now();
 
-            // Scroll background stars
+            game.elapsedSeconds += dt;
+
+            // Update Starfield
             for (const s of game.stars) {
                 s.y += s.speed * dt;
-                if (s.y > canvas.height) {
+                if (s.y > h) {
                     s.y = 0;
-                    s.x = Math.random() * canvas.width;
+                    s.x = Math.random() * w;
                 }
             }
 
-            // Spawn falling words
-            if (!isFrozen) {
-                game.spawnTimer -= dt;
-                if (game.spawnTimer <= 0) {
-                    spawnFallingWord();
-                    const interval = Math.max(0.85, 2.2 - (game.level - 1) * 0.14);
-                    game.spawnTimer = interval;
-                }
-            }
-
-            // Auto-turret skill
+            // Auto Turret Skill
             if (game.skills.autoTurret > 0 && game.words.length > 0) {
-                const rate = Math.max(0.8, (4.2 - game.skills.autoTurret * 0.65) / (game.skills.awakened ? 2 : 1));
+                const interval = Math.max(1.2, 5.2 - game.skills.autoTurret * 0.75 - (game.skills.awakened ? 1.0 : 0));
                 game.autoTurretTimer += dt;
-                if (game.autoTurretTimer >= rate) {
+                if (game.autoTurretTimer >= interval) {
                     game.autoTurretTimer = 0;
                     let lowestIdx = 0;
                     for (let i = 1; i < game.words.length; i++) {
                         if (game.words[i].y > game.words[lowestIdx].y) lowestIdx = i;
                     }
-                    destroyWordAtIndex(lowestIdx, true);
+                    destroyWordTarget(lowestIdx, true);
                 }
             }
 
-            // Move boss horizontally
-            if (game.boss) {
-                game.boss.x += game.boss.dir * 55 * dt;
-                if (game.boss.x < 95) {
-                    game.boss.x = 95;
-                    game.boss.dir = 1;
-                } else if (game.boss.x > canvas.width - 95) {
-                    game.boss.x = canvas.width - 95;
-                    game.boss.dir = -1;
+            // Spawn Regular Falling Words
+            const isFrozen = now < game.freezeUntil;
+            if (!isFrozen) {
+                const spawnInterval = Math.max(0.85, 2.1 - (game.level - 1) * 0.12);
+                game.spawnTimer += dt;
+                if (game.spawnTimer >= spawnInterval) {
+                    game.spawnTimer = 0;
+                    spawnFallingWord();
                 }
             }
 
-            // Move falling words
-            const dangerLineY = canvas.height - 44;
+            // Update Falling Words
+            const defenseLineY = h - 54;
             for (let i = game.words.length - 1; i >= 0; i--) {
-                const w = game.words[i];
+                const word = game.words[i];
                 if (!isFrozen) {
-                    w.y += w.speed * dt;
+                    word.y += word.speed * dt;
                 }
-                if (w.y >= dangerLineY) {
+                if (word.y >= defenseLineY) {
                     game.words.splice(i, 1);
-                    createExplosion(w.x, dangerLineY, '#f43f5e', 16);
-                    sfx.error();
-                    triggerDamageShake();
-                    game.combo = 0;
-                    game.lives -= 1;
-                    updateGameHud();
-                    if (game.lives <= 0) {
-                        triggerGameOver();
-                        return;
+                    damagePlayer(word.isBossBarrage ? '보스 탄막에 피격되었습니다!' : `'${word.text}' 단어가 방어선을 돌파했습니다!`);
+                    if (!game.active) return;
+                }
+            }
+
+            // Update Boss Movement & Barrage Attacks
+            if (game.boss) {
+                const b = game.boss;
+                b.animTick += dt * (b.enraged ? 1.8 : 1.0);
+                const moveSpeed = (b.enraged ? 95 : 55);
+                b.x += b.dir * moveSpeed * dt;
+                const margin = 80;
+                if (b.x < margin) {
+                    b.x = margin;
+                    b.dir = 1;
+                } else if (b.x > w - margin) {
+                    b.x = w - margin;
+                    b.dir = -1;
+                }
+
+                if (!isFrozen) {
+                    b.attackTimer -= dt;
+                    if (b.attackTimer <= 0) {
+                        b.attackTimer = b.enraged ? 2.4 : 3.8;
+                        spawnBossBarrageWord(b);
                     }
                 }
             }
 
-            // Update lasers
+            // Update Lasers
             for (let i = game.lasers.length - 1; i >= 0; i--) {
                 game.lasers[i].life -= dt;
                 if (game.lasers[i].life <= 0) game.lasers.splice(i, 1);
             }
 
-            // Update particles
+            // Update Particles
             for (let i = game.particles.length - 1; i >= 0; i--) {
-                const p = game.particles[i];
-                p.x += p.vx * dt;
-                p.y += p.vy * dt;
-                p.life -= dt;
-                if (p.life <= 0) game.particles.splice(i, 1);
+                const pt = game.particles[i];
+                pt.x += pt.vx * dt;
+                pt.y += pt.vy * dt;
+                pt.life -= dt;
+                if (pt.life <= 0) game.particles.splice(i, 1);
             }
 
-            updateGameHud();
+            // Update Floating Texts
+            for (let i = game.floatingTexts.length - 1; i >= 0; i--) {
+                const ft = game.floatingTexts[i];
+                ft.y -= 28 * dt;
+                ft.life -= dt;
+                if (ft.life <= 0) game.floatingTexts.splice(i, 1);
+            }
+
+            updateHud();
         }
 
-        function renderGame() {
+        function renderGameCanvas() {
             const canvas = document.getElementById('gameCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
+            if (!ctx) return;
             const w = canvas.width;
             const h = canvas.height;
+            const now = performance.now();
 
-            // Space background
+            ctx.clearRect(0, 0, w, h);
             ctx.fillStyle = '#090714';
             ctx.fillRect(0, 0, w, h);
 
             // Stars
             for (const s of game.stars) {
                 ctx.fillStyle = `rgba(226, 232, 240, ${s.alpha})`;
-                ctx.fillRect(s.x, s.y, s.size, s.size);
+                ctx.fillRect(Math.round(s.x), Math.round(s.y), s.size, s.size);
             }
 
-            // Defense line
-            const dangerLineY = h - 44;
-            ctx.strokeStyle = 'rgba(244, 63, 94, 0.55)';
-            ctx.lineWidth = 2;
+            // Freeze Tint
+            if (now < game.freezeUntil) {
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            // Defense Line
+            const defenseLineY = h - 54;
+            ctx.strokeStyle = 'rgba(244, 63, 94, 0.45)';
             ctx.setLineDash([6, 6]);
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(0, dangerLineY);
-            ctx.lineTo(w, dangerLineY);
+            ctx.moveTo(0, defenseLineY);
+            ctx.lineTo(w, defenseLineY);
             ctx.stroke();
             ctx.setLineDash([]);
+
+            // Boss Rendering
+            if (game.boss) {
+                const b = game.boss;
+                const bob = Math.sin(b.animTick * 4) * 3;
+                drawBossPixelSprite(ctx, b.id, b.x, b.y + bob, 3, b.animTick, b.enraged);
+
+                // Boss Name & HP Bar
+                ctx.font = 'bold 12px Galmuri11, monospace';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = b.enraged ? '#fb7185' : '#facc15';
+                ctx.fillText(`${b.enraged ? '🔥[광폭화] ' : ''}${b.name}`, b.x, b.y - 28);
+
+                const barW = 140;
+                const barH = 8;
+                const hpRatio = Math.max(0, b.hp / b.maxHp);
+                ctx.fillStyle = '#1e1b4b';
+                ctx.fillRect(b.x - barW / 2, b.y - 22, barW, barH);
+                ctx.fillStyle = b.enraged ? '#f43f5e' : '#ef4444';
+                ctx.fillRect(b.x - barW / 2, b.y - 22, barW * hpRatio, barH);
+                ctx.strokeStyle = '#f8fafc';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(b.x - barW / 2, b.y - 22, barW, barH);
+
+                // Boss Target Word Box
+                ctx.font = 'bold 15px Galmuri11, monospace';
+                const tw = ctx.measureText(b.word).width + 20;
+                ctx.fillStyle = '#171433';
+                ctx.fillRect(b.x - tw / 2, b.y + 24, tw, 24);
+                ctx.strokeStyle = '#f43f5e';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(b.x - tw / 2, b.y + 24, tw, 24);
+                ctx.fillStyle = '#fde047';
+                ctx.fillText(b.word, b.x, b.y + 41);
+            }
+
+            // Falling Words
+            ctx.font = 'bold 14px Galmuri11, monospace';
+            ctx.textAlign = 'center';
+            for (const word of game.words) {
+                const label = word.isBossBarrage ? `⚠️ ${word.text}` :
+                              word.special === 'freeze' ? `❄️ ${word.text}` :
+                              word.special === 'fever' ? `🔥 ${word.text}` :
+                              word.text;
+                const tw = ctx.measureText(label).width + 16;
+                const boxH = 24;
+
+                ctx.fillStyle = word.isBossBarrage ? '#4c0519' :
+                                word.special === 'freeze' ? '#082f49' :
+                                word.special === 'fever' ? '#451a03' :
+                                '#171433';
+                ctx.fillRect(word.x - tw / 2, word.y - 16, tw, boxH);
+
+                ctx.strokeStyle = word.isBossBarrage ? '#f43f5e' :
+                                  word.special === 'freeze' ? '#38bdf8' :
+                                  word.special === 'fever' ? '#fb923c' :
+                                  '#6366f1';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(word.x - tw / 2, word.y - 16, tw, boxH);
+
+                ctx.fillStyle = word.isBossBarrage ? '#fda4af' :
+                                word.special === 'freeze' ? '#bae6fd' :
+                                word.special === 'fever' ? '#fde047' :
+                                '#f8fafc';
+                ctx.fillText(label, word.x, word.y + 1);
+            }
 
             // Lasers
             for (const l of game.lasers) {
@@ -2277,185 +2811,227 @@
                 ctx.stroke();
             }
 
-            // Boss ship
-            if (game.boss) {
-                const b = game.boss;
-                ctx.fillStyle = '#1e1b4b';
-                ctx.strokeStyle = b.color;
-                ctx.lineWidth = 2;
-                ctx.fillRect(b.x - 75, b.y - 24, 150, 48);
-                ctx.strokeRect(b.x - 75, b.y - 24, 150, 48);
-
-                // Boss HP bar
-                const hpPct = Math.max(0, b.hp / b.maxHp);
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(b.x - 65, b.y - 34, 130, 6);
-                ctx.fillStyle = b.color;
-                ctx.fillRect(b.x - 65, b.y - 34, 130 * hpPct, 6);
-
-                ctx.font = 'bold 11px Galmuri11, monospace';
-                ctx.textAlign = 'center';
-                ctx.fillStyle = '#facc15';
-                ctx.fillText(b.name, b.x, b.y - 8);
-
-                ctx.font = 'bold 14px Galmuri11, monospace';
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(b.word, b.x, b.y + 13);
-            }
-
-            // Falling words
-            ctx.font = 'bold 14px Galmuri11, monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            for (const item of game.words) {
-                const textW = ctx.measureText(item.text).width;
-                const boxW = textW + 18;
-                const boxH = 26;
-                const dangerRatio = item.y / dangerLineY;
-
-                let borderCol = '#38bdf8';
-                let textCol = '#f8fafc';
-                if (item.special === 'freeze') {
-                    borderCol = '#22d3ee';
-                    textCol = '#67e8f9';
-                } else if (item.special === 'fever') {
-                    borderCol = '#fb7185';
-                    textCol = '#fda4af';
-                } else if (dangerRatio > 0.72) {
-                    borderCol = '#f43f5e';
-                    textCol = '#fecdd3';
-                }
-
-                ctx.fillStyle = 'rgba(15, 12, 33, 0.9)';
-                ctx.fillRect(item.x - boxW / 2, item.y - boxH / 2, boxW, boxH);
-                ctx.strokeStyle = borderCol;
-                ctx.lineWidth = 2;
-                ctx.strokeRect(item.x - boxW / 2, item.y - boxH / 2, boxW, boxH);
-
-                ctx.fillStyle = textCol;
-                ctx.fillText(item.text, item.x, item.y + 1);
-            }
-
             // Particles
-            for (const p of game.particles) {
-                ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y, p.size, p.size);
+            for (const pt of game.particles) {
+                ctx.fillStyle = pt.color;
+                ctx.fillRect(Math.round(pt.x), Math.round(pt.y), pt.size, pt.size);
             }
 
-            // Quokka Spaceship at Bottom Center
-            const shipX = w / 2;
-            const shipY = h - 22;
-            ctx.fillStyle = '#facc15';
-            ctx.beginPath();
-            ctx.moveTo(shipX, shipY - 16);
-            ctx.lineTo(shipX - 18, shipY + 12);
-            ctx.lineTo(shipX + 18, shipY + 12);
-            ctx.closePath();
-            ctx.fill();
+            // Floating Texts
+            ctx.font = 'bold 13px Galmuri11, monospace';
+            for (const ft of game.floatingTexts) {
+                ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+            }
 
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(shipX - 5, shipY - 4, 10, 8);
+            // Player Quokka Spaceship (Pixel Quokka inside Saucer)
+            drawQuokkaShip(ctx, w / 2, h - 32);
         }
 
         function gameLoop(timestamp) {
             if (!game.active) return;
-            const dt = Math.min(0.05, Math.max(0.001, (timestamp - game.lastFrameTime) / 1000));
+            const dt = Math.min(0.05, Math.max(0, (timestamp - game.lastFrameTime) / 1000));
             game.lastFrameTime = timestamp;
 
             if (!game.paused) {
                 updateGame(dt);
             }
-            if (game.active) {
-                renderGame();
-                game.animId = requestAnimationFrame(gameLoop);
+            renderGameCanvas();
+            game.animId = requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            const codeVal = document.getElementById('classCodeInput').value.trim();
+            const roomVal = document.getElementById('classRoomInput').value.trim();
+            const nickVal = document.getElementById('nicknameInput').value.trim();
+
+            if (!codeVal) {
+                showToast('⚠️ 학급 코드를 입력해주세요!');
+                document.getElementById('classCodeInput').focus();
+                return;
             }
+            if (!roomVal) {
+                showToast('⚠️ 반을 입력해주세요! (예: 3-2)');
+                document.getElementById('classRoomInput').focus();
+                return;
+            }
+            if (!nickVal) {
+                showToast('⚠️ 닉네임을 입력해주세요!');
+                document.getElementById('nicknameInput').focus();
+                return;
+            }
+
+            appState.classCode = codeVal;
+            appState.classRoom = roomVal;
+            appState.nickname = nickVal;
+
+            const badge = document.getElementById('playerInfoBadge');
+            if (badge) {
+                badge.textContent = `${codeVal} · ${roomVal} · ${nickVal}`;
+                badge.classList.remove('hidden');
+            }
+            const pilotLabel = document.getElementById('pilotHudLabel');
+            if (pilotLabel) {
+                pilotLabel.textContent = `🐹 ${nickVal} (${roomVal})`;
+            }
+
+            // Reset Game State
+            clearBossIntroTimers();
+            clearTimeout(game.levelUpTimerId);
+            if (game.animId) cancelAnimationFrame(game.animId);
+
+            game.active = true;
+            game.paused = false;
+            game.elapsedSeconds = 0;
+            game.score = 0;
+            game.kills = 0;
+            game.combo = 0;
+            game.maxCombo = 0;
+            game.lives = 3;
+            game.totalTypedChars = 0;
+            game.level = 1;
+            game.expInLevel = 0;
+            game.requiredForNextLevel = getRequiredKillsForLevel(1);
+            game.words = [];
+            game.lasers = [];
+            game.particles = [];
+            game.floatingTexts = [];
+            game.boss = null;
+            game.nextBossScore = 1000;
+            game.bossCount = 0;
+            game.freezeUntil = 0;
+            game.feverUntil = 0;
+            game.spawnTimer = 0;
+            game.autoTurretTimer = 0;
+            game.comboShieldCharges = 0;
+            game.quizState.active = false;
+            game.quizState.isSecondChance = false;
+            game.quizState.currentQuestion = null;
+            game.quizState.usedQuizIds.clear();
+            game.skillChoices = [];
+            game.skills = {
+                autoTurret: 0,
+                scoreBoost: 0,
+                slowField: 0,
+                comboShield: 0,
+                awakened: false
+            };
+
+            // Hide all modals & unblur
+            ['bossIntroModal', 'mathQuizModal', 'levelUpModal', 'skillSelectModal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                }
+            });
+            setGameplayBlur(false);
+
+            switchView('gameScreen');
+            resizeGameCanvas();
+            initStarfield();
+            spawnFallingWord();
+            spawnFallingWord();
+            updateHud();
+
+            const input = document.getElementById('wordInput');
+            if (input) {
+                input.value = '';
+                setTimeout(() => input.focus(), 50);
+            }
+
+            game.lastFrameTime = performance.now();
+            game.animId = requestAnimationFrame(gameLoop);
+        }
+
+        function exitGameToHome() {
+            game.active = false;
+            game.paused = false;
+            clearBossIntroTimers();
+            clearTimeout(game.levelUpTimerId);
+            setGameplayBlur(false);
+            if (game.animId) {
+                cancelAnimationFrame(game.animId);
+                game.animId = null;
+            }
+            switchView('startScreen');
         }
 
         // ==========================================
-        // 9. EVENT WIRING & INITIALIZATION
+        // 10. INITIALIZATION & EVENT LISTENERS
         // ==========================================
-        window.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
             initBackend();
+            renderHallOfFameTable();
 
-            // Header buttons
-            document.getElementById('homeLogoBtn').addEventListener('click', () => {
-                sfx.click();
-                stopGame();
-                exitGameFullscreen();
-                showScreen('startScreen');
-            });
-
-            document.getElementById('exitGameToHomeBtn').addEventListener('click', () => {
-                sfx.click();
-                stopGame();
-                exitGameFullscreen();
-                showScreen('startScreen');
-            });
-
-            document.getElementById('serverStatusBtn').addEventListener('click', () => {
-                sfx.click();
-                const modal = document.getElementById('firebaseSetupModal');
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            });
-
-            document.getElementById('closeFirebaseModalBtn').addEventListener('click', () => {
-                sfx.click();
-                const modal = document.getElementById('firebaseSetupModal');
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            });
-
-            document.getElementById('applyFirebaseConfigBtn').addEventListener('click', async () => {
-                sfx.click();
-                const raw = document.getElementById('firebaseConfigInput').value.trim();
-                if (!raw) {
-                    showToast('⚠️ Firebase 설정 JSON을 입력해주세요.');
-                    return;
-                }
-                try {
-                    const parsed = JSON.parse(raw);
-                    const ok = await connectWithFirebaseConfig(parsed);
-                    if (ok) {
-                        showToast('🟢 새 Firebase 설정이 연결되었습니다!');
-                        const modal = document.getElementById('firebaseSetupModal');
-                        modal.classList.add('hidden');
-                        modal.classList.remove('flex');
-                    } else {
-                        showToast('❌ 연결에 실패했습니다. 설정값을 확인해주세요.');
-                    }
-                } catch (err) {
-                    showToast('❌ 올바른 JSON 형식이 아닙니다.');
-                }
-            });
-
-            document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
-                soundEnabled = !soundEnabled;
-                e.currentTarget.textContent = soundEnabled ? '🔊 ON' : '🔇 OFF';
-                if (soundEnabled) sfx.click();
-            });
-
-            // Language selection pills on Start Screen
+            // Language selection buttons
             document.querySelectorAll('.lang-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    sfx.click();
                     document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     appState.lang = btn.getAttribute('data-lang') || 'ko';
                 });
             });
 
-            // Start Screen buttons
-            document.getElementById('startGameBtn').addEventListener('click', () => {
-                sfx.click();
-                startGame();
-            });
+            // Sound toggle
+            const soundBtn = document.getElementById('soundToggleBtn');
+            if (soundBtn) {
+                soundBtn.addEventListener('click', () => {
+                    appState.soundOn = !appState.soundOn;
+                    soundBtn.textContent = appState.soundOn ? '🔊 ON' : '🔇 OFF';
+                });
+            }
 
+            // Firebase Modal controls
+            const serverBtn = document.getElementById('serverStatusBtn');
+            const fbModal = document.getElementById('firebaseSetupModal');
+            if (serverBtn && fbModal) {
+                serverBtn.addEventListener('click', () => {
+                    fbModal.classList.remove('hidden');
+                    fbModal.classList.add('flex');
+                });
+            }
+            const closeFbBtn = document.getElementById('closeFirebaseModalBtn');
+            if (closeFbBtn && fbModal) {
+                closeFbBtn.addEventListener('click', () => {
+                    fbModal.classList.add('hidden');
+                    fbModal.classList.remove('flex');
+                });
+            }
+            const applyFbBtn = document.getElementById('applyFirebaseConfigBtn');
+            if (applyFbBtn) {
+                applyFbBtn.addEventListener('click', async () => {
+                    const raw = document.getElementById('firebaseConfigInput').value.trim();
+                    if (!raw) {
+                        showToast('⚠️ Firebase 설정 JSON을 입력해주세요.');
+                        return;
+                    }
+                    try {
+                        const parsed = JSON.parse(raw);
+                        const ok = await connectWithFirebaseConfig(parsed);
+                        if (ok) {
+                            showToast('🟢 Firebase 실시간 서버에 연결되었습니다!');
+                            fbModal.classList.add('hidden');
+                            fbModal.classList.remove('flex');
+                        } else {
+                            showToast('❌ 연결에 실패했습니다. 설정값을 확인해주세요.');
+                        }
+                    } catch (_) {
+                        showToast('❌ 올바른 JSON 형식이 아닙니다.');
+                    }
+                });
+            }
+
+            // Start & Restart & Navigation buttons
+            document.getElementById('startGameBtn')?.addEventListener('click', startGame);
+            document.getElementById('restartGameBtn')?.addEventListener('click', startGame);
+            document.getElementById('exitGameToHomeBtn')?.addEventListener('click', exitGameToHome);
+            document.getElementById('homeLogoBtn')?.addEventListener('click', exitGameToHome);
+            document.getElementById('gameOverHomeBtn')?.addEventListener('click', () => switchView('startScreen'));
+
+            // Enter key on start screen inputs starts game
             ['classCodeInput', 'classRoomInput', 'nicknameInput'].forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                el.addEventListener('keydown', (e) => {
+                document.getElementById(id)?.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         startGame();
@@ -2463,134 +3039,96 @@
                 });
             });
 
-            // Gameplay input & Dev test buttons
-            const wordInput = document.getElementById('wordInput');
-            wordInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.isComposing) {
-                    e.preventDefault();
-                    handleWordSubmit();
+            // Hall of Fame buttons & tabs
+            document.getElementById('startHofBtn')?.addEventListener('click', () => openHallOfFame('startScreen'));
+            document.getElementById('openHofHeaderBtn')?.addEventListener('click', () => {
+                if (game.active) {
+                    showToast('⚠️ 게임 진행 중에는 명예의 전당을 열 수 없습니다.');
+                    return;
                 }
+                openHallOfFame('startScreen');
+            });
+            document.getElementById('gameOverHofBtn')?.addEventListener('click', () => openHallOfFame('gameOverScreen'));
+            document.getElementById('closeHofBtn')?.addEventListener('click', () => {
+                switchView(appState.previousView || 'startScreen');
             });
 
-            document.getElementById('fireBtn').addEventListener('click', () => {
-                handleWordSubmit();
-                wordInput.focus();
+            const tabAllBtn = document.getElementById('hofTabAllBtn');
+            const tabClassBtn = document.getElementById('hofTabClassBtn');
+            const classFilterBar = document.getElementById('hofClassFilterBar');
+
+            tabAllBtn?.addEventListener('click', () => {
+                appState.hofFilterMode = 'all';
+                tabAllBtn.classList.add('active');
+                tabClassBtn?.classList.remove('active');
+                classFilterBar?.classList.add('hidden');
+                classFilterBar?.classList.remove('flex');
+                renderHallOfFameTable();
             });
 
-            // Keyboard shortcuts for Math Quiz [1-4] and Skill Cards [1-3]
+            tabClassBtn?.addEventListener('click', () => {
+                appState.hofFilterMode = 'class';
+                tabClassBtn.classList.add('active');
+                tabAllBtn?.classList.remove('active');
+                classFilterBar?.classList.remove('hidden');
+                classFilterBar?.classList.add('flex');
+                appState.hofSearchCode = document.getElementById('hofClassCodeInput').value;
+                appState.hofSearchRoom = document.getElementById('hofClassRoomInput').value;
+                renderHallOfFameTable();
+            });
+
+            document.getElementById('hofSearchBtn')?.addEventListener('click', () => {
+                appState.hofSearchCode = document.getElementById('hofClassCodeInput').value;
+                appState.hofSearchRoom = document.getElementById('hofClassRoomInput').value;
+                renderHallOfFameTable();
+            });
+
+            // Word Input & IME Composition Handling
+            const wordInput = document.getElementById('wordInput');
+            if (wordInput) {
+                wordInput.addEventListener('compositionstart', () => {
+                    game.isComposing = true;
+                });
+                wordInput.addEventListener('compositionend', () => {
+                    game.isComposing = false;
+                });
+                wordInput.addEventListener('input', () => {
+                    if (performance.now() < game.ignoreInputUntil) {
+                        wordInput.value = '';
+                    }
+                });
+                wordInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleWordSubmission(wordInput.value);
+                    }
+                });
+            }
+
+            document.getElementById('fireBtn')?.addEventListener('click', () => {
+                if (wordInput) handleWordSubmission(wordInput.value);
+            });
+
+            // Keyboard Shortcuts [1-4] for Math Quiz & [1-3] for Skill Selection
             window.addEventListener('keydown', (e) => {
-                const quizModal = document.getElementById('mathQuizModal');
-                if (quizModal && !quizModal.classList.contains('hidden')) {
+                if (!game.active) return;
+                if (game.quizState.active) {
                     if (['1', '2', '3', '4'].includes(e.key)) {
                         e.preventDefault();
                         handleQuizAnswer(Number(e.key) - 1);
                     }
-                    return;
-                }
-                const skillModal = document.getElementById('skillSelectModal');
-                if (skillModal && !skillModal.classList.contains('hidden')) {
+                } else if (game.skillChoices.length > 0) {
                     if (['1', '2', '3'].includes(e.key)) {
                         e.preventDefault();
-                        selectSkillChoice(Number(e.key) - 1);
+                        selectSkill(Number(e.key) - 1);
                     }
                 }
-            });
-
-            // Game Over Screen buttons
-            document.getElementById('restartGameBtn').addEventListener('click', () => {
-                sfx.click();
-                startGame();
-            });
-
-            document.getElementById('gameOverHomeBtn').addEventListener('click', () => {
-                sfx.click();
-                showScreen('startScreen');
-            });
-
-            // Hall of Fame Navigation & Filter Controls
-            function openHallOfFameScreen() {
-                if (game.active) {
-                    stopGame();
-                }
-                showScreen('hallOfFameScreen');
-                renderHallOfFame();
-            }
-
-            document.getElementById('openHofHeaderBtn').addEventListener('click', () => {
-                sfx.click();
-                openHallOfFameScreen();
-            });
-
-            document.getElementById('startHofBtn').addEventListener('click', () => {
-                sfx.click();
-                openHallOfFameScreen();
-            });
-
-            document.getElementById('gameOverHofBtn').addEventListener('click', () => {
-                sfx.click();
-                openHallOfFameScreen();
-            });
-
-            document.getElementById('closeHofBtn').addEventListener('click', () => {
-                sfx.click();
-                const target = appState.previousScreenId === 'gameScreen' ? 'startScreen' : (appState.previousScreenId || 'startScreen');
-                showScreen(target);
-            });
-
-            // '전체' vs '우리반' tabs
-            const hofTabAllBtn = document.getElementById('hofTabAllBtn');
-            const hofTabClassBtn = document.getElementById('hofTabClassBtn');
-            const hofClassFilterBar = document.getElementById('hofClassFilterBar');
-
-            hofTabAllBtn.addEventListener('click', () => {
-                sfx.click();
-                appState.hofTab = 'all';
-                hofTabAllBtn.classList.add('active');
-                hofTabClassBtn.classList.remove('active');
-                hofClassFilterBar.classList.add('hidden');
-                hofClassFilterBar.classList.remove('flex');
-                renderHallOfFame();
-            });
-
-            hofTabClassBtn.addEventListener('click', () => {
-                sfx.click();
-                appState.hofTab = 'class';
-                hofTabClassBtn.classList.add('active');
-                hofTabAllBtn.classList.remove('active');
-                hofClassFilterBar.classList.remove('hidden');
-                hofClassFilterBar.classList.add('flex');
-
-                const codeInput = document.getElementById('hofClassCodeInput');
-                const roomInput = document.getElementById('hofClassRoomInput');
-                if (!codeInput.value && appState.classCode) codeInput.value = appState.classCode;
-                if (!roomInput.value && appState.classRoom) roomInput.value = appState.classRoom;
-                appState.hofFilterCode = codeInput.value;
-                appState.hofFilterRoom = roomInput.value;
-                renderHallOfFame();
-            });
-
-            document.getElementById('hofSearchBtn').addEventListener('click', () => {
-                sfx.click();
-                appState.hofFilterCode = document.getElementById('hofClassCodeInput').value;
-                appState.hofFilterRoom = document.getElementById('hofClassRoomInput').value;
-                renderHallOfFame();
-            });
-
-            ['hofClassCodeInput', 'hofClassRoomInput'].forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                el.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        appState.hofFilterCode = document.getElementById('hofClassCodeInput').value;
-                        appState.hofFilterRoom = document.getElementById('hofClassRoomInput').value;
-                        renderHallOfFame();
-                    }
-                });
             });
 
             window.addEventListener('resize', () => {
-                if (game.active) resizeGameCanvas();
+                if (game.active) {
+                    resizeGameCanvas();
+                }
             });
         });
     </script>
