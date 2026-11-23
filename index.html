@@ -121,7 +121,7 @@
     <!-- 상단 아케이드 상태바 -->
     <header class="relative z-20 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 pb-2 flex items-center justify-between">
         <!-- 좌측: 오둥게임즈 로고 & 브랜드명 -->
-        <a href="/" class="flex items-center gap-3 group">
+        <a href="#" onclick="resetToHome(event)" class="flex items-center gap-3 group">
             <div class="w-10 h-10 rounded-lg overflow-hidden bg-[#FFA400] flex items-center justify-center border-2 border-black shadow-[3px_3px_0px_#000] group-hover:scale-105 transition-transform">
                 <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-label="Odung Games 로고">
                     <rect width="200" height="200" fill="#FFA400" />
@@ -138,13 +138,15 @@
             </span>
         </a>
 
-        <!-- 우측: 1P START 버튼 & GAMES 카운터 -->
+        <!-- 우측: 로그인 버튼 & GAMES 카운터 -->
         <div class="flex items-center gap-3 sm:gap-4">
-            <button onclick="showToast('게스트 모드로 바로 플레이할 수 있어요!')" class="px-3 py-1.5 bg-[#121629] border-2 border-[#4ade80] text-[#4ade80] text-xs sm:text-sm font-bold tracking-wider shadow-[0_0_10px_rgba(74,222,128,0.25)] hover:bg-[#4ade80] hover:text-[#121629] transition-colors cursor-pointer">
-                1P START
-            </button>
+            <div id="auth-control-area" class="flex items-center gap-2">
+                <button onclick="openLoginModal()" class="px-3.5 py-1.5 bg-[#121629] border-2 border-[#4ade80] text-[#4ade80] text-xs sm:text-sm font-bold tracking-wider shadow-[0_0_10px_rgba(74,222,128,0.25)] hover:bg-[#4ade80] hover:text-[#121629] transition-colors cursor-pointer">
+                    로그인
+                </button>
+            </div>
             <div class="text-xs sm:text-sm tracking-wider text-slate-400 font-bold">
-                GAMES <span id="total-games-count" class="text-amber-400 text-sm sm:text-base ml-1">4</span>
+                GAMES <span id="total-games-count" class="text-amber-400 text-sm sm:text-base ml-1">5</span>
             </div>
         </div>
     </header>
@@ -189,7 +191,7 @@
         <!-- 레트로 사각 탭 버튼 (카테고리 필터) -->
         <div id="category-filters" class="flex flex-wrap justify-center gap-2 sm:gap-2.5">
             <button data-category="all" class="filter-btn active px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#4ade80] bg-[#4ade80] text-[#121629] shadow-[0_0_12px_rgba(74,222,128,0.4)] transition-all cursor-pointer">
-                전체 <span class="count-badge ml-1 opacity-80">4</span>
+                전체 <span class="count-badge ml-1 opacity-80">5</span>
             </button>
             <button data-category="multi" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
                 멀티 / 파티 <span class="count-badge ml-1 text-slate-400">1</span>
@@ -198,7 +200,7 @@
                 아케이드 / 퍼즐 <span class="count-badge ml-1 text-slate-400">2</span>
             </button>
             <button data-category="teacher" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
-                선생님용 <span class="count-badge ml-1 text-slate-400">1</span>
+                선생님용 <span class="count-badge ml-1 text-slate-400">2</span>
             </button>
         </div>
     </section>
@@ -211,7 +213,7 @@
 
         <!-- 개발자 페이지 이동 버튼 (우측 하단) -->
         <div class="mt-12 flex justify-end">
-            <a href="https://odunggames.github.io/creator" 
+            <a href="https://odunggames.github.io/creator" target="_blank" rel="noopener noreferrer"
                class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#120e24] border-2 border-sky-400 text-sky-400 text-xs sm:text-sm font-bold tracking-wider hover:bg-sky-400 hover:text-[#120e24] transition-all shadow-[4px_4px_0px_rgba(56,189,248,0.3)] hover:shadow-[4px_4px_0px_rgba(56,189,248,1)] hover:-translate-y-1 active:translate-y-0 active:shadow-none">
                 <span>👨‍💻 개발자 페이지</span>
                 <span class="text-[10px]">▶</span>
@@ -233,7 +235,7 @@
                 <div class="flex flex-col items-center text-center">
                     <div class="w-24 h-24 mb-4 bg-[#120e24] border-2 border-[#3b3363] p-1.5 flex items-center justify-center shadow-inner">
                         <div id="modal-icon-bg" class="w-full h-full bg-gradient-to-br flex items-center justify-center border border-black/40">
-                            <span id="modal-icon" class="text-4xl drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"></span>
+                            <span id="modal-icon" class="text-4xl drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)] flex items-center justify-center"></span>
                         </div>
                     </div>
                     <h2 id="modal-title" class="text-2xl font-bold text-white mb-2 tracking-wide font-condensed drop-shadow-md">게임 제목</h2>
@@ -258,6 +260,86 @@
                         <!-- JS로 동적 삽입됨 -->
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로그인 입력 팝업(모달) -->
+    <div id="login-modal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-200">
+        <div id="login-modal-content" class="relative w-full max-w-sm bg-[#1e193b] border-[3px] border-[#4ade80] p-1.5 flex flex-col shadow-[0_0_30px_rgba(74,222,128,0.3)] transform scale-95 transition-transform duration-200">
+            <div class="border border-[#4ade80]/30 p-5 flex flex-col relative">
+                <!-- 상단 라벨 & 닫기 -->
+                <div class="flex justify-between items-center mb-5">
+                    <div class="bg-[#4ade80] text-[#121629] px-2.5 py-1 text-xs font-bold tracking-wider shadow-[2px_2px_0px_#000]">
+                        ARCADE LOGIN
+                    </div>
+                    <button onclick="closeLoginModal()" class="text-slate-400 hover:text-white border border-slate-500 hover:border-white px-2 py-0.5 text-sm bg-[#120e24] transition-colors shadow-[2px_2px_0px_#000] cursor-pointer">✕</button>
+                </div>
+
+                <!-- 로고 & 타이틀 -->
+                <div class="flex flex-col items-center text-center mb-5">
+                    <div class="w-16 h-16 mb-3 rounded-lg overflow-hidden bg-[#FFA400] border-2 border-black shadow-[3px_3px_0px_#000]">
+                        <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="200" height="200" fill="#FFA400" />
+                            <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="10" stroke-linejoin="round" />
+                            <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
+                            <circle cx="85" cy="95" r="5" fill="#000000" />
+                            <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
+                            <circle cx="115" cy="95" r="5" fill="#000000" />
+                            <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="7" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-white tracking-wide">오둥 오락실 로그인</h2>
+                    <p class="text-xs text-slate-400 mt-1">아이디와 비밀번호를 입력해 주세요</p>
+                </div>
+
+                <!-- 로그인 입력 폼 -->
+                <form onsubmit="handleLoginSubmit(event)" class="flex flex-col gap-3.5">
+                    <div>
+                        <label for="login-id-input" class="block text-xs font-bold text-amber-300 mb-1.5">아이디</label>
+                        <input type="text" id="login-id-input" autocomplete="username" placeholder="아이디를 입력하세요" class="w-full bg-[#120e24] border-2 border-[#3b3363] focus:border-[#4ade80] focus:outline-none px-3.5 py-2.5 text-sm text-white placeholder-slate-500">
+                    </div>
+                    <div>
+                        <label for="login-pw-input" class="block text-xs font-bold text-amber-300 mb-1.5">비밀번호</label>
+                        <input type="password" id="login-pw-input" autocomplete="current-password" placeholder="비밀번호를 입력하세요" class="w-full bg-[#120e24] border-2 border-[#3b3363] focus:border-[#4ade80] focus:outline-none px-3.5 py-2.5 text-sm text-white placeholder-slate-500">
+                    </div>
+
+                    <!-- 로그인 실패 안내 문구 -->
+                    <p id="login-error-msg" class="hidden text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/40 px-3 py-2 text-center">
+                        아이디 또는 비밀번호가 올바르지 않습니다.
+                    </p>
+
+                    <button type="submit" class="mt-1 w-full bg-[#4ade80] text-[#121629] font-bold py-3 text-base shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_6px_0px_#000] active:translate-y-1 active:shadow-[0_0_0_#000] transition-all cursor-pointer">
+                        ▶ 로그인
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로그인 성공 환영 팝업(모달) -->
+    <div id="welcome-modal" class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/85 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-200">
+        <div id="welcome-modal-content" class="relative w-full max-w-md bg-[#1e193b] border-[3px] border-amber-400 p-1.5 flex flex-col shadow-[0_0_35px_rgba(251,191,36,0.35)] transform scale-95 transition-transform duration-200">
+            <div class="border border-amber-400/30 p-6 flex flex-col items-center text-center relative">
+                <div id="welcome-badge" class="bg-amber-400 text-[#1e193b] px-3 py-1 text-xs font-bold tracking-wider shadow-[2px_2px_0px_#000] mb-5">
+                    ★ WELCOME ★
+                </div>
+
+                <div id="welcome-icon-box" class="w-20 h-20 mb-4 bg-[#120e24] border-2 border-amber-400/60 flex items-center justify-center text-4xl shadow-inner">
+                    🦆
+                </div>
+
+                <h2 id="welcome-title" class="text-xl sm:text-2xl font-bold text-white mb-2.5 leading-snug">
+                    이경민 선생님, 환영합니다.
+                </h2>
+
+                <p id="welcome-subtitle" class="text-xs sm:text-sm text-amber-200/90 leading-relaxed mb-6 px-2">
+                    오둥오락실에서 번호, 자리, 다양한 클래스 게임을 즐겨보세요.
+                </p>
+
+                <button id="welcome-confirm-btn" onclick="closeWelcomeModal()" class="w-full bg-amber-400 text-[#1e193b] font-bold py-3.5 text-base sm:text-lg shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_6px_0px_#000] active:translate-y-1 active:shadow-[0_0_0_#000] transition-all cursor-pointer">
+                    확인했어요
+                </button>
             </div>
         </div>
     </div>
@@ -363,7 +445,7 @@
                 gameNumber: 'GAME 01',
                 title: '캐치마인드 (CatchMind)',
                 description: '제시어를 보고 그림을 그리면 친구들이 정답을 맞추는 실시간 그림 퀴즈 게임!',
-                url: './catchmind/',
+                url: 'https://odunggames.github.io/catchmind/',
                 category: 'multi',
                 subBadge: '★ 실시간 멀티',
                 tags: ['#그림퀴즈', '#인기게임'],
@@ -442,11 +524,39 @@
             }
         ];
 
+        // 등록된 선생님/관리자 계정 정보
+        const AUTH_STORAGE_KEY = 'odung_arcade_logged_in_user_v1';
+        const REGISTERED_ACCOUNTS = {
+            laless: {
+                passwords: ['sofl2026!'],
+                displayName: '이경민 선생님',
+                badge: '★ WELCOME ★',
+                icon: '🦆',
+                welcomeTitle: '이경민 선생님, 환영합니다.',
+                welcomeSubtitle: '오둥오락실에서 번호, 자리, 다양한 클래스 게임을 즐겨보세요.'
+            },
+            huklevery: {
+                passwords: ['soflch2026!'],
+                displayName: '오둥오락실 개발자',
+                badge: '★ DEVELOPER MODE ★',
+                icon: '👨‍💻',
+                welcomeTitle: '오둥오락실 개발자님, 환영합니다.',
+                welcomeSubtitle: '오둥오락실 개발자 모드에 오신 것을 환영합니다.'
+            }
+        };
+
         const gamesGrid = document.getElementById('games-grid');
         const filterBtns = document.querySelectorAll('.filter-btn');
         const toastModal = document.getElementById('toast-modal');
         const toastMessage = document.getElementById('toast-message');
-        let toastTimeout;
+        const gameModal = document.getElementById('game-modal');
+        const gameModalContent = document.getElementById('game-modal-content');
+        const loginModal = document.getElementById('login-modal');
+        const loginModalContent = document.getElementById('login-modal-content');
+        const welcomeModal = document.getElementById('welcome-modal');
+        const welcomeModalContent = document.getElementById('welcome-modal-content');
+        let toastTimeout = null;
+        let currentCategory = 'all';
 
         // 커스텀 알림 토스트 표시 함수
         function showToast(msg) {
@@ -456,6 +566,147 @@
             toastTimeout = setTimeout(() => {
                 toastModal.classList.add('hidden');
             }, 2500);
+        }
+
+        // 로고 클릭 시 초기 홈 화면 상태로 복귀
+        function resetToHome(event) {
+            if (event) event.preventDefault();
+            closeGameModal();
+            closeLoginModal();
+            closeWelcomeModal();
+
+            const allBtn = document.querySelector('.filter-btn[data-category="all"]');
+            if (allBtn) {
+                allBtn.click();
+            } else {
+                currentCategory = 'all';
+                renderGames('all');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- 로그인 및 환영 모달 제어 ---
+        function openLoginModal() {
+            const idInput = document.getElementById('login-id-input');
+            const pwInput = document.getElementById('login-pw-input');
+            const errMsg = document.getElementById('login-error-msg');
+
+            if (idInput) idInput.value = '';
+            if (pwInput) pwInput.value = '';
+            if (errMsg) errMsg.classList.add('hidden');
+
+            loginModal.classList.remove('hidden');
+            loginModal.classList.add('flex');
+            setTimeout(() => {
+                loginModal.classList.remove('opacity-0');
+                loginModalContent.classList.remove('scale-95');
+                loginModalContent.classList.add('scale-100');
+                if (idInput) idInput.focus();
+            }, 10);
+        }
+
+        function closeLoginModal() {
+            loginModal.classList.add('opacity-0');
+            loginModalContent.classList.remove('scale-100');
+            loginModalContent.classList.add('scale-95');
+            setTimeout(() => {
+                loginModal.classList.add('hidden');
+                loginModal.classList.remove('flex');
+            }, 200);
+        }
+
+        function handleLoginSubmit(event) {
+            event.preventDefault();
+            const idInput = document.getElementById('login-id-input');
+            const pwInput = document.getElementById('login-pw-input');
+            const errMsg = document.getElementById('login-error-msg');
+
+            const userId = (idInput?.value || '').trim().toLowerCase();
+            const password = (pwInput?.value || '').trim();
+            const account = REGISTERED_ACCOUNTS[userId];
+
+            if (!account || !account.passwords.includes(password)) {
+                if (errMsg) {
+                    errMsg.classList.remove('hidden');
+                }
+                if (pwInput) {
+                    pwInput.value = '';
+                    pwInput.focus();
+                }
+                return;
+            }
+
+            if (errMsg) errMsg.classList.add('hidden');
+            try {
+                localStorage.setItem(AUTH_STORAGE_KEY, userId);
+            } catch (e) {}
+
+            updateAuthHeaderUI(userId);
+            closeLoginModal();
+            openWelcomeModal(account);
+        }
+
+        function logoutUser() {
+            try {
+                localStorage.removeItem(AUTH_STORAGE_KEY);
+            } catch (e) {}
+            updateAuthHeaderUI(null);
+            showToast('로그아웃되었습니다.');
+        }
+
+        function openWelcomeModal(account) {
+            document.getElementById('welcome-badge').textContent = account.badge || '★ WELCOME ★';
+            document.getElementById('welcome-icon-box').textContent = account.icon || '🦆';
+            document.getElementById('welcome-title').textContent = account.welcomeTitle;
+            document.getElementById('welcome-subtitle').textContent = account.welcomeSubtitle;
+
+            welcomeModal.classList.remove('hidden');
+            welcomeModal.classList.add('flex');
+            setTimeout(() => {
+                welcomeModal.classList.remove('opacity-0');
+                welcomeModalContent.classList.remove('scale-95');
+                welcomeModalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeWelcomeModal() {
+            welcomeModal.classList.add('opacity-0');
+            welcomeModalContent.classList.remove('scale-100');
+            welcomeModalContent.classList.add('scale-95');
+            setTimeout(() => {
+                welcomeModal.classList.add('hidden');
+                welcomeModal.classList.remove('flex');
+            }, 200);
+        }
+
+        // 로그인 상태에 따른 상단 헤더 및 전용 게임 URL 갱신
+        function updateAuthHeaderUI(userId) {
+            const area = document.getElementById('auth-control-area');
+            const account = userId ? REGISTERED_ACCOUNTS[userId] : null;
+            const seatGame = gamesList.find(g => g.id === 'randomseat');
+
+            if (seatGame) {
+                seatGame.url = userId === 'laless'
+                    ? 'https://quokka52.github.io/randomseat/?user=laless'
+                    : 'https://quokka52.github.io/randomseat/';
+            }
+
+            if (account) {
+                area.innerHTML = `
+                    <span class="px-3 py-1.5 bg-[#121629] border-2 border-amber-400 text-amber-300 text-xs sm:text-sm font-bold tracking-wide shadow-[0_0_10px_rgba(251,191,36,0.25)]">
+                        🦆 ${account.displayName}
+                    </span>
+                    <button onclick="logoutUser()" class="px-2.5 py-1.5 bg-[#120e24] border-2 border-slate-500 text-slate-300 hover:border-rose-400 hover:text-rose-300 text-xs font-bold transition-colors cursor-pointer">
+                        로그아웃
+                    </button>
+                `;
+            } else {
+                area.innerHTML = `
+                    <button onclick="openLoginModal()" class="px-3.5 py-1.5 bg-[#121629] border-2 border-[#4ade80] text-[#4ade80] text-xs sm:text-sm font-bold tracking-wider shadow-[0_0_10px_rgba(74,222,128,0.25)] hover:bg-[#4ade80] hover:text-[#121629] transition-colors cursor-pointer">
+                        로그인
+                    </button>
+                `;
+            }
         }
 
         // 카테고리별 개수 업데이트
@@ -473,6 +724,7 @@
 
         // 게임 카드 렌더링 함수
         function renderGames(filterCategory = 'all') {
+            currentCategory = filterCategory;
             gamesGrid.innerHTML = '';
 
             const filteredGames = filterCategory === 'all' 
@@ -493,7 +745,7 @@
                 `).join('');
 
                 card.innerHTML = `
-                    <!-- 좌측 상단 라벨 탭 -->
+                    <!-- 좌측 상단 GAME 01 라벨 탭 -->
                     <div class="absolute -top-3.5 left-4 px-2.5 py-0.5 text-xs font-bold tracking-wider text-[#121629] group-hover:-translate-y-1 transition-transform"
                          style="background-color: ${game.themeColor};">
                         ${game.gameNumber}
@@ -503,7 +755,7 @@
                         <!-- 중앙 픽셀 아이콘 프레임 -->
                         <div class="w-24 h-24 mb-5 bg-[#120e24] border-2 border-[#3b3363] p-2 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
                             <div class="w-full h-full bg-gradient-to-br ${game.iconBg} flex items-center justify-center border border-black/40">
-                                <span class="text-4xl flex items-center justify-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
+                                <span class="text-4xl drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)] flex items-center justify-center">
                                     ${game.icon}
                                 </span>
                             </div>
@@ -538,34 +790,51 @@
             });
         }
 
-        // --- 팝업(모달) 제어 함수 ---
-        const gameModal = document.getElementById('game-modal');
-        const gameModalContent = document.getElementById('game-modal-content');
-
         // 카테고리를 한글로 변환
         function getCategoryText(cat) {
             if (cat === 'multi') return '멀티 / 파티';
             if (cat === 'arcade') return '아케이드 / 퍼즐';
-            if (cat === 'teacher') return '선생님용 도구';
+            if (cat === 'teacher') return '선생님용';
             return '기타';
         }
 
+        // 게임 및 수업 도구 실행 함수
+        function launchGame(gameId) {
+            const game = gamesList.find(g => g.id === gameId);
+            if (!game || !game.isReady) return;
+
+            if (game.openAsPopup) {
+                const width = Math.min(1280, window.screen.availWidth - 40);
+                const height = Math.min(840, window.screen.availHeight - 40);
+                const left = Math.max(0, Math.floor((window.screen.availWidth - width) / 2));
+                const top = Math.max(0, Math.floor((window.screen.availHeight - height) / 2));
+                const popup = window.open(
+                    game.url,
+                    `odung_${game.id}`,
+                    `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes`
+                );
+                if (!popup) {
+                    window.open(game.url, '_blank', 'noopener,noreferrer');
+                }
+            } else {
+                window.open(game.url, '_blank', 'noopener,noreferrer');
+            }
+            closeGameModal();
+        }
+
+        // 게임 상세 팝업 열기
         function openGameModal(gameId) {
             const game = gamesList.find(g => g.id === gameId);
             if (!game) return;
 
-            // 데이터 채우기
             document.getElementById('modal-game-number').textContent = game.gameNumber;
-            const modalIconEl = document.getElementById('modal-icon');
-            modalIconEl.className = 'text-4xl flex items-center justify-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]';
-            modalIconEl.innerHTML = game.icon;
+            document.getElementById('modal-icon').innerHTML = game.icon;
             document.getElementById('modal-icon-bg').className = `w-full h-full bg-gradient-to-br ${game.iconBg} flex items-center justify-center border border-black/40`;
             document.getElementById('modal-title').textContent = game.title;
             document.getElementById('modal-category-text').textContent = getCategoryText(game.category);
             document.getElementById('modal-badge').textContent = game.subBadge;
-            document.getElementById('modal-desc').innerHTML = game.description;
+            document.getElementById('modal-desc').textContent = game.description;
 
-            // 태그 렌더링
             const tagsHtml = game.tags.map(tag => `
                 <span class="px-2 py-1 bg-[#130f26] border border-[#3b3363] text-slate-300 text-[11px] font-bold">
                     ${tag}
@@ -573,32 +842,22 @@
             `).join('');
             document.getElementById('modal-tags').innerHTML = tagsHtml;
 
-            // 게임 시작 / 이동 버튼 렌더링
             const actionContainer = document.getElementById('modal-action-container');
             if (game.isReady) {
-                const buttonText = game.actionLabel || '▶ 게임 시작';
-                if (game.openAsPopup) {
-                    actionContainer.innerHTML = `
-                        <button onclick="window.open('${game.url}', '_blank', 'width=1280,height=800,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes')" class="block w-full bg-amber-400 text-[#1e193b] text-center font-bold py-3.5 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_6px_0px_#000] active:translate-y-1 active:shadow-[0_0_0_#000] transition-all cursor-pointer">
-                            ${buttonText}
-                        </button>
-                    `;
-                } else {
-                    actionContainer.innerHTML = `
-                        <a href="${game.url}" class="block w-full bg-amber-400 text-[#1e193b] text-center font-bold py-3.5 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_6px_0px_#000] active:translate-y-1 active:shadow-[0_0_0_#000] transition-all">
-                            ${buttonText}
-                        </a>
-                    `;
-                }
+                const label = game.actionLabel || '▶ 게임 시작';
+                actionContainer.innerHTML = `
+                    <button type="button" onclick="launchGame('${game.id}')" class="block w-full bg-amber-400 text-[#1e193b] text-center font-bold py-3.5 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_6px_0px_#000] active:translate-y-1 active:shadow-[0_0_0_#000] transition-all cursor-pointer">
+                        ${label}
+                    </button>
+                `;
             } else {
                 actionContainer.innerHTML = `
-                    <button onclick="showToast('${game.title}은(는) 현재 열심히 개발 중입니다!')" class="w-full bg-[#120e24] border-2 border-amber-400 text-amber-400 text-center font-bold py-3 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[0_0_0_#000] transition-all cursor-pointer">
+                    <button type="button" onclick="showToast('${game.title}은(는) 현재 열심히 개발 중입니다!')" class="w-full bg-[#120e24] border-2 border-amber-400 text-amber-400 text-center font-bold py-3 text-lg sm:text-xl shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[0_0_0_#000] transition-all cursor-pointer">
                         ■ 개발 중 (COMING SOON)
                     </button>
                 `;
             }
 
-            // 모달 표시
             gameModal.classList.remove('hidden');
             gameModal.classList.add('flex');
             setTimeout(() => {
@@ -608,6 +867,7 @@
             }, 10);
         }
 
+        // 게임 상세 팝업 닫기
         function closeGameModal() {
             gameModal.classList.add('opacity-0');
             gameModalContent.classList.remove('scale-100');
@@ -619,10 +879,23 @@
             }, 300);
         }
 
-        // 모달 바깥 어두운 배경 클릭 시 모달 닫기
+        // 모달 바깥 어두운 배경 클릭 시 닫기
         gameModal.addEventListener('click', (e) => {
-            if (e.target === gameModal) {
-                closeGameModal();
+            if (e.target === gameModal) closeGameModal();
+        });
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) closeLoginModal();
+        });
+        welcomeModal.addEventListener('click', (e) => {
+            if (e.target === welcomeModal) closeWelcomeModal();
+        });
+
+        // ESC 키로 열린 모달 닫기
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (!welcomeModal.classList.contains('hidden')) closeWelcomeModal();
+                if (!loginModal.classList.contains('hidden')) closeLoginModal();
+                if (!gameModal.classList.contains('hidden')) closeGameModal();
             }
         });
 
@@ -645,7 +918,13 @@
             });
         });
 
-        // 초기 실행
+        // 초기 실행 및 저장된 로그인 상태 복원
+        try {
+            const savedUserId = localStorage.getItem(AUTH_STORAGE_KEY);
+            updateAuthHeaderUI(savedUserId);
+        } catch (e) {
+            updateAuthHeaderUI(null);
+        }
         updateCategoryCounts();
         renderGames();
     </script>
