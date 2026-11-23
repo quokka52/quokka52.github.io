@@ -1,0 +1,2739 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리반 타자왕 (개발자 전용) - GAME 03 | 오둥오락실</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Galmuri11 Retro Pixel Font -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css" />
+    <style>
+        :root {
+            --bg-dark: #120f24;
+            --card-bg: #171433;
+            --arcade-yellow: #facc15;
+            --arcade-yellow-dark: #eab308;
+            --neon-blue: #38bdf8;
+            --neon-pink: #f43f5e;
+            --neon-green: #4ade80;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Galmuri11', monospace, sans-serif;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        *::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
+        html, body {
+            background-color: #16111d;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: #f8fafc;
+            min-height: 100vh;
+            min-height: 100dvh;
+            width: 100%;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ==========================================
+           OLD CRT TV INFINITE OVERLAYS & ANIMATIONS
+        =========================================== */
+        .crt-overlay {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background:
+                linear-gradient(
+                    rgba(18, 16, 16, 0) 50%,
+                    rgba(0, 0, 0, 0.24) 50%
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255, 0, 0, 0.03),
+                    rgba(0, 255, 0, 0.015),
+                    rgba(0, 0, 255, 0.03)
+                );
+            background-size: 100% 4px, 6px 100%;
+            z-index: 50;
+            animation: crtFlicker 0.14s infinite alternate;
+        }
+
+        .crt-scan-beam {
+            pointer-events: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 110px;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(186, 230, 253, 0.055) 50%,
+                rgba(255, 255, 255, 0.09) 52%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            z-index: 51;
+            animation: crtScanRoll 5.5s linear infinite;
+        }
+
+        .crt-glitch-bar {
+            pointer-events: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(250, 204, 21, 0.14);
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
+            z-index: 52;
+            opacity: 0;
+            animation: crtTrackingGlitch 7s infinite;
+        }
+
+        .crt-vignette {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            box-shadow: inset 0 0 85px rgba(0, 0, 0, 0.78);
+            z-index: 53;
+        }
+
+        @keyframes crtFlicker {
+            0% { opacity: 0.92; }
+            50% { opacity: 0.98; }
+            100% { opacity: 0.94; }
+        }
+
+        @keyframes crtScanRoll {
+            0% { transform: translateY(-130px); }
+            100% { transform: translateY(105vh); }
+        }
+
+        @keyframes crtTrackingGlitch {
+            0%, 88%, 100% {
+                opacity: 0;
+                transform: translateY(20vh) scaleX(1);
+            }
+            90% {
+                opacity: 0.85;
+                transform: translateY(35vh) scaleX(1.02);
+            }
+            92% {
+                opacity: 0.4;
+                transform: translateY(62vh) scaleX(0.98);
+            }
+            94% {
+                opacity: 0.9;
+                transform: translateY(78vh) scaleX(1.01);
+            }
+            96% {
+                opacity: 0;
+            }
+        }
+
+        /* RGB Phosphor Chromatic Aberration & Subtle Jitter for Retro TV Text */
+        body, button, span, p, input, td, th {
+            animation: crtSubtleTextGlow 2.8s infinite ease-in-out;
+        }
+
+        h1, h2, #hudScore, #hudSurvivalTime, #hudCombo {
+            animation: crtTextAberration 3.2s infinite ease-in-out;
+        }
+
+        @keyframes crtSubtleTextGlow {
+            0%, 100% {
+                text-shadow:
+                    -0.7px 0 rgba(244, 63, 94, 0.45),
+                    0.7px 0 rgba(56, 189, 248, 0.45);
+            }
+            49% {
+                text-shadow:
+                    -1.1px 0 rgba(244, 63, 94, 0.6),
+                    1.1px 0 rgba(56, 189, 248, 0.6);
+                transform: translateX(0);
+            }
+            50% {
+                text-shadow:
+                    -1.6px 0.3px rgba(244, 63, 94, 0.75),
+                    1.6px -0.3px rgba(56, 189, 248, 0.75);
+                transform: translateX(0.4px);
+            }
+            51% {
+                text-shadow:
+                    -0.7px 0 rgba(244, 63, 94, 0.45),
+                    0.7px 0 rgba(56, 189, 248, 0.45);
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes crtTextAberration {
+            0%, 100% {
+                text-shadow:
+                    -1.2px 0 rgba(244, 63, 94, 0.65),
+                    1.2px 0 rgba(56, 189, 248, 0.65),
+                    0 0 8px rgba(250, 204, 21, 0.25);
+                transform: translateX(0);
+            }
+            48% {
+                text-shadow:
+                    -1.8px 0 rgba(244, 63, 94, 0.8),
+                    1.8px 0 rgba(56, 189, 248, 0.8),
+                    0 0 12px rgba(250, 204, 21, 0.35);
+                transform: translateX(0);
+            }
+            50% {
+                text-shadow:
+                    -2.6px 0.5px rgba(244, 63, 94, 0.92),
+                    2.6px -0.5px rgba(56, 189, 248, 0.92),
+                    0 0 10px rgba(255, 255, 255, 0.35);
+                transform: translateX(-0.8px);
+            }
+            51% {
+                transform: translateX(0.6px);
+            }
+            52% {
+                text-shadow:
+                    -1.2px 0 rgba(244, 63, 94, 0.65),
+                    1.2px 0 rgba(56, 189, 248, 0.65),
+                    0 0 8px rgba(250, 204, 21, 0.25);
+                transform: translateX(0);
+            }
+        }
+
+        /* ==========================================
+           ARCADE CABINET & CONTROLS
+        =========================================== */
+        .arcade-frame {
+            background-color: var(--card-bg);
+            border: 3px solid var(--arcade-yellow);
+            box-shadow:
+                0 0 0 4px #0d0b1a,
+                0 12px 40px rgba(0, 0, 0, 0.75),
+                0 0 24px rgba(250, 204, 21, 0.18),
+                inset 0 0 32px rgba(0, 0, 0, 0.65);
+            position: relative;
+            transition: box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .arcade-frame.fever-active {
+            border-color: #fb7185;
+            box-shadow:
+                0 0 0 4px #0d0b1a,
+                0 0 35px rgba(244, 63, 94, 0.55),
+                inset 0 0 25px rgba(244, 63, 94, 0.2);
+            animation: feverPulse 0.6s infinite alternate;
+        }
+
+        @keyframes feverPulse {
+            from { border-color: #facc15; }
+            to { border-color: #f43f5e; }
+        }
+
+        .game-badge {
+            background-color: var(--arcade-yellow);
+            color: #141129;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            box-shadow: 3px 3px 0px #090712;
+        }
+
+        .pixel-btn {
+            border: 2px solid #090712;
+            box-shadow: 0 4px 0 #090712;
+            transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .pixel-btn:hover:not(:disabled) {
+            filter: brightness(1.08);
+        }
+
+        .pixel-btn:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #090712;
+        }
+
+        .pixel-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .option-pill {
+            background-color: #100d24;
+            border: 2px solid #2e295e;
+            color: #94a3b8;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .option-pill:hover {
+            border-color: #64748b;
+            color: #e2e8f0;
+        }
+
+        .option-pill.active {
+            background-color: rgba(250, 204, 21, 0.15);
+            border-color: var(--arcade-yellow);
+            color: var(--arcade-yellow);
+            box-shadow: 0 0 12px rgba(250, 204, 21, 0.2);
+        }
+
+        .typing-input {
+            background-color: #0b0918;
+            border: 3px solid #3b3575;
+            color: #ffffff;
+            caret-color: var(--arcade-yellow);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .typing-input:focus {
+            outline: none;
+            border-color: var(--arcade-yellow);
+            box-shadow: 0 0 16px rgba(250, 204, 21, 0.3);
+        }
+
+        .shake, .typing-input.shake {
+            animation: inputShake 0.28s ease;
+            border-color: #f43f5e;
+        }
+
+        @keyframes inputShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            50% { transform: translateX(6px); }
+            75% { transform: translateX(-4px); }
+        }
+
+        @keyframes levelUpBounce {
+            0% { transform: scale(0.4) translateY(12px); opacity: 0; }
+            50% { transform: scale(1.12) translateY(-4px); opacity: 1; }
+            75% { transform: scale(0.96) translateY(0); opacity: 1; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .levelup-banner {
+            animation: levelUpBounce 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .skill-card {
+            background: linear-gradient(180deg, #1b173d 0%, #0f0c21 100%);
+            border: 2px solid #3b3575;
+            transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+            cursor: pointer;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--arcade-yellow);
+            box-shadow: 0 0 18px rgba(250, 204, 21, 0.35);
+        }
+
+        .skill-card.awakening-card {
+            background: linear-gradient(180deg, #451a03 0%, #1e1035 100%);
+            border: 2px solid #facc15;
+            box-shadow: 0 0 22px rgba(250, 204, 21, 0.45);
+            animation: feverPulse 0.7s infinite alternate;
+        }
+
+        .damage-flash {
+            animation: damageFlashAnim 0.3s ease;
+        }
+
+        @keyframes damageFlashAnim {
+            0%, 100% { box-shadow: 0 0 0 4px #0d0b1a, 0 12px 40px rgba(0, 0, 0, 0.75); }
+            50% { border-color: #f43f5e; box-shadow: 0 0 32px rgba(244, 63, 94, 0.8), inset 0 0 30px rgba(244, 63, 94, 0.45); }
+        }
+
+        /* Developer Lock Blur Effect */
+        .dev-locked-blur {
+            filter: blur(7px) brightness(0.65);
+            pointer-events: none;
+            user-select: none;
+            transition: filter 0.35s ease;
+        }
+
+        .dev-unlocked-clear {
+            filter: none;
+            transition: filter 0.35s ease;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body class="p-2.5 sm:p-5">
+    <!-- Old CRT TV Infinite Effects -->
+    <div class="crt-overlay"></div>
+    <div class="crt-scan-beam"></div>
+    <div class="crt-glitch-bar"></div>
+    <div class="crt-vignette"></div>
+
+    <!-- Non-blocking Toast Message -->
+    <div id="toastBox" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden bg-[#0f0c21] border-2 border-yellow-400 text-yellow-300 text-xs sm:text-sm px-4 py-2 rounded shadow-lg">
+    </div>
+
+    <!-- Main Container -->
+    <div class="w-full max-w-4xl mx-auto my-auto pt-4">
+        <!-- Main Arcade Cabinet Box -->
+        <div id="arcadeFrame" class="arcade-frame rounded-md p-4 sm:p-6">
+            <!-- Top-Left GAME 03 + DEV Floating Tag -->
+            <div class="game-badge absolute -top-4 left-4 px-3 py-1 text-xs sm:text-sm rounded-sm flex items-center gap-2 z-30">
+                <span>GAME 03</span>
+                <span class="bg-[#141129] text-rose-400 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold">DEV</span>
+            </div>
+
+            <!-- Developer Login Gate Overlay (Shown over blurred arcade screen) -->
+            <div id="devLoginOverlay" class="absolute inset-0 bg-[#090714]/55 backdrop-blur-[2px] z-40 rounded-md flex flex-col items-center justify-center p-4 sm:p-6 text-center">
+                <div class="w-full max-w-sm bg-[#171433]/95 border-2 border-yellow-400 rounded-md p-5 sm:p-6 space-y-4 shadow-[0_0_0_4px_#0d0b1a,0_0_30px_rgba(250,204,21,0.35)]">
+                    <div class="inline-block bg-rose-500/20 border border-rose-400/70 text-rose-300 text-[11px] px-2.5 py-0.5 rounded font-bold tracking-wider">
+                        🔐 DEVELOPER ACCESS ONLY
+                    </div>
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-yellow-400 tracking-wide">개발자 인증 로그인</h2>
+                        <p class="text-[11px] sm:text-xs text-slate-300 mt-1">
+                            악용 방지를 위해 관리자 아이디와 비밀번호를 입력해주세요.
+                        </p>
+                    </div>
+
+                    <div class="space-y-3 text-left">
+                        <div>
+                            <label class="block text-xs text-yellow-400 mb-1">▶ 개발자 아이디</label>
+                            <input id="devIdInput" type="text" autocomplete="off"
+                                placeholder="아이디를 입력하세요"
+                                class="typing-input w-full py-2 px-3 rounded text-sm sm:text-base text-center" />
+                        </div>
+                        <div>
+                            <label class="block text-xs text-yellow-400 mb-1">▶ 비밀번호</label>
+                            <input id="devPwInput" type="password" autocomplete="off"
+                                placeholder="비밀번호를 입력하세요"
+                                class="typing-input w-full py-2 px-3 rounded text-sm sm:text-base text-center" />
+                        </div>
+                    </div>
+
+                    <div id="devLoginError" class="hidden bg-rose-950/90 border border-rose-500 text-rose-200 text-xs py-1.5 px-3 rounded">
+                        ❌ 아이디 또는 비밀번호가 일치하지 않습니다.
+                    </div>
+
+                    <button id="devLoginSubmitBtn" type="button"
+                        class="pixel-btn w-full bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-sm sm:text-base py-2.5 px-4 rounded">
+                        🔓 로그인 및 잠금 해제
+                    </button>
+                </div>
+            </div>
+
+            <!-- Blurred Content Wrapper (Unblurs after developer login) -->
+            <div id="devProtectedContent" class="dev-locked-blur">
+
+                <!-- Firebase Server Setup Modal -->
+                <div id="firebaseSetupModal" class="hidden absolute inset-0 bg-[#090714]/94 z-40 rounded-md flex-col items-center justify-center p-4 sm:p-6 text-left">
+                    <div class="w-full max-w-lg bg-[#171433] border-2 border-yellow-400 rounded-md p-4 sm:p-5 space-y-3">
+                        <div class="flex items-center justify-between border-b border-[#2e295e] pb-2">
+                            <h3 class="text-base sm:text-lg font-bold text-yellow-400">⚙️ 실시간 서버(Firebase) 연결</h3>
+                            <span id="modalConnStatus" class="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">미연결</span>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            여러 기기에서 명예의 전당 기록을 공유하려면 Firebase 설정이 필요합니다. (현재 프로젝트 설정이 기본 내장되어 있습니다.)
+                        </p>
+                        <div>
+                            <label class="block text-xs text-yellow-400 mb-1">▶ 다른 Firebase Config 적용 (선택사항)</label>
+                            <textarea id="firebaseConfigInput" rows="4"
+                                placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", "appId": "..."}'
+                                class="typing-input w-full p-2.5 rounded text-xs font-mono leading-relaxed"></textarea>
+                        </div>
+                        <div class="flex gap-2 pt-1">
+                            <button id="applyFirebaseConfigBtn" type="button"
+                                class="pixel-btn flex-1 bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-xs sm:text-sm py-2.5 px-4 rounded">
+                                연결 적용하기
+                            </button>
+                            <button id="closeFirebaseModalBtn" type="button"
+                                class="pixel-btn bg-[#25204a] hover:bg-[#312b61] text-slate-200 font-bold text-xs sm:text-sm py-2.5 px-4 rounded">
+                                닫기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Developer Hall of Fame Reset Confirmation Modal -->
+                <div id="resetHofConfirmModal" class="hidden absolute inset-0 bg-[#090714]/94 z-40 rounded-md flex-col items-center justify-center p-4 sm:p-6 text-center">
+                    <div class="w-full max-w-md bg-[#171433] border-2 border-rose-500 rounded-md p-5 space-y-4 shadow-[0_0_25px_rgba(244,63,94,0.4)]">
+                        <div class="text-xs text-rose-400 tracking-widest">DEVELOPER ADMIN ACTION</div>
+                        <h3 class="text-lg sm:text-xl font-bold text-white">🗑️ 명예의 전당 기록 초기화</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            명예의 전당에 등록된 <strong class="text-rose-400">모든 학급·반의 기록이 영구 삭제</strong>됩니다.<br/>
+                            정말 초기화하시겠습니까?
+                        </p>
+                        <div class="flex gap-2.5 pt-1">
+                            <button id="confirmResetHofBtn" type="button"
+                                class="pixel-btn flex-1 bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs sm:text-sm py-2.5 px-4 rounded">
+                                🗑️ 예, 모두 초기화
+                            </button>
+                            <button id="cancelResetHofBtn" type="button"
+                                class="pixel-btn flex-1 bg-[#25204a] hover:bg-[#312b61] text-slate-200 font-bold text-xs sm:text-sm py-2.5 px-4 rounded">
+                                취소
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6th Grade 2nd Semester Math Quiz Modal (Proportional Expressions & Distribution) -->
+                <div id="mathQuizModal" class="hidden absolute inset-0 bg-[#090714]/94 z-30 rounded-md flex-col items-center justify-center p-4 sm:p-6 text-center">
+                    <div id="quizAttemptBadge" class="text-[11px] sm:text-xs bg-cyan-500/20 border border-cyan-400/70 text-cyan-300 px-3 py-0.5 rounded tracking-wider mb-1.5">
+                        📐 6학년 2학기 수학 · 비례식과 비례배분
+                    </div>
+                    <h3 id="quizModalTitle" class="text-lg sm:text-xl font-bold text-yellow-400 mb-2">
+                        ⚡ 레벨업 관문! 문제를 맞히면 Lv.2 달성!
+                    </h3>
+                    <div id="quizAlertBanner" class="hidden w-full max-w-xl bg-rose-950/90 border border-rose-500 text-rose-200 text-xs px-3 py-1.5 rounded mb-2.5">
+                    </div>
+                    <div class="w-full max-w-xl bg-[#120f29] border-2 border-yellow-400/80 rounded-md p-3.5 sm:p-4 mb-3.5 text-left sm:text-center">
+                        <p id="quizQuestionText" class="text-sm sm:text-base font-bold text-white leading-relaxed">
+                            문제를 불러오는 중...
+                        </p>
+                    </div>
+                    <div id="quizChoicesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-xl">
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-3">
+                        보기 버튼을 클릭하거나 키보드 <span class="text-yellow-300 font-bold">[1] [2] [3] [4]</span> 키로 선택하세요!
+                    </p>
+                </div>
+
+                <!-- Level Up 3-Skill Selection Modal (Appears 2s after Lv.N UP!) -->
+                <div id="skillSelectModal" class="hidden absolute inset-0 bg-[#090714]/92 z-30 rounded-md flex-col items-center justify-center p-4 sm:p-6 text-center">
+                    <div class="text-xs text-yellow-400 tracking-widest mb-1">SKILL UPGRADE</div>
+                    <h3 id="skillModalTitle" class="text-xl sm:text-2xl font-bold text-white mb-1">⚡ Lv.2 달성! 스킬을 선택하세요</h3>
+                    <p class="text-[11px] sm:text-xs text-slate-300 mb-4">카드를 클릭하거나 키보드 <span class="text-yellow-300 font-bold">[1] [2] [3]</span> 키로 즉시 선택!</p>
+                    <div id="skillCardsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl">
+                    </div>
+                </div>
+
+                <!-- Top Header Bar -->
+                <div class="flex flex-wrap items-center justify-between border-b-2 border-[#2a2554] pb-3 mb-4 pt-1 gap-2">
+                    <div class="flex items-center gap-2">
+                        <button id="homeLogoBtn" type="button" class="text-xs sm:text-sm text-yellow-400 hover:text-yellow-300 tracking-wider cursor-pointer">
+                            오둥오락실
+                        </button>
+                        <span class="text-xs text-slate-500 hidden sm:inline">| ODUNG ARCADE</span>
+                        <span class="text-[11px] bg-rose-500/20 border border-rose-400/70 text-rose-300 px-2 py-0.5 rounded font-bold">
+                            🛠️ 개발자 전용
+                        </span>
+                        <span id="playerInfoBadge" class="hidden text-[11px] bg-indigo-500/20 border border-indigo-400/50 text-indigo-300 px-2 py-0.5 rounded">
+                            대기 중
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <button id="serverStatusBtn" type="button" title="Firebase 실시간 서버 연결 상태 및 설정"
+                            class="text-[11px] sm:text-xs bg-[#0f0c21] border border-amber-500/60 hover:border-yellow-400 text-amber-300 px-2 py-1 rounded transition">
+                            🟡 연결 중...
+                        </button>
+                        <button id="openHofHeaderBtn" type="button"
+                            class="text-xs bg-[#0f0c21] border border-amber-400/60 hover:border-yellow-400 text-amber-300 px-2.5 py-1 rounded transition">
+                            🏆 명예의 전당
+                        </button>
+                        <button id="soundToggleBtn" type="button" title="효과음 켜기/끄기"
+                            class="text-xs bg-[#0f0c21] border border-[#2e295e] hover:border-yellow-400 text-slate-200 px-2.5 py-1 rounded transition">
+                            🔊 ON
+                        </button>
+                        <button id="devLockBtn" type="button" title="개발자 화면 다시 잠그기"
+                            class="text-xs bg-rose-950/80 border border-rose-400/60 hover:border-rose-300 text-rose-200 px-2.5 py-1 rounded transition">
+                            🔒 잠금
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     VIEW 1: START SCREEN (Left Title/Icon, Right Inputs)
+                =========================================== -->
+                <div id="startScreen" class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center py-2 sm:py-4">
+                    <!-- Left Column: Keyboard Icon, Dev Badge, Title, Subtitle -->
+                    <div class="md:col-span-5 flex flex-col items-start text-left space-y-3 px-1">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-[#0f0c21] border-4 border-[#27224d] p-1.5 rounded shadow-inner">
+                            <div class="w-full h-full rounded-sm bg-gradient-to-b from-[#4f9cf9] to-[#6366f1] flex items-center justify-center relative overflow-hidden">
+                                <svg class="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-[0_3px_0_rgba(15,23,42,0.5)]" viewBox="0 0 32 24" fill="none">
+                                    <rect x="2" y="4" width="28" height="16" rx="2" fill="#e2e8f0"/>
+                                    <rect x="2" y="18" width="28" height="3" rx="1" fill="#94a3b8"/>
+                                    <rect x="5" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="8" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="11" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="14" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="17" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="20" y="7" width="2" height="2" fill="#64748b"/>
+                                    <rect x="23" y="7" width="4" height="2" fill="#64748b"/>
+                                    <rect x="5" y="10" width="3" height="2" fill="#64748b"/>
+                                    <rect x="9" y="10" width="2" height="2" fill="#64748b"/>
+                                    <rect x="12" y="10" width="2" height="2" fill="#64748b"/>
+                                    <rect x="15" y="10" width="2" height="2" fill="#64748b"/>
+                                    <rect x="18" y="10" width="2" height="2" fill="#64748b"/>
+                                    <rect x="21" y="10" width="2" height="2" fill="#64748b"/>
+                                    <rect x="24" y="10" width="3" height="2" fill="#64748b"/>
+                                    <rect x="5" y="13" width="3" height="2" fill="#64748b"/>
+                                    <rect x="9" y="13" width="13" height="2" fill="#64748b"/>
+                                    <rect x="23" y="13" width="4" height="2" fill="#64748b"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <span class="inline-block text-[11px] bg-rose-500/20 border border-rose-400/60 text-rose-300 px-2.5 py-0.5 rounded font-bold">
+                            🛠️ 개발자 전용 관리 &amp; 테스트 에디션
+                        </span>
+
+                        <h1 class="text-2xl sm:text-4xl font-bold text-white tracking-wide drop-shadow-[0_2px_0_#090712]">
+                            우리반 타자왕
+                        </h1>
+
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            개발자 전용 웹입니다. 게임 테스트 및 명예의 전당 전체 기록 초기화 관리가 가능합니다.
+                        </p>
+                    </div>
+
+                    <!-- Right Column: Class Code, Class Room, Nickname, Language, Start & Hall of Fame -->
+                    <div class="md:col-span-7 flex flex-col gap-3">
+                        <div class="bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-4 sm:p-5 space-y-3.5 text-left">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-yellow-400 mb-1">▶ 학급 코드</label>
+                                    <input id="classCodeInput" type="text" maxlength="20"
+                                        placeholder="학급 코드를 입력하세요"
+                                        class="typing-input w-full py-2 px-3 rounded text-sm text-center" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-yellow-400 mb-1">▶ 반</label>
+                                    <input id="classRoomInput" type="text" maxlength="12"
+                                        placeholder="반을 입력하세요 (예: 3-2)"
+                                        class="typing-input w-full py-2 px-3 rounded text-sm text-center" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs text-yellow-400 mb-1">▶ 닉네임</label>
+                                <input id="nicknameInput" type="text" maxlength="12"
+                                    placeholder="닉네임을 입력하세요"
+                                    class="typing-input w-full py-2 px-3 rounded text-sm sm:text-base text-center" />
+                            </div>
+
+                            <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+                                <span class="text-xs text-cyan-300">▶ 단어 언어</span>
+                                <div class="flex gap-1.5">
+                                    <button type="button" data-lang="ko" class="lang-btn option-pill active px-3 py-1 rounded text-xs font-bold">한글</button>
+                                    <button type="button" data-lang="en" class="lang-btn option-pill px-3 py-1 rounded text-xs font-bold">영문</button>
+                                    <button type="button" data-lang="mix" class="lang-btn option-pill px-3 py-1 rounded text-xs font-bold">한/영 혼합</button>
+                                </div>
+                            </div>
+
+                            <button id="startGameBtn" type="button"
+                                class="pixel-btn w-full bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-base sm:text-lg py-3 px-5 rounded">
+                                ▶ 게임 시작!
+                            </button>
+                        </div>
+
+                        <button id="startHofBtn" type="button"
+                            class="pixel-btn w-full bg-[#25204a] hover:bg-[#312b61] text-amber-300 font-bold text-sm py-3 px-5 rounded flex items-center justify-center gap-2">
+                            <span>🏆</span>
+                            <span>명예의 전당</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     VIEW 2: ACTIVE GAMEPLAY SCREEN
+                =========================================== -->
+                <div id="gameScreen" class="hidden flex-col">
+                    <!-- Top EXP Level Gauge & Equipped Skills Bar -->
+                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-3 py-2 mb-2">
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <div class="flex items-center gap-2">
+                                <span id="hudLevelBadge" class="bg-yellow-400 text-[#141129] font-bold px-2 py-0.5 rounded text-[11px]">
+                                    Lv.1
+                                </span>
+                                <span id="hudExpText" class="text-[11px] text-cyan-300">EXP 0 / 6개</span>
+                            </div>
+                            <div id="hudEquippedSkills" class="flex flex-wrap items-center gap-1 text-[10px]">
+                                <span class="text-slate-400">보유 스킬: 없음</span>
+                            </div>
+                        </div>
+                        <div class="w-full h-2.5 bg-[#191536] rounded-sm overflow-hidden border border-[#2e295e]">
+                            <div id="hudExpBar" class="h-full bg-gradient-to-r from-cyan-400 via-emerald-400 to-yellow-400 transition-all duration-150" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Top 4-Card HUD -->
+                    <div class="grid grid-cols-4 gap-2 mb-2">
+                        <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                            <div class="text-[10px] text-slate-400">생명 (HP)</div>
+                            <div id="hudLives" class="text-sm sm:text-base font-bold text-rose-400 tracking-wider">❤️❤️❤️</div>
+                        </div>
+                        <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                            <div class="text-[10px] text-slate-400">생존 시간</div>
+                            <div id="hudSurvivalTime" class="text-sm sm:text-base font-bold text-cyan-300">00:00</div>
+                        </div>
+                        <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                            <div class="text-[10px] text-slate-400">SCORE</div>
+                            <div id="hudScore" class="text-sm sm:text-base font-bold text-yellow-400">0</div>
+                        </div>
+                        <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                            <div class="text-[10px] text-slate-400">COMBO</div>
+                            <div id="hudCombo" class="text-sm sm:text-base font-bold text-emerald-400">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Sub Status Strip -->
+                    <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 px-1 mb-2 gap-1.5">
+                        <div class="flex items-center gap-3">
+                            <span>격추: <strong id="hudKills" class="text-emerald-300">0개</strong></span>
+                            <span>속도: <strong id="hudCpm" class="text-slate-200">0 타/분</strong></span>
+                            <span id="feverIndicator" class="hidden text-rose-400 font-bold animate-pulse">🔥 FEVER x2</span>
+                            <span id="freezeIndicator" class="hidden text-cyan-300 font-bold">❄️ FREEZE!</span>
+                            <span id="awakenedIndicator" class="hidden text-yellow-300 font-bold animate-pulse">🌟 각성 오토 발동중!</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button id="devForceLevelUpBtn" type="button"
+                                class="bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/60 text-rose-200 px-1.5 py-0.5 rounded text-[10px] cursor-pointer">
+                                [DEV] 즉시 레벨업
+                            </button>
+                            <button id="devSpawnBossBtn" type="button"
+                                class="bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-200 px-1.5 py-0.5 rounded text-[10px] cursor-pointer">
+                                [DEV] 보스 소환
+                            </button>
+                            <span id="pilotHudLabel" class="text-amber-300">🐹 파일럿</span>
+                        </div>
+                    </div>
+
+                    <!-- Gameplay Canvas -->
+                    <div id="canvasWrapper" class="relative w-full h-[250px] sm:h-[320px] bg-[#090714] border-2 border-[#2e295e] rounded overflow-hidden mb-2.5">
+                        <canvas id="gameCanvas"></canvas>
+                        <!-- Lv.N UP! Floating Banner (Shows for 2s before 3-Skill Modal opens) -->
+                        <div id="levelUpBanner" class="hidden pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-[#090714]/45 z-20">
+                            <div id="levelUpBannerText" class="levelup-banner text-3xl sm:text-5xl font-bold text-yellow-400 drop-shadow-[0_4px_0_#000] tracking-wider">
+                                Lv.2 UP!
+                            </div>
+                            <div class="text-xs sm:text-sm text-cyan-200 mt-2 bg-[#0f0c21]/90 border border-cyan-400/60 px-3 py-1 rounded">
+                                잠시 후 스킬 선택창이 열립니다...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Typing Input Area -->
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <input id="wordInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                                placeholder="단어가 바닥에 닿기 전에 입력해서 격추하세요!"
+                                class="typing-input w-full py-2.5 sm:py-3 px-3 rounded text-base sm:text-lg text-center tracking-wider" />
+                        </div>
+                        <button id="fireBtn" type="button"
+                            class="pixel-btn bg-yellow-400 text-[#141129] font-bold text-xs sm:text-sm py-3 px-4 rounded shrink-0">
+                            격추!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     VIEW 3: GAME OVER / RESTART SCREEN (죽었을 때)
+                =========================================== -->
+                <div id="gameOverScreen" class="hidden flex-col items-center text-center py-3">
+                    <div class="text-xs text-rose-400 tracking-widest mb-1">GAME OVER</div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">💥 우주선이 파괴되었습니다!</h2>
+                    <div id="gameOverHofNotice" class="inline-block bg-emerald-500/15 border border-emerald-400 text-emerald-300 text-xs sm:text-sm font-bold px-4 py-1.5 rounded mb-4">
+                        🏆 명예의 전당에 기록이 등록되었습니다!
+                    </div>
+
+                    <div class="w-full max-w-md grid grid-cols-2 gap-2.5 mb-5">
+                        <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
+                            <div class="text-[11px] text-slate-400">격추 단어 수</div>
+                            <div id="resKills" class="text-lg sm:text-xl font-bold text-emerald-400 mt-0.5">0개</div>
+                        </div>
+                        <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
+                            <div class="text-[11px] text-slate-400">최종 점수</div>
+                            <div id="resScore" class="text-lg sm:text-xl font-bold text-yellow-400 mt-0.5">0점</div>
+                        </div>
+                        <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
+                            <div class="text-[11px] text-slate-400">평균 타수 (CPM)</div>
+                            <div id="resCpm" class="text-lg sm:text-xl font-bold text-cyan-300 mt-0.5">0 타</div>
+                        </div>
+                        <div class="bg-[#0f0c21] border border-[#2a2554] p-3 rounded">
+                            <div class="text-[11px] text-slate-400">생존 시간 / 최대 콤보</div>
+                            <div id="resSurvivalCombo" class="text-lg sm:text-xl font-bold text-rose-300 mt-0.5">00:00 / 0</div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-2.5 w-full max-w-md">
+                        <button id="restartGameBtn" type="button"
+                            class="pixel-btn flex-1 bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-sm py-3 px-4 rounded">
+                            🔄 다시 시작하기
+                        </button>
+                        <button id="gameOverHofBtn" type="button"
+                            class="pixel-btn flex-1 bg-amber-500 hover:bg-amber-400 text-[#141129] font-bold text-sm py-3 px-4 rounded">
+                            🏆 명예의 전당
+                        </button>
+                        <button id="gameOverHomeBtn" type="button"
+                            class="pixel-btn bg-[#25204a] hover:bg-[#312b61] text-white font-bold text-sm py-3 px-4 rounded">
+                            처음으로
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     VIEW 4: HALL OF FAME (전체 / 우리반 조회 + 개발자 초기화)
+                =========================================== -->
+                <div id="hallOfFameScreen" class="hidden flex-col items-center text-center py-2">
+                    <div class="text-xs text-amber-400 tracking-widest mb-1">ODUNG ARCADE LEGENDS · DEV CONSOLE</div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-3">🏆 명예의 전당</h2>
+
+                    <!-- Filter Mode Toggle & Developer Reset Buttons: 전체 / 우리반 / 초기화 -->
+                    <div class="flex flex-wrap items-center justify-center gap-2 mb-3">
+                        <button id="hofTabAllBtn" type="button"
+                            class="option-pill active px-5 py-1.5 rounded text-xs sm:text-sm font-bold">
+                            전체
+                        </button>
+                        <button id="hofTabClassBtn" type="button"
+                            class="option-pill px-5 py-1.5 rounded text-xs sm:text-sm font-bold">
+                            우리반
+                        </button>
+                        <button id="resetHofBtn" type="button"
+                            class="pixel-btn bg-rose-600 hover:bg-rose-500 text-white px-4 py-1.5 rounded text-xs sm:text-sm font-bold">
+                            🗑️ 초기화
+                        </button>
+                    </div>
+
+                    <!-- '우리반' Filter Bar: 학급 코드 + 반 + 조회 버튼 (Visible only when '우리반' is clicked) -->
+                    <div id="hofClassFilterBar" class="hidden w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-2.5 sm:p-3 mb-3 flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        <input id="hofClassCodeInput" type="text" maxlength="20"
+                            placeholder="학급 코드"
+                            class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
+                        <input id="hofClassRoomInput" type="text" maxlength="12"
+                            placeholder="반"
+                            class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
+                        <button id="hofSearchBtn" type="button"
+                            class="pixel-btn bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-xs sm:text-sm py-1.5 px-5 rounded shrink-0">
+                            조회
+                        </button>
+                    </div>
+
+                    <!-- Hall of Fame Leaderboard Table -->
+                    <div class="w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md overflow-hidden mb-4">
+                        <div class="overflow-x-auto max-h-[300px] overflow-y-auto">
+                            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                                <thead class="bg-[#1b173b] text-yellow-400 border-b-2 border-[#2e295e] sticky top-0">
+                                    <tr>
+                                        <th class="py-2.5 px-3 text-center w-14">순위</th>
+                                        <th class="py-2.5 px-3">닉네임 (학급·반)</th>
+                                        <th class="py-2.5 px-3 text-right">격추</th>
+                                        <th class="py-2.5 px-3 text-right">점수</th>
+                                        <th class="py-2.5 px-3 text-right hidden sm:table-cell">타수</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hofTableBody" class="divide-y divide-[#231f47]">
+                                    <tr>
+                                        <td colspan="5" class="py-8 text-center text-slate-400">기록을 불러오는 중...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <button id="closeHofBtn" type="button"
+                        class="pixel-btn w-full max-w-xs bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-sm py-3 px-6 rounded">
+                        ← 돌아가기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         FIREBASE & GAMEPLAY LOGIC
+    =========================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import {
+            getFirestore, doc, getDoc, setDoc, getDocs, deleteDoc, onSnapshot, collection
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // 1. BACKEND SYNC LAYER (FIRESTORE + LOCAL FALLBACK)
+        // ==========================================
+        const MANUAL_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBWP4uPs5tVufwyz83XM1MVBfPGY61g-jo",
+            authDomain: "classtyping-2a9a3.firebaseapp.com",
+            projectId: "classtyping-2a9a3",
+            storageBucket: "classtyping-2a9a3.firebasestorage.app",
+            messagingSenderId: "145624297399",
+            appId: "1:145624297399:web:974c2d56442b9126a98232",
+            measurementId: "G-N09Q2D8XC7"
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'odung-speed-typing';
+        const LOCAL_HOF_KEY = 'odung_typing_hof_records_v1';
+        const DEV_CREDENTIALS = {
+            id: 'hukleverydev',
+            pw: 'devdevdev'
+        };
+
+        let isDevAuthenticated = false;
+        let firebaseAppInstance = null;
+        let db = null;
+        let auth = null;
+        let useFirestore = false;
+        let defaultEnvConfig = null;
+        let unsubHof = null;
+
+        function updateConnectionStatusUI() {
+            const btn = document.getElementById('serverStatusBtn');
+            const modalBadge = document.getElementById('modalConnStatus');
+            if (useFirestore && db) {
+                if (btn) {
+                    btn.textContent = '🟢 실시간 서버 연결됨';
+                    btn.className = 'text-[11px] sm:text-xs bg-emerald-950/80 border border-emerald-400/70 text-emerald-300 px-2 py-1 rounded transition';
+                }
+                if (modalBadge) {
+                    modalBadge.textContent = '🟢 클라우드 연결됨';
+                    modalBadge.className = 'text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300';
+                }
+            } else {
+                if (btn) {
+                    btn.textContent = '🟡 로컬 모드';
+                    btn.className = 'text-[11px] sm:text-xs bg-[#0f0c21] border border-amber-500/60 hover:border-yellow-400 text-amber-300 px-2 py-1 rounded transition';
+                }
+                if (modalBadge) {
+                    modalBadge.textContent = '🟡 로컬 저장소 사용 중';
+                    modalBadge.className = 'text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300';
+                }
+            }
+        }
+
+        async function connectWithFirebaseConfig(firebaseConfig) {
+            try {
+                if (!firebaseConfig || !firebaseConfig.apiKey) return false;
+                firebaseAppInstance = initializeApp(firebaseConfig, `odung_dev_app_${Date.now()}`);
+                db = getFirestore(firebaseAppInstance);
+                useFirestore = Boolean(db);
+
+                try {
+                    auth = getAuth(firebaseAppInstance);
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && firebaseConfig === defaultEnvConfig) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (authErr) {
+                    console.info('Optional auth skipped:', authErr?.code || authErr);
+                }
+
+                updateConnectionStatusUI();
+                subscribeHallOfFame();
+                return useFirestore;
+            } catch (err) {
+                console.warn('Firebase connection failed:', err);
+                useFirestore = false;
+                db = null;
+                updateConnectionStatusUI();
+                return false;
+            }
+        }
+
+        async function initBackend() {
+            loadLocalHof();
+            try {
+                if (MANUAL_FIREBASE_CONFIG && MANUAL_FIREBASE_CONFIG.apiKey) {
+                    await connectWithFirebaseConfig(MANUAL_FIREBASE_CONFIG);
+                    return;
+                }
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    defaultEnvConfig = JSON.parse(__firebase_config);
+                    await connectWithFirebaseConfig(defaultEnvConfig);
+                    return;
+                }
+            } catch (err) {
+                console.warn('Firestore init fallback to local:', err);
+            }
+            useFirestore = false;
+            updateConnectionStatusUI();
+        }
+
+        function getHofColRef() {
+            return collection(db, 'artifacts', appId, 'public', 'data', 'hallOfFame');
+        }
+
+        function getHofDocRef(recordKey) {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'hallOfFame', recordKey);
+        }
+
+        // ==========================================
+        // 2. APPLICATION STATE & WORD DICTIONARY
+        // ==========================================
+        const WORDS_KO = [
+            '쿼카', '우주선', '오둥이', '타자왕', '별빛', '은하수', '로켓', '혜성',
+            '행성', '인공위성', '무지개', '번개', '소행성', '우주정거장', '초신성',
+            '태양계', '블랙홀', '달빛', '별똥별', '탐사선', '망원경', '오락실',
+            '승리', '도전', '협동', '최고속도', '광속돌파', '우주비행사', '지구촌',
+            '별자리', '토성고리', '화성탐사', '목성', '수성', '금성', '천왕성', '해왕성'
+        ];
+
+        const WORDS_EN = [
+            'QUOKKA', 'ROCKET', 'GALAXY', 'STAR', 'PLANET', 'COMET', 'METEOR',
+            'ORBIT', 'COSMOS', 'NEBULA', 'APOLLO', 'SATURN', 'JUPITER', 'MARS',
+            'VENUS', 'MERCURY', 'ARCADE', 'TYPING', 'SPEED', 'WINNER', 'CHAMPION',
+            'LASER', 'SHIELD', 'BOOST', 'FEVER', 'PIXEL', 'RETRO', 'SPACE', 'FUTURE'
+        ];
+
+        const BOSS_WORDS_KO = [
+            '우리반타자왕', '초광속우주선', '쿼카대장출격', '은하계수호자',
+            '무적의타자실력', '전광석화타격', '우주해적격퇴', '최강타자마스터'
+        ];
+
+        const BOSS_WORDS_EN = [
+            'SUPERSONIC', 'STARFIGHTER', 'GALAXYKING', 'HYPERDRIVE',
+            'MECHABOSS', 'QUOKKAHOME', 'LIGHTSPEED', 'CHAMPIONSHIP'
+        ];
+
+        const BOSS_PROFILES = [
+            { name: 'Lv.1 우주 해적 메카냥', color: '#f43f5e', baseHp: 120 },
+            { name: 'Lv.2 암흑 성운 드래곤', color: '#a855f7', baseHp: 180 },
+            { name: 'Lv.3 초거대 블랙홀 코어', color: '#38bdf8', baseHp: 250 },
+            { name: 'Lv.4 은하계 최종 함대장', color: '#facc15', baseHp: 330 }
+        ];
+
+        // 6th Grade 2nd Semester Math Quiz Bank (비례식과 비례배분)
+        const MATH_QUIZ_PRIMARY = [
+            {
+                q: "비례식 3 : 5 = 12 : □ 에서 □ 안에 들어갈 알맞은 수는 무엇일까요?",
+                choices: ["15", "20", "24", "30"],
+                answer: 1
+            },
+            {
+                q: "비례식 4 : 7 = □ : 28 에서 □ 안에 들어갈 알맞은 수는 무엇일까요?",
+                choices: ["12", "14", "16", "21"],
+                answer: 2
+            },
+            {
+                q: "사탕 35개를 지민이와 서연이가 3 : 4로 비례배분하여 나누어 가졌습니다. 서연이가 가진 사탕은 몇 개일까요?",
+                choices: ["15개", "18개", "20개", "25개"],
+                answer: 2
+            },
+            {
+                q: "비례식 □ : 9 = 8 : 12 에서 외항의 곱은 72입니다. □ 안에 들어갈 수는 무엇일까요?",
+                choices: ["4", "6", "8", "10"],
+                answer: 1
+            },
+            {
+                q: "가로와 세로의 비가 5 : 3인 직사각형 모양의 밭이 있습니다. 가로가 25m일 때 세로는 몇 m일까요?",
+                choices: ["12m", "15m", "18m", "20m"],
+                answer: 1
+            },
+            {
+                q: "공책 48권을 5 : 3으로 비례배분할 때, 더 많이 받는 쪽은 몇 권을 받게 될까요?",
+                choices: ["18권", "24권", "30권", "36권"],
+                answer: 2
+            },
+            {
+                q: "비 0.4 : 1.2 를 가장 간단한 자연수의 비로 바르게 나타낸 것은 무엇일까요?",
+                choices: ["1 : 2", "1 : 3", "2 : 3", "4 : 12"],
+                answer: 1
+            },
+            {
+                q: "밀가루와 설탕을 7 : 2의 비로 섞어 반죽 450g을 만들려고 합니다. 필요한 설탕은 몇 g일까요?",
+                choices: ["50g", "100g", "150g", "350g"],
+                answer: 1
+            }
+        ];
+
+        const MATH_QUIZ_EASIER = [
+            {
+                q: "[보너스 쉬운 문제] 비례식 1 : 2 = 3 : □ 에서 □ 안에 들어갈 수는 무엇일까요?",
+                choices: ["4", "5", "6", "8"],
+                answer: 2
+            },
+            {
+                q: "[보너스 쉬운 문제] 연필 10자루를 1 : 1로 똑같이 나누면 한 사람이 몇 자루씩 가질까요?",
+                choices: ["2자루", "4자루", "5자루", "10자루"],
+                answer: 2
+            },
+            {
+                q: "[보너스 쉬운 문제] 비 2 : 4 와 비율이 같은 비는 어느 것일까요?",
+                choices: ["1 : 2", "1 : 3", "2 : 3", "3 : 4"],
+                answer: 0
+            },
+            {
+                q: "[보너스 쉬운 문제] 귤 12개를 형과 동생이 2 : 1로 나누어 가졌습니다. 동생이 가진 귤은 몇 개일까요?",
+                choices: ["2개", "4개", "6개", "8개"],
+                answer: 1
+            },
+            {
+                q: "[보너스 쉬운 문제] 비례식 2 : 5 = 4 : □ 에서 □ 안에 들어갈 수는 무엇일까요?",
+                choices: ["6", "8", "10", "12"],
+                answer: 2
+            }
+        ];
+
+        const appState = {
+            classCode: '',
+            classRoom: '',
+            nickname: '',
+            lang: 'ko',
+            previousScreenId: 'startScreen',
+            hofRecords: [],
+            hofTab: 'all', // 'all' | 'class'
+            hofFilterCode: '',
+            hofFilterRoom: ''
+        };
+
+        // ==========================================
+        // 3. RETRO SOUND SYNTHESIZER (WEB AUDIO API)
+        // ==========================================
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function ensureAudio() {
+            if (!soundEnabled) return null;
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+            return audioCtx;
+        }
+
+        function playTone(freq, type = 'square', duration = 0.08, vol = 0.08, delay = 0) {
+            const ctx = ensureAudio();
+            if (!ctx) return;
+            try {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+                gain.gain.setValueAtTime(vol, ctx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ctx.currentTime + delay);
+                osc.stop(ctx.currentTime + delay + duration);
+            } catch (e) {}
+        }
+
+        const sfx = {
+            click: () => playTone(520, 'square', 0.05, 0.06),
+            error: () => {
+                playTone(180, 'sawtooth', 0.12, 0.08, 0);
+                playTone(140, 'sawtooth', 0.14, 0.08, 0.09);
+            },
+            hit: () => {
+                playTone(660, 'square', 0.06, 0.07, 0);
+                playTone(880, 'square', 0.08, 0.07, 0.05);
+            },
+            bossHit: () => {
+                playTone(300, 'sawtooth', 0.07, 0.09, 0);
+                playTone(740, 'square', 0.09, 0.09, 0.04);
+            },
+            bossDefeat: () => {
+                [523, 659, 784, 1046].forEach((f, i) => playTone(f, 'square', 0.11, 0.09, i * 0.06));
+            },
+            levelUp: () => {
+                [440, 554, 659, 880].forEach((f, i) => playTone(f, 'triangle', 0.12, 0.1, i * 0.07));
+            },
+            gameOver: () => {
+                [392, 349, 311, 261].forEach((f, i) => playTone(f, 'sawtooth', 0.16, 0.09, i * 0.11));
+            }
+        };
+
+        // ==========================================
+        // 4. UI NAVIGATION & HELPERS
+        // ==========================================
+        const ALL_SCREENS = [
+            'startScreen',
+            'gameScreen',
+            'gameOverScreen',
+            'hallOfFameScreen'
+        ];
+
+        function showScreen(screenId) {
+            ALL_SCREENS.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (id === screenId) {
+                    el.classList.remove('hidden');
+                    if (id === 'startScreen') {
+                        el.classList.add('grid');
+                    } else {
+                        el.classList.add('flex');
+                    }
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex', 'grid');
+                }
+            });
+            if (screenId !== 'hallOfFameScreen') {
+                appState.previousScreenId = screenId;
+            }
+        }
+
+        let toastTimeout = null;
+        function showToast(msg, duration = 2600) {
+            const box = document.getElementById('toastBox');
+            if (!box) return;
+            box.textContent = msg;
+            box.classList.remove('hidden');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                box.classList.add('hidden');
+            }, duration);
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatElapsed(seconds) {
+            const safe = Math.max(0, Math.floor(seconds));
+            const mins = Math.floor(safe / 60);
+            const secs = safe % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function updateHeaderBadge() {
+            const badge = document.getElementById('playerInfoBadge');
+            if (!badge) return;
+            if (appState.nickname) {
+                badge.textContent = `${appState.classCode} · ${appState.classRoom} · ${appState.nickname}`;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        // ==========================================
+        // 4.5 DEVELOPER AUTHENTICATION GATE
+        // ==========================================
+        function unlockDeveloperMode() {
+            isDevAuthenticated = true;
+            const overlay = document.getElementById('devLoginOverlay');
+            const protectedContent = document.getElementById('devProtectedContent');
+            const errBox = document.getElementById('devLoginError');
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+            if (protectedContent) {
+                protectedContent.classList.remove('dev-locked-blur');
+                protectedContent.classList.add('dev-unlocked-clear');
+            }
+            if (errBox) errBox.classList.add('hidden');
+            sfx.levelUp();
+            showToast('🔓 개발자 인증 완료! 모든 관리 기능이 활성화되었습니다.');
+        }
+
+        function lockDeveloperMode() {
+            isDevAuthenticated = false;
+            stopGame();
+            const overlay = document.getElementById('devLoginOverlay');
+            const protectedContent = document.getElementById('devProtectedContent');
+            const idInput = document.getElementById('devIdInput');
+            const pwInput = document.getElementById('devPwInput');
+            if (protectedContent) {
+                protectedContent.classList.remove('dev-unlocked-clear');
+                protectedContent.classList.add('dev-locked-blur');
+            }
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            }
+            if (idInput) idInput.value = '';
+            if (pwInput) {
+                pwInput.value = '';
+                setTimeout(() => idInput && idInput.focus(), 40);
+            }
+            sfx.click();
+            showToast('🔒 개발자 화면이 잠금 처리되었습니다.');
+        }
+
+        function attemptDeveloperLogin() {
+            const idInput = document.getElementById('devIdInput');
+            const pwInput = document.getElementById('devPwInput');
+            const errBox = document.getElementById('devLoginError');
+            const enteredId = (idInput?.value || '').trim();
+            const enteredPw = (pwInput?.value || '').trim();
+
+            if (enteredId === DEV_CREDENTIALS.id && enteredPw === DEV_CREDENTIALS.pw) {
+                unlockDeveloperMode();
+                return;
+            }
+
+            sfx.error();
+            if (errBox) errBox.classList.remove('hidden');
+            [idInput, pwInput].forEach(el => {
+                if (!el) return;
+                el.classList.remove('shake');
+                void el.offsetWidth;
+                el.classList.add('shake');
+            });
+            if (pwInput) {
+                pwInput.value = '';
+                pwInput.focus();
+            }
+        }
+
+        // ==========================================
+        // 5. HALL OF FAME STORAGE & SINGLE-RECORD UPDATE
+        // ==========================================
+        function normalizeKeyPart(val) {
+            return String(val || '').trim().replace(/\s+/g, '').toLowerCase();
+        }
+
+        function makePlayerRecordKey(classCode, classRoom, nickname) {
+            return `${normalizeKeyPart(classCode)}__${normalizeKeyPart(classRoom)}__${normalizeKeyPart(nickname)}`;
+        }
+
+        function loadLocalHof() {
+            try {
+                const raw = localStorage.getItem(LOCAL_HOF_KEY);
+                appState.hofRecords = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                appState.hofRecords = [];
+            }
+        }
+
+        function saveLocalHof() {
+            try {
+                localStorage.setItem(LOCAL_HOF_KEY, JSON.stringify(appState.hofRecords));
+            } catch (e) {}
+        }
+
+        function subscribeHallOfFame() {
+            if (!useFirestore || !db) return;
+            if (unsubHof) unsubHof();
+            unsubHof = onSnapshot(getHofColRef(), (snap) => {
+                const remoteList = [];
+                snap.forEach(d => {
+                    remoteList.push({ id: d.id, ...d.data() });
+                });
+                appState.hofRecords = remoteList;
+                saveLocalHof();
+                if (!document.getElementById('hallOfFameScreen').classList.contains('hidden')) {
+                    renderHallOfFame();
+                }
+            }, (err) => {
+                console.warn('Hall of Fame snapshot error:', err);
+            });
+        }
+
+        /**
+         * Saves or updates a player's record on Game Over.
+         * If the same (classCode + classRoom + nickname) already exists:
+         *  - Updates the existing entry ONLY if the new score (or kills on tie) is higher!
+         *  - Never creates duplicate rows for the same participant.
+         */
+        async function upsertHallOfFameRecord(newEntry) {
+            const key = makePlayerRecordKey(newEntry.classCode, newEntry.classRoom, newEntry.nickname);
+            const recordPayload = {
+                recordKey: key,
+                classCode: newEntry.classCode,
+                classRoom: newEntry.classRoom,
+                nickname: newEntry.nickname,
+                kills: newEntry.kills,
+                score: newEntry.score,
+                cpm: newEntry.cpm,
+                updatedAt: Date.now()
+            };
+
+            const existingIdx = appState.hofRecords.findIndex(r =>
+                makePlayerRecordKey(r.classCode, r.classRoom, r.nickname) === key
+            );
+
+            let isNewHigh = true;
+            if (existingIdx !== -1) {
+                const prev = appState.hofRecords[existingIdx];
+                if (newEntry.score > prev.score || (newEntry.score === prev.score && newEntry.kills > prev.kills)) {
+                    appState.hofRecords[existingIdx] = { ...prev, ...recordPayload };
+                } else {
+                    isNewHigh = false;
+                }
+            } else {
+                appState.hofRecords.push(recordPayload);
+            }
+
+            saveLocalHof();
+
+            if (useFirestore && db && isNewHigh) {
+                try {
+                    const docRef = getHofDocRef(key);
+                    const snap = await getDoc(docRef);
+                    if (snap.exists()) {
+                        const prevRemote = snap.data();
+                        if (newEntry.score > (prevRemote.score || 0) ||
+                           (newEntry.score === (prevRemote.score || 0) && newEntry.kills > (prevRemote.kills || 0))) {
+                            await setDoc(docRef, recordPayload);
+                        } else {
+                            isNewHigh = false;
+                        }
+                    } else {
+                        await setDoc(docRef, recordPayload);
+                    }
+                } catch (err) {
+                    console.warn('Firestore HoF upsert error:', err);
+                }
+            }
+
+            return { isNewHigh, isExisting: existingIdx !== -1 };
+        }
+
+        async function resetAllHallOfFameRecords() {
+            appState.hofRecords = [];
+            saveLocalHof();
+
+            if (useFirestore && db) {
+                try {
+                    const snap = await getDocs(getHofColRef());
+                    const deletions = [];
+                    snap.forEach(docItem => {
+                        deletions.push(deleteDoc(docItem.ref));
+                    });
+                    await Promise.all(deletions);
+                } catch (err) {
+                    console.warn('Firestore HoF reset error:', err);
+                }
+            }
+
+            renderHallOfFame();
+            sfx.bossDefeat();
+            showToast('🗑️ 명예의 전당의 모든 기록이 초기화되었습니다!');
+        }
+
+        function renderHallOfFame() {
+            const tbody = document.getElementById('hofTableBody');
+            if (!tbody) return;
+
+            let list = [...appState.hofRecords];
+
+            if (appState.hofTab === 'class') {
+                const fCode = normalizeKeyPart(appState.hofFilterCode);
+                const fRoom = normalizeKeyPart(appState.hofFilterRoom);
+                if (!fCode && !fRoom) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-slate-400">
+                                위 입력칸에 <strong class="text-yellow-300">학급 코드</strong>와 <strong class="text-yellow-300">반</strong>을 적고 <strong class="text-yellow-300">조회</strong> 버튼을 눌러주세요.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+                list = list.filter(r => {
+                    const matchCode = !fCode || normalizeKeyPart(r.classCode) === fCode;
+                    const matchRoom = !fRoom || normalizeKeyPart(r.classRoom) === fRoom;
+                    return matchCode && matchRoom;
+                });
+            }
+
+            list.sort((a, b) => (b.score - a.score) || (b.kills - a.kills));
+
+            if (list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-slate-400">
+                            등록된 기록이 없습니다.
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((item, idx) => {
+                const rank = idx + 1;
+                const rankBadge = rank === 1 ? '👑 1' : rank === 2 ? '🥈 2' : rank === 3 ? '🥉 3' : `${rank}`;
+                const rowHighlight = rank === 1 ? 'bg-yellow-400/10 text-yellow-200' : 'text-slate-200';
+                return `
+                    <tr class="${rowHighlight} hover:bg-[#1b173b]/60 transition">
+                        <td class="py-2.5 px-3 text-center font-bold">${rankBadge}</td>
+                        <td class="py-2.5 px-3">
+                            <span class="font-bold text-white">${escapeHtml(item.nickname)}</span>
+                            <span class="text-[11px] text-cyan-300 ml-1.5">(${escapeHtml(item.classCode)} · ${escapeHtml(item.classRoom)})</span>
+                        </td>
+                        <td class="py-2.5 px-3 text-right text-emerald-400 font-bold">${item.kills || 0}개</td>
+                        <td class="py-2.5 px-3 text-right text-yellow-400 font-bold">${(item.score || 0).toLocaleString()}점</td>
+                        <td class="py-2.5 px-3 text-right text-slate-300 hidden sm:table-cell">${item.cpm || 0} 타</td>
+                    </tr>`;
+            }).join('');
+        }
+
+        // ==========================================
+        // 6. GAMEPLAY ENGINE (WORDS, BOSS, SKILLS, MATH QUIZ)
+        // ==========================================
+        const game = {
+            active: false,
+            paused: false,
+            animId: null,
+            lastFrameTime: 0,
+            startTime: 0,
+            pausedAccumMs: 0,
+            pauseStartedAt: 0,
+            lives: 3,
+            maxLives: 5,
+            score: 0,
+            kills: 0,
+            combo: 0,
+            maxCombo: 0,
+            totalTypedChars: 0,
+            level: 1,
+            expInLevel: 0,
+            requiredForNextLevel: 6,
+            spawnTimer: 0,
+            words: [],
+            lasers: [],
+            particles: [],
+            stars: [],
+            boss: null,
+            nextBossScore: 1000,
+            bossCount: 0,
+            freezeUntil: 0,
+            feverUntil: 0,
+            usedPrimaryQuizIndices: new Set(),
+            usedEasierQuizIndices: new Set(),
+            currentQuiz: null,
+            isQuizRetry: false,
+            skills: {
+                autoTurret: 0,
+                multiLaser: 0,
+                scoreBoost: 0,
+                slowField: 0,
+                awakened: false
+            },
+            autoTurretTimer: 0
+        };
+
+        function getRequiredKillsForLevel(lv) {
+            // Lv.1 -> 6, Lv.2 -> 8, Lv.3 -> 10, Lv.4 -> 12 ...
+            return 6 + (lv - 1) * 2;
+        }
+
+        function initCanvasStars(w, h) {
+            game.stars = [];
+            for (let i = 0; i < 42; i++) {
+                game.stars.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    size: Math.random() < 0.3 ? 2 : 1,
+                    speed: 14 + Math.random() * 28,
+                    alpha: 0.35 + Math.random() * 0.65
+                });
+            }
+        }
+
+        function resizeGameCanvas() {
+            const wrapper = document.getElementById('canvasWrapper');
+            const canvas = document.getElementById('gameCanvas');
+            if (!wrapper || !canvas) return;
+            const rect = wrapper.getBoundingClientRect();
+            canvas.width = Math.max(300, Math.floor(rect.width));
+            canvas.height = Math.max(220, Math.floor(rect.height));
+            if (game.stars.length === 0) {
+                initCanvasStars(canvas.width, canvas.height);
+            }
+        }
+
+        function pickRandomWord(isBoss = false) {
+            const lang = appState.lang;
+            if (isBoss) {
+                const pool = lang === 'en' ? BOSS_WORDS_EN :
+                             lang === 'mix' ? [...BOSS_WORDS_KO, ...BOSS_WORDS_EN] :
+                             BOSS_WORDS_KO;
+                return pool[Math.floor(Math.random() * pool.length)];
+            }
+            const pool = lang === 'en' ? WORDS_EN :
+                         lang === 'mix' ? [...WORDS_KO, ...WORDS_EN] :
+                         WORDS_KO;
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+
+        function spawnFallingWord() {
+            const canvas = document.getElementById('gameCanvas');
+            if (!canvas) return;
+            const text = pickRandomWord(false);
+            const margin = 56;
+            const x = margin + Math.random() * Math.max(40, canvas.width - margin * 2);
+            const baseSpeed = 24 + (game.level - 1) * 4.5 + Math.min(28, game.kills * 0.35);
+            const slowFactor = Math.max(0.55, 1 - game.skills.slowField * 0.12);
+            const isSpecialFreeze = Math.random() < 0.08;
+            const isSpecialFever = !isSpecialFreeze && Math.random() < 0.08;
+
+            game.words.push({
+                text,
+                x,
+                y: 22,
+                speed: baseSpeed * slowFactor * (0.9 + Math.random() * 0.25),
+                special: isSpecialFreeze ? 'freeze' : isSpecialFever ? 'fever' : 'normal'
+            });
+        }
+
+        function spawnBoss() {
+            const canvas = document.getElementById('gameCanvas');
+            if (!canvas) return;
+            const profile = BOSS_PROFILES[game.bossCount % BOSS_PROFILES.length];
+            const cycle = Math.floor(game.bossCount / BOSS_PROFILES.length) + 1;
+            const maxHp = profile.baseHp * cycle;
+            game.bossCount += 1;
+            game.boss = {
+                name: profile.name,
+                color: profile.color,
+                hp: maxHp,
+                maxHp,
+                word: pickRandomWord(true),
+                x: canvas.width / 2,
+                y: 54,
+                dir: 1
+            };
+            showToast(`👾 경고! [${profile.name}] 출현!`);
+        }
+
+        function createExplosion(x, y, color = '#facc15', count = 14) {
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+                const speed = 50 + Math.random() * 120;
+                game.particles.push({
+                    x,
+                    y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 0.45 + Math.random() * 0.25,
+                    maxLife: 0.7,
+                    color,
+                    size: 2 + Math.floor(Math.random() * 3)
+                });
+            }
+        }
+
+        function fireLaserAt(targetX, targetY, color = '#38bdf8') {
+            const canvas = document.getElementById('gameCanvas');
+            if (!canvas) return;
+            game.lasers.push({
+                x1: canvas.width / 2,
+                y1: canvas.height - 34,
+                x2: targetX,
+                y2: targetY,
+                life: 0.16,
+                color
+            });
+        }
+
+        function pauseGameForModal() {
+            if (!game.paused) {
+                game.paused = true;
+                game.pauseStartedAt = Date.now();
+            }
+        }
+
+        function resumeGameFromModal() {
+            if (game.paused) {
+                game.paused = false;
+                game.pausedAccumMs += (Date.now() - game.pauseStartedAt);
+                game.lastFrameTime = performance.now();
+                const input = document.getElementById('wordInput');
+                if (input && game.active) {
+                    setTimeout(() => input.focus(), 30);
+                }
+            }
+        }
+
+        // Safely clears Korean IME composition buffer so trailing syllable never leaks to next word
+        function clearWordInputSafely() {
+            const input = document.getElementById('wordInput');
+            if (!input) return;
+            input.value = '';
+            const wasFocused = (document.activeElement === input);
+            if (wasFocused) {
+                input.blur();
+            }
+            input.value = '';
+            if (wasFocused && game.active && !game.paused) {
+                setTimeout(() => {
+                    input.value = '';
+                    input.focus();
+                }, 0);
+            }
+        }
+
+        function triggerDamageShake() {
+            const frame = document.getElementById('arcadeFrame');
+            if (!frame) return;
+            frame.classList.remove('damage-flash');
+            void frame.offsetWidth;
+            frame.classList.add('damage-flash');
+        }
+
+        function updateGameHud() {
+            const livesEl = document.getElementById('hudLives');
+            if (livesEl) {
+                livesEl.textContent = game.lives > 0 ? '❤️'.repeat(game.lives) : '💀';
+            }
+
+            const elapsedSec = game.active
+                ? (Date.now() - game.startTime - game.pausedAccumMs) / 1000
+                : 0;
+            const timeEl = document.getElementById('hudSurvivalTime');
+            if (timeEl) timeEl.textContent = formatElapsed(elapsedSec);
+
+            const scoreEl = document.getElementById('hudScore');
+            if (scoreEl) scoreEl.textContent = game.score.toLocaleString();
+
+            const comboEl = document.getElementById('hudCombo');
+            if (comboEl) comboEl.textContent = String(game.combo);
+
+            const killsEl = document.getElementById('hudKills');
+            if (killsEl) killsEl.textContent = `${game.kills}개`;
+
+            const cpm = elapsedSec > 1 ? Math.round((game.totalTypedChars / elapsedSec) * 60) : 0;
+            const cpmEl = document.getElementById('hudCpm');
+            if (cpmEl) cpmEl.textContent = `${cpm} 타/분`;
+
+            const lvBadge = document.getElementById('hudLevelBadge');
+            if (lvBadge) lvBadge.textContent = `Lv.${game.level}`;
+
+            const expText = document.getElementById('hudExpText');
+            if (expText) expText.textContent = `EXP ${game.expInLevel} / ${game.requiredForNextLevel}개`;
+
+            const expBar = document.getElementById('hudExpBar');
+            if (expBar) {
+                const pct = Math.min(100, Math.round((game.expInLevel / game.requiredForNextLevel) * 100));
+                expBar.style.width = `${pct}%`;
+            }
+
+            // Indicators
+            const now = Date.now();
+            const feverEl = document.getElementById('feverIndicator');
+            const freezeEl = document.getElementById('freezeIndicator');
+            const awakeEl = document.getElementById('awakenedIndicator');
+            const frame = document.getElementById('arcadeFrame');
+
+            const isFever = now < game.feverUntil;
+            if (feverEl) feverEl.classList.toggle('hidden', !isFever);
+            if (frame) frame.classList.toggle('fever-active', isFever);
+            if (freezeEl) freezeEl.classList.toggle('hidden', now >= game.freezeUntil);
+            if (awakeEl) awakeEl.classList.toggle('hidden', !game.skills.awakened);
+
+            // Equipped skills pills
+            const skillsBox = document.getElementById('hudEquippedSkills');
+            if (skillsBox) {
+                const tags = [];
+                if (game.skills.autoTurret > 0) tags.push(`🤖 오토포탑 Lv.${game.skills.autoTurret}`);
+                if (game.skills.multiLaser > 0) tags.push(`⚡ 연쇄레이저 Lv.${game.skills.multiLaser}`);
+                if (game.skills.scoreBoost > 0) tags.push(`💎 점수증폭 Lv.${game.skills.scoreBoost}`);
+                if (game.skills.slowField > 0) tags.push(`❄️ 감속역장 Lv.${game.skills.slowField}`);
+                if (game.skills.awakened) tags.push(`🌟 초각성`);
+                skillsBox.innerHTML = tags.length > 0
+                    ? tags.map(t => `<span class="bg-[#1b173b] border border-cyan-400/50 text-cyan-200 px-1.5 py-0.5 rounded">${t}</span>`).join('')
+                    : `<span class="text-slate-400">보유 스킬: 없음</span>`;
+            }
+        }
+
+        // ==========================================
+        // 7. 6TH GRADE 2ND SEMESTER MATH QUIZ & LEVEL UP
+        // ==========================================
+        function pickNonRepeatingQuiz(pool, usedSet) {
+            if (usedSet.size >= pool.length) {
+                usedSet.clear();
+            }
+            const available = [];
+            for (let i = 0; i < pool.length; i++) {
+                if (!usedSet.has(i)) available.push(i);
+            }
+            const chosenIdx = available[Math.floor(Math.random() * available.length)];
+            usedSet.add(chosenIdx);
+            return pool[chosenIdx];
+        }
+
+        function openMathQuizForLevelUp(isRetry = false, alertMsg = '') {
+            pauseGameForModal();
+            game.isQuizRetry = isRetry;
+            const quiz = isRetry
+                ? pickNonRepeatingQuiz(MATH_QUIZ_EASIER, game.usedEasierQuizIndices)
+                : pickNonRepeatingQuiz(MATH_QUIZ_PRIMARY, game.usedPrimaryQuizIndices);
+            game.currentQuiz = quiz;
+
+            const modal = document.getElementById('mathQuizModal');
+            const badge = document.getElementById('quizAttemptBadge');
+            const title = document.getElementById('quizModalTitle');
+            const alertBanner = document.getElementById('quizAlertBanner');
+            const qText = document.getElementById('quizQuestionText');
+            const grid = document.getElementById('quizChoicesGrid');
+
+            if (badge) {
+                badge.textContent = isRetry
+                    ? '📐 6학년 2학기 수학 · 보너스 기초 비례식 문제'
+                    : '📐 6학년 2학기 수학 · 비례식과 비례배분';
+            }
+            if (title) {
+                title.textContent = `⚡ 레벨업 관문! 문제를 맞히면 Lv.${game.level + 1} 달성!`;
+            }
+            if (alertBanner) {
+                if (alertMsg) {
+                    alertBanner.textContent = alertMsg;
+                    alertBanner.classList.remove('hidden');
+                } else {
+                    alertBanner.classList.add('hidden');
+                }
+            }
+            if (qText) qText.textContent = quiz.q;
+
+            if (grid) {
+                grid.innerHTML = quiz.choices.map((choiceText, idx) => `
+                    <button type="button" data-choice-idx="${idx}"
+                        class="quiz-choice-btn skill-card p-3 rounded text-left flex items-center gap-2.5 text-xs sm:text-sm text-white">
+                        <span class="bg-yellow-400 text-[#141129] font-bold px-2 py-0.5 rounded shrink-0">${idx + 1}</span>
+                        <span>${escapeHtml(choiceText)}</span>
+                    </button>
+                `).join('');
+
+                grid.querySelectorAll('.quiz-choice-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const chosen = Number(btn.getAttribute('data-choice-idx'));
+                        handleQuizAnswer(chosen);
+                    });
+                });
+            }
+
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeMathQuizModal() {
+            const modal = document.getElementById('mathQuizModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            game.currentQuiz = null;
+        }
+
+        function handleQuizAnswer(choiceIdx) {
+            if (!game.currentQuiz) return;
+            const isCorrect = (choiceIdx === game.currentQuiz.answer);
+
+            if (isCorrect) {
+                closeMathQuizModal();
+                proceedToLevelUpCelebration();
+                return;
+            }
+
+            // Incorrect answer: deduct 1 life
+            sfx.error();
+            triggerDamageShake();
+            game.lives -= 1;
+            updateGameHud();
+
+            if (game.lives <= 0) {
+                closeMathQuizModal();
+                triggerGameOver();
+                return;
+            }
+
+            if (!game.isQuizRetry) {
+                // 1st wrong -> deduct 1 life & show easier problem
+                openMathQuizForLevelUp(
+                    true,
+                    '❌ 오답입니다! 목숨이 1개 차감되었습니다. 조금 더 쉬운 문제에 도전하세요!'
+                );
+            } else {
+                // 2nd wrong -> deduct 1 life & continue game without leveling up
+                closeMathQuizModal();
+                game.expInLevel = 0;
+                updateGameHud();
+                showToast('❌ 아쉽습니다! 목숨 1개 차감 후 현재 레벨로 게임을 계속합니다.');
+                resumeGameFromModal();
+            }
+        }
+
+        function proceedToLevelUpCelebration() {
+            game.level += 1;
+            game.expInLevel = 0;
+            game.requiredForNextLevel = getRequiredKillsForLevel(game.level);
+            sfx.levelUp();
+            updateGameHud();
+
+            const banner = document.getElementById('levelUpBanner');
+            const bannerText = document.getElementById('levelUpBannerText');
+            if (bannerText) bannerText.textContent = `Lv.${game.level} UP!`;
+            if (banner) banner.classList.remove('hidden');
+
+            // Show Lv.N UP! for 2 seconds, then open 3-skill selection modal
+            setTimeout(() => {
+                if (banner) banner.classList.add('hidden');
+                if (!game.active) return;
+                openSkillSelectModal();
+            }, 2000);
+        }
+
+        const ALL_SKILL_POOL = [
+            {
+                id: 'autoTurret',
+                icon: '🤖',
+                name: '오토 타자 포탑',
+                desc: '일정 시간마다 가장 아래 단어를 자동으로 격추합니다.',
+                apply: () => { game.skills.autoTurret += 1; }
+            },
+            {
+                id: 'multiLaser',
+                icon: '⚡',
+                name: '연쇄 레이저포',
+                desc: '단어 격추 시 주변 단어 1개를 추가로 함께 파괴합니다.',
+                apply: () => { game.skills.multiLaser += 1; }
+            },
+            {
+                id: 'scoreBoost',
+                icon: '💎',
+                name: '점수 증폭 코어',
+                desc: '단어 격추 및 보스 타격 점수가 +35% 증가합니다.',
+                apply: () => { game.skills.scoreBoost += 1; }
+            },
+            {
+                id: 'slowField',
+                icon: '❄️',
+                name: '중력 감속 역장',
+                desc: '낙하하는 단어의 하강 속도를 영구적으로 늦춥니다.',
+                apply: () => { game.skills.slowField += 1; }
+            },
+            {
+                id: 'healShip',
+                icon: '💖',
+                name: '긴급 선체 수리',
+                desc: '생명(HP)을 즉시 1칸 회복하고 화면의 단어를 밀어냅니다.',
+                apply: () => {
+                    game.lives = Math.min(game.maxLives, game.lives + 1);
+                    game.words.forEach(w => { w.y = Math.max(20, w.y - 65); });
+                }
+            }
+        ];
+
+        let currentSkillChoices = [];
+
+        function openSkillSelectModal() {
+            const modal = document.getElementById('skillSelectModal');
+            const title = document.getElementById('skillModalTitle');
+            const grid = document.getElementById('skillCardsGrid');
+            if (title) title.textContent = `⚡ Lv.${game.level} 달성! 스킬을 선택하세요`;
+
+            const shuffled = [...ALL_SKILL_POOL].sort(() => Math.random() - 0.5).slice(0, 3);
+            const totalSkillLv = game.skills.autoTurret + game.skills.multiLaser + game.skills.scoreBoost + game.skills.slowField;
+            if (totalSkillLv >= 4 && !game.skills.awakened) {
+                shuffled[2] = {
+                    id: 'awakening',
+                    icon: '🌟',
+                    name: '초각성: 쿼카 오버드라이브',
+                    desc: '오토 포탑 속도가 2배로 폭주하고 모든 점수가 대폭 상승합니다!',
+                    awakening: true,
+                    apply: () => { game.skills.awakened = true; }
+                };
+            }
+            currentSkillChoices = shuffled;
+
+            if (grid) {
+                grid.innerHTML = shuffled.map((sk, idx) => `
+                    <button type="button" data-skill-idx="${idx}"
+                        class="skill-card-btn skill-card ${sk.awakening ? 'awakening-card' : ''} p-4 rounded-md flex flex-col items-center text-center gap-2">
+                        <div class="text-xs bg-yellow-400 text-[#141129] font-bold px-2 py-0.5 rounded">[${idx + 1}] 선택</div>
+                        <div class="text-3xl">${sk.icon}</div>
+                        <div class="text-sm sm:text-base font-bold text-yellow-300">${escapeHtml(sk.name)}</div>
+                        <div class="text-xs text-slate-300 leading-relaxed">${escapeHtml(sk.desc)}</div>
+                    </button>
+                `).join('');
+
+                grid.querySelectorAll('.skill-card-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const idx = Number(btn.getAttribute('data-skill-idx'));
+                        selectSkillChoice(idx);
+                    });
+                });
+            }
+
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function selectSkillChoice(idx) {
+            const chosen = currentSkillChoices[idx];
+            if (!chosen) return;
+            chosen.apply();
+            currentSkillChoices = [];
+            const modal = document.getElementById('skillSelectModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            sfx.hit();
+            updateGameHud();
+            showToast(`✨ [${chosen.name}] 스킬 장착 완료!`);
+            resumeGameFromModal();
+        }
+
+        // ==========================================
+        // 8. WORD DESTRUCTION & GAME LOOP
+        // ==========================================
+        function destroyWordAtIndex(index, isAuto = false) {
+            const target = game.words[index];
+            if (!target) return;
+
+            game.words.splice(index, 1);
+            fireLaserAt(target.x, target.y, isAuto ? '#facc15' : '#38bdf8');
+            createExplosion(target.x, target.y, target.special === 'freeze' ? '#38bdf8' : target.special === 'fever' ? '#f43f5e' : '#facc15');
+
+            if (target.special === 'freeze') {
+                game.freezeUntil = Date.now() + 4000;
+                showToast('❄️ 빙결 폭탄! 4초간 모든 단어가 정지합니다!');
+            } else if (target.special === 'fever') {
+                game.feverUntil = Date.now() + 6000;
+                showToast('🔥 피버 타임! 6초간 획득 점수 2배!');
+            }
+
+            game.kills += 1;
+            game.combo += 1;
+            if (game.combo > game.maxCombo) game.maxCombo = game.combo;
+            if (!isAuto) {
+                game.totalTypedChars += target.text.length * 2.4;
+            }
+
+            const feverMult = Date.now() < game.feverUntil ? 2 : 1;
+            const boostMult = 1 + game.skills.scoreBoost * 0.35 + (game.skills.awakened ? 0.5 : 0);
+            const gained = Math.round((50 + target.text.length * 15 + game.combo * 5) * feverMult * boostMult);
+            game.score += gained;
+
+            // Multi-laser bonus chain hit
+            if (!isAuto && game.skills.multiLaser > 0 && game.words.length > 0) {
+                const extraIdx = 0;
+                const extra = game.words[extraIdx];
+                if (extra) {
+                    game.words.splice(extraIdx, 1);
+                    fireLaserAt(extra.x, extra.y, '#a855f7');
+                    createExplosion(extra.x, extra.y, '#a855f7', 10);
+                    game.kills += 1;
+                    game.score += Math.round(40 * feverMult * boostMult);
+                    game.expInLevel += 1;
+                }
+            }
+
+            // Boss spawn check every 1,000 points
+            if (!game.boss && game.score >= game.nextBossScore) {
+                game.nextBossScore += 1000;
+                spawnBoss();
+            }
+
+            // EXP & Level Up check (opens 6th-grade math quiz first)
+            game.expInLevel += 1;
+            updateGameHud();
+
+            if (game.expInLevel >= game.requiredForNextLevel) {
+                openMathQuizForLevelUp(false, '');
+            }
+        }
+
+        function handleWordSubmit() {
+            if (!game.active || game.paused) return;
+            const input = document.getElementById('wordInput');
+            if (!input) return;
+            const typed = input.value.trim();
+            if (!typed) return;
+
+            // 1) Check Boss word first
+            if (game.boss && typed.toLowerCase() === game.boss.word.toLowerCase()) {
+                clearWordInputSafely();
+                sfx.bossHit();
+                fireLaserAt(game.boss.x, game.boss.y, '#f43f5e');
+                createExplosion(game.boss.x, game.boss.y, '#f43f5e', 18);
+
+                const dmg = 65 + game.level * 15 + game.skills.scoreBoost * 20;
+                game.boss.hp -= dmg;
+                game.totalTypedChars += typed.length * 2.5;
+                game.combo += 1;
+                game.score += 180;
+
+                if (game.boss.hp <= 0) {
+                    sfx.bossDefeat();
+                    createExplosion(game.boss.x, game.boss.y, '#facc15', 32);
+                    showToast(`🎉 [${game.boss.name}] 격파 성공! +500점 & 생명 회복!`);
+                    game.score += 500;
+                    game.lives = Math.min(game.maxLives, game.lives + 1);
+                    game.boss = null;
+                } else {
+                    game.boss.word = pickRandomWord(true);
+                }
+                updateGameHud();
+                return;
+            }
+
+            // 2) Check lowest matching falling word
+            let matchIdx = -1;
+            let lowestY = -Infinity;
+            for (let i = 0; i < game.words.length; i++) {
+                if (game.words[i].text.toLowerCase() === typed.toLowerCase()) {
+                    if (game.words[i].y > lowestY) {
+                        lowestY = game.words[i].y;
+                        matchIdx = i;
+                    }
+                }
+            }
+
+            if (matchIdx !== -1) {
+                clearWordInputSafely();
+                sfx.hit();
+                destroyWordAtIndex(matchIdx, false);
+            } else {
+                sfx.error();
+                game.combo = 0;
+                input.classList.remove('shake');
+                void input.offsetWidth;
+                input.classList.add('shake');
+                clearWordInputSafely();
+                updateGameHud();
+            }
+        }
+
+        function startGame() {
+            const codeVal = (document.getElementById('classCodeInput')?.value || '').trim();
+            const roomVal = (document.getElementById('classRoomInput')?.value || '').trim();
+            const nickVal = (document.getElementById('nicknameInput')?.value || '').trim();
+
+            if (!codeVal || !roomVal || !nickVal) {
+                sfx.error();
+                showToast('⚠️ 학급 코드, 반, 닉네임을 모두 입력해주세요!');
+                return;
+            }
+
+            appState.classCode = codeVal;
+            appState.classRoom = roomVal;
+            appState.nickname = nickVal;
+            updateHeaderBadge();
+
+            const pilotLabel = document.getElementById('pilotHudLabel');
+            if (pilotLabel) pilotLabel.textContent = `🐹 ${nickVal}`;
+
+            // Reset gameplay state
+            game.active = true;
+            game.paused = false;
+            game.startTime = Date.now();
+            game.lastFrameTime = performance.now();
+            game.pausedAccumMs = 0;
+            game.pauseStartedAt = 0;
+            game.lives = 3;
+            game.score = 0;
+            game.kills = 0;
+            game.combo = 0;
+            game.maxCombo = 0;
+            game.totalTypedChars = 0;
+            game.level = 1;
+            game.expInLevel = 0;
+            game.requiredForNextLevel = getRequiredKillsForLevel(1); // 6 kills for Lv.1 -> Lv.2
+            game.spawnTimer = 0.4;
+            game.words = [];
+            game.lasers = [];
+            game.particles = [];
+            game.boss = null;
+            game.nextBossScore = 1000;
+            game.bossCount = 0;
+            game.freezeUntil = 0;
+            game.feverUntil = 0;
+            game.usedPrimaryQuizIndices.clear();
+            game.usedEasierQuizIndices.clear();
+            game.currentQuiz = null;
+            game.isQuizRetry = false;
+            game.skills = {
+                autoTurret: 0,
+                multiLaser: 0,
+                scoreBoost: 0,
+                slowField: 0,
+                awakened: false
+            };
+            game.autoTurretTimer = 0;
+
+            document.getElementById('levelUpBanner')?.classList.add('hidden');
+            closeMathQuizModal();
+            document.getElementById('skillSelectModal')?.classList.add('hidden');
+
+            showScreen('gameScreen');
+            resizeGameCanvas();
+            spawnFallingWord();
+            updateGameHud();
+
+            const wordInput = document.getElementById('wordInput');
+            if (wordInput) {
+                wordInput.value = '';
+                setTimeout(() => wordInput.focus(), 40);
+            }
+
+            if (game.animId) cancelAnimationFrame(game.animId);
+            game.animId = requestAnimationFrame(gameLoop);
+        }
+
+        function stopGame() {
+            game.active = false;
+            game.paused = false;
+            if (game.animId) {
+                cancelAnimationFrame(game.animId);
+                game.animId = null;
+            }
+        }
+
+        async function triggerGameOver() {
+            const elapsedSec = Math.max(1, (Date.now() - game.startTime - game.pausedAccumMs) / 1000);
+            const finalCpm = Math.round((game.totalTypedChars / elapsedSec) * 60);
+            const finalKills = game.kills;
+            const finalScore = game.score;
+            const finalCombo = game.maxCombo;
+
+            stopGame();
+            sfx.gameOver();
+
+            document.getElementById('resKills').textContent = `${finalKills}개`;
+            document.getElementById('resScore').textContent = `${finalScore.toLocaleString()}점`;
+            document.getElementById('resCpm').textContent = `${finalCpm} 타`;
+            document.getElementById('resSurvivalCombo').textContent = `${formatElapsed(elapsedSec)} / ${finalCombo}`;
+
+            showScreen('gameOverScreen');
+
+            const res = await upsertHallOfFameRecord({
+                classCode: appState.classCode,
+                classRoom: appState.classRoom,
+                nickname: appState.nickname,
+                kills: finalKills,
+                score: finalScore,
+                cpm: finalCpm
+            });
+
+            const noticeEl = document.getElementById('gameOverHofNotice');
+            if (noticeEl) {
+                if (res.isExisting && res.isNewHigh) {
+                    noticeEl.textContent = '🎉 기존 기록을 경신하여 명예의 전당 최고 기록이 업데이트되었습니다!';
+                } else if (res.isExisting && !res.isNewHigh) {
+                    noticeEl.textContent = '📌 기존 명예의 전당 최고 기록이 더 높아 기존 기록을 유지합니다!';
+                } else {
+                    noticeEl.textContent = '🏆 명예의 전당에 새로운 기록이 등록되었습니다!';
+                }
+            }
+        }
+
+        function updateGame(dt) {
+            const canvas = document.getElementById('gameCanvas');
+            if (!canvas) return;
+            const now = Date.now();
+            const isFrozen = now < game.freezeUntil;
+
+            // Scroll background stars
+            for (const s of game.stars) {
+                s.y += s.speed * dt;
+                if (s.y > canvas.height) {
+                    s.y = 0;
+                    s.x = Math.random() * canvas.width;
+                }
+            }
+
+            // Spawn falling words
+            if (!isFrozen) {
+                game.spawnTimer -= dt;
+                if (game.spawnTimer <= 0) {
+                    spawnFallingWord();
+                    const interval = Math.max(0.85, 2.2 - (game.level - 1) * 0.14);
+                    game.spawnTimer = interval;
+                }
+            }
+
+            // Auto-turret skill
+            if (game.skills.autoTurret > 0 && game.words.length > 0) {
+                const rate = Math.max(0.8, (4.2 - game.skills.autoTurret * 0.65) / (game.skills.awakened ? 2 : 1));
+                game.autoTurretTimer += dt;
+                if (game.autoTurretTimer >= rate) {
+                    game.autoTurretTimer = 0;
+                    let lowestIdx = 0;
+                    for (let i = 1; i < game.words.length; i++) {
+                        if (game.words[i].y > game.words[lowestIdx].y) lowestIdx = i;
+                    }
+                    destroyWordAtIndex(lowestIdx, true);
+                }
+            }
+
+            // Move boss horizontally
+            if (game.boss) {
+                game.boss.x += game.boss.dir * 55 * dt;
+                if (game.boss.x < 95) {
+                    game.boss.x = 95;
+                    game.boss.dir = 1;
+                } else if (game.boss.x > canvas.width - 95) {
+                    game.boss.x = canvas.width - 95;
+                    game.boss.dir = -1;
+                }
+            }
+
+            // Move falling words
+            const dangerLineY = canvas.height - 44;
+            for (let i = game.words.length - 1; i >= 0; i--) {
+                const w = game.words[i];
+                if (!isFrozen) {
+                    w.y += w.speed * dt;
+                }
+                if (w.y >= dangerLineY) {
+                    game.words.splice(i, 1);
+                    createExplosion(w.x, dangerLineY, '#f43f5e', 16);
+                    sfx.error();
+                    triggerDamageShake();
+                    game.combo = 0;
+                    game.lives -= 1;
+                    updateGameHud();
+                    if (game.lives <= 0) {
+                        triggerGameOver();
+                        return;
+                    }
+                }
+            }
+
+            // Update lasers
+            for (let i = game.lasers.length - 1; i >= 0; i--) {
+                game.lasers[i].life -= dt;
+                if (game.lasers[i].life <= 0) game.lasers.splice(i, 1);
+            }
+
+            // Update particles
+            for (let i = game.particles.length - 1; i >= 0; i--) {
+                const p = game.particles[i];
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.life -= dt;
+                if (p.life <= 0) game.particles.splice(i, 1);
+            }
+
+            updateGameHud();
+        }
+
+        function renderGame() {
+            const canvas = document.getElementById('gameCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // Space background
+            ctx.fillStyle = '#090714';
+            ctx.fillRect(0, 0, w, h);
+
+            // Stars
+            for (const s of game.stars) {
+                ctx.fillStyle = `rgba(226, 232, 240, ${s.alpha})`;
+                ctx.fillRect(s.x, s.y, s.size, s.size);
+            }
+
+            // Defense line
+            const dangerLineY = h - 44;
+            ctx.strokeStyle = 'rgba(244, 63, 94, 0.55)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            ctx.moveTo(0, dangerLineY);
+            ctx.lineTo(w, dangerLineY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Lasers
+            for (const l of game.lasers) {
+                ctx.strokeStyle = l.color;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(l.x1, l.y1);
+                ctx.lineTo(l.x2, l.y2);
+                ctx.stroke();
+            }
+
+            // Boss ship
+            if (game.boss) {
+                const b = game.boss;
+                ctx.fillStyle = '#1e1b4b';
+                ctx.strokeStyle = b.color;
+                ctx.lineWidth = 2;
+                ctx.fillRect(b.x - 75, b.y - 24, 150, 48);
+                ctx.strokeRect(b.x - 75, b.y - 24, 150, 48);
+
+                // Boss HP bar
+                const hpPct = Math.max(0, b.hp / b.maxHp);
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(b.x - 65, b.y - 34, 130, 6);
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x - 65, b.y - 34, 130 * hpPct, 6);
+
+                ctx.font = 'bold 11px Galmuri11, monospace';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#facc15';
+                ctx.fillText(b.name, b.x, b.y - 8);
+
+                ctx.font = 'bold 14px Galmuri11, monospace';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(b.word, b.x, b.y + 13);
+            }
+
+            // Falling words
+            ctx.font = 'bold 14px Galmuri11, monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (const item of game.words) {
+                const textW = ctx.measureText(item.text).width;
+                const boxW = textW + 18;
+                const boxH = 26;
+                const dangerRatio = item.y / dangerLineY;
+
+                let borderCol = '#38bdf8';
+                let textCol = '#f8fafc';
+                if (item.special === 'freeze') {
+                    borderCol = '#22d3ee';
+                    textCol = '#67e8f9';
+                } else if (item.special === 'fever') {
+                    borderCol = '#fb7185';
+                    textCol = '#fda4af';
+                } else if (dangerRatio > 0.72) {
+                    borderCol = '#f43f5e';
+                    textCol = '#fecdd3';
+                }
+
+                ctx.fillStyle = 'rgba(15, 12, 33, 0.9)';
+                ctx.fillRect(item.x - boxW / 2, item.y - boxH / 2, boxW, boxH);
+                ctx.strokeStyle = borderCol;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(item.x - boxW / 2, item.y - boxH / 2, boxW, boxH);
+
+                ctx.fillStyle = textCol;
+                ctx.fillText(item.text, item.x, item.y + 1);
+            }
+
+            // Particles
+            for (const p of game.particles) {
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            }
+
+            // Quokka Spaceship at Bottom Center
+            const shipX = w / 2;
+            const shipY = h - 22;
+            ctx.fillStyle = '#facc15';
+            ctx.beginPath();
+            ctx.moveTo(shipX, shipY - 16);
+            ctx.lineTo(shipX - 18, shipY + 12);
+            ctx.lineTo(shipX + 18, shipY + 12);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(shipX - 5, shipY - 4, 10, 8);
+        }
+
+        function gameLoop(timestamp) {
+            if (!game.active) return;
+            const dt = Math.min(0.05, Math.max(0.001, (timestamp - game.lastFrameTime) / 1000));
+            game.lastFrameTime = timestamp;
+
+            if (!game.paused) {
+                updateGame(dt);
+            }
+            if (game.active) {
+                renderGame();
+                game.animId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // ==========================================
+        // 9. EVENT WIRING & INITIALIZATION
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            initBackend();
+
+            // Developer Login Gate Controls
+            const devIdInput = document.getElementById('devIdInput');
+            const devPwInput = document.getElementById('devPwInput');
+            document.getElementById('devLoginSubmitBtn').addEventListener('click', attemptDeveloperLogin);
+            devIdInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (!devPwInput.value.trim()) {
+                        devPwInput.focus();
+                    } else {
+                        attemptDeveloperLogin();
+                    }
+                }
+            });
+            devPwInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    attemptDeveloperLogin();
+                }
+            });
+            document.getElementById('devLockBtn').addEventListener('click', lockDeveloperMode);
+            setTimeout(() => devIdInput && devIdInput.focus(), 50);
+
+            // Header buttons
+            document.getElementById('homeLogoBtn').addEventListener('click', () => {
+                sfx.click();
+                stopGame();
+                showScreen('startScreen');
+            });
+
+            document.getElementById('serverStatusBtn').addEventListener('click', () => {
+                sfx.click();
+                const modal = document.getElementById('firebaseSetupModal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            });
+
+            document.getElementById('closeFirebaseModalBtn').addEventListener('click', () => {
+                sfx.click();
+                const modal = document.getElementById('firebaseSetupModal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            });
+
+            document.getElementById('applyFirebaseConfigBtn').addEventListener('click', async () => {
+                sfx.click();
+                const raw = document.getElementById('firebaseConfigInput').value.trim();
+                if (!raw) {
+                    showToast('⚠️ Firebase 설정 JSON을 입력해주세요.');
+                    return;
+                }
+                try {
+                    const parsed = JSON.parse(raw);
+                    const ok = await connectWithFirebaseConfig(parsed);
+                    if (ok) {
+                        showToast('🟢 새 Firebase 설정이 연결되었습니다!');
+                        const modal = document.getElementById('firebaseSetupModal');
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                    } else {
+                        showToast('❌ 연결에 실패했습니다. 설정값을 확인해주세요.');
+                    }
+                } catch (err) {
+                    showToast('❌ 올바른 JSON 형식이 아닙니다.');
+                }
+            });
+
+            document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
+                soundEnabled = !soundEnabled;
+                e.currentTarget.textContent = soundEnabled ? '🔊 ON' : '🔇 OFF';
+                if (soundEnabled) sfx.click();
+            });
+
+            // Language selection pills on Start Screen
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    sfx.click();
+                    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    appState.lang = btn.getAttribute('data-lang') || 'ko';
+                });
+            });
+
+            // Start Screen buttons
+            document.getElementById('startGameBtn').addEventListener('click', () => {
+                sfx.click();
+                startGame();
+            });
+
+            ['classCodeInput', 'classRoomInput', 'nicknameInput'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        startGame();
+                    }
+                });
+            });
+
+            // Gameplay input & Dev test buttons
+            const wordInput = document.getElementById('wordInput');
+            wordInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.isComposing) {
+                    e.preventDefault();
+                    handleWordSubmit();
+                }
+            });
+
+            document.getElementById('fireBtn').addEventListener('click', () => {
+                handleWordSubmit();
+                wordInput.focus();
+            });
+
+            document.getElementById('devForceLevelUpBtn').addEventListener('click', () => {
+                if (!game.active || game.paused) return;
+                sfx.click();
+                openMathQuizForLevelUp(false, '');
+            });
+
+            document.getElementById('devSpawnBossBtn').addEventListener('click', () => {
+                if (!game.active || game.paused) return;
+                sfx.click();
+                if (!game.boss) {
+                    spawnBoss();
+                } else {
+                    showToast('👾 이미 보스가 출현해 있습니다!');
+                }
+            });
+
+            // Keyboard shortcuts for Math Quiz [1-4] and Skill Cards [1-3]
+            window.addEventListener('keydown', (e) => {
+                if (!isDevAuthenticated) return;
+                const quizModal = document.getElementById('mathQuizModal');
+                if (quizModal && !quizModal.classList.contains('hidden')) {
+                    if (['1', '2', '3', '4'].includes(e.key)) {
+                        e.preventDefault();
+                        handleQuizAnswer(Number(e.key) - 1);
+                    }
+                    return;
+                }
+                const skillModal = document.getElementById('skillSelectModal');
+                if (skillModal && !skillModal.classList.contains('hidden')) {
+                    if (['1', '2', '3'].includes(e.key)) {
+                        e.preventDefault();
+                        selectSkillChoice(Number(e.key) - 1);
+                    }
+                }
+            });
+
+            // Game Over Screen buttons
+            document.getElementById('restartGameBtn').addEventListener('click', () => {
+                sfx.click();
+                startGame();
+            });
+
+            document.getElementById('gameOverHomeBtn').addEventListener('click', () => {
+                sfx.click();
+                showScreen('startScreen');
+            });
+
+            // Hall of Fame Navigation & Filter Controls
+            function openHallOfFameScreen() {
+                if (game.active) {
+                    stopGame();
+                }
+                showScreen('hallOfFameScreen');
+                renderHallOfFame();
+            }
+
+            document.getElementById('openHofHeaderBtn').addEventListener('click', () => {
+                sfx.click();
+                openHallOfFameScreen();
+            });
+
+            document.getElementById('startHofBtn').addEventListener('click', () => {
+                sfx.click();
+                openHallOfFameScreen();
+            });
+
+            document.getElementById('gameOverHofBtn').addEventListener('click', () => {
+                sfx.click();
+                openHallOfFameScreen();
+            });
+
+            document.getElementById('closeHofBtn').addEventListener('click', () => {
+                sfx.click();
+                const target = appState.previousScreenId === 'gameScreen' ? 'startScreen' : (appState.previousScreenId || 'startScreen');
+                showScreen(target);
+            });
+
+            // '전체' vs '우리반' tabs
+            const hofTabAllBtn = document.getElementById('hofTabAllBtn');
+            const hofTabClassBtn = document.getElementById('hofTabClassBtn');
+            const hofClassFilterBar = document.getElementById('hofClassFilterBar');
+
+            hofTabAllBtn.addEventListener('click', () => {
+                sfx.click();
+                appState.hofTab = 'all';
+                hofTabAllBtn.classList.add('active');
+                hofTabClassBtn.classList.remove('active');
+                hofClassFilterBar.classList.add('hidden');
+                hofClassFilterBar.classList.remove('flex');
+                renderHallOfFame();
+            });
+
+            hofTabClassBtn.addEventListener('click', () => {
+                sfx.click();
+                appState.hofTab = 'class';
+                hofTabClassBtn.classList.add('active');
+                hofTabAllBtn.classList.remove('active');
+                hofClassFilterBar.classList.remove('hidden');
+                hofClassFilterBar.classList.add('flex');
+
+                const codeInput = document.getElementById('hofClassCodeInput');
+                const roomInput = document.getElementById('hofClassRoomInput');
+                if (!codeInput.value && appState.classCode) codeInput.value = appState.classCode;
+                if (!roomInput.value && appState.classRoom) roomInput.value = appState.classRoom;
+                appState.hofFilterCode = codeInput.value;
+                appState.hofFilterRoom = roomInput.value;
+                renderHallOfFame();
+            });
+
+            document.getElementById('hofSearchBtn').addEventListener('click', () => {
+                sfx.click();
+                appState.hofFilterCode = document.getElementById('hofClassCodeInput').value;
+                appState.hofFilterRoom = document.getElementById('hofClassRoomInput').value;
+                renderHallOfFame();
+            });
+
+            ['hofClassCodeInput', 'hofClassRoomInput'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        appState.hofFilterCode = document.getElementById('hofClassCodeInput').value;
+                        appState.hofFilterRoom = document.getElementById('hofClassRoomInput').value;
+                        renderHallOfFame();
+                    }
+                });
+            });
+
+            // Developer Reset Hall of Fame Controls
+            document.getElementById('resetHofBtn').addEventListener('click', () => {
+                sfx.click();
+                const modal = document.getElementById('resetHofConfirmModal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            });
+
+            document.getElementById('cancelResetHofBtn').addEventListener('click', () => {
+                sfx.click();
+                const modal = document.getElementById('resetHofConfirmModal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            });
+
+            document.getElementById('confirmResetHofBtn').addEventListener('click', async () => {
+                const modal = document.getElementById('resetHofConfirmModal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                await resetAllHallOfFameRecords();
+            });
+
+            window.addEventListener('resize', () => {
+                if (game.active) resizeGameCanvas();
+            });
+        });
+    </script>
+</body>
+</html>
