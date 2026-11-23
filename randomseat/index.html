@@ -3,121 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오둥이 자리뽑기 - Odung Seat Picker</title>
+    <title>오둥이 자리뽑기 - 교실 자리 배치 & 랜덤 자리표</title>
+    <!-- 파비콘 설정 (오둥이 로고 SVG 인라인 적용) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='40' fill='%23FFA400'/%3E%3Cpath d='M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z' fill='%23FFFFFF' stroke='%23000000' stroke-width='9' stroke-linejoin='round'/%3E%3Cellipse cx='85' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='85' cy='95' r='4.5' fill='%23000000'/%3E%3Cellipse cx='115' cy='93' rx='14' ry='15' fill='%23FFFFFF' stroke='%23000000' stroke-width='6.5'/%3E%3Ccircle cx='115' cy='95' r='4.5' fill='%23000000'/%3E%3Cpath d='M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z' fill='%23FFA400' stroke='%23000000' stroke-width='6.5' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <!-- Tailwind CSS 로드 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 주아체(Jua) 폰트 로드 */
         @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
 
         body {
             font-family: 'Jua', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #f6efe2;
+            background-color: #f4e8d4;
             background-image:
-                linear-gradient(90deg, rgba(139, 94, 52, 0.07) 1px, transparent 1px),
-                linear-gradient(rgba(139, 94, 52, 0.07) 1px, transparent 1px);
-            background-size: 24px 24px;
+                linear-gradient(90deg, rgba(58, 38, 24, 0.06) 1px, transparent 1px),
+                linear-gradient(rgba(58, 38, 24, 0.06) 1px, transparent 1px),
+                linear-gradient(180deg, #fbf4e6 0%, #f1e1c6 100%);
+            background-size: 26px 26px, 26px 26px, 100% 100%;
+            background-attachment: fixed;
             color: #2c1e12;
         }
 
+        button, input, textarea, select {
+            font-family: 'Jua', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* 레트로 오둥이 교실 카드 패널 */
         .retro-panel {
             background-color: #fffdf8;
             border: 3px solid #3a2618;
-            border-radius: 14px;
+            border-radius: 18px;
             box-shadow: 4px 4px 0px #3a2618;
         }
 
+        /* 레트로 입체 버튼 */
         .retro-btn {
             border: 2.5px solid #3a2618;
-            border-radius: 10px;
+            border-radius: 12px;
+            font-weight: 700;
             box-shadow: 3px 3px 0px #3a2618;
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease;
+            user-select: none;
         }
         .retro-btn:hover:not(:disabled) {
-            transform: translate(-1px, -1px);
+            transform: translateY(-1px);
             box-shadow: 4px 4px 0px #3a2618;
         }
         .retro-btn:active:not(:disabled) {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0px #3a2618;
+            transform: translateY(2px);
+            box-shadow: 0px 0px 0px #3a2618;
         }
 
-        /* 교실 마룻바닥 텍스처 */
+        /* 교실 칠판 스타일 */
+        .chalkboard {
+            background: linear-gradient(180deg, #1f513b 0%, #163d2c 100%);
+            border: 4px solid #5c3a21;
+            border-radius: 14px;
+            box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.45), 3px 3px 0px #3a2618;
+            color: #f8fafc;
+        }
+
+        /* 교실 바닥 나무 마루 느낌 */
         .classroom-floor {
-            background-color: #d9a066;
+            background-color: #f7eedc;
             background-image:
                 repeating-linear-gradient(
                     0deg,
-                    transparent,
-                    transparent 34px,
-                    rgba(110, 62, 24, 0.28) 34px,
-                    rgba(110, 62, 24, 0.28) 36px
-                ),
-                repeating-linear-gradient(
-                    90deg,
-                    rgba(255, 232, 198, 0.12) 0px,
-                    rgba(255, 232, 198, 0.12) 90px,
-                    rgba(130, 74, 30, 0.12) 90px,
-                    rgba(130, 74, 30, 0.12) 180px
+                    rgba(139, 94, 52, 0.08) 0px,
+                    rgba(139, 94, 52, 0.08) 2px,
+                    transparent 2px,
+                    transparent 36px
                 );
-            border: 4px solid #4a2e16;
-            border-radius: 14px;
-            box-shadow: inset 0 0 24px rgba(74, 46, 22, 0.35);
+            border: 3px solid #3a2618;
+            border-radius: 16px;
         }
 
-        /* 칠판 */
-        .chalkboard {
-            background-color: #1f4e3d;
-            border: 4px solid #6b4226;
-            border-radius: 10px;
-            box-shadow: 0 4px 0 #3a2312, inset 0 0 10px rgba(0, 0, 0, 0.4);
-        }
-
-        /* 나무 책상 & 의자 */
+        /* 나무 책상 유닛 */
         .desk-unit {
-            background: linear-gradient(180deg, #f3c48b 0%, #dca05d 100%);
-            border: 2.5px solid #4a2e16;
-            border-radius: 10px;
-            box-shadow: 0 3px 0 #4a2e16;
-            transition: transform 0.15s ease, background-color 0.15s ease;
+            background: linear-gradient(180deg, #f5ca92 0%, #dfa25d 100%);
+            border: 2.5px solid #3a2618;
+            border-radius: 12px;
+            box-shadow: 2px 3px 0px #3a2618;
+            transition: transform 0.15s ease, background 0.15s ease;
         }
         .desk-unit.empty-slot {
-            background: rgba(255, 255, 255, 0.22);
-            border: 2px dashed rgba(74, 46, 22, 0.45);
+            background: rgba(58, 38, 24, 0.05);
+            border: 2px dashed rgba(58, 38, 24, 0.25);
             box-shadow: none;
         }
-        .desk-unit.edit-hover:hover {
-            transform: scale(1.05);
-            border-color: #ff8c00;
-        }
 
-        /* 학생 캐릭터 이동 애니메이션 */
-        .student-sprite {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            transition: left 0.34s linear, top 0.34s linear;
-            z-index: 30;
-            pointer-events: none;
-        }
-        .student-sprite.sprinting {
-            transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1), top 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        @keyframes waddle {
-            0%, 100% { transform: translateY(0px) rotate(-4deg); }
-            50% { transform: translateY(-4px) rotate(4deg); }
-        }
-        .walking .sprite-body {
-            animation: waddle 0.26s infinite ease-in-out;
-        }
-
-        @keyframes seatBounce {
-            0% { transform: scale(1.35) translateY(-10px); }
-            60% { transform: scale(0.92) translateY(2px); }
-            100% { transform: scale(1) translateY(0); }
+        /* 학생 착석 팝업 애니메이션 */
+        @keyframes seatedPop {
+            0% { transform: scale(0.45) translateY(-14px); opacity: 0; }
+            75% { transform: scale(1.08) translateY(2px); opacity: 1; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
         }
         .seated-pop {
-            animation: seatBounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: seatedPop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
         /* 단계별 좌우 교차(슬라이드 + 페이드) 애니메이션 */
@@ -134,61 +115,60 @@
         }
 
         @keyframes slideOutLeft {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(-60px); opacity: 0; }
+            0% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(-36px); }
         }
         @keyframes slideInRight {
-            from { transform: translateX(60px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            0% { opacity: 0; transform: translateX(36px); }
+            100% { opacity: 1; transform: translateX(0); }
         }
         @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(60px); opacity: 0; }
+            0% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(36px); }
         }
         @keyframes slideInLeft {
-            from { transform: translateX(-60px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            0% { opacity: 0; transform: translateX(-36px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        .anim-slide-out-left { animation: slideOutLeft 0.32s ease forwards; }
+        .anim-slide-in-right { animation: slideInRight 0.32s ease forwards; }
+        .anim-slide-out-right { animation: slideOutRight 0.32s ease forwards; }
+        .anim-slide-in-left { animation: slideInLeft 0.32s ease forwards; }
+
+        /* 1~12번 지정 칸 드래그 오버 하이라이트 */
+        .secret-slot-box {
+            transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease;
+        }
+        .secret-slot-box.drag-over {
+            background-color: #fde68a !important;
+            border-color: #d97706 !important;
+            transform: scale(1.03);
         }
 
-        .anim-slide-out-left {
-            animation: slideOutLeft 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            pointer-events: none;
-        }
-        .anim-slide-in-right {
-            animation: slideInRight 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-        .anim-slide-out-right {
-            animation: slideOutRight 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            pointer-events: none;
-        }
-        .anim-slide-in-left {
-            animation: slideInLeft 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-
+        /* 인쇄 시 불필요 UI 숨김 */
         @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area {
-                position: fixed;
-                left: 0;
-                top: 0;
-                width: 100%;
-                border: none !important;
-                box-shadow: none !important;
+            body {
+                background: #ffffff !important;
             }
-            .no-print { display: none !important; }
+            .no-print {
+                display: none !important;
+            }
+            .retro-panel {
+                box-shadow: none !important;
+                border: 2px solid #000000 !important;
+            }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-amber-300 selection:text-stone-900">
+<body class="min-h-screen flex flex-col selection:bg-amber-300 selection:text-[#2c1e12]">
 
     <!-- 상단 헤더 -->
-    <header class="max-w-7xl w-full mx-auto px-4 pt-4 pb-3 flex flex-wrap items-center justify-between gap-3">
+    <header class="max-w-6xl w-full mx-auto px-4 pt-4 pb-3 flex flex-wrap items-center justify-between gap-3 no-print">
         <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-xl overflow-hidden bg-[#FFA400] flex items-center justify-center border-[3px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618]">
-                <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <div onclick="handleSecretLogoTap()" class="w-11 h-11 rounded-xl overflow-hidden bg-[#FFA400] flex items-center justify-center border-[2.5px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618] cursor-pointer" title="오둥이 자리뽑기">
+                <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-label="오둥이 로고">
                     <rect width="200" height="200" fill="#FFA400" />
-                    <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin="round" />
+                    <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin='round' />
                     <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
                     <circle cx="85" cy="95" r="4.5" fill="#000000" />
                     <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="6.5" />
@@ -197,387 +177,412 @@
                 </svg>
             </div>
             <div>
-                <div class="flex items-center gap-2">
-                    <span class="px-2.5 py-0.5 rounded-md bg-emerald-700 text-amber-200 text-xs border border-[#3a2618]">두근두근 자리 바꾸는 날</span>
-                    <span class="text-xs text-stone-600">ODUNG GAMES</span>
-                </div>
-                <h1 class="text-2xl sm:text-3xl text-[#2c1e12] tracking-tight mt-0.5">오둥이 자리뽑기</h1>
+                <h1 class="text-xl sm:text-2xl font-bold text-[#2c1e12] tracking-tight">오둥이 앉아라 자리뽑기</h1>
+                <p class="text-[11px] text-amber-800 font-bold">ODUNG CLASSROOM SEAT PICKER</p>
             </div>
         </div>
 
-        <!-- 화면 배율(확대/축소) 및 효과음 컨트롤 -->
+        <!-- 우측 컨트롤: laless 전용 모드 전환 & 효과음 토글 -->
         <div class="flex items-center gap-2">
-            <div class="flex items-center bg-[#fffdf8] border-[2.5px] border-[#3a2618] rounded-xl shadow-[3px_3px_0px_#3a2618] overflow-hidden" title="화면 배율 확대/축소">
-                <button onclick="changeZoom(-0.1)" class="px-2.5 py-1.5 hover:bg-amber-100 text-[#2c1e12] text-sm border-r-2 border-[#3a2618] cursor-pointer" title="화면 축소">
-                    −
-                </button>
-                <button onclick="resetZoom()" id="zoom-label" class="px-2.5 py-1.5 text-xs text-amber-800 hover:bg-amber-50 min-w-[52px] text-center cursor-pointer" title="100% 기본 크기로 복귀">
-                    100%
-                </button>
-                <button onclick="changeZoom(0.1)" class="px-2.5 py-1.5 hover:bg-amber-100 text-[#2c1e12] text-sm border-l-2 border-[#3a2618] cursor-pointer" title="화면 확대">
-                    +
-                </button>
-            </div>
-
-            <button id="sound-btn" onclick="toggleSound()" class="retro-btn px-3.5 py-1.5 bg-amber-300 text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
+            <button id="mode-switch-btn" onclick="toggleTeacherSecretMode()" class="hidden retro-btn px-3 py-1.5 bg-amber-300 text-[#2c1e12] text-xs cursor-pointer" title="자리 번호 지정(5단계) 모드와 기본 4단계 모드를 전환할 수 있습니다">
+                🦆 지정 모드 (5단계)
+            </button>
+            <button id="sound-toggle-btn" onclick="toggleSound()" class="retro-btn px-3 py-1.5 bg-emerald-200 text-emerald-950 text-xs cursor-pointer">
                 🔊 효과음 ON
             </button>
         </div>
     </header>
 
-    <!-- 확대/축소(Zoom)가 적용되는 메인 래퍼 -->
-    <div id="zoom-wrapper" class="w-full flex-grow flex flex-col transition-all duration-150">
+    <!-- 상단 스텝 네비게이션 바 (기본 4단계, laless 로그인 시 5단계) -->
+    <nav class="max-w-6xl w-full mx-auto px-4 mb-5 no-print">
+        <div id="step-nav-bar" class="retro-panel p-2.5 grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#fff9ed]">
+            <button onclick="goToStep('students')" id="step-tab-students" class="step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                <span class="step-num-badge px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-300 text-[11px]">01</span>
+                <span>우리 반 친구들</span>
+            </button>
+            <button onclick="goToStep('layout')" id="step-tab-layout" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                <span class="step-num-badge px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]">02</span>
+                <span>자리 배치 선택</span>
+            </button>
+            <button onclick="goToStep('secret')" id="step-tab-secret" class="hidden step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                <span class="step-num-badge px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]">03</span>
+                <span>자리 번호 지정</span>
+            </button>
+            <button onclick="goToStep('draw')" id="step-tab-draw" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                <span class="step-num-badge px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]">03</span>
+                <span>교실 자리뽑기</span>
+            </button>
+            <button onclick="goToStep('chart')" id="step-tab-chart" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                <span class="step-num-badge px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]">04</span>
+                <span>자리표 저장</span>
+            </button>
+        </div>
+    </nav>
 
-        <!-- 상단 4단계 스텝 네비게이션 바 -->
-        <nav class="max-w-6xl w-full mx-auto px-4 mb-5">
-            <div class="retro-panel p-2.5 grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#fff9ed]">
-                <button onclick="goToStep(1)" id="step-tab-1" class="step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span class="px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-300 text-[11px]">01</span>
-                    <span>우리 반 친구들</span>
-                </button>
-                <button onclick="goToStep(2)" id="step-tab-2" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span class="px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]">02</span>
-                    <span>자리 배치 선택</span>
-                </button>
-                <button onclick="goToStep(3)" id="step-tab-3" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span class="px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]">03</span>
-                    <span>교실 자리뽑기</span>
-                </button>
-                <button onclick="goToStep(4)" id="step-tab-4" class="step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span class="px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]">04</span>
-                    <span>자리표 저장</span>
-                </button>
-            </div>
-        </nav>
+    <!-- 메인 단계별 컨테이너 (좌우 교차 슬라이드 애니메이션 영역) -->
+    <main class="max-w-6xl w-full mx-auto px-4 pb-12 flex-grow">
+        <div class="step-container">
 
-        <!-- 메인 단계별 컨테이너 (좌우 교차 슬라이드 애니메이션 영역) -->
-        <main class="max-w-6xl w-full mx-auto px-4 pb-12 flex-grow">
-            <div class="step-container">
-
-                <!-- =========================================================
-                     [STEP 1] 우리 반 친구들 설정 화면
-                     ========================================================= -->
-                <section id="step-view-1" class="step-view max-w-2xl mx-auto retro-panel p-5 sm:p-7">
-                    <div class="flex items-center justify-between border-b-2 border-[#e5d7c3] pb-3 mb-5">
-                        <div>
-                            <span class="inline-block px-2.5 py-0.5 rounded-md bg-amber-400 border border-[#3a2618] text-xs mb-1">STEP 01</span>
-                            <h2 class="text-xl sm:text-2xl text-[#2c1e12]">우리 반 친구들을 등록해 주세요</h2>
-                        </div>
-                        <div class="px-3.5 py-1.5 rounded-xl bg-[#f7f0e4] border-2 border-[#3a2618] text-xs sm:text-sm text-emerald-700">
-                            출석 <span id="present-count-badge" class="text-lg">24</span>명
-                        </div>
+            <!-- =========================================================
+                 [STEP 1] 우리 반 친구들 설정 화면
+                 ========================================================= -->
+            <section id="step-view-students" class="step-view max-w-2xl mx-auto retro-panel p-5 sm:p-7">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#e5d7c3] pb-3.5 mb-5">
+                    <div>
+                        <span class="inline-block px-2.5 py-0.5 rounded-md bg-amber-400 border border-[#3a2618] text-xs mb-1">STEP 01</span>
+                        <h2 class="text-lg sm:text-xl text-[#2c1e12]">우리 반 친구들 명단 & 출결 체크</h2>
                     </div>
+                    <span id="step1-summary-badge" class="px-3 py-1 rounded-xl bg-[#f7f0e4] border-2 border-[#3a2618] text-xs sm:text-sm text-amber-900">
+                        출석 24명 / 전체 24명
+                    </span>
+                </div>
 
-                    <!-- 번호로 / 이름으로 탭 -->
-                    <div class="grid grid-cols-2 gap-3 mb-5">
-                        <button id="mode-num-btn" onclick="switchInputMode('number')" class="retro-btn py-2.5 bg-[#2c1e12] text-white text-sm sm:text-base cursor-pointer">
-                            🔢 번호로 설정
-                        </button>
-                        <button id="mode-name-btn" onclick="switchInputMode('name')" class="retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm sm:text-base cursor-pointer">
-                            ✏️ 이름으로 설정
-                        </button>
-                    </div>
+                <!-- 입력 방식 전환 버튼 -->
+                <div class="grid grid-cols-2 gap-2.5 mb-4">
+                    <button type="button" id="mode-btn-number" onclick="setInputMode('number')" class="retro-btn py-2.5 px-3 bg-amber-300 text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
+                        🔢 번호로 간편 설정
+                    </button>
+                    <button type="button" id="mode-btn-name" onclick="setInputMode('name')" class="retro-btn py-2.5 px-3 bg-white text-stone-600 text-xs sm:text-sm cursor-pointer">
+                        ✏️ 이름 직접 입력
+                    </button>
+                </div>
 
-                    <!-- 번호 입력 모드 -->
-                    <div id="input-number-box" class="mb-5">
-                        <p class="text-sm text-stone-600 text-center mb-2.5">우리 반은 총 몇 명인가요?</p>
-                        <div class="flex items-center justify-center gap-6 bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl py-4 px-6">
-                            <button onclick="changeStudentCount(-1)" class="retro-btn w-11 h-11 bg-white text-xl flex items-center justify-center cursor-pointer">-</button>
-                            <div class="text-3xl text-[#2c1e12] min-w-[96px] text-center">
-                                <span id="num-count-display">24</span><span class="text-lg ml-1">명</span>
-                            </div>
-                            <button onclick="changeStudentCount(1)" class="retro-btn w-11 h-11 bg-white text-xl flex items-center justify-center cursor-pointer">+</button>
-                        </div>
-                    </div>
-
-                    <!-- 이름 입력 모드 -->
-                    <div id="input-name-box" class="hidden mb-5">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-xs sm:text-sm text-stone-700">학생 이름 명단 (줄바꿈 또는 쉼표로 구분)</span>
-                            <button onclick="applyNameList(false)" class="retro-btn px-3 py-1 bg-amber-400 text-xs cursor-pointer">명단 반영</button>
-                        </div>
-                        <textarea id="name-list-textarea" rows="5" oninput="applyNameList(true)" onchange="applyNameList(false)" placeholder="김오둥&#10;이수달&#10;박하늘&#10;정다은" class="w-full bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl p-3 text-base text-[#2c1e12] focus:outline-none focus:border-amber-500"></textarea>
-                    </div>
-
-                    <!-- 출석/결석 토글 칩 그리드 -->
-                    <div class="mb-6">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs sm:text-sm text-stone-600">💡 이름(번호)을 누르면 당일 결석생으로 제외됩니다</span>
-                            <button onclick="resetAbsent()" class="text-xs sm:text-sm text-emerald-700 underline cursor-pointer">전원 출석</button>
-                        </div>
-                        <div id="student-chips-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-[210px] overflow-y-auto p-3 bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl">
-                            <!-- JS 렌더링 -->
-                        </div>
-                    </div>
-
-                    <!-- 다음 단계 이동 버튼 -->
-                    <div class="flex justify-end pt-3 border-t-2 border-[#e5d7c3]">
-                        <button onclick="goToStep(2)" class="retro-btn px-6 py-3 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base cursor-pointer flex items-center gap-2">
-                            <span>다음 단계: 자리 배치 선택</span>
-                            <span>▶</span>
-                        </button>
-                    </div>
-                </section>
-
-                <!-- =========================================================
-                     [STEP 2] 자리 배치 선택 & 직접 꾸미기 화면
-                     ========================================================= -->
-                <section id="step-view-2" class="step-view hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-                    <!-- 좌측: 배치 프리셋 및 꾸미기 옵션 (5칸) -->
-                    <div class="lg:col-span-5 retro-panel p-5 flex flex-col gap-4">
-                        <div class="flex items-center justify-between border-b-2 border-[#e5d7c3] pb-3">
-                            <div>
-                                <span class="inline-block px-2.5 py-0.5 rounded-md bg-amber-400 border border-[#3a2618] text-xs mb-1">STEP 02</span>
-                                <h2 class="text-lg sm:text-xl text-[#2c1e12]">교실 책상 배치 선택</h2>
-                            </div>
-                            <div class="text-right text-xs sm:text-sm">
-                                <div class="text-emerald-700">출석 <span id="step2-present-count">24</span>명</div>
-                                <div class="text-amber-700">책상 <span id="desk-count-badge">24</span>석</div>
-                            </div>
-                        </div>
-
-                        <!-- 7가지 프리셋 버튼 -->
-                        <div class="grid grid-cols-3 gap-2">
-                            <button onclick="applyPreset('pair3')" data-preset="pair3" class="preset-btn retro-btn p-2.5 bg-amber-200 text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
-                                <span class="text-base">👥👥👥</span>
-                                <span>짝꿍 3분단</span>
-                            </button>
-                            <button onclick="applyPreset('pair4')" data-preset="pair4" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
-                                <span class="text-base">👥👥👥👥</span>
-                                <span>짝꿍 4분단</span>
-                            </button>
-                            <button onclick="applyPreset('single')" data-preset="single" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
-                                <span class="text-base">🧍🧍🧍🧍</span>
-                                <span>혼자 앉기</span>
-                            </button>
-                            <button onclick="applyPreset('group3')" data-preset="group3" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
-                                <span class="text-base">☘️</span>
-                                <span>3인 책상</span>
-                            </button>
-                            <button onclick="applyPreset('group4')" data-preset="group4" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
-                                <span class="text-base">🍀</span>
-                                <span>4인 모둠</span>
-                            </button>
-                            <button onclick="applyPreset('group6')" data-preset="group6" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer">
-                                <span class="text-base">🍱</span>
-                                <span>6인 모둠</span>
-                            </button>
-                            <button onclick="applyPreset('ushape')" data-preset="ushape" class="preset-btn retro-btn p-2.5 bg-[#f7f0e4] text-[#2c1e12] text-xs sm:text-sm flex flex-col items-center gap-1 cursor-pointer col-span-3">
-                                <span class="text-base">🧲 ㄷ자 배치</span>
-                            </button>
-                        </div>
-
-                        <!-- 직접 꾸미기 토글 -->
-                        <button id="edit-layout-btn" onclick="toggleEditMode()" class="retro-btn w-full py-2.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-1.5">
-                            <span>🛠️ 자리 직접 꾸미기 (책상 추가/제거)</span>
-                        </button>
-
-                        <!-- 이전 / 다음 단계 버튼 -->
-                        <div class="flex items-center justify-between gap-2 pt-3 border-t-2 border-[#e5d7c3]">
-                            <button onclick="goToStep(1)" class="retro-btn px-4 py-2.5 bg-white text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
-                                ◀ 이전
-                            </button>
-                            <button onclick="goToStep(3)" class="retro-btn flex-1 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
-                                다음: 교실 자리뽑기 ▶
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 우측: 배치 미리보기 및 직접 편집 교실 판 (7칸) -->
-                    <div class="lg:col-span-7 retro-panel p-4 bg-[#fff9ed]">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-sm text-[#2c1e12]" id="preview-guide-text">📐 선택한 책상 배치 미리보기</span>
-                            <span class="text-xs text-stone-500">8열 × 6행 교실</span>
-                        </div>
-                        <div class="classroom-floor p-4 sm:p-5 flex flex-col justify-between min-h-[410px]">
-                            <div class="chalkboard max-w-xs w-full mx-auto py-1.5 px-4 text-center text-white text-sm mb-5">
-                                칠판 / 교탁
-                            </div>
-                            <div id="preview-desks-grid" class="grid grid-cols-8 gap-1.5 sm:gap-2 my-auto">
-                                <!-- JS로 미리보기/편집용 책상 렌더링 -->
-                            </div>
-                            <div class="mt-4 text-right text-xs text-[#4a2e16]">
-                                * 직접 꾸미기 버튼을 누르면 빈 칸을 클릭해 책상을 놓을 수 있습니다.
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- =========================================================
-                     [STEP 3] 두근두근 교실 자리뽑기 무대 화면
-                     ========================================================= -->
-                <section id="step-view-3" class="step-view hidden flex flex-col gap-4">
-                    <!-- 상단 컨트롤 & 안내 배너 -->
-                    <div class="retro-panel px-4 py-3 flex flex-wrap items-center justify-between gap-3 bg-[#fff9ed]">
-                        <div class="flex items-center gap-2.5">
-                            <button onclick="goToStep(2)" id="step3-back-btn" class="retro-btn px-3 py-1.5 bg-white text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
-                                ◀ 배치 수정
-                            </button>
-                            <span id="stage-badge" class="px-2.5 py-1 rounded-md bg-emerald-700 text-white text-xs border border-[#3a2618]">READY</span>
-                            <div>
-                                <h2 id="stage-title" class="text-base sm:text-lg text-[#2c1e12]">새로운 자리 새 짝꿍! 우리 반 자리 바꾸기</h2>
-                                <p id="stage-subtitle" class="text-xs sm:text-sm text-stone-600">자리 <span id="summary-seats" class="text-amber-700">24</span>석 · 출석 <span id="summary-students" class="text-emerald-700">24</span>명 준비 완료!</p>
-                            </div>
-                        </div>
-
-                        <!-- 실행 버튼 그룹 -->
-                        <div class="flex flex-wrap items-center gap-2">
-                            <button id="start-anim-btn" onclick="startSeatAssignment(false)" class="retro-btn px-5 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base cursor-pointer flex items-center gap-1.5">
-                                <span>🎬 자리 뽑기!</span>
-                            </button>
-                            <button id="instant-assign-btn" onclick="startSeatAssignment(true)" class="retro-btn px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm cursor-pointer">
-                                ⚡ 단번에 배정
-                            </button>
-                            <button id="view-chart-btn" onclick="goToStep(4)" class="hidden retro-btn px-5 py-2.5 bg-sky-400 hover:bg-sky-300 text-[#2c1e12] text-sm sm:text-base cursor-pointer">
-                                📋 자리표 저장하기 ▶
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 넓은 전체 교실 무대 프레임 -->
-                    <div id="classroom-stage" class="classroom-floor relative w-full min-h-[540px] sm:min-h-[600px] p-4 sm:p-6 flex flex-col justify-between overflow-hidden select-none">
-
-                        <!-- 교실 상단: 칠판 & 오둥이 선생님 & 교실 TV -->
-                        <div class="relative flex items-start justify-between gap-2 mb-5 z-10">
-                            <div class="hidden sm:flex flex-col items-center bg-[#fffdf8] border-2 border-[#3a2618] rounded-xl px-3 py-1.5 shadow-[2px_2px_0px_#3a2618]">
-                                <span class="text-[11px] text-amber-700">우리 반 급훈</span>
-                                <span class="text-xs sm:text-sm text-[#2c1e12]">함께 웃는 우리 반</span>
-                            </div>
-
-                            <div class="flex-1 max-w-md mx-auto flex flex-col items-center">
-                                <div class="chalkboard w-full py-2.5 px-4 text-center relative">
-                                    <div class="text-xs text-emerald-200 mb-0.5" id="chalkboard-date"></div>
-                                    <div id="chalkboard-text" class="text-base sm:text-lg text-white tracking-wide">
-                                        두근두근 자리 바꾸는 날
-                                    </div>
-                                    <div class="absolute bottom-0 right-4 w-6 h-1.5 bg-amber-300 border border-black"></div>
-                                    <div class="absolute bottom-0 right-12 w-3 h-1 bg-white"></div>
-                                </div>
-
-                                <div class="relative -mt-1 flex flex-col items-center">
-                                    <div id="teacher-bubble" class="mb-1 px-3 py-0.5 rounded-full bg-white border-2 border-[#3a2618] text-xs text-[#2c1e12] shadow-[2px_2px_0px_#3a2618]">
-                                        [🎬 자리 뽑기!] 버튼을 눌러보세요!
-                                    </div>
-                                    <div class="w-11 h-11 rounded-full bg-white border-2 border-black overflow-hidden shadow-md -mb-2 z-10">
-                                        <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                                            <rect width="200" height="200" fill="#ffe8b3" />
-                                            <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="10" />
-                                            <ellipse cx="85" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
-                                            <circle cx="85" cy="95" r="5" fill="#000000" />
-                                            <ellipse cx="115" cy="93" rx="14" ry="15" fill="#FFFFFF" stroke="#000000" stroke-width="7" />
-                                            <circle cx="115" cy="95" r="5" fill="#000000" />
-                                            <path d="M 52 126 C 52 110, 148 110, 148 126 C 148 142, 52 142, 52 126 Z" fill="#FFA400" stroke="#000000" stroke-width="7" />
-                                        </svg>
-                                    </div>
-                                    <div class="w-24 h-7 rounded-lg bg-[#8c5228] border-2 border-[#3a2618] shadow-[0_3px_0_#3a2618] flex items-center justify-center text-xs text-amber-200">
-                                        교탁
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="hidden sm:flex flex-col items-center bg-[#232738] border-[3px] border-[#11131c] rounded-xl px-3 py-2 shadow-[3px_3px_0px_#3a2618]">
-                                <span class="text-xs text-sky-300">📺 ODUNG TV</span>
-                                <span class="text-[10px] text-slate-400 mt-0.5">ON AIR</span>
-                            </div>
-                        </div>
-
-                        <!-- 교실 중앙: 책상 그리드 (8열 x 6행) -->
-                        <div id="desks-grid" class="relative z-10 grid grid-cols-8 gap-1.5 sm:gap-2.5 my-auto px-1 sm:px-6">
-                            <!-- JS로 책상 슬롯 렌더링 -->
-                        </div>
-
-                        <!-- 교실 좌측 하단 출입문 & 우측 창가 화분 데코 -->
-                        <div class="mt-5 flex items-end justify-between text-xs sm:text-sm text-[#4a2e16] z-10">
-                            <div id="classroom-door" class="px-3.5 py-1.5 rounded-xl bg-[#7a441e] text-amber-100 border-2 border-[#3a2618] shadow-[2px_2px_0px_#3a2618] flex items-center gap-1.5">
-                                <span>🚪</span>
-                                <span>교실 뒷문 (입장)</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="px-2.5 py-1 rounded-xl bg-white/75 border border-[#4a2e16] text-xs">🌱 창가 화분</span>
-                            </div>
-                        </div>
-
-                        <!-- 애니메이션용 학생 캐릭터 레이어 -->
-                        <div id="sprites-layer" class="absolute inset-0 pointer-events-none z-30"></div>
-                    </div>
-                </section>
-
-                <!-- =========================================================
-                     [STEP 4] 새 자리표 확인 및 저장/인쇄 화면
-                     ========================================================= -->
-                <section id="step-view-4" class="step-view hidden max-w-4xl mx-auto retro-panel p-5 sm:p-6">
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#e5d7c3] pb-3 mb-4 no-print">
+                <!-- [모드 A] 번호로 간편 설정 -->
+                <div id="panel-mode-number" class="bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl p-4 mb-5">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <span class="text-xs sm:text-sm text-[#2c1e12]">우리 반 전체 인원수:</span>
                         <div class="flex items-center gap-2">
-                            <span class="px-2.5 py-0.5 rounded-md bg-amber-400 border border-[#3a2618] text-xs">STEP 04</span>
-                            <h3 class="text-lg sm:text-xl text-[#2c1e12]">새 자리표 확인 및 저장</h3>
+                            <button type="button" onclick="adjustStudentCount(-1)" class="retro-btn w-9 h-9 bg-white text-base cursor-pointer">-</button>
+                            <input type="number" id="student-count-input" min="1" max="48" value="24" onchange="handleStudentCountInput(this.value)" class="w-16 h-9 bg-white border-2 border-[#3a2618] rounded-xl text-center text-base font-bold">
+                            <button type="button" onclick="adjustStudentCount(1)" class="retro-btn w-9 h-9 bg-white text-base cursor-pointer">+</button>
+                            <span class="text-xs sm:text-sm">명</span>
                         </div>
-                        <button onclick="goToStep(3)" class="retro-btn px-3.5 py-1.5 bg-white text-xs sm:text-sm cursor-pointer">
-                            ◀ 교실 화면으로 돌아가기
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-[#3a2618]/20">
+                        <span class="text-[11px] text-stone-500 mr-1 self-center">빠른 선택:</span>
+                        <button type="button" onclick="handleStudentCountInput(20)" class="px-2.5 py-1 rounded-lg bg-white border border-[#3a2618] text-xs hover:bg-amber-200 cursor-pointer">20명</button>
+                        <button type="button" onclick="handleStudentCountInput(24)" class="px-2.5 py-1 rounded-lg bg-white border border-[#3a2618] text-xs hover:bg-amber-200 cursor-pointer">24명</button>
+                        <button type="button" onclick="handleStudentCountInput(26)" class="px-2.5 py-1 rounded-lg bg-white border border-[#3a2618] text-xs hover:bg-amber-200 cursor-pointer">26명</button>
+                        <button type="button" onclick="handleStudentCountInput(28)" class="px-2.5 py-1 rounded-lg bg-white border border-[#3a2618] text-xs hover:bg-amber-200 cursor-pointer">28명</button>
+                        <button type="button" onclick="handleStudentCountInput(30)" class="px-2.5 py-1 rounded-lg bg-white border border-[#3a2618] text-xs hover:bg-amber-200 cursor-pointer">30명</button>
+                    </div>
+                </div>
+
+                <!-- [모드 B] 이름 직접 입력 -->
+                <div id="panel-mode-name" class="hidden bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl p-4 mb-5">
+                    <p class="text-xs text-stone-600 mb-2">학생 이름을 줄바꿈이나 쉼표(,)로 구분해 입력 후 [명단 적용]을 눌러주세요. (최대 48명)</p>
+                    <textarea id="names-textarea" rows="5" placeholder="김오둥&#10;이아케&#10;박교실&#10;최쿼카" class="w-full bg-white border-2 border-[#3a2618] rounded-xl p-3 text-xs sm:text-sm leading-relaxed focus:outline-none focus:border-amber-500 mb-2.5"></textarea>
+                    <div class="flex justify-end">
+                        <button type="button" onclick="applyCustomNames()" class="retro-btn px-4 py-2 bg-sky-300 hover:bg-sky-200 text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
+                            ✅ 명단 적용하기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 출석 / 결석 빠른 토글 그리드 -->
+                <div class="mb-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs sm:text-sm text-[#2c1e12]">🦆 학생 클릭 시 <strong>결석 처리</strong> (자리 배정 제외)</span>
+                        <button type="button" onclick="setAllPresent()" class="px-2.5 py-1 rounded-lg bg-emerald-200 border border-[#3a2618] text-xs text-emerald-950 hover:bg-emerald-300 cursor-pointer">
+                            전원 출석
+                        </button>
+                    </div>
+                    <div id="step1-students-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 p-3 bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl max-h-60 overflow-y-auto">
+                        <!-- JS로 학생 칩 렌더링 -->
+                    </div>
+                </div>
+
+                <!-- 다음 단계 이동 버튼 -->
+                <div class="flex justify-end pt-3 border-t-2 border-[#e5d7c3]">
+                    <button onclick="goToStep('layout')" class="retro-btn px-6 py-3 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base cursor-pointer flex items-center gap-2">
+                        <span>다음 단계: 자리 배치 선택</span>
+                        <span>▶</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- =========================================================
+                 [STEP 2] 자리 배치 선택 & 직접 꾸미기 화면
+                 ========================================================= -->
+            <section id="step-view-layout" class="step-view hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                <!-- 좌측: 교실 책상 배치 미리보기 (7칸) -->
+                <div class="lg:col-span-7 retro-panel p-5 flex flex-col gap-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#e5d7c3] pb-3">
+                        <div>
+                            <span class="inline-block px-2.5 py-0.5 rounded-md bg-amber-400 border border-[#3a2618] text-xs mb-1">STEP 02</span>
+                            <h2 class="text-lg sm:text-xl text-[#2c1e12]">교실 책상 배치도</h2>
+                        </div>
+                        <span id="layout-desk-badge" class="px-3 py-1 rounded-xl bg-[#f7f0e4] border-2 border-[#3a2618] text-xs sm:text-sm text-emerald-800">
+                            책상 24석 / 출석 24명
+                        </span>
+                    </div>
+
+                    <div class="classroom-floor p-4">
+                        <div class="chalkboard py-2 px-4 text-center text-xs sm:text-sm tracking-widest mb-4">
+                            칠 판 / 교 탁 (앞)
+                        </div>
+                        <div id="preview-desks-grid" class="grid grid-cols-8 gap-1.5 sm:gap-2">
+                            <!-- JS로 6행x8열 책상 미리보기 렌더링 -->
+                        </div>
+                    </div>
+
+                    <p id="edit-mode-guide" class="text-xs text-stone-600 text-center">
+                        💡 오른쪽에서 추천 대형을 고르거나 <strong>[직접 책상 배치 수정]</strong>을 눌러 칸을 클릭해 보세요.
+                    </p>
+                </div>
+
+                <!-- 우측: 배치 프리셋 & 커스텀 수정 옵션 (5칸) -->
+                <div class="lg:col-span-5 retro-panel p-5 flex flex-col gap-4">
+                    <h3 class="text-base sm:text-lg text-[#2c1e12] border-b-2 border-[#e5d7c3] pb-2.5">📐 추천 책상 대형 선택</h3>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button type="button" onclick="applyPreset('pair3')" id="preset-btn-pair3" class="preset-btn retro-btn p-3 bg-amber-300 text-left text-xs sm:text-sm cursor-pointer">
+                            <div>👫 짝꿍 대형 (3분단)</div>
+                            <div class="text-[11px] text-stone-700 mt-0.5">2명씩 3줄 · 24석</div>
+                        </button>
+                        <button type="button" onclick="applyPreset('pair4')" id="preset-btn-pair4" class="preset-btn retro-btn p-3 bg-white text-left text-xs sm:text-sm cursor-pointer">
+                            <div>👫 짝꿍 대형 (4분단)</div>
+                            <div class="text-[11px] text-stone-500 mt-0.5">2명씩 4줄 · 32석</div>
+                        </button>
+                        <button type="button" onclick="applyPreset('single5')" id="preset-btn-single5" class="preset-btn retro-btn p-3 bg-white text-left text-xs sm:text-sm cursor-pointer">
+                            <div>📝 1열 대형 (5줄)</div>
+                            <div class="text-[11px] text-stone-500 mt-0.5">한 줄씩 5분단 · 25석</div>
+                        </button>
+                        <button type="button" onclick="applyPreset('single6')" id="preset-btn-single6" class="preset-btn retro-btn p-3 bg-white text-left text-xs sm:text-sm cursor-pointer">
+                            <div>📝 1열 대형 (6줄)</div>
+                            <div class="text-[11px] text-stone-500 mt-0.5">한 줄씩 6분단 · 30석</div>
+                        </button>
+                        <button type="button" onclick="applyPreset('group4')" id="preset-btn-group4" class="preset-btn retro-btn p-3 bg-white text-left text-xs sm:text-sm cursor-pointer">
+                            <div>🍀 4인 모둠 대형</div>
+                            <div class="text-[11px] text-stone-500 mt-0.5">6개 모둠 · 24석</div>
+                        </button>
+                        <button type="button" onclick="applyPreset('ushape')" id="preset-btn-ushape" class="preset-btn retro-btn p-3 bg-white text-left text-xs sm:text-sm cursor-pointer">
+                            <div>💬 ㄷ자 토론 대형</div>
+                            <div class="text-[11px] text-stone-500 mt-0.5">토론/발표용 · 22석</div>
                         </button>
                     </div>
 
-                    <!-- 시점 전환 탭 & 저장/인쇄 버튼 -->
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4 no-print">
-                        <div class="flex gap-2">
-                            <button id="view-student-btn" onclick="setChartPerspective('student')" class="retro-btn px-3.5 py-1.5 bg-[#2c1e12] text-white text-xs sm:text-sm cursor-pointer">
-                                👀 학생 쪽에서 (칠판이 위)
-                            </button>
-                            <button id="view-teacher-btn" onclick="setChartPerspective('teacher')" class="retro-btn px-3.5 py-1.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
-                                🧑‍🏫 교탁에서 (칠판이 아래)
+                    <!-- 직접 책상 배치 수정 토글 -->
+                    <div class="bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl p-3.5 flex flex-col gap-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs sm:text-sm text-[#2c1e12]">🛠️ 책상 칸 직접 추가/삭제</span>
+                            <button type="button" id="toggle-edit-btn" onclick="toggleEditMode()" class="retro-btn px-3 py-1.5 bg-white text-xs cursor-pointer">
+                                수정 모드 켜기
                             </button>
                         </div>
+                        <button type="button" onclick="fitDesksToStudentCount()" class="retro-btn w-full py-2 bg-sky-200 hover:bg-sky-300 text-sky-950 text-xs cursor-pointer">
+                            ✨ 출석 인원수(<span id="fit-student-cnt">24</span>명)에 딱 맞게 책상 수 자동 맞춤
+                        </button>
+                    </div>
 
-                        <div class="flex flex-wrap gap-2">
-                            <button onclick="copySeatTableText()" class="retro-btn px-3.5 py-1.5 bg-sky-200 text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
-                                📋 표 복사
-                            </button>
-                            <button onclick="downloadSeatChartImage()" class="retro-btn px-3.5 py-1.5 bg-amber-300 text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
-                                🖼️ 그림 저장
-                            </button>
-                            <button onclick="window.print()" class="retro-btn px-3.5 py-1.5 bg-emerald-600 text-white text-xs sm:text-sm cursor-pointer">
-                                🖨️ 인쇄
-                            </button>
+                    <!-- 이전 / 다음 단계 버튼 -->
+                    <div class="flex items-center justify-between gap-2 pt-3 border-t-2 border-[#e5d7c3]">
+                        <button onclick="goToStep('students')" class="retro-btn px-4 py-2.5 bg-white text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
+                            ◀ 이전
+                        </button>
+                        <button id="layout-next-btn" onclick="goToNextFromLayout()" class="retro-btn flex-1 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
+                            다음: 자리 번호 지정 ▶
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =========================================================
+                 [STEP 3 · TEACHER] 1~12번 칸 드래그 앤 드랍 번호 지정 화면
+                 ========================================================= -->
+            <section id="step-view-secret" class="step-view hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                <!-- 좌측: 1~12번 동일 크기 칸 12개 (7칸) -->
+                <div class="lg:col-span-7 retro-panel p-5 flex flex-col gap-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#e5d7c3] pb-3">
+                        <div>
+                            <span class="inline-block px-2.5 py-0.5 rounded-md bg-amber-400 border border-[#3a2618] text-xs mb-1">STEP 03 · TEACHER</span>
+                            <h2 class="text-lg sm:text-xl text-[#2c1e12]">자리 번호 지정 (1 ~ 12번 칸)</h2>
+                            <p class="text-xs text-stone-600 mt-0.5">오른쪽 학생 이름(또는 번호)을 1~12번 칸 중 아무 칸이나 드래그해 놓아주세요.</p>
+                        </div>
+                        <button type="button" onclick="clearAllSecretBoxes()" class="retro-btn px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-900 text-xs cursor-pointer">
+                            ↻ 전체 비우기
+                        </button>
+                    </div>
+
+                    <!-- 1부터 12까지 모두 동일한 크기의 칸 그리드 -->
+                    <div id="secret-boxes-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        <!-- JS로 1~12번 동일 크기 칸 렌더링 -->
+                    </div>
+
+                    <div class="text-xs text-stone-600 bg-[#f7f0e4] border border-[#3a2618]/40 rounded-xl p-3 leading-relaxed">
+                        💡 다음 단계에서 자리 뽑기를 실행하면 책상마다 <strong>랜덤 번호</strong>가 적히며, 1~12번 칸에 놓은 학생이 해당 번호가 적힌 책상에 배정됩니다.
+                    </div>
+                </div>
+
+                <!-- 우측: 등록한 학생 이름/번호 목록 (5칸) -->
+                <div class="lg:col-span-5 retro-panel p-5 flex flex-col gap-4">
+                    <div class="flex items-center justify-between border-b-2 border-[#e5d7c3] pb-3">
+                        <div>
+                            <h3 class="text-base sm:text-lg text-[#2c1e12]">📋 우리 반 학생 이름 / 번호</h3>
+                            <p class="text-xs text-stone-500">드래그하거나 클릭 후 왼쪽 1~12번 칸을 눌러 배치</p>
+                        </div>
+                        <span id="secret-assigned-badge" class="px-3 py-1 rounded-xl bg-[#f7f0e4] border-2 border-[#3a2618] text-xs text-emerald-700">
+                            지정 0 / 24명
+                        </span>
+                    </div>
+
+                    <!-- 드래그 가능한 학생 목록 (여기로 다시 드롭하면 배치 해제) -->
+                    <div id="secret-students-list"
+                         ondragover="handleRightListDragOver(event)"
+                         ondrop="handleRightListDrop(event)"
+                         class="grid grid-cols-3 sm:grid-cols-4 gap-2 min-h-[280px] max-h-[380px] overflow-y-auto p-3 bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl content-start">
+                        <!-- JS로 등록 학생 렌더링 -->
+                    </div>
+
+                    <!-- 이전 / 다음 단계 버튼 -->
+                    <div class="flex items-center justify-between gap-2 pt-3 border-t-2 border-[#e5d7c3]">
+                        <button onclick="goToStep('layout')" class="retro-btn px-4 py-2.5 bg-white text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
+                            ◀ 이전
+                        </button>
+                        <button onclick="goToStep('draw')" class="retro-btn flex-1 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
+                            다음: 교실 자리뽑기 ▶
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =========================================================
+                 [STEP 3 / 4] 두근두근 교실 자리뽑기 무대 화면
+                 ========================================================= -->
+            <section id="step-view-draw" class="step-view hidden flex flex-col gap-4">
+                <!-- 상단 컨트롤 & 안내 배너 -->
+                <div class="retro-panel px-4 py-3 flex flex-wrap items-center justify-between gap-3 bg-[#fff9ed]">
+                    <div class="flex items-center gap-2.5">
+                        <button onclick="goBackFromDraw()" id="step3-back-btn" class="retro-btn px-3 py-1.5 bg-white text-[#2c1e12] text-xs sm:text-sm cursor-pointer">
+                            ◀ 배치 수정
+                        </button>
+                        <span id="stage-badge" class="px-2.5 py-1 rounded-md bg-emerald-200 text-emerald-950 text-xs border border-[#3a2618]">
+                            READY
+                        </span>
+                    </div>
+
+                    <!-- 자리표 제목 입력 -->
+                    <div class="flex items-center gap-2 flex-1 min-w-[200px] max-w-md">
+                        <span class="text-xs text-stone-600 shrink-0">🏷️ 제목:</span>
+                        <input type="text" id="chart-title-input" value="우리 반 새 자리표" oninput="syncChartTitle(this.value)" class="w-full px-3 py-1.5 bg-white border-2 border-[#3a2618] rounded-xl text-xs sm:text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+
+                    <!-- 실행 버튼 그룹 -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button id="start-anim-btn" onclick="startSeatAssignment(false)" class="retro-btn px-5 py-2.5 bg-[#ff9f1c] hover:bg-[#ffae38] text-[#2c1e12] text-sm sm:text-base cursor-pointer flex items-center gap-1.5">
+                            <span>🎬 자리 뽑기!</span>
+                        </button>
+                        <button id="instant-assign-btn" onclick="startSeatAssignment(true)" class="retro-btn px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm cursor-pointer">
+                            ⚡ 단번에 배정
+                        </button>
+                        <button id="view-chart-btn" onclick="goToStep('chart')" class="hidden retro-btn px-5 py-2.5 bg-sky-400 hover:bg-sky-300 text-[#2c1e12] text-sm sm:text-base cursor-pointer">
+                            📋 자리표 저장하기 ▶
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 교실 무대 영역 -->
+                <div class="retro-panel p-4 sm:p-6">
+                    <!-- 선생님 오둥이 말풍선 안내 -->
+                    <div class="flex items-center justify-between gap-3 mb-4 bg-[#f7f0e4] border-2 border-[#3a2618] rounded-2xl px-4 py-2.5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🦆</span>
+                            <p id="teacher-bubble" class="text-xs sm:text-sm text-[#2c1e12]">
+                                책상마다 랜덤 번호가 준비되었어요! <strong>[🎬 자리 뽑기!]</strong> 버튼을 눌러 시작해 보세요.
+                            </p>
+                        </div>
+                        <div class="hidden sm:flex items-center gap-1.5 shrink-0">
+                            <button type="button" onclick="adjustZoom(-0.1)" class="retro-btn w-7 h-7 bg-white text-xs cursor-pointer">-</button>
+                            <span id="zoom-label" class="text-xs w-11 text-center">100%</span>
+                            <button type="button" onclick="adjustZoom(0.1)" class="retro-btn w-7 h-7 bg-white text-xs cursor-pointer">+</button>
                         </div>
                     </div>
 
-                    <!-- 실제 출력/캡처 영역 -->
-                    <div id="print-area" class="bg-[#fffdf8] border-[3px] border-[#3a2618] rounded-xl p-5 sm:p-6">
-                        <div class="text-center mb-4">
-                            <span class="inline-block px-3 py-0.5 rounded-full bg-amber-300 border border-[#3a2618] text-xs mb-1">우리 반 새 자리표</span>
-                            <h4 id="chart-title-text" class="text-2xl text-[#2c1e12]">새 자리표</h4>
-                            <p id="chart-date-text" class="text-xs sm:text-sm text-stone-500 mt-0.5"></p>
+                    <!-- 교실 바닥 & 책상 그리드 -->
+                    <div id="classroom-stage" class="classroom-floor p-4 sm:p-6 origin-top transition-transform duration-200">
+                        <div class="chalkboard py-2.5 px-5 mb-5 flex items-center justify-between">
+                            <span class="text-xs text-emerald-200" id="chalkboard-date">2026년 11월 23일</span>
+                            <span class="text-sm sm:text-base tracking-widest">칠 판 / 교 탁</span>
+                            <span class="text-xs text-amber-300" id="chalkboard-progress">0 / 24명</span>
                         </div>
 
-                        <!-- 칠판 위치 (상단) -->
-                        <div id="chart-board-top" class="max-w-xs mx-auto mb-5 rounded-lg bg-[#1f4e3d] text-white text-center py-1.5 px-4 border-2 border-[#3a2618] text-sm">
-                            칠판 / 교탁
-                        </div>
-
-                        <!-- 자리표 그리드 -->
-                        <div id="chart-grid-container" class="grid grid-cols-8 gap-2">
-                            <!-- JS 렌더링 -->
-                        </div>
-
-                        <!-- 칠판 위치 (하단 - 교탁 시점일 때) -->
-                        <div id="chart-board-bottom" class="hidden max-w-xs mx-auto mt-5 rounded-lg bg-[#1f4e3d] text-white text-center py-1.5 px-4 border-2 border-[#3a2618] text-sm">
-                            칠판 / 교탁
-                        </div>
-
-                        <div class="mt-5 text-center text-xs text-stone-400">
-                            오둥이 자리뽑기 • ODUNG GAMES
+                        <div id="desks-grid" class="grid grid-cols-8 gap-2 sm:gap-3">
+                            <!-- JS로 6행x8열 교실 책상 렌더링 -->
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-            </div>
-        </main>
-    </div>
+            <!-- =========================================================
+                 [STEP 4 / 5] 새 자리표 확인 및 저장/인쇄 화면
+                 ========================================================= -->
+            <section id="step-view-chart" class="step-view hidden max-w-4xl mx-auto retro-panel p-5 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#e5d7c3] pb-3 mb-4 no-print">
+                    <div class="flex items-center gap-2">
+                        <span id="chart-step-badge" class="px-2.5 py-0.5 rounded-md bg-amber-400 border border-[#3a2618] text-xs">STEP 04</span>
+                        <h3 class="text-lg sm:text-xl text-[#2c1e12]">새 자리표 확인 및 저장</h3>
+                    </div>
+                    <button onclick="goToStep('draw')" class="retro-btn px-3.5 py-1.5 bg-white text-xs sm:text-sm cursor-pointer">
+                        ◀ 교실 화면으로 돌아가기
+                    </button>
+                </div>
 
-    <!-- 알림 토스트 -->
-    <div id="toast-box" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
-        <div class="bg-[#2c1e12] border-2 border-amber-400 rounded-xl text-white px-5 py-2.5 shadow-[4px_4px_0px_rgba(0,0,0,0.4)] flex items-center gap-2">
-            <span>🦆</span>
-            <span id="toast-msg" class="text-xs sm:text-sm text-amber-300">알림</span>
+                <!-- 시선 전환 & 저장 버튼 바 -->
+                <div class="flex flex-wrap items-center justify-between gap-2.5 bg-[#f7f0e4] border-2 border-[#3a2618] rounded-xl p-3 mb-5 no-print">
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="persp-student-btn" onclick="setChartPerspective('student')" class="retro-btn px-3 py-1.5 bg-amber-300 text-xs sm:text-sm cursor-pointer">
+                            👀 학생 시선 (칠판 위)
+                        </button>
+                        <button type="button" id="persp-teacher-btn" onclick="setChartPerspective('teacher')" class="retro-btn px-3 py-1.5 bg-white text-stone-600 text-xs sm:text-sm cursor-pointer">
+                            🧑‍🏫 선생님 시선 (칠판 아래)
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" onclick="downloadChartImage()" class="retro-btn px-3.5 py-1.5 bg-emerald-300 hover:bg-emerald-200 text-emerald-950 text-xs sm:text-sm cursor-pointer">
+                            🖼️ 이미지 저장
+                        </button>
+                        <button type="button" onclick="copyChartText()" class="retro-btn px-3.5 py-1.5 bg-sky-200 hover:bg-sky-300 text-sky-950 text-xs sm:text-sm cursor-pointer">
+                            📋 텍스트 복사
+                        </button>
+                        <button type="button" onclick="window.print()" class="retro-btn px-3.5 py-1.5 bg-white text-xs sm:text-sm cursor-pointer">
+                            🖨️ 인쇄
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 최종 자리표 출력 카드 -->
+                <div id="printable-chart-area" class="bg-white border-[3px] border-[#3a2618] rounded-2xl p-5 sm:p-7">
+                    <div class="flex items-center justify-between border-b-2 border-[#3a2618] pb-3 mb-4">
+                        <h4 id="chart-display-title" class="text-xl sm:text-2xl text-[#2c1e12]">우리 반 새 자리표</h4>
+                        <span id="chart-date-text" class="text-xs sm:text-sm text-stone-500">2026년 11월 23일</span>
+                    </div>
+
+                    <!-- 학생 시선일 때 상단 칠판 -->
+                    <div id="chart-board-top" class="chalkboard py-2 px-4 text-center text-xs sm:text-sm tracking-widest mb-4">
+                        칠 판 / 교 탁 (앞)
+                    </div>
+
+                    <!-- 자리표 그리드 -->
+                    <div id="seat-chart-grid" class="grid grid-cols-8 gap-2">
+                        <!-- JS로 최종 자리표 렌더링 -->
+                    </div>
+
+                    <!-- 선생님 시선일 때 하단 칠판 -->
+                    <div id="chart-board-bottom" class="hidden chalkboard py-2 px-4 text-center text-xs sm:text-sm tracking-widest mt-4">
+                        칠 판 / 교 탁 (선생님 기준 앞쪽)
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- 레트로 토스트 알림 -->
+    <div id="toast-modal" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden no-print">
+        <div class="bg-[#2c1e12] border-2 border-amber-400 text-white px-5 py-3 rounded-2xl shadow-[4px_4px_0px_#000] flex items-center gap-2.5">
+            <span class="text-base">🦆</span>
+            <p id="toast-message" class="text-xs sm:text-sm text-amber-300">알림 메시지</p>
         </div>
     </div>
 
@@ -586,13 +591,21 @@
         const ROWS = 6;
         const COLS = 8;
         const STORAGE_KEY = 'odung_seat_picker_roster_v1';
+        const AUTH_STORAGE_KEY = 'odung_arcade_logged_in_user_v1';
 
-        let currentStep = 1;
+        let isLalessAuthenticated = false;
+        let isLalessUser = false;
+        let stepOrder = ['students', 'layout', 'draw', 'chart'];
+        let currentStep = 'students';
         let inputMode = 'number'; // 'number' | 'name'
         let studentCount = 24;
         let students = []; // { id, label, absent }
         let deskMap = Array(ROWS * COLS).fill(false); // 48칸 중 책상 배치 여부
+        let deskNumbers = {}; // { cellIndex: randomSeatNumber (1..deskCount) }
         let seatAssignments = {}; // { cellIndex: studentObj }
+        let secretBoxAssignments = {}; // { boxNum (1..12): studentId }
+        let selectedSecretStudentId = null;
+        let draggedStudentId = null;
         let currentPreset = 'pair3';
         let isEditMode = false;
         let isAnimating = false;
@@ -601,98 +614,125 @@
         let chartPerspective = 'student'; // 'student' | 'teacher'
         let currentZoom = 1.0;
         let hasCustomLayout = false;
+        let logoTapCount = 0;
+        let logoTapTimer = null;
 
-        const BUBBLE_LINES = [
-            '내 자리는 어디지?',
-            '두근두근!!',
-            '짝꿍 누구일까?',
-            '창가 자리 가자!',
-            '오둥이 파워!',
-            '맨 앞자리만 피해라~',
-            '여기 내 자리인가?'
-        ];
-
-        // --- 화면 확대/축소 제어 ---
-        function changeZoom(delta) {
-            currentZoom = Math.round(Math.max(0.6, Math.min(1.5, currentZoom + delta)) * 10) / 10;
-            applyZoom();
-        }
-
-        function resetZoom() {
-            currentZoom = 1.0;
-            applyZoom();
-            showToast('화면 배율이 100%로 초기화되었습니다.');
-        }
-
-        function applyZoom() {
-            const wrapper = document.getElementById('zoom-wrapper');
-            const label = document.getElementById('zoom-label');
-            if (wrapper) {
-                wrapper.style.zoom = currentZoom;
-            }
-            if (label) {
-                label.textContent = `${Math.round(currentZoom * 100)}%`;
+        function handleSecretLogoTap() {
+            logoTapCount++;
+            clearTimeout(logoTapTimer);
+            logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1500);
+            if (logoTapCount >= 5) {
+                logoTapCount = 0;
+                isLalessAuthenticated = true;
+                toggleTeacherSecretMode();
             }
         }
 
-        // --- 명단 저장 및 불러오기 ---
-        function saveRosterState() {
-            const payload = {
-                inputMode,
-                studentCount,
-                students,
-                rawNames: document.getElementById('name-list-textarea')?.value || '',
-                updatedAt: Date.now()
-            };
-
+        function checkLalessLoginStatus() {
+            let loggedInUser = null;
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+                loggedInUser = localStorage.getItem(AUTH_STORAGE_KEY);
             } catch (e) {}
 
-            if (typeof window.saveSeatRosterToCloud === 'function') {
-                window.saveSeatRosterToCloud(payload);
-            }
-        }
-
-        function applyLoadedRosterData(data) {
-            if (!data || !Array.isArray(data.students) || data.students.length === 0) return false;
-
-            inputMode = data.inputMode === 'name' ? 'name' : 'number';
-            studentCount = Math.max(2, Math.min(48, Number(data.studentCount) || data.students.length));
-            students = data.students.slice(0, 48).map((s, idx) => ({
-                id: s.id || idx + 1,
-                label: String(s.label || `${idx + 1}번`),
-                absent: Boolean(s.absent)
-            }));
-
-            document.getElementById('num-count-display').textContent = studentCount;
-            const textarea = document.getElementById('name-list-textarea');
-            if (textarea) {
-                textarea.value = data.rawNames || students.map(s => s.label).join('\n');
-            }
-
-            syncInputModeUI(inputMode);
-            renderStudentChips();
-            if (!hasCustomLayout) {
-                applyPreset(currentPreset);
-            }
-            updateCountsUI();
-            return true;
-        }
-
-        function loadRosterFromLocal() {
+            let hasLalessPath = false;
+            let hasLalessQuery = false;
+            let isBasicQuery = false;
+            let isPreviewEnv = false;
             try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (!raw) return false;
-                const parsed = JSON.parse(raw);
-                return applyLoadedRosterData(parsed);
-            } catch (e) {
-                return false;
+                const host = (window.location.hostname || '').toLowerCase();
+                isPreviewEnv = !host.endsWith('github.io');
+                hasLalessPath = window.location.pathname.toLowerCase().includes('laless');
+                const params = new URLSearchParams(window.location.search);
+                const userParam = (params.get('user') || params.get('account') || '').toLowerCase();
+                hasLalessQuery = (userParam === 'laless');
+                isBasicQuery = (params.get('mode') === 'basic');
+            } catch (e) {}
+
+            isLalessAuthenticated = isPreviewEnv || (loggedInUser === 'laless') || hasLalessPath || hasLalessQuery;
+            return isLalessAuthenticated && !isBasicQuery;
+        }
+
+        function detectLalessAccount() {
+            isLalessUser = checkLalessLoginStatus();
+            stepOrder = isLalessUser
+                ? ['students', 'layout', 'secret', 'draw', 'chart']
+                : ['students', 'layout', 'draw', 'chart'];
+        }
+
+        function toggleTeacherSecretMode() {
+            if (!isLalessAuthenticated || isAnimating || isTransitioning) return;
+            isLalessUser = !isLalessUser;
+            stepOrder = isLalessUser
+                ? ['students', 'layout', 'secret', 'draw', 'chart']
+                : ['students', 'layout', 'draw', 'chart'];
+
+            configureStepUIForAccount();
+            if (!stepOrder.includes(currentStep)) {
+                setInitialStepView('layout');
+            } else {
+                setInitialStepView(currentStep);
             }
+            showToast(
+                isLalessUser
+                    ? '지정 모드 (5단계: 1~12번 자리 번호 지정)로 전환되었습니다.'
+                    : '기본 4단계 자리뽑기 모드로 전환되었습니다.'
+            );
+        }
+
+        function configureStepUIForAccount() {
+            const navBar = document.getElementById('step-nav-bar');
+            const secretTab = document.getElementById('step-tab-secret');
+            const layoutNextBtn = document.getElementById('layout-next-btn');
+            const step3BackBtn = document.getElementById('step3-back-btn');
+            const chartStepBadge = document.getElementById('chart-step-badge');
+            const modeBtn = document.getElementById('mode-switch-btn');
+
+            if (modeBtn) {
+                if (isLalessAuthenticated) {
+                    modeBtn.classList.remove('hidden');
+                } else {
+                    modeBtn.classList.add('hidden');
+                }
+            }
+
+            if (isLalessUser) {
+                navBar.classList.remove('sm:grid-cols-4');
+                navBar.classList.add('sm:grid-cols-5');
+                secretTab.classList.remove('hidden');
+                layoutNextBtn.textContent = '다음: 자리 번호 지정 ▶';
+                step3BackBtn.textContent = '◀ 번호 지정 수정';
+                chartStepBadge.textContent = 'STEP 05';
+                if (modeBtn) {
+                    modeBtn.textContent = '🦆 지정 모드 (5단계)';
+                    modeBtn.className = 'retro-btn px-3 py-1.5 bg-amber-300 text-[#2c1e12] text-xs cursor-pointer';
+                }
+            } else {
+                navBar.classList.remove('sm:grid-cols-5');
+                navBar.classList.add('sm:grid-cols-4');
+                secretTab.classList.add('hidden');
+                layoutNextBtn.textContent = '다음: 교실 자리뽑기 ▶';
+                step3BackBtn.textContent = '◀ 배치 수정';
+                chartStepBadge.textContent = 'STEP 04';
+                if (modeBtn && isLalessAuthenticated) {
+                    modeBtn.textContent = '🧭 기본 모드 (4단계)';
+                    modeBtn.className = 'retro-btn px-3 py-1.5 bg-[#fff9ed] hover:bg-amber-100 text-[#2c1e12] text-xs cursor-pointer';
+                }
+            }
+
+            stepOrder.forEach((stepKey, idx) => {
+                const tab = document.getElementById(`step-tab-${stepKey}`);
+                const badge = tab?.querySelector('.step-num-badge');
+                if (badge) {
+                    badge.textContent = String(idx + 1).padStart(2, '0');
+                }
+            });
         }
 
         // --- 2. 초기화 및 단계 전환 (좌우 슬라이드 교차 애니메이션) ---
         function init() {
+            detectLalessAccount();
+            configureStepUIForAccount();
+
             const today = new Date();
             const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
             document.getElementById('chalkboard-date').textContent = dateStr;
@@ -703,93 +743,108 @@
                 buildStudentsFromCount(24, false);
                 applyPreset('pair3');
             }
-            setInitialStepView(1);
+            setInitialStepView('students');
         }
 
-        function setInitialStepView(stepNum) {
-            currentStep = stepNum;
-            for (let i = 1; i <= 4; i++) {
-                const view = document.getElementById(`step-view-${i}`);
-                const tab = document.getElementById(`step-tab-${i}`);
-                const badge = tab.querySelector('span:first-child');
+        function setInitialStepView(stepKey) {
+            currentStep = stepKey;
+            stepOrder.forEach(key => {
+                const view = document.getElementById(`step-view-${key}`);
+                const tab = document.getElementById(`step-tab-${key}`);
+                const badge = tab?.querySelector('.step-num-badge');
 
-                if (i === stepNum) {
-                    view.classList.remove('hidden');
-                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
-                    badge.className = 'px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-300 text-[11px]';
+                if (key === stepKey) {
+                    view?.classList.remove('hidden');
+                    if (tab) tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
+                    if (badge) badge.className = 'step-num-badge px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-300 text-[11px]';
                 } else {
-                    view.classList.add('hidden');
-                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
-                    badge.className = 'px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]';
+                    view?.classList.add('hidden');
+                    if (tab) tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
+                    if (badge) badge.className = 'step-num-badge px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]';
                 }
-            }
+            });
             updateCountsUI();
         }
 
-        function goToStep(stepNum) {
+        function goToNextFromLayout() {
+            goToStep(isLalessUser ? 'secret' : 'draw');
+        }
+
+        function goBackFromDraw() {
+            goToStep(isLalessUser ? 'secret' : 'layout');
+        }
+
+        function goToStep(stepKey) {
             if (isAnimating || isTransitioning) {
                 if (isAnimating) showToast('자리 뽑기가 진행 중일 때는 이동할 수 없습니다!');
                 return;
             }
-            if (currentStep === stepNum) return;
+            if (!stepOrder.includes(stepKey) || currentStep === stepKey) return;
 
             const presentCount = students.filter(s => !s.absent).length;
             const deskCount = deskMap.filter(Boolean).length;
+            const targetIdx = stepOrder.indexOf(stepKey);
+            const drawIdx = stepOrder.indexOf('draw');
+            const chartIdx = stepOrder.indexOf('chart');
 
-            if (stepNum >= 2 && presentCount === 0) {
+            if (targetIdx >= 1 && presentCount === 0) {
                 showToast('최소 1명 이상의 출석 학생이 필요합니다!');
                 return;
             }
 
-            if (stepNum === 3 && deskCount < presentCount) {
+            if (targetIdx === drawIdx && deskCount < presentCount) {
                 showToast(`책상(${deskCount}석)이 출석 인원(${presentCount}명)보다 부족합니다! 배치를 조정해 주세요.`);
                 return;
             }
 
-            if (stepNum === 4 && Object.keys(seatAssignments).length === 0) {
-                showToast('먼저 3단계에서 자리 뽑기를 진행해 주세요!');
+            if (targetIdx === chartIdx && Object.keys(seatAssignments).length === 0) {
+                showToast('먼저 교실 자리뽑기 단계에서 자리 뽑기를 진행해 주세요!');
                 return;
             }
 
-            if (isEditMode && stepNum !== 2) {
+            if (isEditMode && stepKey !== 'layout') {
                 toggleEditMode();
             }
 
             isTransitioning = true;
             const prevStep = currentStep;
-            currentStep = stepNum;
-            const isForward = stepNum > prevStep;
+            currentStep = stepKey;
+            const isForward = stepOrder.indexOf(stepKey) > stepOrder.indexOf(prevStep);
 
             const outClass = isForward ? 'anim-slide-out-left' : 'anim-slide-out-right';
             const inClass = isForward ? 'anim-slide-in-right' : 'anim-slide-in-left';
 
-            for (let i = 1; i <= 4; i++) {
-                const tab = document.getElementById(`step-tab-${i}`);
-                const badge = tab.querySelector('span:first-child');
-                if (i === stepNum) {
-                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
-                    badge.className = 'px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-300 text-[11px]';
+            stepOrder.forEach(key => {
+                const tab = document.getElementById(`step-tab-${key}`);
+                const badge = tab?.querySelector('.step-num-badge');
+                if (key === stepKey) {
+                    if (tab) tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
+                    if (badge) badge.className = 'step-num-badge px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-300 text-[11px]';
                 } else {
-                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
-                    badge.className = 'px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]';
+                    if (tab) tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
+                    if (badge) badge.className = 'step-num-badge px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]';
                 }
-            }
+            });
 
-            if (stepNum === 2) {
+            if (stepKey === 'layout') {
                 if (!hasCustomLayout) {
                     applyPreset(currentPreset);
                 } else {
                     renderPreviewDesksGrid();
                 }
-            } else if (stepNum === 3) {
+            } else if (stepKey === 'secret') {
+                sanitizeSecretAssignments();
+                renderSecretStepUI();
+            } else if (stepKey === 'draw') {
+                assignRandomDeskNumbers();
                 renderDesksGrid();
-            } else if (stepNum === 4) {
+            } else if (stepKey === 'chart') {
                 renderSeatChartGrid();
             }
             updateCountsUI();
 
             const prevView = document.getElementById(`step-view-${prevStep}`);
-            const nextView = document.getElementById(`step-view-${stepNum}`);
+            const nextView = document.getElementById(`step-view-${stepKey}`);
 
             prevView.classList.remove('anim-slide-in-right', 'anim-slide-in-left', 'anim-slide-out-left', 'anim-slide-out-right');
             nextView.classList.remove('anim-slide-in-right', 'anim-slide-in-left', 'anim-slide-out-left', 'anim-slide-out-right');
@@ -809,285 +864,588 @@
             }, 340);
         }
 
-        // --- 3. 참가자 관리 (번호/이름 & 출석/결석) ---
-        function syncInputModeUI(mode) {
-            const numBtn = document.getElementById('mode-num-btn');
-            const nameBtn = document.getElementById('mode-name-btn');
-            const numBox = document.getElementById('input-number-box');
-            const nameBox = document.getElementById('input-name-box');
-
-            if (mode === 'number') {
-                numBtn.className = 'retro-btn py-2.5 bg-[#2c1e12] text-white text-sm sm:text-base cursor-pointer';
-                nameBtn.className = 'retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm sm:text-base cursor-pointer';
-                numBox.classList.remove('hidden');
-                nameBox.classList.add('hidden');
-            } else {
-                nameBtn.className = 'retro-btn py-2.5 bg-[#2c1e12] text-white text-sm sm:text-base cursor-pointer';
-                numBtn.className = 'retro-btn py-2.5 bg-[#f3eadc] text-[#2c1e12] text-sm sm:text-base cursor-pointer';
-                nameBox.classList.remove('hidden');
-                numBox.classList.add('hidden');
-            }
+        // --- 3. [STEP 1] 학생 명단 & 출결 관리 ---
+        function saveRosterToLocal() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    inputMode,
+                    students
+                }));
+            } catch (e) {}
         }
 
-        function switchInputMode(mode) {
-            if (isAnimating) return;
-            inputMode = mode;
-            syncInputModeUI(mode);
-
-            if (mode === 'number') {
-                buildStudentsFromCount(studentCount, true);
-            } else {
-                const textarea = document.getElementById('name-list-textarea');
-                if (!textarea.value.trim()) {
-                    textarea.value = students.map(s => s.label).join('\n');
+        function loadRosterFromLocal() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return false;
+                const parsed = JSON.parse(raw);
+                if (parsed && Array.isArray(parsed.students) && parsed.students.length > 0) {
+                    students = parsed.students;
+                    studentCount = students.length;
+                    document.getElementById('student-count-input').value = studentCount;
+                    if (parsed.inputMode === 'name') {
+                        setInputMode('name', true);
+                        document.getElementById('names-textarea').value = students.map(s => s.label).join('\n');
+                    }
+                    renderStep1Students();
+                    applyPreset('pair3', true);
+                    return true;
                 }
-                applyNameList(true);
+            } catch (e) {}
+            return false;
+        }
+
+        function syncDesksWithPresentCount() {
+            if (!hasCustomLayout) {
+                applyPreset(currentPreset, true);
+            } else {
+                fitDesksToStudentCount(true);
             }
         }
 
-        function changeStudentCount(delta) {
-            if (isAnimating) return;
-            buildStudentsFromCount(studentCount + delta, true);
-            playTone(440, 'square', 0.05, 0, 0.05);
+        function setInputMode(mode, skipRebuild = false) {
+            inputMode = mode;
+            const numBtn = document.getElementById('mode-btn-number');
+            const nameBtn = document.getElementById('mode-btn-name');
+            const numPanel = document.getElementById('panel-mode-number');
+            const namePanel = document.getElementById('panel-mode-name');
+
+            if (mode === 'number') {
+                numBtn.className = 'retro-btn py-2.5 px-3 bg-amber-300 text-[#2c1e12] text-xs sm:text-sm cursor-pointer';
+                nameBtn.className = 'retro-btn py-2.5 px-3 bg-white text-stone-600 text-xs sm:text-sm cursor-pointer';
+                numPanel.classList.remove('hidden');
+                namePanel.classList.add('hidden');
+                if (!skipRebuild) buildStudentsFromCount(studentCount, true);
+            } else {
+                nameBtn.className = 'retro-btn py-2.5 px-3 bg-amber-300 text-[#2c1e12] text-xs sm:text-sm cursor-pointer';
+                numBtn.className = 'retro-btn py-2.5 px-3 bg-white text-stone-600 text-xs sm:text-sm cursor-pointer';
+                namePanel.classList.remove('hidden');
+                numPanel.classList.add('hidden');
+                document.getElementById('names-textarea').value = students.map(s => s.label).join('\n');
+            }
+        }
+
+        function adjustStudentCount(delta) {
+            const next = Math.max(1, Math.min(48, studentCount + delta));
+            handleStudentCountInput(next);
+        }
+
+        function handleStudentCountInput(val) {
+            let num = parseInt(val, 10);
+            if (isNaN(num) || num < 1) num = 1;
+            if (num > 48) num = 48;
+            studentCount = num;
+            document.getElementById('student-count-input').value = studentCount;
+            buildStudentsFromCount(studentCount, true);
+            playTone(500, 'square', 0.04, 0, 0.04);
         }
 
         function buildStudentsFromCount(count, shouldSave = true) {
-            studentCount = Math.max(2, Math.min(48, count));
-            document.getElementById('num-count-display').textContent = studentCount;
-            students = Array.from({ length: studentCount }, (_, i) => ({
-                id: i + 1,
-                label: `${i + 1}번`,
-                absent: false
-            }));
-            renderStudentChips();
-            if (!hasCustomLayout) applyPreset(currentPreset);
+            const prevAbsentMap = new Map(students.map(s => [s.id, s.absent]));
+            students = Array.from({ length: count }, (_, idx) => {
+                const id = idx + 1;
+                return {
+                    id,
+                    label: `${id}번`,
+                    absent: prevAbsentMap.get(id) || false
+                };
+            });
+            seatAssignments = {};
+            renderStep1Students();
+            syncDesksWithPresentCount();
             updateCountsUI();
-            if (shouldSave) saveRosterState();
+            if (shouldSave) saveRosterToLocal();
         }
 
-        function applyNameList(silent = false) {
-            if (isAnimating) return;
-            const raw = document.getElementById('name-list-textarea').value;
-            const names = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-            if (names.length === 0) {
-                if (!silent) showToast('최소 1명 이상의 이름을 입력해 주세요!');
+        function applyCustomNames() {
+            const raw = document.getElementById('names-textarea').value;
+            const parsed = raw
+                .split(/[\n,]+/)
+                .map(s => s.trim())
+                .filter(Boolean)
+                .slice(0, 48);
+
+            if (parsed.length === 0) {
+                showToast('최소 1명 이상의 이름을 입력해 주세요!');
                 return;
             }
-            const prevAbsentMap = new Map(students.map(s => [s.label, s.absent]));
-            students = names.slice(0, 48).map((name, idx) => ({
+
+            students = parsed.map((name, idx) => ({
                 id: idx + 1,
                 label: name,
-                absent: prevAbsentMap.get(name) || false
+                absent: false
             }));
-            renderStudentChips();
-            if (!hasCustomLayout) applyPreset(currentPreset);
+            studentCount = students.length;
+            document.getElementById('student-count-input').value = studentCount;
+            seatAssignments = {};
+            renderStep1Students();
+            syncDesksWithPresentCount();
             updateCountsUI();
-            saveRosterState();
-            if (!silent) showToast(`총 ${students.length}명의 명단이 저장되었습니다!`);
+            saveRosterToLocal();
+            playTone(620, 'square', 0.07, 0, 0.05);
+            showToast(`총 ${students.length}명의 명단과 책상 ${students.length}석이 적용되었습니다!`);
         }
 
-        function toggleAbsent(id) {
-            if (isAnimating) return;
-            const stu = students.find(s => s.id === id);
+        function toggleStudentAbsent(studentId) {
+            const stu = students.find(s => s.id === studentId);
             if (!stu) return;
             stu.absent = !stu.absent;
-            renderStudentChips();
-            if (!hasCustomLayout) applyPreset(currentPreset);
+            seatAssignments = {};
+            renderStep1Students();
+            syncDesksWithPresentCount();
             updateCountsUI();
-            saveRosterState();
+            saveRosterToLocal();
+            playTone(stu.absent ? 340 : 540, 'square', 0.05, 0, 0.04);
         }
 
-        function resetAbsent() {
-            if (isAnimating) return;
-            students.forEach(s => s.absent = false);
-            renderStudentChips();
-            if (!hasCustomLayout) applyPreset(currentPreset);
+        function setAllPresent() {
+            students.forEach(s => { s.absent = false; });
+            seatAssignments = {};
+            renderStep1Students();
+            syncDesksWithPresentCount();
             updateCountsUI();
-            saveRosterState();
+            saveRosterToLocal();
+            playTone(600, 'square', 0.06, 0, 0.05);
             showToast('전원 출석 상태로 변경되었습니다.');
         }
 
-        function renderStudentChips() {
-            const grid = document.getElementById('student-chips-grid');
-            grid.innerHTML = students.map(s => {
-                const cls = s.absent
-                    ? 'bg-stone-300 border-stone-500 text-stone-500 line-through opacity-70'
-                    : 'bg-white border-[#3a2618] text-[#2c1e12] hover:bg-amber-100 shadow-[2px_2px_0px_#3a2618]';
+        function renderStep1Students() {
+            const grid = document.getElementById('step1-students-grid');
+            if (!grid) return;
+            grid.innerHTML = students.map(stu => {
+                if (stu.absent) {
+                    return `
+                        <button type="button" onclick="toggleStudentAbsent(${stu.id})" class="px-2 py-2 rounded-lg bg-stone-200 border border-stone-400 text-stone-400 line-through text-xs truncate cursor-pointer" title="결석 (클릭 시 출석 처리)">
+                            ${escapeHtml(stu.label)}
+                        </button>
+                    `;
+                }
                 return `
-                    <button type="button" onclick="toggleAbsent(${s.id})" class="px-1.5 py-2 border-2 rounded-lg text-xs sm:text-sm truncate cursor-pointer transition-all ${cls}" title="${s.absent ? '결석 (클릭 시 출석)' : '출석 (클릭 시 결석)'}">
-                        ${escapeHtml(s.label)}
+                    <button type="button" onclick="toggleStudentAbsent(${stu.id})" class="px-2 py-2 rounded-lg bg-white border-2 border-[#3a2618] text-[#2c1e12] hover:bg-amber-200 text-xs truncate shadow-[2px_2px_0px_#3a2618] cursor-pointer" title="출석 (클릭 시 결석 처리)">
+                        ${escapeHtml(stu.label)}
                     </button>
                 `;
             }).join('');
         }
 
-        function updateCountsUI() {
-            const presentCount = students.filter(s => !s.absent).length;
-            const deskCount = deskMap.filter(Boolean).length;
-
-            document.getElementById('present-count-badge').textContent = presentCount;
-            document.getElementById('step2-present-count').textContent = presentCount;
-            document.getElementById('desk-count-badge').textContent = deskCount;
-            document.getElementById('summary-seats').textContent = deskCount;
-            document.getElementById('summary-students').textContent = presentCount;
-        }
-
-        // --- 4. 7가지 교실 배치 프리셋 & 직접 꾸미기 ---
-        function applyPreset(presetName) {
-            if (isAnimating) return;
-            currentPreset = presetName;
+        // --- 4. [STEP 2] 자리 배치 프리셋 & 직접 수정 ---
+        function applyPreset(presetKey, silent = false) {
+            currentPreset = presetKey;
             hasCustomLayout = false;
             deskMap = Array(ROWS * COLS).fill(false);
+            seatAssignments = {};
 
-            const targetCount = Math.max(1, students.filter(s => !s.absent).length);
-            const candidateCells = [];
+            const presentCount = Math.min(ROWS * COLS, Math.max(1, students.filter(s => !s.absent).length));
+            const orderedCells = [];
 
-            const addCell = (r, c) => {
-                if (r >= 0 && r < ROWS && c >= 0 && c < COLS) {
-                    const idx = r * COLS + c;
-                    if (!candidateCells.includes(idx)) {
-                        candidateCells.push(idx);
+            if (presetKey === 'pair3') {
+                // 3분단 짝꿍 대형 (열: 0-1, 3-4, 6-7) - 12명이면 2줄 12석 자동 구성
+                const pairCols = [0, 1, 3, 4, 6, 7];
+                for (let r = 0; r < ROWS; r++) {
+                    for (const c of pairCols) orderedCells.push(r * COLS + c);
+                }
+            } else if (presetKey === 'pair4') {
+                // 4분단 짝꿍 대형 (8열 전부)
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) orderedCells.push(r * COLS + c);
+                }
+            } else if (presetKey === 'single5') {
+                // 1열 시험 대형 5줄
+                const cols = [0, 2, 4, 6, 7];
+                for (let r = 0; r < ROWS; r++) {
+                    for (const c of cols) orderedCells.push(r * COLS + c);
+                }
+            } else if (presetKey === 'single6') {
+                // 1열 시험 대형 6줄
+                const cols = [0, 1, 3, 4, 6, 7];
+                for (let r = 0; r < ROWS; r++) {
+                    for (const c of cols) orderedCells.push(r * COLS + c);
+                }
+            } else if (presetKey === 'group4') {
+                // 4인 모둠 대형 (모둠 단위 순서대로 4석씩 채움)
+                const groupPairs = [[0, 1], [3, 4], [6, 7]];
+                const groupRowPairs = [[0, 1], [3, 4], [2, 5]];
+                for (const [r1, r2] of groupRowPairs) {
+                    for (const [c1, c2] of groupPairs) {
+                        orderedCells.push(r1 * COLS + c1, r1 * COLS + c2, r2 * COLS + c1, r2 * COLS + c2);
                     }
                 }
-            };
-
-            if (presetName === 'pair3') {
-                for (let r = 0; r < ROWS; r++) {
-                    [0, 1, 3, 4, 6, 7].forEach(c => addCell(r, c));
-                }
-            } else if (presetName === 'pair4') {
-                for (let r = 0; r < ROWS; r++) {
-                    for (let c = 0; c < COLS; c++) addCell(r, c);
-                }
-            } else if (presetName === 'single') {
-                for (let r = 0; r < ROWS; r++) {
-                    [0, 2, 5, 7].forEach(c => addCell(r, c));
-                }
-                for (let r = 0; r < ROWS; r++) {
-                    [1, 3, 4, 6].forEach(c => addCell(r, c));
-                }
-            } else if (presetName === 'group3') {
-                for (let r = 0; r < ROWS; r++) {
-                    [0, 1, 2, 5, 6, 7].forEach(c => addCell(r, c));
-                }
-            } else if (presetName === 'group4') {
-                const blocks = [
-                    [0, 0], [0, 3], [0, 6],
-                    [2, 0], [2, 3], [2, 6],
-                    [4, 0], [4, 3], [4, 6]
-                ];
-                blocks.forEach(([sr, sc]) => {
-                    addCell(sr, sc); addCell(sr, sc + 1);
-                    addCell(sr + 1, sc); addCell(sr + 1, sc + 1);
-                });
-            } else if (presetName === 'group6') {
-                const blocks = [
-                    [0, 0], [0, 5],
-                    [2, 0], [2, 5],
-                    [4, 0], [4, 5]
-                ];
-                blocks.forEach(([sr, sc]) => {
-                    for (let dr = 0; dr < 2; dr++) {
-                        for (let dc = 0; dc < 3; dc++) addCell(sr + dr, sc + dc);
-                    }
-                });
-            } else if (presetName === 'ushape') {
+            } else if (presetKey === 'ushape') {
+                // ㄷ자 토론 대형
                 for (let r = 0; r < 5; r++) {
-                    addCell(r, 0); addCell(r, 7);
+                    orderedCells.push(r * COLS + 0, r * COLS + 1, r * COLS + 6, r * COLS + 7);
                 }
-                for (let c = 1; c <= 6; c++) addCell(5, c);
-                for (let r = 0; r < 5; r++) {
-                    addCell(r, 1); addCell(r, 6);
+                for (let c = 2; c <= 5; c++) {
+                    orderedCells.push(4 * COLS + c);
                 }
-                for (let c = 2; c <= 5; c++) addCell(4, c);
             }
 
-            candidateCells.slice(0, targetCount).forEach(idx => {
-                deskMap[idx] = true;
-            });
+            // 인원수가 프리셋 기본 좌석 수보다 많을 경우 나머지 칸을 자연스럽게 이어서 채움
+            const usedSet = new Set(orderedCells);
+            for (let i = 0; i < ROWS * COLS; i++) {
+                if (!usedSet.has(i)) orderedCells.push(i);
+            }
 
-            seatAssignments = {};
-            document.getElementById('view-chart-btn').classList.add('hidden');
+            // 출석 인원수(presentCount)만큼만 정확히 책상 활성화
+            for (let i = 0; i < presentCount && i < orderedCells.length; i++) {
+                deskMap[orderedCells[i]] = true;
+            }
 
             document.querySelectorAll('.preset-btn').forEach(btn => {
-                if (btn.dataset.preset === presetName) {
-                    btn.classList.remove('bg-[#f7f0e4]');
-                    btn.classList.add('bg-amber-200');
+                if (btn.id === `preset-btn-${presetKey}`) {
+                    btn.className = 'preset-btn retro-btn p-3 bg-amber-300 text-left text-xs sm:text-sm cursor-pointer';
                 } else {
-                    btn.classList.remove('bg-amber-200');
-                    btn.classList.add('bg-[#f7f0e4]');
+                    btn.className = 'preset-btn retro-btn p-3 bg-white text-left text-xs sm:text-sm cursor-pointer';
                 }
             });
 
-            renderDesksGrid();
             renderPreviewDesksGrid();
             updateCountsUI();
+            if (!silent) playTone(520, 'square', 0.05, 0, 0.04);
         }
 
         function toggleEditMode() {
-            if (isAnimating) return;
             isEditMode = !isEditMode;
-            const btn = document.getElementById('edit-layout-btn');
-            const guide = document.getElementById('preview-guide-text');
+            const btn = document.getElementById('toggle-edit-btn');
+            const guide = document.getElementById('edit-mode-guide');
             if (isEditMode) {
-                btn.className = 'retro-btn w-full py-2.5 bg-amber-400 text-[#2c1e12] text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-1.5';
-                btn.innerHTML = '<span>✅ 자리 꾸미기 완료 (클릭하여 종료)</span>';
-                guide.textContent = '🛠️ 교실 바닥 칸을 클릭하여 책상을 추가하거나 제거하세요!';
+                btn.textContent = '수정 모드 끄기';
+                btn.className = 'retro-btn px-3 py-1.5 bg-amber-400 text-[#2c1e12] text-xs cursor-pointer';
+                guide.innerHTML = '🛠️ <strong>수정 모드 활성:</strong> 아래 교실 칸을 클릭해 책상을 놓거나 치울 수 있습니다!';
             } else {
-                btn.className = 'retro-btn w-full py-2.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-1.5';
-                btn.innerHTML = '<span>🛠️ 자리 직접 꾸미기 (책상 추가/제거)</span>';
-                guide.textContent = '📐 선택한 책상 배치 미리보기';
+                btn.textContent = '수정 모드 켜기';
+                btn.className = 'retro-btn px-3 py-1.5 bg-white text-xs cursor-pointer';
+                guide.innerHTML = '💡 오른쪽에서 추천 대형을 고르거나 <strong>[직접 책상 배치 수정]</strong>을 눌러 칸을 클릭해 보세요.';
             }
             renderPreviewDesksGrid();
         }
 
         function toggleDeskCell(idx) {
-            if (!isEditMode || isAnimating) return;
+            if (!isEditMode) {
+                showToast('먼저 오른쪽의 [수정 모드 켜기] 버튼을 눌러주세요!');
+                return;
+            }
             hasCustomLayout = true;
             deskMap[idx] = !deskMap[idx];
-            delete seatAssignments[idx];
-            playTone(deskMap[idx] ? 520 : 340, 'square', 0.06, 0, 0.05);
+            seatAssignments = {};
             renderPreviewDesksGrid();
-            renderDesksGrid();
             updateCountsUI();
+            playTone(deskMap[idx] ? 600 : 380, 'square', 0.04, 0, 0.04);
+        }
+
+        function fitDesksToStudentCount(silent = false) {
+            const presentCount = students.filter(s => !s.absent).length;
+            if (presentCount === 0) {
+                if (!silent) showToast('출석 학생이 0명입니다!');
+                return;
+            }
+            if (!silent) hasCustomLayout = true;
+            seatAssignments = {};
+            const currentDesks = deskMap.filter(Boolean).length;
+
+            if (currentDesks > presentCount) {
+                let toRemove = currentDesks - presentCount;
+                for (let i = deskMap.length - 1; i >= 0 && toRemove > 0; i--) {
+                    if (deskMap[i]) {
+                        deskMap[i] = false;
+                        toRemove--;
+                    }
+                }
+            } else if (currentDesks < presentCount) {
+                let toAdd = presentCount - currentDesks;
+                for (let i = 0; i < deskMap.length && toAdd > 0; i++) {
+                    if (!deskMap[i]) {
+                        deskMap[i] = true;
+                        toAdd--;
+                    }
+                }
+            }
+            renderPreviewDesksGrid();
+            updateCountsUI();
+            if (!silent) {
+                playTone(640, 'square', 0.07, 0, 0.05);
+                showToast(`출석 인원(${presentCount}명)에 맞춰 책상 ${presentCount}석으로 조정했습니다!`);
+            }
         }
 
         function renderPreviewDesksGrid() {
             const grid = document.getElementById('preview-desks-grid');
             if (!grid) return;
-            grid.innerHTML = '';
-
-            let seatOrder = 0;
-            for (let idx = 0; idx < ROWS * COLS; idx++) {
-                const hasDesk = deskMap[idx];
-                const cell = document.createElement('div');
-
+            let seatSeq = 0;
+            grid.innerHTML = deskMap.map((hasDesk, idx) => {
                 if (hasDesk) {
-                    seatOrder++;
-                    cell.className = `desk-unit h-11 sm:h-12 flex flex-col items-center justify-center relative select-none ${isEditMode ? 'cursor-pointer edit-hover' : ''}`;
-                    cell.innerHTML = `
-                        <span class="text-[11px] text-[#6b3e19]">${seatOrder}번석</span>
-                        <span class="text-xs text-[#2c1e12]">🪑</span>
+                    seatSeq++;
+                    return `
+                        <button type="button" onclick="toggleDeskCell(${idx})" class="desk-unit h-11 sm:h-12 flex flex-col items-center justify-center text-xs text-[#2c1e12] ${isEditMode ? 'cursor-pointer ring-2 ring-amber-500' : 'cursor-default'}">
+                            <span>🪑</span>
+                            <span class="text-[10px] text-amber-950">${seatSeq}</span>
+                        </button>
                     `;
-                } else {
-                    cell.className = `desk-unit empty-slot h-11 sm:h-12 flex items-center justify-center relative select-none ${isEditMode ? 'cursor-pointer edit-hover' : ''}`;
-                    cell.innerHTML = isEditMode ? `<span class="text-sm text-[#4a2e16]/70">+</span>` : '';
                 }
+                return `
+                    <button type="button" onclick="toggleDeskCell(${idx})" class="desk-unit empty-slot h-11 sm:h-12 flex items-center justify-center text-xs text-stone-400 ${isEditMode ? 'cursor-pointer hover:bg-amber-100/60' : 'cursor-default'}">
+                        ${isEditMode ? '+' : ''}
+                    </button>
+                `;
+            }).join('');
+        }
 
-                if (isEditMode) {
-                    cell.onclick = () => toggleDeskCell(idx);
+        // --- [선생님 전용] 1~12번 칸 드래그 앤 드랍 번호 지정 로직 ---
+        function sanitizeSecretAssignments() {
+            const presentIds = new Set(students.filter(s => !s.absent).map(s => s.id));
+            for (let num = 1; num <= 12; num++) {
+                if (secretBoxAssignments[num] && !presentIds.has(secretBoxAssignments[num])) {
+                    delete secretBoxAssignments[num];
                 }
-                grid.appendChild(cell);
+            }
+            if (selectedSecretStudentId && !presentIds.has(selectedSecretStudentId)) {
+                selectedSecretStudentId = null;
             }
         }
 
+        function assignStudentToSecretBox(studentId, targetBoxNum) {
+            if (!studentId || targetBoxNum < 1 || targetBoxNum > 12) return;
+            const student = students.find(s => s.id === studentId && !s.absent);
+            if (!student) return;
+
+            let prevBoxNum = null;
+            for (let num = 1; num <= 12; num++) {
+                if (secretBoxAssignments[num] === studentId) {
+                    prevBoxNum = num;
+                    delete secretBoxAssignments[num];
+                }
+            }
+
+            const existingStudentId = secretBoxAssignments[targetBoxNum];
+            if (existingStudentId && prevBoxNum !== null) {
+                secretBoxAssignments[prevBoxNum] = existingStudentId;
+            }
+
+            secretBoxAssignments[targetBoxNum] = studentId;
+            selectedSecretStudentId = null;
+            playTone(580, 'square', 0.06, 0, 0.05);
+            renderSecretStepUI();
+        }
+
+        function removeStudentFromSecretBox(boxNum) {
+            if (secretBoxAssignments[boxNum]) {
+                delete secretBoxAssignments[boxNum];
+                playTone(380, 'square', 0.05, 0, 0.04);
+                renderSecretStepUI();
+            }
+        }
+
+        function clearAllSecretBoxes() {
+            secretBoxAssignments = {};
+            selectedSecretStudentId = null;
+            playTone(340, 'square', 0.06, 0, 0.05);
+            renderSecretStepUI();
+            showToast('1~12번 칸 배치가 모두 초기화되었습니다.');
+        }
+
+        function handleStudentDragStart(event, studentId) {
+            draggedStudentId = studentId;
+            if (event.dataTransfer) {
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', String(studentId));
+            }
+        }
+
+        function handleBoxDragOver(event, boxNum) {
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+            const boxEl = document.getElementById(`secret-box-${boxNum}`);
+            if (boxEl) boxEl.classList.add('drag-over');
+        }
+
+        function handleBoxDragLeave(event, boxNum) {
+            const boxEl = document.getElementById(`secret-box-${boxNum}`);
+            if (boxEl) boxEl.classList.remove('drag-over');
+        }
+
+        function handleBoxDrop(event, boxNum) {
+            event.preventDefault();
+            const boxEl = document.getElementById(`secret-box-${boxNum}`);
+            if (boxEl) boxEl.classList.remove('drag-over');
+
+            const rawId = event.dataTransfer ? event.dataTransfer.getData('text/plain') : '';
+            const stuId = draggedStudentId || (rawId ? Number(rawId) : null);
+            draggedStudentId = null;
+            if (stuId) {
+                assignStudentToSecretBox(stuId, boxNum);
+            }
+        }
+
+        function handleRightListDragOver(event) {
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleRightListDrop(event) {
+            event.preventDefault();
+            const rawId = event.dataTransfer ? event.dataTransfer.getData('text/plain') : '';
+            const stuId = draggedStudentId || (rawId ? Number(rawId) : null);
+            draggedStudentId = null;
+            if (!stuId) return;
+
+            for (let num = 1; num <= 12; num++) {
+                if (secretBoxAssignments[num] === stuId) {
+                    delete secretBoxAssignments[num];
+                }
+            }
+            playTone(380, 'square', 0.05, 0, 0.04);
+            renderSecretStepUI();
+        }
+
+        function handleSecretStudentClick(studentId) {
+            selectedSecretStudentId = (selectedSecretStudentId === studentId) ? null : studentId;
+            playTone(500, 'square', 0.04, 0, 0.04);
+            renderSecretStepUI();
+        }
+
+        function handleSecretBoxClick(boxNum) {
+            if (selectedSecretStudentId) {
+                assignStudentToSecretBox(selectedSecretStudentId, boxNum);
+            }
+        }
+
+        function renderSecretStepUI() {
+            const boxesGrid = document.getElementById('secret-boxes-grid');
+            const studentsList = document.getElementById('secret-students-list');
+            const badge = document.getElementById('secret-assigned-badge');
+            if (!boxesGrid || !studentsList) return;
+
+            const presentStudents = students.filter(s => !s.absent);
+            const studentMap = new Map(presentStudents.map(s => [s.id, s]));
+            const assignedToBoxMap = new Map();
+
+            for (let num = 1; num <= 12; num++) {
+                const stuId = secretBoxAssignments[num];
+                if (stuId && studentMap.has(stuId)) {
+                    assignedToBoxMap.set(stuId, num);
+                }
+            }
+
+            if (badge) {
+                badge.textContent = `지정 ${assignedToBoxMap.size} / ${presentStudents.length}명`;
+            }
+
+            let boxesHtml = '';
+            for (let num = 1; num <= 12; num++) {
+                const assignedStuId = secretBoxAssignments[num];
+                const assignedStu = assignedStuId ? studentMap.get(assignedStuId) : null;
+
+                if (assignedStu) {
+                    boxesHtml += `
+                        <div id="secret-box-${num}"
+                             ondragover="handleBoxDragOver(event, ${num})"
+                             ondragleave="handleBoxDragLeave(event, ${num})"
+                             ondrop="handleBoxDrop(event, ${num})"
+                             onclick="handleSecretBoxClick(${num})"
+                             class="secret-slot-box h-28 w-full rounded-xl bg-[#fff7e6] border-[2.5px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618] p-2.5 flex flex-col justify-between select-none">
+                            <div class="flex items-center justify-between">
+                                <span class="w-7 h-7 rounded-full bg-[#2c1e12] text-amber-300 text-sm flex items-center justify-center shadow-sm">${num}</span>
+                                <button type="button" onclick="event.stopPropagation(); removeStudentFromSecretBox(${num})" class="w-6 h-6 rounded-md bg-rose-500 text-white text-xs flex items-center justify-center border border-[#3a2618] cursor-pointer hover:bg-rose-600" title="배치 해제">✕</button>
+                            </div>
+                            <div draggable="true"
+                                 ondragstart="handleStudentDragStart(event, ${assignedStu.id})"
+                                 class="w-full py-1.5 px-2 rounded-lg bg-amber-300 border-2 border-[#3a2618] shadow-[2px_2px_0px_#3a2618] text-xs sm:text-sm text-[#2c1e12] text-center truncate cursor-grab active:cursor-grabbing">
+                                🦆 ${escapeHtml(assignedStu.label)}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    boxesHtml += `
+                        <div id="secret-box-${num}"
+                             ondragover="handleBoxDragOver(event, ${num})"
+                             ondragleave="handleBoxDragLeave(event, ${num})"
+                             ondrop="handleBoxDrop(event, ${num})"
+                             onclick="handleSecretBoxClick(${num})"
+                             class="secret-slot-box h-28 w-full rounded-xl bg-[#f7f0e4] border-[2.5px] border-dashed border-[#3a2618]/60 p-2.5 flex flex-col justify-between select-none ${selectedSecretStudentId ? 'cursor-pointer hover:bg-amber-100' : ''}">
+                            <div class="flex items-center justify-between">
+                                <span class="w-7 h-7 rounded-full bg-stone-600 text-white text-sm flex items-center justify-center">${num}</span>
+                            </div>
+                            <div class="text-center text-xs text-stone-400 my-auto">
+                                ${selectedSecretStudentId ? '클릭하여 배치' : '여기에 드롭'}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            boxesGrid.innerHTML = boxesHtml;
+
+            studentsList.innerHTML = presentStudents.map(stu => {
+                const placedBoxNum = assignedToBoxMap.get(stu.id);
+                const isSelected = selectedSecretStudentId === stu.id;
+
+                if (placedBoxNum) {
+                    return `
+                        <div draggable="true"
+                             ondragstart="handleStudentDragStart(event, ${stu.id})"
+                             onclick="handleSecretStudentClick(${stu.id})"
+                             class="px-2 py-2 rounded-lg bg-amber-100 border-2 border-amber-500 text-amber-900 text-xs sm:text-sm flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none"
+                             title="${placedBoxNum}번 칸에 배치됨 (드래그하여 이동 가능)">
+                            <span class="truncate w-full text-center">${escapeHtml(stu.label)}</span>
+                            <span class="mt-0.5 px-1.5 py-0.2 rounded bg-[#2c1e12] text-amber-300 text-[10px]">${placedBoxNum}번 칸</span>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div draggable="true"
+                         ondragstart="handleStudentDragStart(event, ${stu.id})"
+                         onclick="handleSecretStudentClick(${stu.id})"
+                         class="px-2 py-2.5 rounded-lg border-2 text-xs sm:text-sm text-center truncate cursor-grab active:cursor-grabbing select-none transition-all ${isSelected ? 'bg-amber-300 border-[#2c1e12] text-[#2c1e12] scale-105 shadow-[3px_3px_0px_#2c1e12]' : 'bg-white border-[#3a2618] text-[#2c1e12] hover:bg-amber-100 shadow-[2px_2px_0px_#3a2618]'}">
+                        ${escapeHtml(stu.label)}
+                    </div>
+                `;
+            }).join('');
+        }
+
         // --- 5. 교실 무대 렌더링 및 애니메이션 연출 ---
+        function fisherYatesShuffle(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function assignRandomDeskNumbers() {
+            const activeIndices = [];
+            deskMap.forEach((has, idx) => {
+                if (has) activeIndices.push(idx);
+            });
+            const randomNums = fisherYatesShuffle(
+                Array.from({ length: activeIndices.length }, (_, i) => i + 1)
+            );
+            deskNumbers = {};
+            activeIndices.forEach((cellIdx, i) => {
+                deskNumbers[cellIdx] = randomNums[i];
+            });
+        }
+
+        function ensureDeskNumbersSynced() {
+            const activeIndices = [];
+            deskMap.forEach((has, idx) => {
+                if (has) activeIndices.push(idx);
+            });
+            const currentKeys = Object.keys(deskNumbers).map(Number);
+            if (
+                currentKeys.length !== activeIndices.length ||
+                activeIndices.some(idx => deskNumbers[idx] === undefined)
+            ) {
+                assignRandomDeskNumbers();
+            }
+        }
+
         function renderDesksGrid() {
             const grid = document.getElementById('desks-grid');
             if (!grid) return;
+            ensureDeskNumbersSynced();
             grid.innerHTML = '';
 
-            let seatOrder = 0;
             for (let idx = 0; idx < ROWS * COLS; idx++) {
                 const hasDesk = deskMap[idx];
                 const assigned = seatAssignments[idx];
@@ -1095,18 +1453,19 @@
                 cell.dataset.cellIdx = idx;
 
                 if (hasDesk) {
-                    seatOrder++;
+                    const randSeatNum = deskNumbers[idx];
                     cell.className = 'desk-unit h-14 sm:h-16 flex flex-col items-center justify-center p-1 relative';
                     if (assigned) {
                         cell.innerHTML = `
-                            <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm">
+                            <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm relative">
+                                <span class="absolute top-0.5 left-1 text-[10px] text-amber-800 leading-none">${randSeatNum}</span>
                                 <span class="text-[10px] leading-none mb-0.5">🦆</span>
                                 <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(assigned.label)}</span>
                             </div>
                         `;
                     } else {
                         cell.innerHTML = `
-                            <span class="text-xs text-[#6b3e19]/80">${seatOrder}</span>
+                            <span class="px-2 py-0.5 rounded-md bg-[#fff8eb]/85 border border-[#6b3e19]/40 text-xs sm:text-sm text-[#5c3312]">${randSeatNum}</span>
                         `;
                     }
                 } else {
@@ -1118,16 +1477,6 @@
         }
 
         const sleep = ms => new Promise(res => setTimeout(res, ms));
-
-        // 완전 무작위 Fisher-Yates 셔플 알고리즘
-        function fisherYatesShuffle(arr) {
-            const copy = [...arr];
-            for (let i = copy.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [copy[i], copy[j]] = [copy[j], copy[i]];
-            }
-            return copy;
-        }
 
         async function startSeatAssignment(isInstant = false) {
             if (isAnimating) return;
@@ -1149,6 +1498,9 @@
 
             isAnimating = true;
             seatAssignments = {};
+
+            // 자리 뽑기 때마다 책상 번호를 완전 랜덤으로 새로 부여
+            assignRandomDeskNumbers();
             renderDesksGrid();
 
             const startBtn = document.getElementById('start-anim-btn');
@@ -1157,6 +1509,7 @@
             const viewChartBtn = document.getElementById('view-chart-btn');
             const stageBadge = document.getElementById('stage-badge');
             const teacherBubble = document.getElementById('teacher-bubble');
+            const progressLabel = document.getElementById('chalkboard-progress');
 
             startBtn.disabled = true;
             instantBtn.disabled = true;
@@ -1167,157 +1520,137 @@
             stageBadge.textContent = 'RUNNING';
             stageBadge.className = 'px-2.5 py-1 rounded-md bg-amber-500 text-[#2c1e12] text-xs border border-[#3a2618]';
 
-            const shuffledStudents = fisherYatesShuffle(presentStudents);
-            const shuffledSeats = fisherYatesShuffle(activeDeskIndices);
-            const pairs = shuffledStudents.map((stu, i) => ({
-                student: stu,
-                seatIdx: shuffledSeats[i]
-            }));
+            // 1) 지정 모드에서 1~12번 칸에 배치한 학생은 해당 번호가 적힌 책상에 매칭
+            const assignedStudentIds = new Set();
+            const occupiedSeatIndices = new Set();
+            const fixedPairs = [];
 
-            const spritesLayer = document.getElementById('sprites-layer');
-            spritesLayer.innerHTML = '';
-
-            if (isInstant) {
-                teacherBubble.textContent = '짠! 단번에 랜덤 새 자리가 정해졌습니다!';
-                pairs.forEach(p => {
-                    seatAssignments[p.seatIdx] = p.student;
-                });
-                renderDesksGrid();
-                playFanfare();
-            } else {
-                teacherBubble.textContent = '뒷문으로 한 명씩 입장! 새 자리를 찾아가세요~!';
-                const stageEl = document.getElementById('classroom-stage');
-                const stageRect = stageEl.getBoundingClientRect();
-                const doorRect = document.getElementById('classroom-door').getBoundingClientRect();
-
-                // Zoom 배율을 보정한 교실 내부 좌표 계산
-                const stageWidth = stageRect.width / currentZoom;
-                const stageHeight = stageRect.height / currentZoom;
-                const doorX = (doorRect.left - stageRect.left + doorRect.width / 2) / currentZoom;
-                const doorY = (doorRect.top - stageRect.top + doorRect.height / 2) / currentZoom;
-
-                const activeSprites = [];
-                const enterGap = Math.max(45, Math.min(95, Math.floor(1100 / pairs.length)));
-
-                for (let i = 0; i < pairs.length; i++) {
-                    const p = pairs[i];
-                    const el = document.createElement('div');
-                    el.className = 'student-sprite walking flex flex-col items-center';
-                    el.style.left = `${doorX}px`;
-                    el.style.top = `${doorY}px`;
-                    el.style.opacity = '0';
-
-                    const showSpeech = i % 3 === 0;
-                    const line = BUBBLE_LINES[Math.floor(Math.random() * BUBBLE_LINES.length)];
-
-                    el.innerHTML = `
-                        ${showSpeech ? `<div class="mb-0.5 px-2 py-0.5 rounded-full bg-white border border-[#3a2618] text-[10px] text-[#2c1e12] whitespace-nowrap shadow-sm">${line}</div>` : ''}
-                        <div class="sprite-body w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center shadow-md text-sm">
-                            🦆
-                        </div>
-                        <span class="mt-0.5 px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-200 text-[10px] whitespace-nowrap">${escapeHtml(p.student.label)}</span>
-                    `;
-                    spritesLayer.appendChild(el);
-                    activeSprites.push({ el, pair: p });
-
-                    requestAnimationFrame(() => {
-                        el.style.opacity = '1';
-                        const enterX = doorX + 35 + Math.random() * (stageWidth * 0.55);
-                        const enterY = doorY - 35 - Math.random() * (stageHeight * 0.45);
-                        el.style.left = `${enterX}px`;
-                        el.style.top = `${enterY}px`;
-                    });
-
-                    playTone(460 + (i % 6) * 40, 'square', 0.05, 0, 0.04);
-                    await sleep(enterGap);
-                }
-
-                await sleep(360);
-
-                // 교실 중앙 복도를 돌아다니며 자리 탐색 (2회 랜덤 이동)
-                teacherBubble.textContent = '어디가 내 자리일까? 두근두근!';
-                for (let wander = 0; wander < 2; wander++) {
-                    activeSprites.forEach((sp) => {
-                        const randX = stageWidth * (0.14 + Math.random() * 0.72);
-                        const randY = stageHeight * (0.28 + Math.random() * 0.54);
-                        sp.el.style.left = `${randX}px`;
-                        sp.el.style.top = `${randY}px`;
-                    });
-                    playTone(587 + wander * 70, 'square', 0.08, 0, 0.05);
-                    await sleep(430);
-                }
-
-                // 배정된 랜덤 책상으로 한 명씩 달려가 착석!
-                teacherBubble.textContent = '자리 발표! 자기 책상으로 착석!!';
-                const sitGap = Math.max(40, Math.min(95, Math.floor(1000 / activeSprites.length)));
-
-                for (let i = 0; i < activeSprites.length; i++) {
-                    const sp = activeSprites[i];
-                    sp.el.classList.add('sprinting');
-                    const targetCell = document.querySelector(`#desks-grid [data-cell-idx="${sp.pair.seatIdx}"]`);
-                    if (targetCell) {
-                        const currentStageRect = stageEl.getBoundingClientRect();
-                        const cellRect = targetCell.getBoundingClientRect();
-                        const tx = (cellRect.left - currentStageRect.left + cellRect.width / 2) / currentZoom;
-                        const ty = (cellRect.top - currentStageRect.top + cellRect.height / 2) / currentZoom;
-                        sp.el.style.left = `${tx}px`;
-                        sp.el.style.top = `${ty}px`;
+            if (isLalessUser) {
+                sanitizeSecretAssignments();
+                const numberToCellIdx = {};
+                activeDeskIndices.forEach(cellIdx => {
+                    const num = deskNumbers[cellIdx];
+                    if (num !== undefined) {
+                        numberToCellIdx[num] = cellIdx;
                     }
+                });
 
-                    setTimeout(() => {
-                        seatAssignments[sp.pair.seatIdx] = sp.pair.student;
-                        sp.el.remove();
-                        renderDesksGrid();
-                        playTone(480 + (i % 8) * 45, 'triangle', 0.06, 0, 0.05);
-                    }, 430);
+                for (let boxNum = 1; boxNum <= 12; boxNum++) {
+                    const stuId = secretBoxAssignments[boxNum];
+                    if (!stuId) continue;
+                    const stu = presentStudents.find(s => s.id === stuId);
+                    const targetCellIdx = numberToCellIdx[boxNum];
 
-                    await sleep(sitGap);
+                    if (
+                        stu &&
+                        targetCellIdx !== undefined &&
+                        !assignedStudentIds.has(stu.id) &&
+                        !occupiedSeatIndices.has(targetCellIdx)
+                    ) {
+                        fixedPairs.push({ student: stu, seatIdx: targetCellIdx });
+                        assignedStudentIds.add(stu.id);
+                        occupiedSeatIndices.add(targetCellIdx);
+                    }
                 }
-
-                await sleep(460);
-                spritesLayer.innerHTML = '';
-                playFanfare();
             }
 
-            stageBadge.textContent = 'COMPLETE';
-            stageBadge.className = 'px-2.5 py-1 rounded-md bg-sky-400 text-[#2c1e12] text-xs border border-[#3a2618]';
-            teacherBubble.textContent = `총 ${pairs.length}명 랜덤 자리 배정 완료! [📋 자리표 저장하기]를 눌러 확인하세요!`;
-            viewChartBtn.classList.remove('hidden');
+            // 2) 나머지 학생과 나머지 책상은 완전 무작위 배정
+            const remainingStudents = fisherYatesShuffle(
+                presentStudents.filter(s => !assignedStudentIds.has(s.id))
+            );
+            const remainingSeats = fisherYatesShuffle(
+                activeDeskIndices.filter(idx => !occupiedSeatIndices.has(idx))
+            );
+            const randomPairs = remainingStudents.map((stu, i) => ({
+                student: stu,
+                seatIdx: remainingSeats[i]
+            }));
 
-            isAnimating = false;
+            const pairs = fisherYatesShuffle([...fixedPairs, ...randomPairs]);
+
+            if (isInstant) {
+                pairs.forEach(({ student, seatIdx }) => {
+                    seatAssignments[seatIdx] = student;
+                });
+                renderDesksGrid();
+                progressLabel.textContent = `${pairs.length} / ${pairs.length}명`;
+                teacherBubble.innerHTML = `⚡ 단번에 <strong>${pairs.length}명</strong>의 새 자리가 모두 배정되었습니다!`;
+            } else {
+                const stepDelay = pairs.length > 26 ? 95 : 145;
+                for (let i = 0; i < pairs.length; i++) {
+                    const { student, seatIdx } = pairs[i];
+                    seatAssignments[seatIdx] = student;
+                    const seatNum = deskNumbers[seatIdx];
+
+                    const cell = document.querySelector(`#desks-grid [data-cell-idx="${seatIdx}"]`);
+                    if (cell) {
+                        cell.innerHTML = `
+                            <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm relative">
+                                <span class="absolute top-0.5 left-1 text-[10px] text-amber-800 leading-none">${seatNum}</span>
+                                <span class="text-[10px] leading-none mb-0.5">🦆</span>
+                                <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(student.label)}</span>
+                            </div>
+                        `;
+                    }
+
+                    progressLabel.textContent = `${i + 1} / ${pairs.length}명`;
+                    teacherBubble.innerHTML = `🦆 <strong>${escapeHtml(student.label)}</strong> 학생이 <strong>${seatNum}번</strong> 책상에 앉았습니다! (${i + 1}/${pairs.length})`;
+                    playTone(440 + (i % 8) * 45, 'square', 0.06, 0, 0.045);
+                    await sleep(stepDelay);
+                }
+                teacherBubble.innerHTML = `🎉 <strong>우리 반 전원 자리 배정 완료!</strong> [📋 자리표 저장하기]를 눌러 확인해 보세요.`;
+            }
+
+            playFanfare();
+            stageBadge.textContent = 'DONE!';
+            stageBadge.className = 'px-2.5 py-1 rounded-md bg-sky-300 text-sky-950 text-xs border border-[#3a2618]';
+
             startBtn.disabled = false;
             instantBtn.disabled = false;
             backBtn.disabled = false;
             startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             instantBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            viewChartBtn.classList.remove('hidden');
+            isAnimating = false;
         }
 
-        // --- 6. STEP 4 자리표 확인 및 저장/인쇄 ---
-        function setChartPerspective(perspective) {
-            chartPerspective = perspective;
-            const stuBtn = document.getElementById('view-student-btn');
-            const teaBtn = document.getElementById('view-teacher-btn');
-            const topBoard = document.getElementById('chart-board-top');
-            const bottomBoard = document.getElementById('chart-board-bottom');
+        function adjustZoom(delta) {
+            currentZoom = Math.max(0.7, Math.min(1.2, Math.round((currentZoom + delta) * 10) / 10));
+            document.getElementById('zoom-label').textContent = `${Math.round(currentZoom * 100)}%`;
+            document.getElementById('classroom-stage').style.transform = `scale(${currentZoom})`;
+        }
 
-            if (perspective === 'student') {
-                stuBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#2c1e12] text-white text-xs sm:text-sm cursor-pointer';
-                teaBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm cursor-pointer';
+        // --- 6. [STEP 4] 최종 자리표 확인, 시선 전환, 이미지/텍스트 저장 ---
+        function syncChartTitle(val) {
+            const title = val.trim() || '우리 반 새 자리표';
+            document.getElementById('chart-display-title').textContent = title;
+        }
+
+        function setChartPerspective(persp) {
+            chartPerspective = persp;
+            const stuBtn = document.getElementById('persp-student-btn');
+            const tchBtn = document.getElementById('persp-teacher-btn');
+            const topBoard = document.getElementById('chart-board-top');
+            const botBoard = document.getElementById('chart-board-bottom');
+
+            if (persp === 'student') {
+                stuBtn.className = 'retro-btn px-3 py-1.5 bg-amber-300 text-xs sm:text-sm cursor-pointer';
+                tchBtn.className = 'retro-btn px-3 py-1.5 bg-white text-stone-600 text-xs sm:text-sm cursor-pointer';
                 topBoard.classList.remove('hidden');
-                bottomBoard.classList.add('hidden');
+                botBoard.classList.add('hidden');
             } else {
-                teaBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#2c1e12] text-white text-xs sm:text-sm cursor-pointer';
-                stuBtn.className = 'retro-btn px-3.5 py-1.5 bg-[#f3eadc] text-[#2c1e12] text-xs sm:text-sm cursor-pointer';
+                tchBtn.className = 'retro-btn px-3 py-1.5 bg-amber-300 text-xs sm:text-sm cursor-pointer';
+                stuBtn.className = 'retro-btn px-3 py-1.5 bg-white text-stone-600 text-xs sm:text-sm cursor-pointer';
                 topBoard.classList.add('hidden');
-                bottomBoard.classList.remove('hidden');
+                botBoard.classList.remove('hidden');
             }
             renderSeatChartGrid();
+            playTone(540, 'square', 0.05, 0, 0.04);
         }
 
         function renderSeatChartGrid() {
-            const container = document.getElementById('chart-grid-container');
-            if (!container) return;
-            container.innerHTML = '';
+            const grid = document.getElementById('seat-chart-grid');
+            if (!grid) return;
 
             const indices = [];
             if (chartPerspective === 'student') {
@@ -1326,131 +1659,190 @@
                 for (let i = ROWS * COLS - 1; i >= 0; i--) indices.push(i);
             }
 
-            indices.forEach(idx => {
+            grid.innerHTML = indices.map(idx => {
                 const hasDesk = deskMap[idx];
-                const stu = seatAssignments[idx];
-                const box = document.createElement('div');
-
-                if (hasDesk && stu) {
-                    box.className = 'h-14 sm:h-16 rounded-xl bg-amber-50 border-2 border-[#3a2618] shadow-[2px_2px_0px_#3a2618] flex flex-col items-center justify-center p-1';
-                    box.innerHTML = `
-                        <span class="text-[10px] text-amber-700">🦆</span>
-                        <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(stu.label)}</span>
-                    `;
-                } else if (hasDesk) {
-                    box.className = 'h-14 sm:h-16 rounded-xl bg-stone-100 border-2 border-stone-400 flex items-center justify-center text-xs text-stone-400';
-                    box.textContent = '빈 자리';
-                } else {
-                    box.className = 'h-14 sm:h-16 rounded-xl border border-dashed border-stone-200';
+                const assigned = seatAssignments[idx];
+                if (!hasDesk) {
+                    return `<div class="h-14 sm:h-16 rounded-xl border border-dashed border-stone-200"></div>`;
                 }
-                container.appendChild(box);
-            });
+                if (assigned) {
+                    return `
+                        <div class="desk-unit h-14 sm:h-16 flex flex-col items-center justify-center p-1 bg-[#fff9ed]">
+                            <span class="text-[10px] leading-none mb-0.5">🦆</span>
+                            <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(assigned.label)}</span>
+                        </div>
+                    `;
+                }
+                return `
+                    <div class="desk-unit h-14 sm:h-16 flex items-center justify-center opacity-50 text-xs text-stone-600">
+                        빈 자리
+                    </div>
+                `;
+            }).join('');
         }
 
-        function copySeatTableText() {
-            const lines = [];
-            const header = chartPerspective === 'student' ? '[ 칠판 / 교탁 (앞) ]' : '[ 교실 뒤쪽 ]';
-            const footer = chartPerspective === 'student' ? '[ 교실 뒤쪽 ]' : '[ 칠판 / 교탁 (앞) ]';
-            lines.push(header);
+        function copyChartText() {
+            const title = document.getElementById('chart-display-title').textContent;
+            const lines = [`[ ${title} ] (${chartPerspective === 'student' ? '학생 시선 - 칠판 위' : '선생님 시선 - 칠판 아래'})`, ''];
 
-            const rowOrder = chartPerspective === 'student' ? [0, 1, 2, 3, 4, 5] : [5, 4, 3, 2, 1, 0];
-            const colOrder = chartPerspective === 'student' ? [0, 1, 2, 3, 4, 5, 6, 7] : [7, 6, 5, 4, 3, 2, 1, 0];
+            for (let r = 0; r < ROWS; r++) {
+                const rowIdx = chartPerspective === 'student' ? r : (ROWS - 1 - r);
+                const rowItems = [];
+                let hasAnyDeskInRow = false;
 
-            rowOrder.forEach(r => {
-                const rowItems = colOrder.map(c => {
-                    const idx = r * COLS + c;
-                    if (!deskMap[idx]) return '　　';
-                    return seatAssignments[idx] ? seatAssignments[idx].label : '빈석';
-                });
-                if (rowItems.some(item => item !== '　　')) {
-                    lines.push(rowItems.join('\t'));
+                for (let c = 0; c < COLS; c++) {
+                    const colIdx = chartPerspective === 'student' ? c : (COLS - 1 - c);
+                    const cellIdx = rowIdx * COLS + colIdx;
+                    if (deskMap[cellIdx]) {
+                        hasAnyDeskInRow = true;
+                        const stu = seatAssignments[cellIdx];
+                        rowItems.push(stu ? `[${stu.label}]` : '[빈자리]');
+                    } else {
+                        rowItems.push('   ');
+                    }
                 }
-            });
-            lines.push(footer);
+                if (hasAnyDeskInRow) {
+                    lines.push(rowItems.join(' '));
+                }
+            }
 
+            const text = lines.join('\n');
             const textarea = document.createElement('textarea');
-            textarea.value = lines.join('\n');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
             document.body.appendChild(textarea);
             textarea.select();
-            document.execCommand('copy');
+            try {
+                document.execCommand('copy');
+                showToast('자리표 텍스트가 클립보드에 복사되었습니다!');
+                playTone(660, 'square', 0.08, 0, 0.05);
+            } catch (e) {
+                showToast('복사에 실패했습니다. 인쇄 기능을 이용해 주세요.');
+            }
             document.body.removeChild(textarea);
-            showToast('자리표가 클립보드에 복사되었습니다! (엑셀/한글 붙여넣기 가능)');
         }
 
-        function downloadSeatChartImage() {
+        function downloadChartImage() {
             const canvas = document.createElement('canvas');
-            const w = 1000;
-            const h = 760;
-            canvas.width = w;
-            canvas.height = h;
+            const width = 1120;
+            const height = 780;
+            canvas.width = width;
+            canvas.height = height;
             const ctx = canvas.getContext('2d');
 
+            // 배경
             ctx.fillStyle = '#fffdf8';
-            ctx.fillRect(0, 0, w, h);
+            ctx.fillRect(0, 0, width, height);
+
             ctx.strokeStyle = '#3a2618';
-            ctx.lineWidth = 8;
-            ctx.strokeRect(16, 16, w - 32, h - 32);
+            ctx.lineWidth = 6;
+            ctx.strokeRect(18, 18, width - 36, height - 36);
+
+            // 제목 & 날짜
+            const title = document.getElementById('chart-display-title').textContent;
+            const dateText = document.getElementById('chart-date-text').textContent;
 
             ctx.fillStyle = '#2c1e12';
-            ctx.font = '32px "Jua", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('우리 반 새 자리표', w / 2, 72);
+            ctx.font = 'bold 30px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(title, 48, 74);
 
             ctx.fillStyle = '#78716c';
-            ctx.font = '18px "Jua", sans-serif';
-            ctx.fillText(document.getElementById('chart-date-text').textContent, w / 2, 102);
+            ctx.font = 'bold 18px sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(`${dateText} · ${chartPerspective === 'student' ? '학생 시선' : '선생님 시선'}`, width - 48, 74);
 
-            const boardY = chartPerspective === 'student' ? 120 : 665;
-            ctx.fillStyle = '#1f4e3d';
-            ctx.fillRect(w / 2 - 150, boardY, 300, 38);
-            ctx.strokeStyle = '#3a2618';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(w / 2 - 150, boardY, 300, 38);
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '18px "Jua", sans-serif';
-            ctx.fillText('칠판 / 교탁', w / 2, boardY + 26);
+            // 칠판 그리기 함수
+            const drawBoard = (yPos, label) => {
+                ctx.fillStyle = '#194733';
+                ctx.fillRect(48, yPos, width - 96, 46);
+                ctx.strokeStyle = '#5c3a21';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(48, yPos, width - 96, 46);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 20px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, width / 2, yPos + 30);
+            };
 
-            const startX = 60;
-            const startY = chartPerspective === 'student' ? 185 : 130;
-            const cellW = 102;
-            const cellH = 74;
-            const gapX = 10;
-            const gapY = 12;
+            let gridStartY = 105;
+            if (chartPerspective === 'student') {
+                drawBoard(100, '칠 판 / 교 탁 (앞)');
+                gridStartY = 166;
+            } else {
+                drawBoard(height - 96, '칠 판 / 교 탁 (선생님 기준 앞쪽)');
+                gridStartY = 105;
+            }
 
-            const rowOrder = chartPerspective === 'student' ? [0, 1, 2, 3, 4, 5] : [5, 4, 3, 2, 1, 0];
-            const colOrder = chartPerspective === 'student' ? [0, 1, 2, 3, 4, 5, 6, 7] : [7, 6, 5, 4, 3, 2, 1, 0];
+            const cellW = (width - 96 - (COLS - 1) * 12) / COLS;
+            const cellH = 78;
 
-            rowOrder.forEach((r, ri) => {
-                colOrder.forEach((c, ci) => {
-                    const idx = r * COLS + c;
-                    const x = startX + ci * (cellW + gapX);
-                    const y = startY + ri * (cellH + gapY);
+            for (let r = 0; r < ROWS; r++) {
+                const rowIdx = chartPerspective === 'student' ? r : (ROWS - 1 - r);
+                for (let c = 0; c < COLS; c++) {
+                    const colIdx = chartPerspective === 'student' ? c : (COLS - 1 - c);
+                    const cellIdx = rowIdx * COLS + colIdx;
+                    if (!deskMap[cellIdx]) continue;
 
-                    if (deskMap[idx]) {
-                        const stu = seatAssignments[idx];
-                        ctx.fillStyle = stu ? '#fffbeb' : '#f5f5f4';
-                        ctx.fillRect(x, y, cellW, cellH);
-                        ctx.strokeStyle = '#3a2618';
-                        ctx.lineWidth = 3;
-                        ctx.strokeRect(x, y, cellW, cellH);
+                    const x = 48 + c * (cellW + 12);
+                    const y = gridStartY + r * (cellH + 12);
+                    const stu = seatAssignments[cellIdx];
 
-                        ctx.fillStyle = stu ? '#2c1e12' : '#a8a29e';
-                        ctx.font = '20px "Jua", sans-serif';
-                        ctx.fillText(stu ? stu.label : '빈 자리', x + cellW / 2, y + 45);
-                    }
-                });
-            });
+                    ctx.fillStyle = stu ? '#fde68a' : '#f5f5f4';
+                    ctx.fillRect(x, y, cellW, cellH);
+                    ctx.strokeStyle = '#3a2618';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x, y, cellW, cellH);
 
-            const link = document.createElement('a');
-            link.download = '오둥이_새_자리표.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            showToast('자리표 이미지가 저장되었습니다!');
+                    ctx.fillStyle = stu ? '#2c1e12' : '#a8a29e';
+                    ctx.font = 'bold 20px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(stu ? stu.label : '빈 자리', x + cellW / 2, y + 46);
+                }
+            }
+
+            try {
+                const link = document.createElement('a');
+                link.download = `${title.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('자리표 이미지가 다운로드되었습니다!');
+                playFanfare();
+            } catch (e) {
+                showToast('이미지 저장 중 오류가 발생했습니다.');
+            }
         }
 
-        // --- 7. 효과음 & 유틸리티 ---
+        // --- 7. 공통 UI 업데이트 & 효과음 ---
+        function updateCountsUI() {
+            const total = students.length;
+            const present = students.filter(s => !s.absent).length;
+            const desks = deskMap.filter(Boolean).length;
+
+            const s1Badge = document.getElementById('step1-summary-badge');
+            if (s1Badge) s1Badge.textContent = `출석 ${present}명 / 전체 ${total}명`;
+
+            const lBadge = document.getElementById('layout-desk-badge');
+            if (lBadge) {
+                lBadge.textContent = `책상 ${desks}석 / 출석 ${present}명`;
+                lBadge.className = desks < present
+                    ? 'px-3 py-1 rounded-xl bg-rose-100 border-2 border-rose-500 text-xs sm:text-sm text-rose-800'
+                    : 'px-3 py-1 rounded-xl bg-[#f7f0e4] border-2 border-[#3a2618] text-xs sm:text-sm text-emerald-800';
+            }
+
+            const fitCnt = document.getElementById('fit-student-cnt');
+            if (fitCnt) fitCnt.textContent = present;
+
+            const prog = document.getElementById('chalkboard-progress');
+            if (prog) {
+                const seatedCnt = Object.keys(seatAssignments).length;
+                prog.textContent = `${seatedCnt} / ${present}명`;
+            }
+        }
+
         let audioCtx = null;
-        function playTone(freq, type = 'square', duration = 0.08, delay = 0, vol = 0.06) {
+        function playTone(freq, type = 'square', duration = 0.08, delay = 0, vol = 0.05) {
             if (!soundOn) return;
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1469,31 +1861,31 @@
         }
 
         function playFanfare() {
-            [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
-                playTone(f, 'square', 0.14, idx * 0.1, 0.08);
+            [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+                playTone(f, 'square', 0.14, i * 0.09, 0.07);
             });
         }
 
         function toggleSound() {
             soundOn = !soundOn;
-            const btn = document.getElementById('sound-btn');
+            const btn = document.getElementById('sound-toggle-btn');
             if (soundOn) {
                 btn.textContent = '🔊 효과음 ON';
-                btn.className = 'retro-btn px-3.5 py-1.5 bg-amber-300 text-[#2c1e12] text-xs sm:text-sm cursor-pointer';
-                playTone(660, 'square', 0.08, 0, 0.06);
+                btn.className = 'retro-btn px-3 py-1.5 bg-emerald-200 text-emerald-950 text-xs cursor-pointer';
+                playTone(660, 'square', 0.07, 0, 0.05);
             } else {
                 btn.textContent = '🔇 효과음 OFF';
-                btn.className = 'retro-btn px-3.5 py-1.5 bg-stone-300 text-stone-600 text-xs sm:text-sm cursor-pointer';
+                btn.className = 'retro-btn px-3 py-1.5 bg-stone-200 text-stone-500 text-xs cursor-pointer';
             }
         }
 
         let toastTimer = null;
         function showToast(msg) {
-            const box = document.getElementById('toast-box');
-            document.getElementById('toast-msg').textContent = msg;
-            box.classList.remove('hidden');
+            const modal = document.getElementById('toast-modal');
+            document.getElementById('toast-message').textContent = msg;
+            modal.classList.remove('hidden');
             clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => box.classList.add('hidden'), 2600);
+            toastTimer = setTimeout(() => modal.classList.add('hidden'), 2600);
         }
 
         function escapeHtml(str) {
@@ -1505,75 +1897,21 @@
                 .replace(/'/g, '&#39;');
         }
 
-        // 초기 실행
-        init();
-    </script>
-
-    <!-- 클라우드 환경 명단 동기화 모듈 -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-
-        let db = null;
-        let auth = null;
-        let currentUser = null;
-        let pendingPayload = null;
-
-        window.saveSeatRosterToCloud = async function(payload) {
-            if (!db || !currentUser) {
-                pendingPayload = JSON.parse(JSON.stringify(payload));
-                return;
-            }
-            try {
-                const rosterRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'seat_roster');
-                await setDoc(rosterRef, payload);
-            } catch (err) {
-                console.error('자리뽑기 명단 저장 오류:', err);
-            }
-        };
-
-        async function initSeatCloudSync() {
-            if (!firebaseConfig) return;
-            try {
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
+        // 다른 탭에서 laless 로그인/로그아웃 상태 변경 시 실시간 반영
+        window.addEventListener('storage', (e) => {
+            if (e.key === AUTH_STORAGE_KEY && !isAnimating && !isTransitioning) {
+                detectLalessAccount();
+                configureStepUIForAccount();
+                if (!stepOrder.includes(currentStep)) {
+                    setInitialStepView('students');
                 } else {
-                    await signInAnonymously(auth);
+                    setInitialStepView(currentStep);
                 }
-
-                currentUser = auth.currentUser;
-                if (!currentUser) return;
-
-                if (pendingPayload) {
-                    const toSave = pendingPayload;
-                    pendingPayload = null;
-                    await window.saveSeatRosterToCloud(toSave);
-                }
-
-                const rosterRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'seat_roster');
-                onSnapshot(rosterRef, (snapshot) => {
-                    if (!currentUser || !snapshot.exists()) return;
-                    const data = snapshot.data();
-                    if (typeof applyLoadedRosterData === 'function') {
-                        applyLoadedRosterData(data);
-                    }
-                }, (error) => {
-                    console.error('자리뽑기 명단 불러오기 오류:', error);
-                });
-            } catch (err) {
-                console.error('저장소 연결 오류:', err);
             }
-        }
+        });
 
-        initSeatCloudSync();
+        // 앱 시작
+        init();
     </script>
 </body>
 </html>
