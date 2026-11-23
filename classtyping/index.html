@@ -361,6 +361,29 @@
             50% { border-color: #f43f5e; box-shadow: 0 0 32px rgba(244, 63, 94, 0.8), inset 0 0 30px rgba(244, 63, 94, 0.45); }
         }
 
+        /* Gameplay Background Blur when Math Quiz / Level-Up / Skill Modal is Open */
+        .gameplay-modal-blur {
+            filter: blur(8px) brightness(0.55);
+            pointer-events: none;
+            user-select: none;
+            transition: filter 0.25s ease;
+        }
+
+        /* Fullscreen Gameplay Container */
+        .fullscreen-game-shell {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            z-index: 25;
+            background-color: #0c0a1d;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+
         canvas {
             display: block;
             width: 100%;
@@ -389,39 +412,37 @@
                 <span>GAME 03</span>
             </div>
 
-            <!-- 6th Grade 2nd Semester Math Quiz Modal (Proportional Expressions & Distribution) -->
-            <div id="mathQuizModal" class="hidden absolute inset-0 bg-[#090714]/94 z-30 rounded-md flex-col items-center justify-center p-4 sm:p-6 text-center">
-                <div id="quizAttemptBadge" class="text-[11px] sm:text-xs bg-cyan-500/20 border border-cyan-400/70 text-cyan-300 px-3 py-0.5 rounded tracking-wider mb-1.5">
-                    📐 6학년 2학기 수학 · 비례식과 비례배분
-                </div>
-                <h3 id="quizModalTitle" class="text-lg sm:text-xl font-bold text-yellow-400 mb-2">
-                    ⚡ 레벨업 관문! 문제를 맞히면 Lv.2 달성!
-                </h3>
-                <div id="quizAlertBanner" class="hidden w-full max-w-xl bg-rose-950/90 border border-rose-500 text-rose-200 text-xs px-3 py-1.5 rounded mb-2.5">
-                </div>
-                <div class="w-full max-w-xl bg-[#120f29] border-2 border-yellow-400/80 rounded-md p-3.5 sm:p-4 mb-3.5 text-left sm:text-center">
-                    <p id="quizQuestionText" class="text-sm sm:text-base font-bold text-white leading-relaxed">
-                        문제를 불러오는 중...
+            <!-- Firebase Server Setup Modal -->
+            <div id="firebaseSetupModal" class="hidden absolute inset-0 bg-[#090714]/94 z-40 rounded-md flex-col items-center justify-center p-4 sm:p-6 text-left">
+                <div class="w-full max-w-lg bg-[#171433] border-2 border-yellow-400 rounded-md p-4 sm:p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-[#2e295e] pb-2">
+                        <h3 class="text-base sm:text-lg font-bold text-yellow-400">⚙️ 실시간 서버(Firebase) 연결</h3>
+                        <span id="modalConnStatus" class="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">미연결</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        여러 기기에서 명예의 전당 기록을 공유하려면 Firebase 설정이 필요합니다. (현재 프로젝트 설정이 기본 내장되어 있습니다.)
                     </p>
-                </div>
-                <div id="quizChoicesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-xl">
-                </div>
-                <p class="text-[11px] text-slate-400 mt-3">
-                    보기 버튼을 클릭하거나 키보드 <span class="text-yellow-300 font-bold">[1] [2] [3] [4]</span> 키로 선택하세요!
-                </p>
-            </div>
-
-            <!-- Level Up 3-Skill Selection Modal (Appears 2s after Lv.N UP!) -->
-            <div id="skillSelectModal" class="hidden absolute inset-0 bg-[#090714]/92 z-30 rounded-md flex-col items-center justify-center p-4 sm:p-6 text-center">
-                <div class="text-xs text-yellow-400 tracking-widest mb-1">SKILL UPGRADE</div>
-                <h3 id="skillModalTitle" class="text-xl sm:text-2xl font-bold text-white mb-1">⚡ Lv.2 달성! 스킬을 선택하세요</h3>
-                <p class="text-[11px] sm:text-xs text-slate-300 mb-4">카드를 클릭하거나 키보드 <span class="text-yellow-300 font-bold">[1] [2] [3]</span> 키로 즉시 선택!</p>
-                <div id="skillCardsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl">
+                    <div>
+                        <label class="block text-xs text-yellow-400 mb-1">▶ 다른 Firebase Config 적용 (선택사항)</label>
+                        <textarea id="firebaseConfigInput" rows="4"
+                            placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", "appId": "..."}'
+                            class="typing-input w-full p-2.5 rounded text-xs font-mono leading-relaxed"></textarea>
+                    </div>
+                    <div class="flex gap-2 pt-1">
+                        <button id="applyFirebaseConfigBtn" type="button"
+                            class="pixel-btn flex-1 bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-xs sm:text-sm py-2.5 px-4 rounded">
+                            연결 적용하기
+                        </button>
+                        <button id="closeFirebaseModalBtn" type="button"
+                            class="pixel-btn bg-[#25204a] hover:bg-[#312b61] text-slate-200 font-bold text-xs sm:text-sm py-2.5 px-4 rounded">
+                            닫기
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Top Header Bar -->
-            <div class="flex items-center justify-between border-b-2 border-[#2a2554] pb-3 mb-4 pt-1">
+            <div class="flex flex-wrap items-center justify-between border-b-2 border-[#2a2554] pb-3 mb-4 pt-1 gap-2">
                 <div class="flex items-center gap-2">
                     <button id="homeLogoBtn" type="button" class="text-xs sm:text-sm text-yellow-400 hover:text-yellow-300 tracking-wider cursor-pointer">
                         오둥오락실
@@ -447,115 +468,82 @@
                 </div>
             </div>
 
-            <!-- Firebase Server Setup Modal -->
-            <div id="firebaseSetupModal" class="hidden absolute inset-0 bg-[#090714]/94 z-40 rounded-md flex-col items-center justify-center p-4 sm:p-6 text-left">
-                <div class="w-full max-w-lg bg-[#171433] border-2 border-yellow-400 rounded-md p-4 sm:p-5 space-y-3">
-                    <div class="flex items-center justify-between border-b border-[#2e295e] pb-2">
-                        <h3 class="text-base sm:text-lg font-bold text-yellow-400">⚙️ 실시간 서버(Firebase) 연결</h3>
-                        <span id="modalConnStatus" class="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">미연결</span>
-                    </div>
-                    <p class="text-xs text-slate-300 leading-relaxed">
-                        여러 기기에서 명예의 전당 기록을 실시간으로 공유하려면 Firebase 설정이 필요합니다. (현재 프로젝트 설정이 기본 내장되어 있습니다.)
-                    </p>
-                    <div>
-                        <label class="block text-xs text-yellow-400 mb-1">▶ 다른 Firebase Config 적용 (선택사항)</label>
-                        <textarea id="firebaseConfigInput" rows="4"
-                            placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", "appId": "..."}'
-                            class="typing-input w-full p-2.5 rounded text-xs font-mono leading-relaxed"></textarea>
-                    </div>
-                    <div class="flex gap-2 pt-1">
-                        <button id="applyFirebaseConfigBtn" type="button"
-                            class="pixel-btn flex-1 bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-xs sm:text-sm py-2.5 px-4 rounded">
-                            연결 적용하기
-                        </button>
-                        <button id="closeFirebaseModalBtn" type="button"
-                            class="pixel-btn bg-[#25204a] hover:bg-[#312b61] text-slate-200 font-bold text-xs sm:text-sm py-2.5 px-4 rounded">
-                            닫기
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <!-- ==========================================
-                 VIEW 1: ENTRY SCREEN (학급 코드 / 반 / 닉네임 입력)
+                 VIEW 1: START SCREEN (Left Title/Icon, Right Inputs)
             =========================================== -->
-            <div id="entryScreen" class="flex flex-col md:flex-row items-center justify-between gap-6 py-2 sm:py-4">
-                <!-- Left Column: Emoji/Icon, Title, Subtitle -->
-                <div class="w-full md:w-5/12 flex flex-col items-center md:items-start text-center md:text-left justify-center px-1">
-                    <!-- Icon Box -->
-                    <div class="relative mb-3">
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-[#0f0c21] border-4 border-[#27224d] p-1.5 rounded shadow-inner mx-auto md:mx-0">
-                            <div class="w-full h-full rounded-sm bg-gradient-to-b from-[#4f9cf9] to-[#6366f1] flex items-center justify-center relative overflow-hidden">
-                                <svg class="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-[0_3px_0_rgba(15,23,42,0.5)]" viewBox="0 0 32 24" fill="none">
-                                    <rect x="2" y="4" width="28" height="16" rx="2" fill="#e2e8f0"/>
-                                    <rect x="2" y="18" width="28" height="3" rx="1" fill="#94a3b8"/>
-                                    <rect x="5" y="7" width="2" height="2" fill="#64748b"/>
-                                    <rect x="8" y="7" width="2" height="2" fill="#64748b"/>
-                                    <rect x="11" y="7" width="2" height="2" fill="#64748b"/>
-                                    <rect x="14" y="7" width="2" height="2" fill="#64748b"/>
-                                    <rect x="17" y="7" width="2" height="2" fill="#64748b"/>
-                                    <rect x="20" y="7" width="2" height="2" fill="#64748b"/>
-                                    <rect x="23" y="7" width="4" height="2" fill="#64748b"/>
-                                    <rect x="5" y="10" width="3" height="2" fill="#64748b"/>
-                                    <rect x="9" y="10" width="2" height="2" fill="#64748b"/>
-                                    <rect x="12" y="10" width="2" height="2" fill="#64748b"/>
-                                    <rect x="15" y="10" width="2" height="2" fill="#64748b"/>
-                                    <rect x="18" y="10" width="2" height="2" fill="#64748b"/>
-                                    <rect x="21" y="10" width="2" height="2" fill="#64748b"/>
-                                    <rect x="24" y="10" width="3" height="2" fill="#64748b"/>
-                                    <rect x="5" y="13" width="3" height="2" fill="#64748b"/>
-                                    <rect x="9" y="13" width="13" height="2" fill="#64748b"/>
-                                    <rect x="23" y="13" width="4" height="2" fill="#64748b"/>
-                                </svg>
-                            </div>
+            <div id="startScreen" class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center py-2 sm:py-4">
+                <!-- Left Column: Keyboard Icon, Badge, Title, Subtitle -->
+                <div class="md:col-span-5 flex flex-col items-start text-left space-y-3 px-1">
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-[#0f0c21] border-4 border-[#27224d] p-1.5 rounded shadow-inner">
+                        <div class="w-full h-full rounded-sm bg-gradient-to-b from-[#4f9cf9] to-[#6366f1] flex items-center justify-center relative overflow-hidden">
+                            <svg class="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-[0_3px_0_rgba(15,23,42,0.5)]" viewBox="0 0 32 24" fill="none">
+                                <rect x="2" y="4" width="28" height="16" rx="2" fill="#e2e8f0"/>
+                                <rect x="2" y="18" width="28" height="3" rx="1" fill="#94a3b8"/>
+                                <rect x="5" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="8" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="11" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="14" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="17" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="20" y="7" width="2" height="2" fill="#64748b"/>
+                                <rect x="23" y="7" width="4" height="2" fill="#64748b"/>
+                                <rect x="5" y="10" width="3" height="2" fill="#64748b"/>
+                                <rect x="9" y="10" width="2" height="2" fill="#64748b"/>
+                                <rect x="12" y="10" width="2" height="2" fill="#64748b"/>
+                                <rect x="15" y="10" width="2" height="2" fill="#64748b"/>
+                                <rect x="18" y="10" width="2" height="2" fill="#64748b"/>
+                                <rect x="21" y="10" width="2" height="2" fill="#64748b"/>
+                                <rect x="24" y="10" width="3" height="2" fill="#64748b"/>
+                                <rect x="5" y="13" width="3" height="2" fill="#64748b"/>
+                                <rect x="9" y="13" width="13" height="2" fill="#64748b"/>
+                                <rect x="23" y="13" width="4" height="2" fill="#64748b"/>
+                            </svg>
                         </div>
-                        <span class="inline-block mt-2.5 text-[11px] bg-amber-500/20 border border-amber-400/60 text-amber-300 px-2.5 py-0.5 rounded">
-                            🐹 우주선 쿼카 아케이드 서바이벌
-                        </span>
                     </div>
 
-                    <!-- Title -->
-                    <h1 class="text-2xl sm:text-4xl font-bold text-white tracking-wide mb-2 drop-shadow-[0_2px_0_#090712]">
+                    <span class="inline-block text-[11px] bg-amber-500/20 border border-amber-400/60 text-amber-300 px-2.5 py-0.5 rounded">
+                        🐹 우주선 쿼카 타자 대결 에디션
+                    </span>
+
+                    <h1 class="text-2xl sm:text-4xl font-bold text-white tracking-wide drop-shadow-[0_2px_0_#090712]">
                         우리반 타자왕
                     </h1>
+
                     <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                        학급 코드와 반, 닉네임을 입력하고 떨어지는 단어를 격추하세요!
+                        학급 코드와 반, 닉네임을 입력하고 떨어지는 단어를 격추하며 최고 기록에 도전하세요!
                     </p>
                 </div>
 
-                <!-- Right Column: Class Code, Class Room, Nickname, Start & Hall of Fame -->
-                <div class="w-full md:w-7/12 flex flex-col items-stretch">
-                    <!-- Unified Entry Form: 학급 코드 / 반 / 닉네임 -->
-                    <div class="w-full bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-4 sm:p-5 space-y-3 text-left mb-3">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <!-- Right Column: Class Code, Class Room, Nickname, Language, Start & Hall of Fame -->
+                <div class="md:col-span-7 flex flex-col gap-3">
+                    <div class="bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-4 sm:p-5 space-y-3.5 text-left">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs text-yellow-400 mb-1">▶ 학급 코드</label>
-                                <input id="entryClassCodeInput" type="text" maxlength="20"
+                                <input id="classCodeInput" type="text" maxlength="20"
                                     placeholder="학급 코드를 입력하세요"
-                                    class="typing-input w-full py-2 px-3 rounded text-sm sm:text-base text-center" />
+                                    class="typing-input w-full py-2 px-3 rounded text-sm text-center" />
                             </div>
                             <div>
                                 <label class="block text-xs text-yellow-400 mb-1">▶ 반</label>
-                                <input id="entryClassRoomInput" type="text" maxlength="12"
+                                <input id="classRoomInput" type="text" maxlength="12"
                                     placeholder="반을 입력하세요 (예: 3-2)"
-                                    class="typing-input w-full py-2 px-3 rounded text-sm sm:text-base text-center" />
+                                    class="typing-input w-full py-2 px-3 rounded text-sm text-center" />
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-xs text-yellow-400 mb-1">▶ 닉네임</label>
-                            <input id="entryNicknameInput" type="text" maxlength="12"
+                            <input id="nicknameInput" type="text" maxlength="12"
                                 placeholder="닉네임을 입력하세요"
-                                class="typing-input w-full py-2 px-3.5 rounded text-sm sm:text-base text-center" />
+                                class="typing-input w-full py-2 px-3 rounded text-sm sm:text-base text-center" />
                         </div>
 
-                        <!-- Language Selection -->
-                        <div class="flex items-center justify-between pt-1">
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
                             <span class="text-xs text-cyan-300">▶ 단어 언어</span>
                             <div class="flex gap-1.5">
-                                <button type="button" data-lang="ko" class="lang-btn option-pill active px-2.5 py-1 rounded text-xs font-bold">한글</button>
-                                <button type="button" data-lang="en" class="lang-btn option-pill px-2.5 py-1 rounded text-xs font-bold">영문</button>
-                                <button type="button" data-lang="mix" class="lang-btn option-pill px-2.5 py-1 rounded text-xs font-bold">한/영 혼합</button>
+                                <button type="button" data-lang="ko" class="lang-btn option-pill active px-3 py-1 rounded text-xs font-bold">한글</button>
+                                <button type="button" data-lang="en" class="lang-btn option-pill px-3 py-1 rounded text-xs font-bold">영문</button>
+                                <button type="button" data-lang="mix" class="lang-btn option-pill px-3 py-1 rounded text-xs font-bold">한/영 혼합</button>
                             </div>
                         </div>
 
@@ -565,9 +553,8 @@
                         </button>
                     </div>
 
-                    <!-- Hall of Fame Button -->
-                    <button id="entryHofBtn" type="button"
-                        class="pixel-btn w-full bg-[#25204a] hover:bg-[#312b61] text-amber-300 font-bold text-sm sm:text-base py-3 px-5 rounded-md flex items-center justify-center gap-2">
+                    <button id="startHofBtn" type="button"
+                        class="pixel-btn w-full bg-[#25204a] hover:bg-[#312b61] text-amber-300 font-bold text-sm py-3 px-5 rounded flex items-center justify-center gap-2">
                         <span>🏆</span>
                         <span>명예의 전당</span>
                     </button>
@@ -575,84 +562,142 @@
             </div>
 
             <!-- ==========================================
-                 VIEW 2: ACTIVE GAMEPLAY SCREEN
+                 VIEW 2: FULLSCREEN ACTIVE GAMEPLAY SCREEN
             =========================================== -->
-            <div id="gameScreen" class="hidden flex-col">
-                <!-- Top EXP Level Gauge & Equipped Skills Bar -->
-                <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-3 py-2 mb-2">
-                    <div class="flex items-center justify-between text-xs mb-1">
-                        <div class="flex items-center gap-2">
-                            <span id="hudLevelBadge" class="bg-yellow-400 text-[#141129] font-bold px-2 py-0.5 rounded text-[11px]">
-                                Lv.1
+            <div id="gameScreen" class="hidden fullscreen-game-shell flex-col p-3 sm:p-5">
+                <!-- 1) 6th Grade 2nd Semester Math Quiz Modal Window (Time Paused + Blurred Background) -->
+                <div id="mathQuizModal" class="hidden fixed inset-0 bg-[#090714]/65 backdrop-blur-md z-40 flex-col items-center justify-center p-4 sm:p-6 text-center">
+                    <div class="w-full max-w-xl bg-[#171433]/95 border-2 border-yellow-400 rounded-md p-5 sm:p-6 shadow-[0_0_0_4px_#0d0b1a,0_0_35px_rgba(250,204,21,0.4)]">
+                        <div class="flex items-center justify-between text-[11px] mb-2">
+                            <span id="quizAttemptBadge" class="bg-cyan-500/20 border border-cyan-400/70 text-cyan-300 px-2.5 py-0.5 rounded tracking-wider">
+                                📐 6학년 2학기 수학 · 비례식과 비례배분
                             </span>
-                            <span id="hudExpText" class="text-[11px] text-cyan-300">EXP 0 / 6개</span>
+                            <span class="bg-amber-500/20 border border-amber-400/60 text-amber-300 px-2 py-0.5 rounded font-bold">
+                                ⏸ 시간 정지됨
+                            </span>
                         </div>
-                        <div id="hudEquippedSkills" class="flex flex-wrap items-center gap-1 text-[10px]">
-                            <span class="text-slate-400">보유 스킬: 없음</span>
+                        <h3 id="quizModalTitle" class="text-lg sm:text-xl font-bold text-yellow-400 mb-2.5">
+                            ⚡ 레벨업 관문! 문제를 맞히면 Lv.2 달성!
+                        </h3>
+                        <div id="quizAlertBanner" class="hidden w-full bg-rose-950/90 border border-rose-500 text-rose-200 text-xs px-3 py-1.5 rounded mb-2.5">
                         </div>
-                    </div>
-                    <div class="w-full h-2.5 bg-[#191536] rounded-sm overflow-hidden border border-[#2e295e]">
-                        <div id="hudExpBar" class="h-full bg-gradient-to-r from-cyan-400 via-emerald-400 to-yellow-400 transition-all duration-150" style="width: 0%;"></div>
-                    </div>
-                </div>
-
-                <!-- Top 4-Card HUD -->
-                <div class="grid grid-cols-4 gap-2 mb-2">
-                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
-                        <div class="text-[10px] text-slate-400">생명 (HP)</div>
-                        <div id="hudLives" class="text-sm sm:text-base font-bold text-rose-400 tracking-wider">❤️❤️❤️</div>
-                    </div>
-                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
-                        <div class="text-[10px] text-slate-400">생존 시간</div>
-                        <div id="hudSurvivalTime" class="text-sm sm:text-base font-bold text-cyan-300">00:00</div>
-                    </div>
-                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
-                        <div class="text-[10px] text-slate-400">SCORE</div>
-                        <div id="hudScore" class="text-sm sm:text-base font-bold text-yellow-400">0</div>
-                    </div>
-                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
-                        <div class="text-[10px] text-slate-400">COMBO</div>
-                        <div id="hudCombo" class="text-sm sm:text-base font-bold text-emerald-400">0</div>
+                        <div class="w-full bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-3.5 sm:p-4 mb-3.5 text-left sm:text-center">
+                            <p id="quizQuestionText" class="text-sm sm:text-base font-bold text-white leading-relaxed">
+                                문제를 불러오는 중...
+                            </p>
+                        </div>
+                        <div id="quizChoicesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-3">
+                            보기 버튼을 클릭하거나 키보드 <span class="text-yellow-300 font-bold">[1] [2] [3] [4]</span> 키로 선택하세요!
+                        </p>
                     </div>
                 </div>
 
-                <!-- Sub Status Strip -->
-                <div class="flex items-center justify-between text-[11px] text-slate-400 px-1 mb-2">
-                    <div class="flex items-center gap-3">
-                        <span>격추: <strong id="hudKills" class="text-emerald-300">0개</strong></span>
-                        <span>속도: <strong id="hudCpm" class="text-slate-200">0 타/분</strong></span>
-                        <span id="feverIndicator" class="hidden text-rose-400 font-bold animate-pulse">🔥 FEVER x2</span>
-                        <span id="freezeIndicator" class="hidden text-cyan-300 font-bold">❄️ FREEZE!</span>
-                        <span id="awakenedIndicator" class="hidden text-yellow-300 font-bold animate-pulse">🌟 각성 오토 발동중!</span>
-                    </div>
-                    <span id="pilotHudLabel" class="text-amber-300">🐹 파일럿</span>
-                </div>
-
-                <!-- Gameplay Canvas -->
-                <div id="canvasWrapper" class="relative w-full h-[250px] sm:h-[320px] bg-[#090714] border-2 border-[#2e295e] rounded overflow-hidden mb-2.5">
-                    <canvas id="gameCanvas"></canvas>
-                    <!-- Lv.N UP! Floating Banner (Shows before 3-Skill Modal opens) -->
-                    <div id="levelUpBanner" class="hidden pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-[#090714]/45 z-20">
-                        <div id="levelUpBannerText" class="levelup-banner text-3xl sm:text-5xl font-bold text-yellow-400 drop-shadow-[0_4px_0_#000] tracking-wider">
+                <!-- 2) Level-Up Celebration Modal Window (Time Paused + Blurred Background for 2s) -->
+                <div id="levelUpModal" class="hidden fixed inset-0 bg-[#090714]/65 backdrop-blur-md z-40 flex-col items-center justify-center p-4 sm:p-6 text-center">
+                    <div class="w-full max-w-md bg-[#171433]/95 border-2 border-yellow-400 rounded-md p-6 sm:p-8 shadow-[0_0_0_4px_#0d0b1a,0_0_40px_rgba(250,204,21,0.45)] space-y-3">
+                        <div class="inline-block bg-amber-500/20 border border-amber-400/60 text-amber-300 text-xs px-3 py-0.5 rounded font-bold">
+                            ⏸ 시간 정지 · LEVEL UP!
+                        </div>
+                        <div id="levelUpBannerText" class="levelup-banner text-4xl sm:text-5xl font-bold text-yellow-400 drop-shadow-[0_4px_0_#000] tracking-wider py-2">
                             Lv.2 UP!
                         </div>
-                        <div class="text-xs sm:text-sm text-cyan-200 mt-2 bg-[#0f0c21]/90 border border-cyan-400/60 px-3 py-1 rounded">
-                            잠시 후 스킬 선택창이 열립니다...
+                        <p class="text-xs sm:text-sm text-cyan-200 bg-[#0f0c21] border border-cyan-400/50 px-3 py-2 rounded">
+                            잠시 후 3가지 스킬 선택창이 열립니다...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 3) Skill Selection Modal Window (Time Paused + Blurred Background) -->
+                <div id="skillSelectModal" class="hidden fixed inset-0 bg-[#090714]/65 backdrop-blur-md z-40 flex-col items-center justify-center p-4 sm:p-6 text-center">
+                    <div class="w-full max-w-2xl bg-[#171433]/95 border-2 border-yellow-400 rounded-md p-5 sm:p-6 shadow-[0_0_0_4px_#0d0b1a,0_0_35px_rgba(250,204,21,0.4)]">
+                        <div class="flex items-center justify-center gap-2 text-xs text-yellow-400 tracking-widest mb-1">
+                            <span>SKILL UPGRADE</span>
+                            <span class="bg-amber-500/20 border border-amber-400/60 text-amber-300 px-2 py-0.5 rounded text-[11px] font-bold">⏸ 시간 정지됨</span>
+                        </div>
+                        <h3 id="skillModalTitle" class="text-xl sm:text-2xl font-bold text-white mb-1">⚡ Lv.2 달성! 스킬을 선택하세요</h3>
+                        <p class="text-[11px] sm:text-xs text-slate-300 mb-4">카드를 클릭하거나 키보드 <span class="text-yellow-300 font-bold">[1] [2] [3]</span> 키로 즉시 선택!</p>
+                        <div id="skillCardsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
                         </div>
                     </div>
                 </div>
 
-                <!-- Typing Input Area -->
-                <div class="flex items-center gap-2">
-                    <div class="relative flex-1">
-                        <input id="wordInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                            placeholder="단어가 바닥에 닿기 전에 입력해서 격추하세요!"
-                            class="typing-input w-full py-2.5 sm:py-3 px-3 rounded text-base sm:text-lg text-center tracking-wider" />
+                <!-- Gameplay Playfield Container (Blurs whenever one of the 3 modals above is open) -->
+                <div id="gamePlayfieldContainer" class="w-full max-w-6xl mx-auto flex-1 flex flex-col min-h-0">
+                    <!-- Top EXP Level Gauge & Equipped Skills Bar -->
+                    <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-3 py-2 mb-2 shrink-0">
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <div class="flex items-center gap-2">
+                                <span id="hudLevelBadge" class="bg-yellow-400 text-[#141129] font-bold px-2 py-0.5 rounded text-[11px]">
+                                    Lv.1
+                                </span>
+                                <span id="hudExpText" class="text-[11px] text-cyan-300">EXP 0 / 6개</span>
+                            </div>
+                            <div id="hudEquippedSkills" class="flex flex-wrap items-center gap-1 text-[10px]">
+                                <span class="text-slate-400">보유 스킬: 없음</span>
+                            </div>
+                        </div>
+                        <div class="w-full h-2.5 bg-[#191536] rounded-sm overflow-hidden border border-[#2e295e]">
+                            <div id="hudExpBar" class="h-full bg-gradient-to-r from-cyan-400 via-emerald-400 to-yellow-400 transition-all duration-150" style="width: 0%;"></div>
+                        </div>
                     </div>
-                    <button id="fireBtn" type="button"
-                        class="pixel-btn bg-yellow-400 text-[#141129] font-bold text-xs sm:text-sm py-3 px-4 rounded shrink-0">
-                        격추!
-                    </button>
+
+                    <!-- Top 4-Card HUD -->
+                    <div class="grid grid-cols-4 gap-2 mb-2 shrink-0">
+                        <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                            <div class="text-[10px] text-slate-400">생명 (HP)</div>
+                            <div id="hudLives" class="text-sm sm:text-base font-bold text-rose-400 tracking-wider">❤️❤️❤️</div>
+                        </div>
+                        <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                            <div class="text-[10px] text-slate-400">생존 시간</div>
+                            <div id="hudSurvivalTime" class="text-sm sm:text-base font-bold text-cyan-300">00:00</div>
+                        </div>
+                        <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                            <div class="text-[10px] text-slate-400">SCORE</div>
+                            <div id="hudScore" class="text-sm sm:text-base font-bold text-yellow-400">0</div>
+                        </div>
+                        <div class="bg-[#0f0c21] border-2 border-[#2a2554] rounded px-2 py-1.5 text-center">
+                            <div class="text-[10px] text-slate-400">COMBO</div>
+                            <div id="hudCombo" class="text-sm sm:text-base font-bold text-emerald-400">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Sub Status Strip -->
+                    <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 px-1 mb-2 gap-1.5 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <span>격추: <strong id="hudKills" class="text-emerald-300">0개</strong></span>
+                            <span>속도: <strong id="hudCpm" class="text-slate-200">0 타/분</strong></span>
+                            <span id="feverIndicator" class="hidden text-rose-400 font-bold animate-pulse">🔥 FEVER x2</span>
+                            <span id="freezeIndicator" class="hidden text-cyan-300 font-bold">❄️ FREEZE!</span>
+                            <span id="awakenedIndicator" class="hidden text-yellow-300 font-bold animate-pulse">🌟 각성 오토 발동중!</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="pilotHudLabel" class="text-amber-300">🐹 파일럿</span>
+                            <button id="exitGameToHomeBtn" type="button"
+                                class="bg-[#1b173b] hover:bg-[#272252] border border-[#3b3575] text-slate-300 px-2 py-0.5 rounded text-[10px] cursor-pointer">
+                                나가기
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Fullscreen Gameplay Canvas -->
+                    <div id="canvasWrapper" class="relative w-full flex-1 min-h-[220px] bg-[#090714] border-2 border-[#2e295e] rounded overflow-hidden mb-2.5">
+                        <canvas id="gameCanvas"></canvas>
+                    </div>
+
+                    <!-- Typing Input Area -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        <div class="relative flex-1">
+                            <input id="wordInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                                placeholder="단어가 바닥에 닿기 전에 입력해서 격추하세요!"
+                                class="typing-input w-full py-2.5 sm:py-3 px-3 rounded text-base sm:text-lg text-center tracking-wider" />
+                        </div>
+                        <button id="fireBtn" type="button"
+                            class="pixel-btn bg-yellow-400 text-[#141129] font-bold text-xs sm:text-sm py-3 px-5 rounded shrink-0">
+                            격추!
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -709,7 +754,7 @@
                 <h2 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-3">🏆 명예의 전당</h2>
 
                 <!-- Filter Mode Toggle Buttons: 전체 / 우리반 -->
-                <div class="flex items-center justify-center gap-2 mb-3">
+                <div class="flex flex-wrap items-center justify-center gap-2 mb-3">
                     <button id="hofTabAllBtn" type="button"
                         class="option-pill active px-5 py-1.5 rounded text-xs sm:text-sm font-bold">
                         전체
@@ -721,46 +766,46 @@
                 </div>
 
                 <!-- '우리반' Filter Bar: 학급 코드 + 반 + 조회 버튼 (Visible only when '우리반' is clicked) -->
-                <div id="hofClassFilterBar" class="hidden w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-2.5 sm:p-3 mb-3 flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                    <input id="hofClassCodeInput" type="text" maxlength="20"
-                        placeholder="학급 코드"
-                        class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
-                    <input id="hofClassRoomInput" type="text" maxlength="12"
-                        placeholder="반"
-                        class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
-                    <button id="hofSearchBtn" type="button"
-                        class="pixel-btn bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-xs sm:text-sm py-1.5 px-5 rounded shrink-0">
-                        조회
+                    <div id="hofClassFilterBar" class="hidden w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md p-2.5 sm:p-3 mb-3 flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        <input id="hofClassCodeInput" type="text" maxlength="20"
+                            placeholder="학급 코드"
+                            class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
+                        <input id="hofClassRoomInput" type="text" maxlength="12"
+                            placeholder="반"
+                            class="typing-input flex-1 py-1.5 px-3 rounded text-xs sm:text-sm text-center" />
+                        <button id="hofSearchBtn" type="button"
+                            class="pixel-btn bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-xs sm:text-sm py-1.5 px-5 rounded shrink-0">
+                            조회
+                        </button>
+                    </div>
+
+                    <!-- Hall of Fame Leaderboard Table -->
+                    <div class="w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md overflow-hidden mb-4">
+                        <div class="overflow-x-auto max-h-[300px] overflow-y-auto">
+                            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                                <thead class="bg-[#1b173b] text-yellow-400 border-b-2 border-[#2e295e] sticky top-0">
+                                    <tr>
+                                        <th class="py-2.5 px-3 text-center w-14">순위</th>
+                                        <th class="py-2.5 px-3">닉네임 (학급·반)</th>
+                                        <th class="py-2.5 px-3 text-right">격추</th>
+                                        <th class="py-2.5 px-3 text-right">점수</th>
+                                        <th class="py-2.5 px-3 text-right hidden sm:table-cell">타수</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hofTableBody" class="divide-y divide-[#231f47]">
+                                    <tr>
+                                        <td colspan="5" class="py-8 text-center text-slate-400">기록을 불러오는 중...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <button id="closeHofBtn" type="button"
+                        class="pixel-btn w-full max-w-xs bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-sm py-3 px-6 rounded">
+                        ← 돌아가기
                     </button>
                 </div>
-
-                <!-- Hall of Fame Leaderboard Table -->
-                <div class="w-full max-w-2xl bg-[#0f0c21] border-2 border-yellow-400/70 rounded-md overflow-hidden mb-4">
-                    <div class="overflow-x-auto max-h-[300px] overflow-y-auto">
-                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                            <thead class="bg-[#1b173b] text-yellow-400 border-b-2 border-[#2e295e] sticky top-0">
-                                <tr>
-                                    <th class="py-2.5 px-3 text-center w-14">순위</th>
-                                    <th class="py-2.5 px-3">닉네임 (학급·반)</th>
-                                    <th class="py-2.5 px-3 text-right">격추</th>
-                                    <th class="py-2.5 px-3 text-right">점수</th>
-                                    <th class="py-2.5 px-3 text-right hidden sm:table-cell">타수</th>
-                                </tr>
-                            </thead>
-                            <tbody id="hofTableBody" class="divide-y divide-[#231f47]">
-                                <tr>
-                                    <td colspan="5" class="py-8 text-center text-slate-400">기록을 불러오는 중...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <button id="closeHofBtn" type="button"
-                    class="pixel-btn w-full max-w-xs bg-yellow-400 hover:bg-yellow-300 text-[#141129] font-bold text-sm py-3 px-6 rounded">
-                    ← 돌아가기
-                </button>
-            </div>
         </div>
     </div>
 
@@ -789,11 +834,13 @@
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'odung-speed-typing';
         const LOCAL_HOF_KEY = 'odung_typing_hof_records_v1';
+
         let firebaseAppInstance = null;
         let db = null;
         let auth = null;
         let useFirestore = false;
         let defaultEnvConfig = null;
+        let unsubHof = null;
 
         function updateConnectionStatusUI() {
             const btn = document.getElementById('serverStatusBtn');
@@ -804,12 +851,12 @@
                     btn.className = 'text-[11px] sm:text-xs bg-emerald-950/80 border border-emerald-400/70 text-emerald-300 px-2 py-1 rounded transition';
                 }
                 if (modalBadge) {
-                    modalBadge.textContent = '🟢 클라우드 연결됨 (실시간 동기화)';
+                    modalBadge.textContent = '🟢 클라우드 연결됨';
                     modalBadge.className = 'text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300';
                 }
             } else {
                 if (btn) {
-                    btn.textContent = '🟡 로컬 저장 모드';
+                    btn.textContent = '🟡 로컬 모드';
                     btn.className = 'text-[11px] sm:text-xs bg-[#0f0c21] border border-amber-500/60 hover:border-yellow-400 text-amber-300 px-2 py-1 rounded transition';
                 }
                 if (modalBadge) {
@@ -834,7 +881,7 @@
                         await signInAnonymously(auth);
                     }
                 } catch (authErr) {
-                    console.info('Optional auth skipped, using Firestore directly:', authErr?.code || authErr);
+                    console.info('Optional auth skipped:', authErr?.code || authErr);
                 }
 
                 updateConnectionStatusUI();
@@ -850,7 +897,7 @@
         }
 
         async function initBackend() {
-            loadLocalHofRecords();
+            loadLocalHof();
             try {
                 if (MANUAL_FIREBASE_CONFIG && MANUAL_FIREBASE_CONFIG.apiKey) {
                     await connectWithFirebaseConfig(MANUAL_FIREBASE_CONFIG);
@@ -862,7 +909,7 @@
                     return;
                 }
             } catch (err) {
-                console.warn('Firestore init fallback to local mode:', err);
+                console.warn('Firestore init fallback to local:', err);
             }
             useFirestore = false;
             updateConnectionStatusUI();
@@ -872,8 +919,8 @@
             return collection(db, 'artifacts', appId, 'public', 'data', 'hallOfFame');
         }
 
-        function getHofDocRef(docKey) {
-            return doc(db, 'artifacts', appId, 'public', 'data', 'hallOfFame', docKey);
+        function getHofDocRef(recordKey) {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'hallOfFame', recordKey);
         }
 
         // ==========================================
@@ -911,48 +958,75 @@
             { name: 'Lv.4 은하계 최종 함대장', color: '#facc15', baseHp: 330 }
         ];
 
-        const SKILL_CATALOG = [
+        // 6th Grade 2nd Semester Math Quiz Bank (비례식과 비례배분)
+        const MATH_QUIZ_PRIMARY = [
             {
-                id: 'turret',
-                icon: '🔫',
-                name: '자동 레이저 포탑',
-                desc: '3초마다 가장 가까운 단어를 자동으로 격추합니다.',
-                awakening: false
+                q: "비례식 3 : 5 = 12 : □ 에서 □ 안에 들어갈 알맞은 수는 무엇일까요?",
+                choices: ["15", "20", "24", "30"],
+                answer: 1
             },
             {
-                id: 'scoreBoost',
-                icon: '💎',
-                name: '점수 부스터 x1.5',
-                desc: '단어 격추 시 획득하는 점수가 50% 증가합니다.',
-                awakening: false
+                q: "비례식 4 : 7 = □ : 28 에서 □ 안에 들어갈 알맞은 수는 무엇일까요?",
+                choices: ["12", "14", "16", "21"],
+                answer: 2
             },
             {
-                id: 'freezeWave',
-                icon: '❄️',
-                name: '빙결 충격파',
-                desc: '모든 적 단어의 낙하 속도를 30% 늦추고 즉시 빙결시킵니다.',
-                awakening: false
+                q: "사탕 35개를 지민이와 서연이가 3 : 4로 비례배분하여 나누어 가졌습니다. 서연이가 가진 사탕은 몇 개일까요?",
+                choices: ["15개", "18개", "20개", "25개"],
+                answer: 2
             },
             {
-                id: 'pierceLaser',
-                icon: '⚡',
-                name: '연쇄 플라즈마',
-                desc: '단어 격추 시 주변 단어 1개를 추가로 연쇄 파괴합니다.',
-                awakening: false
+                q: "비례식 □ : 9 = 8 : 12 에서 외항의 곱은 72입니다. □ 안에 들어갈 수는 무엇일까요?",
+                choices: ["4", "6", "8", "10"],
+                answer: 1
             },
             {
-                id: 'healShip',
-                icon: '💖',
-                name: '우주선 긴급 수리',
-                desc: '생명(HP) 1칸을 즉시 회복하고 보너스 +150점을 얻습니다.',
-                awakening: false
+                q: "가로와 세로의 비가 5 : 3인 직사각형 모양의 밭이 있습니다. 가로가 25m일 때 세로는 몇 m일까요?",
+                choices: ["12m", "15m", "18m", "20m"],
+                answer: 1
             },
             {
-                id: 'awakeningOverdrive',
-                icon: '🌟',
-                name: '[각성] 오토 오버드라이브',
-                desc: '1.2초마다 초고속 자동 격추 + 획득 점수 2배 폭주!',
-                awakening: true
+                q: "공책 48권을 5 : 3으로 비례배분할 때, 더 많이 받는 쪽은 몇 권을 받게 될까요?",
+                choices: ["18권", "24권", "30권", "36권"],
+                answer: 2
+            },
+            {
+                q: "비 0.4 : 1.2 를 가장 간단한 자연수의 비로 바르게 나타낸 것은 무엇일까요?",
+                choices: ["1 : 2", "1 : 3", "2 : 3", "4 : 12"],
+                answer: 1
+            },
+            {
+                q: "밀가루와 설탕을 7 : 2의 비로 섞어 반죽 450g을 만들려고 합니다. 필요한 설탕은 몇 g일까요?",
+                choices: ["50g", "100g", "150g", "350g"],
+                answer: 1
+            }
+        ];
+
+        const MATH_QUIZ_EASIER = [
+            {
+                q: "[보너스 쉬운 문제] 비례식 1 : 2 = 3 : □ 에서 □ 안에 들어갈 수는 무엇일까요?",
+                choices: ["4", "5", "6", "8"],
+                answer: 2
+            },
+            {
+                q: "[보너스 쉬운 문제] 연필 10자루를 1 : 1로 똑같이 나누면 한 사람이 몇 자루씩 가질까요?",
+                choices: ["2자루", "4자루", "5자루", "10자루"],
+                answer: 2
+            },
+            {
+                q: "[보너스 쉬운 문제] 비 2 : 4 와 비율이 같은 비는 어느 것일까요?",
+                choices: ["1 : 2", "1 : 3", "2 : 3", "3 : 4"],
+                answer: 0
+            },
+            {
+                q: "[보너스 쉬운 문제] 귤 12개를 형과 동생이 2 : 1로 나누어 가졌습니다. 동생이 가진 귤은 몇 개일까요?",
+                choices: ["2개", "4개", "6개", "8개"],
+                answer: 1
+            },
+            {
+                q: "[보너스 쉬운 문제] 비례식 2 : 5 = 4 : □ 에서 □ 안에 들어갈 수는 무엇일까요?",
+                choices: ["6", "8", "10", "12"],
+                answer: 2
             }
         ];
 
@@ -961,12 +1035,11 @@
             classRoom: '',
             nickname: '',
             lang: 'ko',
-            previousScreenId: 'entryScreen',
-            hofTabMode: 'all', // 'all' | 'class'
-            hofFilterClassCode: '',
-            hofFilterClassRoom: '',
-            allHofRecords: [],
-            unsubHof: null
+            previousScreenId: 'startScreen',
+            hofRecords: [],
+            hofTab: 'all', // 'all' | 'class'
+            hofFilterCode: '',
+            hofFilterRoom: ''
         };
 
         // ==========================================
@@ -1001,7 +1074,7 @@
                 gain.connect(ctx.destination);
                 osc.start(ctx.currentTime + delay);
                 osc.stop(ctx.currentTime + delay + duration);
-            } catch (_) {}
+            } catch (e) {}
         }
 
         const sfx = {
@@ -1009,10 +1082,6 @@
             error: () => {
                 playTone(180, 'sawtooth', 0.12, 0.08, 0);
                 playTone(140, 'sawtooth', 0.14, 0.08, 0.09);
-            },
-            damage: () => {
-                playTone(150, 'sawtooth', 0.18, 0.11, 0);
-                playTone(95, 'sawtooth', 0.22, 0.11, 0.1);
             },
             hit: () => {
                 playTone(660, 'square', 0.06, 0.07, 0);
@@ -1029,15 +1098,15 @@
                 [440, 554, 659, 880].forEach((f, i) => playTone(f, 'triangle', 0.12, 0.1, i * 0.07));
             },
             gameOver: () => {
-                [392, 349, 311, 261].forEach((f, i) => playTone(f, 'sawtooth', 0.18, 0.09, i * 0.13));
+                [392, 349, 311, 261].forEach((f, i) => playTone(f, 'sawtooth', 0.16, 0.09, i * 0.11));
             }
         };
 
         // ==========================================
-        // 4. UI NAVIGATION & FORMATTING HELPERS
+        // 4. UI NAVIGATION & HELPERS
         // ==========================================
         const ALL_SCREENS = [
-            'entryScreen',
+            'startScreen',
             'gameScreen',
             'gameOverScreen',
             'hallOfFameScreen'
@@ -1049,10 +1118,14 @@
                 if (!el) return;
                 if (id === screenId) {
                     el.classList.remove('hidden');
-                    el.classList.add('flex');
+                    if (id === 'startScreen') {
+                        el.classList.add('grid');
+                    } else {
+                        el.classList.add('flex');
+                    }
                 } else {
                     el.classList.add('hidden');
-                    el.classList.remove('flex');
+                    el.classList.remove('flex', 'grid');
                 }
             });
             if (screenId !== 'hallOfFameScreen') {
@@ -1081,19 +1154,10 @@
                 .replace(/'/g, '&#39;');
         }
 
-        function normalizeKey(val) {
-            return String(val || '').trim().replace(/\s+/g, '').toLowerCase();
-        }
-
-        function makePlayerRecordId(classCode, classRoom, nickname) {
-            const raw = `${normalizeKey(classCode)}__${normalizeKey(classRoom)}__${normalizeKey(nickname)}`;
-            return raw.replace(/[^a-z0-9가-힣_-]/g, '_');
-        }
-
-        function formatElapsedMMSS(seconds) {
-            const total = Math.max(0, Math.floor(seconds));
-            const mins = Math.floor(total / 60);
-            const secs = total % 60;
+        function formatElapsed(seconds) {
+            const safe = Math.max(0, Math.floor(seconds));
+            const mins = Math.floor(safe / 60);
+            const secs = safe % 60;
             return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         }
 
@@ -1108,712 +1172,495 @@
             }
         }
 
-        // ==========================================
-        // 5. HALL OF FAME STORAGE & RENDERING
-        // ==========================================
-        function loadLocalHofRecords() {
+        function requestGameFullscreen() {
             try {
-                const raw = localStorage.getItem(LOCAL_HOF_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) {
-                        appState.allHofRecords = parsed;
-                    }
+                const el = document.documentElement;
+                if (!document.fullscreenElement && el.requestFullscreen) {
+                    el.requestFullscreen().catch(() => {});
                 }
-            } catch (_) {}
+            } catch (e) {}
         }
 
-        function saveLocalHofRecords() {
+        function exitGameFullscreen() {
             try {
-                localStorage.setItem(LOCAL_HOF_KEY, JSON.stringify(appState.allHofRecords));
-            } catch (_) {}
+                if (document.fullscreenElement && document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                }
+            } catch (e) {}
+        }
+
+        function setGameplayBlur(isBlurred) {
+            const playfield = document.getElementById('gamePlayfieldContainer');
+            if (!playfield) return;
+            if (isBlurred) {
+                playfield.classList.add('gameplay-modal-blur');
+            } else {
+                playfield.classList.remove('gameplay-modal-blur');
+            }
+        }
+
+        // ==========================================
+        // 5. HALL OF FAME STORAGE & SINGLE-RECORD UPDATE
+        // ==========================================
+        function normalizeKeyPart(val) {
+            return String(val || '').trim().replace(/\s+/g, '').toLowerCase();
+        }
+
+        function makePlayerRecordKey(classCode, classRoom, nickname) {
+            return `${normalizeKeyPart(classCode)}__${normalizeKeyPart(classRoom)}__${normalizeKeyPart(nickname)}`;
+        }
+
+        function loadLocalHof() {
+            try {
+                const raw = localStorage.getItem(LOCAL_HOF_KEY);
+                appState.hofRecords = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                appState.hofRecords = [];
+            }
+        }
+
+        function saveLocalHof() {
+            try {
+                localStorage.setItem(LOCAL_HOF_KEY, JSON.stringify(appState.hofRecords));
+            } catch (e) {}
         }
 
         function subscribeHallOfFame() {
             if (!useFirestore || !db) return;
-            if (appState.unsubHof) {
-                appState.unsubHof();
-                appState.unsubHof = null;
-            }
-            try {
-                appState.unsubHof = onSnapshot(getHofColRef(), (snap) => {
-                    const list = [];
-                    snap.forEach(docSnap => {
-                        const d = docSnap.data();
-                        if (d && d.nickname) {
-                            list.push({ id: docSnap.id, ...d });
-                        }
-                    });
-                    appState.allHofRecords = list;
-                    saveLocalHofRecords();
-                    renderHallOfFameTable();
-                }, (err) => {
-                    console.warn('HOF snapshot error:', err);
+            if (unsubHof) unsubHof();
+            unsubHof = onSnapshot(getHofColRef(), (snap) => {
+                const remoteList = [];
+                snap.forEach(d => {
+                    remoteList.push({ id: d.id, ...d.data() });
                 });
-            } catch (err) {
-                console.warn('HOF subscribe failed:', err);
-            }
+                appState.hofRecords = remoteList;
+                saveLocalHof();
+                if (!document.getElementById('hallOfFameScreen').classList.contains('hidden')) {
+                    renderHallOfFame();
+                }
+            }, (err) => {
+                console.warn('Hall of Fame snapshot error:', err);
+            });
         }
 
-        async function upsertHallOfFameRecord(record) {
-            const docKey = makePlayerRecordId(record.classCode, record.classRoom, record.nickname);
-            const existingIdx = appState.allHofRecords.findIndex(
-                r => makePlayerRecordId(r.classCode, r.classRoom, r.nickname) === docKey
+        /**
+         * Saves or updates a player's record on Game Over.
+         * If the same (classCode + classRoom + nickname) already exists:
+         *  - Updates the existing entry ONLY if the new score (or kills on tie) is higher!
+         *  - Never creates duplicate rows for the same participant.
+         */
+        async function upsertHallOfFameRecord(newEntry) {
+            const key = makePlayerRecordKey(newEntry.classCode, newEntry.classRoom, newEntry.nickname);
+            const recordPayload = {
+                recordKey: key,
+                classCode: newEntry.classCode,
+                classRoom: newEntry.classRoom,
+                nickname: newEntry.nickname,
+                kills: newEntry.kills,
+                score: newEntry.score,
+                cpm: newEntry.cpm,
+                updatedAt: Date.now()
+            };
+
+            const existingIdx = appState.hofRecords.findIndex(r =>
+                makePlayerRecordKey(r.classCode, r.classRoom, r.nickname) === key
             );
-            const existing = existingIdx >= 0 ? appState.allHofRecords[existingIdx] : null;
 
-            // Update only if first record or new score beats previous best
-            let finalRecord = record;
-            let updatedBest = true;
-
-            if (existing && Number(existing.score || 0) >= Number(record.score || 0)) {
-                finalRecord = existing;
-                updatedBest = false;
-            } else {
-                if (existingIdx >= 0) {
-                    appState.allHofRecords[existingIdx] = { id: docKey, ...record };
+            let isNewHigh = true;
+            if (existingIdx !== -1) {
+                const prev = appState.hofRecords[existingIdx];
+                if (newEntry.score > prev.score || (newEntry.score === prev.score && newEntry.kills > prev.kills)) {
+                    appState.hofRecords[existingIdx] = { ...prev, ...recordPayload };
                 } else {
-                    appState.allHofRecords.push({ id: docKey, ...record });
+                    isNewHigh = false;
                 }
-                saveLocalHofRecords();
+            } else {
+                appState.hofRecords.push(recordPayload);
             }
 
-            if (useFirestore && db) {
+            saveLocalHof();
+
+            if (useFirestore && db && isNewHigh) {
                 try {
-                    const ref = getHofDocRef(docKey);
-                    const snap = await getDoc(ref);
+                    const docRef = getHofDocRef(key);
+                    const snap = await getDoc(docRef);
                     if (snap.exists()) {
-                        const prevData = snap.data();
-                        if (Number(prevData.score || 0) >= Number(record.score || 0)) {
-                            updatedBest = false;
+                        const prevRemote = snap.data();
+                        if (newEntry.score > (prevRemote.score || 0) ||
+                           (newEntry.score === (prevRemote.score || 0) && newEntry.kills > (prevRemote.kills || 0))) {
+                            await setDoc(docRef, recordPayload);
                         } else {
-                            await setDoc(ref, record, { merge: true });
-                            updatedBest = true;
+                            isNewHigh = false;
                         }
                     } else {
-                        await setDoc(ref, record);
-                        updatedBest = true;
+                        await setDoc(docRef, recordPayload);
                     }
                 } catch (err) {
-                    console.warn('Firestore HOF upsert fallback to local:', err);
+                    console.warn('Firestore HoF upsert error:', err);
                 }
             }
 
-            renderHallOfFameTable();
-            return { updatedBest, isFirst: !existing, bestScore: Number(finalRecord.score || 0) };
+            return { isNewHigh, isExisting: existingIdx !== -1 };
         }
 
-        function renderHallOfFameTable() {
+        function renderHallOfFame() {
             const tbody = document.getElementById('hofTableBody');
             if (!tbody) return;
 
-            let filtered = [...appState.allHofRecords];
+            let list = [...appState.hofRecords];
 
-            if (appState.hofTabMode === 'class') {
-                const codeFilter = normalizeKey(appState.hofFilterClassCode);
-                const roomFilter = normalizeKey(appState.hofFilterClassRoom);
-                filtered = filtered.filter(item => {
-                    const matchCode = !codeFilter || normalizeKey(item.classCode) === codeFilter;
-                    const matchRoom = !roomFilter || normalizeKey(item.classRoom) === roomFilter;
+            if (appState.hofTab === 'class') {
+                const fCode = normalizeKeyPart(appState.hofFilterCode);
+                const fRoom = normalizeKeyPart(appState.hofFilterRoom);
+                if (!fCode && !fRoom) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-slate-400">
+                                위 입력칸에 <strong class="text-yellow-300">학급 코드</strong>와 <strong class="text-yellow-300">반</strong>을 적고 <strong class="text-yellow-300">조회</strong> 버튼을 눌러주세요.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+                list = list.filter(r => {
+                    const matchCode = !fCode || normalizeKeyPart(r.classCode) === fCode;
+                    const matchRoom = !fRoom || normalizeKeyPart(r.classRoom) === fRoom;
                     return matchCode && matchRoom;
                 });
             }
 
-            filtered.sort((a, b) => {
-                const scoreDiff = Number(b.score || 0) - Number(a.score || 0);
-                if (scoreDiff !== 0) return scoreDiff;
-                return Number(b.wordsDestroyed || 0) - Number(a.wordsDestroyed || 0);
-            });
+            list.sort((a, b) => (b.score - a.score) || (b.kills - a.kills));
 
-            if (filtered.length === 0) {
-                const emptyText = appState.hofTabMode === 'class'
-                    ? '해당 학급 코드와 반의 등록된 기록이 아직 없습니다.'
-                    : '아직 명예의 전당에 등록된 기록이 없습니다. 첫 주인공이 되어보세요!';
+            if (list.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" class="py-8 text-center text-slate-400 text-xs sm:text-sm">${escapeHtml(emptyText)}</td>
-                    </tr>
-                `;
+                        <td colspan="5" class="py-8 text-center text-slate-400">
+                            등록된 기록이 없습니다.
+                        </td>
+                    </tr>`;
                 return;
             }
 
-            tbody.innerHTML = filtered.slice(0, 50).map((item, idx) => {
+            tbody.innerHTML = list.map((item, idx) => {
                 const rank = idx + 1;
-                let rankBadge = `<span class="text-slate-300 font-bold">${rank}</span>`;
-                if (rank === 1) rankBadge = `<span class="text-base">👑</span>`;
-                else if (rank === 2) rankBadge = `<span class="text-base">🥈</span>`;
-                else if (rank === 3) rankBadge = `<span class="text-base">🥉</span>`;
-
+                const rankBadge = rank === 1 ? '👑 1' : rank === 2 ? '🥈 2' : rank === 3 ? '🥉 3' : `${rank}`;
+                const rowHighlight = rank === 1 ? 'bg-yellow-400/10 text-yellow-200' : 'text-slate-200';
                 return `
-                    <tr class="hover:bg-[#191538] transition">
-                        <td class="py-2.5 px-3 text-center">${rankBadge}</td>
+                    <tr class="${rowHighlight} hover:bg-[#1b173b]/60 transition">
+                        <td class="py-2.5 px-3 text-center font-bold">${rankBadge}</td>
                         <td class="py-2.5 px-3">
-                            <div class="font-bold text-white">${escapeHtml(item.nickname)}</div>
-                            <div class="text-[11px] text-cyan-300">${escapeHtml(item.classCode)} · ${escapeHtml(item.classRoom)}</div>
+                            <span class="font-bold text-white">${escapeHtml(item.nickname)}</span>
+                            <span class="text-[11px] text-cyan-300 ml-1.5">(${escapeHtml(item.classCode)} · ${escapeHtml(item.classRoom)})</span>
                         </td>
-                        <td class="py-2.5 px-3 text-right text-emerald-400 font-bold">${Number(item.wordsDestroyed || 0)}개</td>
-                        <td class="py-2.5 px-3 text-right text-yellow-400 font-bold">${Number(item.score || 0).toLocaleString()}점</td>
-                        <td class="py-2.5 px-3 text-right text-slate-300 hidden sm:table-cell">${Number(item.cpm || 0)} 타</td>
-                    </tr>
-                `;
+                        <td class="py-2.5 px-3 text-right text-emerald-400 font-bold">${item.kills || 0}개</td>
+                        <td class="py-2.5 px-3 text-right text-yellow-400 font-bold">${(item.score || 0).toLocaleString()}점</td>
+                        <td class="py-2.5 px-3 text-right text-slate-300 hidden sm:table-cell">${item.cpm || 0} 타</td>
+                    </tr>`;
             }).join('');
         }
 
         // ==========================================
-        // 6. SURVIVAL ARCADE GAME ENGINE & MATH QUIZ
+        // 6. GAMEPLAY ENGINE (WORDS, BOSS, SKILLS, MATH QUIZ)
         // ==========================================
-        const BASE_WORDS_PER_LEVEL = 6;
-        const BOSS_SCORE_STEP = 1000;
-
-        // 6학년 2학기 수학: 비례식과 비례배분 (기본 문제 풀)
-        const QUIZ_NORMAL_POOL = [
-            {
-                q: '비 3 : 5의 전항과 후항에 각각 4를 곱한 비와 같은 것은?',
-                choices: ['12 : 20', '7 : 9', '12 : 5', '3 : 20'],
-                answer: '12 : 20'
-            },
-            {
-                q: '24 : 36을 가장 간단한 자연수의 비로 나타내면?',
-                choices: ['2 : 3', '3 : 4', '4 : 6', '3 : 2'],
-                answer: '2 : 3'
-            },
-            {
-                q: '소수의 비  0.6 : 1.5 를 가장 간단한 자연수의 비로 나타내면?',
-                choices: ['2 : 5', '3 : 5', '2 : 3', '6 : 5'],
-                answer: '2 : 5'
-            },
-            {
-                q: '분수의 비  1/3 : 1/4 을 가장 간단한 자연수의 비로 나타내면?',
-                choices: ['4 : 3', '3 : 4', '1 : 12', '4 : 1'],
-                answer: '4 : 3'
-            },
-            {
-                q: '비례식  4 : 7 = 12 : □  에서 □ 안에 알맞은 수는?',
-                choices: ['21', '15', '28', '19'],
-                answer: '21'
-            },
-            {
-                q: '비례식  □ : 9 = 10 : 15  에서 □ 안에 알맞은 수는?',
-                choices: ['6', '5', '7', '8'],
-                answer: '6'
-            },
-            {
-                q: '비례식  5 : 8 = □ : 32  에서 외항의 곱은 얼마인가요?',
-                choices: ['160', '40', '20', '128'],
-                answer: '160'
-            },
-            {
-                q: '비례식  6 : □ = 9 : 12  에서 내항의 곱은 얼마인가요?',
-                choices: ['72', '54', '108', '60'],
-                answer: '72'
-            },
-            {
-                q: '사탕 35개를 지수와 민호가 3 : 4로 나누어 가질 때, 지수가 가지는 사탕은 몇 개인가요?',
-                choices: ['15개', '20개', '12개', '18개'],
-                answer: '15개'
-            },
-            {
-                q: '끈 48cm를 5 : 3으로 나누어 가질 때, 더 짧은 끈의 길이는?',
-                choices: ['18cm', '30cm', '15cm', '24cm'],
-                answer: '18cm'
-            },
-            {
-                q: '가로와 세로의 비가 5 : 3인 직사각형의 가로가 25cm일 때, 세로는 몇 cm인가요?',
-                choices: ['15cm', '20cm', '9cm', '18cm'],
-                answer: '15cm'
-            },
-            {
-                q: '우유와 딸기즙을 7 : 2로 섞어 딸기우유 450mL를 만들었습니다. 필요한 우유는?',
-                choices: ['350mL', '100mL', '300mL', '400mL'],
-                answer: '350mL'
-            },
-            {
-                q: '다음 중 비례식이 바르게 성립하는 것은 어느 것인가요?',
-                choices: ['3 : 5 = 9 : 15', '2 : 3 = 4 : 9', '4 : 5 = 8 : 15', '3 : 7 = 6 : 21'],
-                answer: '3 : 5 = 9 : 15'
-            },
-            {
-                q: '1.2 : 0.8 을 가장 간단한 자연수의 비로 나타내면?',
-                choices: ['3 : 2', '2 : 3', '6 : 4', '4 : 3'],
-                answer: '3 : 2'
-            },
-            {
-                q: '빵 54개를 형과 동생이 5 : 4로 비례배분할 때, 형이 받는 빵은 몇 개인가요?',
-                choices: ['30개', '24개', '25개', '36개'],
-                answer: '30개'
-            },
-            {
-                q: '비례식  14 : 21 = □ : 6  에서 □ 안에 알맞은 수는?',
-                choices: ['4', '3', '5', '6'],
-                answer: '4'
-            },
-            {
-                q: '구슬 60개를 빨간색과 파란색이 7 : 5가 되도록 나눌 때, 두 색 구슬 수의 차는?',
-                choices: ['10개', '12개', '15개', '5개'],
-                answer: '10개'
-            },
-            {
-                q: '비례식  (□ + 1) : 4 = 9 : 12  에서 □ 안에 알맞은 수는?',
-                choices: ['2', '3', '4', '1'],
-                answer: '2'
-            }
-        ];
-
-        // 6학년 2학기 수학: 비례식과 비례배분 (1차 오답 시 출제되는 조금 더 쉬운 문제 풀)
-        const QUIZ_EASY_POOL = [
-            {
-                q: '[쉬운 문제] 비 2 : 3의 전항과 후항에 각각 2를 곱한 비는?',
-                choices: ['4 : 6', '4 : 3', '2 : 6', '3 : 2'],
-                answer: '4 : 6'
-            },
-            {
-                q: '[쉬운 문제] 비 10 : 15를 가장 간단한 자연수의 비로 나타내면?',
-                choices: ['2 : 3', '3 : 2', '5 : 3', '2 : 5'],
-                answer: '2 : 3'
-            },
-            {
-                q: '[쉬운 문제] 비례식  2 : 5 = 4 : □  에서 □ 안에 알맞은 수는?',
-                choices: ['10', '7', '8', '20'],
-                answer: '10'
-            },
-            {
-                q: '[쉬운 문제] 비례식  3 : 4 = □ : 8  에서 □ 안에 알맞은 수는?',
-                choices: ['6', '5', '7', '12'],
-                answer: '6'
-            },
-            {
-                q: '[쉬운 문제] 비례식  2 : 3 = 6 : 9  에서 바깥쪽에 있는 두 항(외항)은?',
-                choices: ['2와 9', '3과 6', '2와 3', '6과 9'],
-                answer: '2와 9'
-            },
-            {
-                q: '[쉬운 문제] 비례식  4 : 5 = 8 : 10  에서 안쪽에 있는 두 항(내항)은?',
-                choices: ['5와 8', '4와 10', '4와 5', '8과 10'],
-                answer: '5와 8'
-            },
-            {
-                q: '[쉬운 문제] 사탕 10개를 2 : 3으로 나누어 가질 때, 각각 몇 개씩인가요?',
-                choices: ['4개, 6개', '2개, 8개', '5개, 5개', '3개, 7개'],
-                answer: '4개, 6개'
-            },
-            {
-                q: '[쉬운 문제] 연필 15자루를 1 : 2로 나눌 때, 더 많이 가지는 쪽은 몇 자루인가요?',
-                choices: ['10자루', '5자루', '12자루', '8자루'],
-                answer: '10자루'
-            },
-            {
-                q: '[쉬운 문제] 비 6 : 8을 가장 간단한 자연수의 비로 나타내면?',
-                choices: ['3 : 4', '4 : 3', '2 : 4', '6 : 4'],
-                answer: '3 : 4'
-            },
-            {
-                q: '[쉬운 문제] 비례식  1 : 4 = 3 : □  에서 □ 안에 알맞은 수는?',
-                choices: ['12', '7', '8', '16'],
-                answer: '12'
-            },
-            {
-                q: '[쉬운 문제] 귤 20개를 3 : 1로 나누어 가질 때, 3에 해당하는 몫은 몇 개인가요?',
-                choices: ['15개', '5개', '10개', '12개'],
-                answer: '15개'
-            },
-            {
-                q: '[쉬운 문제] 비례식  □ : 2 = 6 : 4  에서 □ 안에 알맞은 수는?',
-                choices: ['3', '2', '4', '1'],
-                answer: '3'
-            }
-        ];
-
-        const usedNormalQuizIndices = new Set();
-        const usedEasyQuizIndices = new Set();
-
-        function getWordsNeededForLevel(level) {
-            return BASE_WORDS_PER_LEVEL + (Math.max(1, level) - 1) * 2;
-        }
-
-        function pickNextQuizQuestion(isEasy = false) {
-            const pool = isEasy ? QUIZ_EASY_POOL : QUIZ_NORMAL_POOL;
-            const usedSet = isEasy ? usedEasyQuizIndices : usedNormalQuizIndices;
-
-            if (usedSet.size >= pool.length) {
-                usedSet.clear();
-            }
-
-            const candidates = [];
-            for (let i = 0; i < pool.length; i++) {
-                if (!usedSet.has(i)) candidates.push(i);
-            }
-            const chosenIdx = candidates[Math.floor(Math.random() * candidates.length)];
-            usedSet.add(chosenIdx);
-
-            const item = pool[chosenIdx];
-            const shuffledChoices = [...item.choices].sort(() => Math.random() - 0.5);
-            return {
-                q: item.q,
-                choices: shuffledChoices,
-                answer: item.answer
-            };
-        }
-
         const game = {
             active: false,
-            pausedForSkill: false,
-            pausedForQuiz: false,
-            quizAttempt: 1,
-            currentQuizData: null,
-            levelUpTimerId: null,
+            paused: false,
             animId: null,
             lastFrameTime: 0,
             startTime: 0,
-            spawnTimer: 0,
-            autoTurretTimer: 0,
-            freezeRemaining: 0,
-            words: [],
-            lasers: [],
-            particles: [],
-            floatingTexts: [],
-            stars: [],
-            // Player Stats
+            pausedAccumMs: 0,
+            pauseStartedAt: 0,
             lives: 3,
             maxLives: 5,
             score: 0,
+            kills: 0,
             combo: 0,
             maxCombo: 0,
-            wordsDestroyed: 0,
             totalTypedChars: 0,
             level: 1,
-            expProgress: 0,
-            skills: {
-                turret: 0,
-                scoreBoost: 0,
-                freezeWave: 0,
-                pierceLaser: 0,
-                awakeningOverdrive: 0
-            },
-            // Boss State
-            nextBossScore: BOSS_SCORE_STEP,
-            bossCount: 0,
+            expInLevel: 0,
+            requiredForNextLevel: 6,
+            spawnTimer: 0,
+            words: [],
+            lasers: [],
+            particles: [],
+            stars: [],
             boss: null,
-            skillChoices: []
+            nextBossScore: 1000,
+            bossCount: 0,
+            freezeUntil: 0,
+            feverUntil: 0,
+            usedPrimaryQuizIndices: new Set(),
+            usedEasierQuizIndices: new Set(),
+            currentQuiz: null,
+            isQuizRetry: false,
+            skills: {
+                autoTurret: 0,
+                multiLaser: 0,
+                scoreBoost: 0,
+                slowField: 0,
+                awakened: false
+            },
+            autoTurretTimer: 0
         };
 
-        let lastWordClearedAt = 0;
+        function getRequiredKillsForLevel(lv) {
+            // Lv.1 -> 6, Lv.2 -> 8, Lv.3 -> 10, Lv.4 -> 12 ...
+            return 6 + (lv - 1) * 2;
+        }
 
-        function clearWordInputSafely() {
-            const input = document.getElementById('wordInput');
-            if (!input) return;
-            lastWordClearedAt = performance.now();
-            input.value = '';
-            // Force Korean IME composition flush so trailing syllable doesn't bleed into next word
-            input.blur();
-            input.value = '';
-            setTimeout(() => {
-                if (game.active && !game.pausedForQuiz && !game.pausedForSkill) {
-                    input.value = '';
-                    input.focus();
-                }
-            }, 0);
+        function initCanvasStars(w, h) {
+            game.stars = [];
+            for (let i = 0; i < 42; i++) {
+                game.stars.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    size: Math.random() < 0.3 ? 2 : 1,
+                    speed: 14 + Math.random() * 28,
+                    alpha: 0.35 + Math.random() * 0.65
+                });
+            }
         }
 
         function resizeGameCanvas() {
             const wrapper = document.getElementById('canvasWrapper');
             const canvas = document.getElementById('gameCanvas');
             if (!wrapper || !canvas) return;
-            canvas.width = Math.max(320, wrapper.clientWidth);
-            canvas.height = Math.max(220, wrapper.clientHeight);
-        }
-
-        function initStarfield(width, height) {
-            game.stars = [];
-            for (let i = 0; i < 45; i++) {
-                game.stars.push({
-                    x: Math.random() * width,
-                    y: Math.random() * height,
-                    size: Math.random() < 0.7 ? 2 : 3,
-                    speed: 14 + Math.random() * 34,
-                    alpha: 0.35 + Math.random() * 0.65
-                });
+            const rect = wrapper.getBoundingClientRect();
+            canvas.width = Math.max(300, Math.floor(rect.width));
+            canvas.height = Math.max(220, Math.floor(rect.height));
+            if (game.stars.length === 0) {
+                initCanvasStars(canvas.width, canvas.height);
             }
         }
 
-        function startNewGame() {
-            stopGame();
-            showScreen('gameScreen');
-
-            document.getElementById('arcadeFrame').classList.remove('fever-active');
-            document.getElementById('skillSelectModal').classList.add('hidden');
-            document.getElementById('skillSelectModal').classList.remove('flex');
-            document.getElementById('mathQuizModal').classList.add('hidden');
-            document.getElementById('mathQuizModal').classList.remove('flex');
-            document.getElementById('levelUpBanner').classList.add('hidden');
-
-            resizeGameCanvas();
-            const canvas = document.getElementById('gameCanvas');
-            initStarfield(canvas.width || 640, canvas.height || 300);
-
-            game.active = true;
-            game.pausedForSkill = false;
-            game.pausedForQuiz = false;
-            game.quizAttempt = 1;
-            game.currentQuizData = null;
-            game.startTime = Date.now();
-            game.lastFrameTime = performance.now();
-            game.spawnTimer = 0.2;
-            game.autoTurretTimer = 0;
-            game.freezeRemaining = 0;
-
-            game.words = [];
-            game.lasers = [];
-            game.particles = [];
-            game.floatingTexts = [];
-
-            game.lives = 3;
-            game.score = 0;
-            game.combo = 0;
-            game.maxCombo = 0;
-            game.wordsDestroyed = 0;
-            game.totalTypedChars = 0;
-            game.level = 1;
-            game.expProgress = 0;
-            game.skills = {
-                turret: 0,
-                scoreBoost: 0,
-                freezeWave: 0,
-                pierceLaser: 0,
-                awakeningOverdrive: 0
-            };
-
-            game.nextBossScore = BOSS_SCORE_STEP;
-            game.bossCount = 0;
-            game.boss = null;
-            game.skillChoices = [];
-
-            document.getElementById('pilotHudLabel').textContent = `🐹 ${appState.nickname}`;
-            updateGameHud();
-
-            // Spawn initial 2 words immediately
-            spawnEnemyWord();
-            spawnEnemyWord();
-
-            const input = document.getElementById('wordInput');
-            input.value = '';
-            setTimeout(() => input.focus(), 40);
-
-            game.animId = requestAnimationFrame(gameLoop);
-        }
-
-        function stopGame() {
-            game.active = false;
-            game.pausedForSkill = false;
-            game.pausedForQuiz = false;
-            if (game.levelUpTimerId) {
-                clearTimeout(game.levelUpTimerId);
-                game.levelUpTimerId = null;
-            }
-            if (game.animId) {
-                cancelAnimationFrame(game.animId);
-                game.animId = null;
-            }
-        }
-
-        function pickRandomWordText(isBoss = false) {
-            let pool = WORDS_KO;
+        function pickRandomWord(isBoss = false) {
+            const lang = appState.lang;
             if (isBoss) {
-                if (appState.lang === 'en') pool = BOSS_WORDS_EN;
-                else if (appState.lang === 'mix') pool = [...BOSS_WORDS_KO, ...BOSS_WORDS_EN];
-                else pool = BOSS_WORDS_KO;
-            } else {
-                if (appState.lang === 'en') pool = WORDS_EN;
-                else if (appState.lang === 'mix') pool = [...WORDS_KO, ...WORDS_EN];
-                else pool = WORDS_KO;
+                const pool = lang === 'en' ? BOSS_WORDS_EN :
+                             lang === 'mix' ? [...BOSS_WORDS_KO, ...BOSS_WORDS_EN] :
+                             BOSS_WORDS_KO;
+                return pool[Math.floor(Math.random() * pool.length)];
             }
-
-            const existingTexts = new Set(game.words.map(w => w.text));
-            const filtered = pool.filter(w => !existingTexts.has(w));
-            const source = filtered.length > 0 ? filtered : pool;
-            return source[Math.floor(Math.random() * source.length)];
+            const pool = lang === 'en' ? WORDS_EN :
+                         lang === 'mix' ? [...WORDS_KO, ...WORDS_EN] :
+                         WORDS_KO;
+            return pool[Math.floor(Math.random() * pool.length)];
         }
 
-        function spawnEnemyWord() {
+        function spawnFallingWord() {
             const canvas = document.getElementById('gameCanvas');
-            const w = canvas ? canvas.width : 640;
-            const text = pickRandomWordText(false);
-            const margin = 65;
-            const x = margin + Math.random() * Math.max(80, w - margin * 2);
-
-            const baseSpeed = 30 + (game.level - 1) * 4.5 + Math.min(28, game.wordsDestroyed * 0.45);
-            const freezeMult = game.skills.freezeWave > 0 ? Math.max(0.45, 1 - game.skills.freezeWave * 0.2) : 1;
-            const activeFreeze = game.freezeRemaining > 0 ? 0.35 : 1;
+            if (!canvas) return;
+            const text = pickRandomWord(false);
+            const margin = 56;
+            const x = margin + Math.random() * Math.max(40, canvas.width - margin * 2);
+            const baseSpeed = 24 + (game.level - 1) * 4.5 + Math.min(28, game.kills * 0.35);
+            const slowFactor = Math.max(0.55, 1 - game.skills.slowField * 0.12);
+            const isSpecialFreeze = Math.random() < 0.08;
+            const isSpecialFever = !isSpecialFreeze && Math.random() < 0.08;
 
             game.words.push({
-                id: `${Date.now()}_${Math.random()}`,
                 text,
                 x,
                 y: 22,
-                speed: baseSpeed * freezeMult * activeFreeze * (0.9 + Math.random() * 0.25),
-                isBossWord: false
+                speed: baseSpeed * slowFactor * (0.9 + Math.random() * 0.25),
+                special: isSpecialFreeze ? 'freeze' : isSpecialFever ? 'fever' : 'normal'
             });
         }
 
-        function spawnBossIfNeeded() {
-            if (game.boss || game.score < game.nextBossScore) return;
+        function spawnBoss() {
             const canvas = document.getElementById('gameCanvas');
-            const w = canvas ? canvas.width : 640;
+            if (!canvas) return;
             const profile = BOSS_PROFILES[game.bossCount % BOSS_PROFILES.length];
-            const scale = 1 + Math.floor(game.bossCount / BOSS_PROFILES.length) * 0.4;
-            const maxHp = Math.round(profile.baseHp * scale);
-
+            const cycle = Math.floor(game.bossCount / BOSS_PROFILES.length) + 1;
+            const maxHp = profile.baseHp * cycle;
             game.bossCount += 1;
-            game.nextBossScore += BOSS_SCORE_STEP;
-
             game.boss = {
                 name: profile.name,
                 color: profile.color,
-                x: w / 2,
-                y: 44,
                 hp: maxHp,
                 maxHp,
-                word: pickRandomWordText(true)
+                word: pickRandomWord(true),
+                x: canvas.width / 2,
+                y: 54,
+                dir: 1
             };
-
-            addFloatingText(w / 2, 76, `⚠️ ${profile.name} 출현!`, '#f43f5e');
-            sfx.bossHit();
+            showToast(`👾 경고! [${profile.name}] 출현!`);
         }
 
-        function addFloatingText(x, y, text, color = '#facc15') {
-            game.floatingTexts.push({
-                x,
-                y,
-                text,
-                color,
-                life: 1.0
-            });
-        }
-
-        function spawnExplosion(x, y, color = '#facc15', count = 14) {
+        function createExplosion(x, y, color = '#facc15', count = 14) {
             for (let i = 0; i < count; i++) {
                 const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
-                const speed = 55 + Math.random() * 125;
+                const speed = 50 + Math.random() * 120;
                 game.particles.push({
                     x,
                     y,
                     vx: Math.cos(angle) * speed,
                     vy: Math.sin(angle) * speed,
-                    size: Math.random() < 0.6 ? 3 : 5,
+                    life: 0.45 + Math.random() * 0.25,
+                    maxLife: 0.7,
                     color,
-                    life: 0.55 + Math.random() * 0.35
+                    size: 2 + Math.floor(Math.random() * 3)
                 });
             }
         }
 
-        function fireLaserBeam(targetX, targetY, color = '#38bdf8') {
+        function fireLaserAt(targetX, targetY, color = '#38bdf8') {
             const canvas = document.getElementById('gameCanvas');
-            const w = canvas ? canvas.width : 640;
-            const h = canvas ? canvas.height : 300;
+            if (!canvas) return;
             game.lasers.push({
-                x1: w / 2,
-                y1: h - 34,
+                x1: canvas.width / 2,
+                y1: canvas.height - 34,
                 x2: targetX,
                 y2: targetY,
-                color,
-                life: 0.22
+                life: 0.16,
+                color
             });
         }
 
-        function calculatePointsForWord(wordLength) {
-            let pts = 35 + wordLength * 12 + Math.min(80, game.combo * 5);
-            if (game.combo >= 5) pts *= 2; // Fever x2
-            if (game.skills.scoreBoost > 0) {
-                pts *= 1 + game.skills.scoreBoost * 0.5;
+        function pauseGameForModal() {
+            if (!game.paused) {
+                game.paused = true;
+                game.pauseStartedAt = Date.now();
             }
-            if (game.skills.awakeningOverdrive > 0) {
-                pts *= 2;
-            }
-            return Math.round(pts);
+            setGameplayBlur(true);
+            updateGameHud();
         }
 
-        function destroyEnemyWord(wordObj, source = 'manual', allowChain = true) {
-            const idx = game.words.findIndex(w => w.id === wordObj.id);
-            if (idx === -1) return;
-            game.words.splice(idx, 1);
-
-            game.wordsDestroyed += 1;
-            game.totalTypedChars += wordObj.text.length;
-
-            const earned = calculatePointsForWord(wordObj.text.length);
-            game.score += earned;
-
-            fireLaserBeam(wordObj.x, wordObj.y, source === 'auto' ? '#facc15' : '#38bdf8');
-            spawnExplosion(wordObj.x, wordObj.y, source === 'auto' ? '#facc15' : '#4ade80', 14);
-            addFloatingText(wordObj.x, wordObj.y - 10, `+${earned}`, '#facc15');
-            sfx.hit();
-
-            // Chain plasma skill
-            if (allowChain && game.skills.pierceLaser > 0 && game.words.length > 0) {
-                const nearest = [...game.words].sort(
-                    (a, b) => Math.hypot(a.x - wordObj.x, a.y - wordObj.y) - Math.hypot(b.x - wordObj.x, b.y - wordObj.y)
-                )[0];
-                if (nearest) {
-                    destroyEnemyWord(nearest, 'auto', false);
+        function resumeGameFromModal() {
+            if (game.paused) {
+                const pausedDelta = Date.now() - game.pauseStartedAt;
+                game.paused = false;
+                game.pausedAccumMs += pausedDelta;
+                if (game.freezeUntil > game.pauseStartedAt) {
+                    game.freezeUntil += pausedDelta;
                 }
+                if (game.feverUntil > game.pauseStartedAt) {
+                    game.feverUntil += pausedDelta;
+                }
+                game.lastFrameTime = performance.now();
             }
-
-            spawnBossIfNeeded();
+            setGameplayBlur(false);
             updateGameHud();
-
-            if (!game.pausedForQuiz && !game.pausedForSkill) {
-                gainExpAndCheckLevelUp();
+            const input = document.getElementById('wordInput');
+            if (input && game.active) {
+                setTimeout(() => input.focus(), 30);
             }
         }
 
-        function damageBoss() {
-            if (!game.boss) return;
-            const dmg = 45 + game.level * 8 + game.skills.pierceLaser * 15;
-            game.boss.hp = Math.max(0, game.boss.hp - dmg);
-            game.wordsDestroyed += 1;
-            game.totalTypedChars += game.boss.word.length;
-
-            const hitPts = calculatePointsForWord(game.boss.word.length);
-            game.score += hitPts;
-
-            fireLaserBeam(game.boss.x, game.boss.y + 12, '#f43f5e');
-            spawnExplosion(game.boss.x, game.boss.y + 10, '#f43f5e', 18);
-            addFloatingText(game.boss.x, game.boss.y + 28, `-${dmg} HP! (+${hitPts})`, '#fb7185');
-
-            if (game.boss.hp <= 0) {
-                const bonus = 350 + game.bossCount * 150;
-                game.score += bonus;
-                spawnExplosion(game.boss.x, game.boss.y, '#facc15', 32);
-                addFloatingText(game.boss.x, game.boss.y + 15, `🏆 보스 격파! +${bonus}점`, '#facc15');
-                sfx.bossDefeat();
-                game.boss = null;
-            } else {
-                sfx.bossHit();
-                game.boss.word = pickRandomWordText(true);
+        // Safely clears Korean IME composition buffer so trailing syllable never leaks to next word
+        function clearWordInputSafely() {
+            const input = document.getElementById('wordInput');
+            if (!input) return;
+            input.value = '';
+            const wasFocused = (document.activeElement === input);
+            if (wasFocused) {
+                input.blur();
             }
-
-            updateGameHud();
-            if (!game.pausedForQuiz && !game.pausedForSkill) {
-                gainExpAndCheckLevelUp();
+            input.value = '';
+            if (wasFocused && game.active && !game.paused) {
+                setTimeout(() => {
+                    input.value = '';
+                    input.focus();
+                }, 0);
             }
         }
 
-        function gainExpAndCheckLevelUp() {
-            const needed = getWordsNeededForLevel(game.level);
-            game.expProgress += 1;
-            if (game.expProgress >= needed) {
-                game.expProgress = needed;
-                updateGameHud();
-                openMathQuizModal(1);
+        function triggerDamageShake() {
+            const frame = document.getElementById('arcadeFrame');
+            if (!frame) return;
+            frame.classList.remove('damage-flash');
+            void frame.offsetWidth;
+            frame.classList.add('damage-flash');
+        }
+
+        function updateGameHud() {
+            const livesEl = document.getElementById('hudLives');
+            if (livesEl) {
+                livesEl.textContent = game.lives > 0 ? '❤️'.repeat(game.lives) : '💀';
+            }
+
+            const effectiveNow = game.paused ? game.pauseStartedAt : Date.now();
+            const elapsedSec = game.active
+                ? (effectiveNow - game.startTime - game.pausedAccumMs) / 1000
+                : 0;
+            const timeEl = document.getElementById('hudSurvivalTime');
+            if (timeEl) timeEl.textContent = formatElapsed(elapsedSec);
+
+            const scoreEl = document.getElementById('hudScore');
+            if (scoreEl) scoreEl.textContent = game.score.toLocaleString();
+
+            const comboEl = document.getElementById('hudCombo');
+            if (comboEl) comboEl.textContent = String(game.combo);
+
+            const killsEl = document.getElementById('hudKills');
+            if (killsEl) killsEl.textContent = `${game.kills}개`;
+
+            const cpm = elapsedSec > 1 ? Math.round((game.totalTypedChars / elapsedSec) * 60) : 0;
+            const cpmEl = document.getElementById('hudCpm');
+            if (cpmEl) cpmEl.textContent = `${cpm} 타/분`;
+
+            const lvBadge = document.getElementById('hudLevelBadge');
+            if (lvBadge) lvBadge.textContent = `Lv.${game.level}`;
+
+            const expText = document.getElementById('hudExpText');
+            if (expText) expText.textContent = `EXP ${game.expInLevel} / ${game.requiredForNextLevel}개`;
+
+            const expBar = document.getElementById('hudExpBar');
+            if (expBar) {
+                const pct = Math.min(100, Math.round((game.expInLevel / game.requiredForNextLevel) * 100));
+                expBar.style.width = `${pct}%`;
+            }
+
+            // Indicators
+            const feverEl = document.getElementById('feverIndicator');
+            const freezeEl = document.getElementById('freezeIndicator');
+            const awakeEl = document.getElementById('awakenedIndicator');
+            const frame = document.getElementById('arcadeFrame');
+
+            const isFever = effectiveNow < game.feverUntil;
+            if (feverEl) feverEl.classList.toggle('hidden', !isFever);
+            if (frame) frame.classList.toggle('fever-active', isFever);
+            if (freezeEl) freezeEl.classList.toggle('hidden', effectiveNow >= game.freezeUntil);
+            if (awakeEl) awakeEl.classList.toggle('hidden', !game.skills.awakened);
+
+            // Equipped skills pills
+            const skillsBox = document.getElementById('hudEquippedSkills');
+            if (skillsBox) {
+                const tags = [];
+                if (game.skills.autoTurret > 0) tags.push(`🤖 오토포탑 Lv.${game.skills.autoTurret}`);
+                if (game.skills.multiLaser > 0) tags.push(`⚡ 연쇄레이저 Lv.${game.skills.multiLaser}`);
+                if (game.skills.scoreBoost > 0) tags.push(`💎 점수증폭 Lv.${game.skills.scoreBoost}`);
+                if (game.skills.slowField > 0) tags.push(`❄️ 감속역장 Lv.${game.skills.slowField}`);
+                if (game.skills.awakened) tags.push(`🌟 초각성`);
+                skillsBox.innerHTML = tags.length > 0
+                    ? tags.map(t => `<span class="bg-[#1b173b] border border-cyan-400/50 text-cyan-200 px-1.5 py-0.5 rounded">${t}</span>`).join('')
+                    : `<span class="text-slate-400">보유 스킬: 없음</span>`;
             }
         }
 
-        function openMathQuizModal(attempt = 1, warningMsg = '') {
-            game.pausedForQuiz = true;
-            game.quizAttempt = attempt;
+        // ==========================================
+        // 7. 6TH GRADE 2ND SEMESTER MATH QUIZ & LEVEL UP
+        // ==========================================
+        function pickNonRepeatingQuiz(pool, usedSet) {
+            if (usedSet.size >= pool.length) {
+                usedSet.clear();
+            }
+            const available = [];
+            for (let i = 0; i < pool.length; i++) {
+                if (!usedSet.has(i)) available.push(i);
+            }
+            const chosenIdx = available[Math.floor(Math.random() * available.length)];
+            usedSet.add(chosenIdx);
+            return pool[chosenIdx];
+        }
 
-            const isEasy = attempt === 2;
-            const quiz = pickNextQuizQuestion(isEasy);
-            game.currentQuizData = quiz;
+        function openMathQuizForLevelUp(isRetry = false, alertMsg = '') {
+            pauseGameForModal();
+            game.isQuizRetry = isRetry;
+            const quiz = isRetry
+                ? pickNonRepeatingQuiz(MATH_QUIZ_EASIER, game.usedEasierQuizIndices)
+                : pickNonRepeatingQuiz(MATH_QUIZ_PRIMARY, game.usedPrimaryQuizIndices);
+            game.currentQuiz = quiz;
 
             const modal = document.getElementById('mathQuizModal');
             const badge = document.getElementById('quizAttemptBadge');
@@ -1822,349 +1669,565 @@
             const qText = document.getElementById('quizQuestionText');
             const grid = document.getElementById('quizChoicesGrid');
 
-            if (isEasy) {
-                badge.textContent = '📐 6학년 2학기 수학 · 보충 찬스 (조금 더 쉬운 문제)';
-                badge.className = 'text-[11px] sm:text-xs bg-amber-500/20 border border-amber-400/70 text-amber-300 px-3 py-0.5 rounded tracking-wider mb-1.5';
-                title.textContent = `🔄 마지막 기회! 맞히면 Lv.${game.level + 1} 달성!`;
-            } else {
-                badge.textContent = '📐 6학년 2학기 수학 · 비례식과 비례배분';
-                badge.className = 'text-[11px] sm:text-xs bg-cyan-500/20 border border-cyan-400/70 text-cyan-300 px-3 py-0.5 rounded tracking-wider mb-1.5';
+            if (badge) {
+                badge.textContent = isRetry
+                    ? '📐 6학년 2학기 수학 · 보너스 기초 비례식 문제'
+                    : '📐 6학년 2학기 수학 · 비례식과 비례배분';
+            }
+            if (title) {
                 title.textContent = `⚡ 레벨업 관문! 문제를 맞히면 Lv.${game.level + 1} 달성!`;
             }
+            if (alertBanner) {
+                if (alertMsg) {
+                    alertBanner.textContent = alertMsg;
+                    alertBanner.classList.remove('hidden');
+                } else {
+                    alertBanner.classList.add('hidden');
+                }
+            }
+            if (qText) qText.textContent = quiz.q;
 
-            if (warningMsg) {
-                alertBanner.textContent = warningMsg;
-                alertBanner.classList.remove('hidden');
-            } else {
-                alertBanner.classList.add('hidden');
+            if (grid) {
+                grid.innerHTML = quiz.choices.map((choiceText, idx) => `
+                    <button type="button" data-choice-idx="${idx}"
+                        class="quiz-choice-btn skill-card p-3 rounded text-left flex items-center gap-2.5 text-xs sm:text-sm text-white">
+                        <span class="bg-yellow-400 text-[#141129] font-bold px-2 py-0.5 rounded shrink-0">${idx + 1}</span>
+                        <span>${escapeHtml(choiceText)}</span>
+                    </button>
+                `).join('');
+
+                grid.querySelectorAll('.quiz-choice-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const chosen = Number(btn.getAttribute('data-choice-idx'));
+                        handleQuizAnswer(chosen);
+                    });
+                });
             }
 
-            qText.textContent = quiz.q;
-
-            grid.innerHTML = quiz.choices.map((choiceText, idx) => `
-                <button type="button" data-quiz-idx="${idx}"
-                    class="skill-card rounded-md p-3 text-left flex items-center gap-2.5">
-                    <span class="text-xs bg-yellow-400/20 border border-yellow-400/60 text-yellow-300 px-2 py-0.5 rounded font-bold shrink-0">
-                        ${idx + 1}
-                    </span>
-                    <span class="text-sm sm:text-base font-bold text-white">
-                        ${escapeHtml(choiceText)}
-                    </span>
-                </button>
-            `).join('');
-
-            grid.querySelectorAll('[data-quiz-idx]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const idx = Number(btn.getAttribute('data-quiz-idx'));
-                    handleQuizAnswer(idx);
-                });
-            });
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
         }
 
         function closeMathQuizModal() {
             const modal = document.getElementById('mathQuizModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            game.pausedForQuiz = false;
-            game.currentQuizData = null;
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            game.currentQuiz = null;
         }
 
         function handleQuizAnswer(choiceIdx) {
-            if (!game.pausedForQuiz || !game.currentQuizData) return;
-            const chosen = game.currentQuizData.choices[choiceIdx];
-            if (chosen === undefined) return;
-
-            const isCorrect = chosen === game.currentQuizData.answer;
+            if (!game.currentQuiz) return;
+            const isCorrect = (choiceIdx === game.currentQuiz.answer);
 
             if (isCorrect) {
                 closeMathQuizModal();
-                game.expProgress = 0;
-                game.level += 1;
-                updateGameHud();
-                triggerLevelUpSequence();
+                proceedToLevelUpCelebration();
                 return;
             }
 
-            // Wrong answer: deduct 1 life
+            // Incorrect answer: deduct 1 life
+            sfx.error();
+            triggerDamageShake();
             game.lives -= 1;
-            game.combo = 0;
-            sfx.damage();
-            const frame = document.getElementById('arcadeFrame');
-            frame.classList.remove('damage-flash');
-            void frame.offsetWidth;
-            frame.classList.add('damage-flash');
             updateGameHud();
 
             if (game.lives <= 0) {
                 closeMathQuizModal();
-                handlePlayerDeath();
+                triggerGameOver();
                 return;
             }
 
-            if (game.quizAttempt === 1) {
-                openMathQuizModal(
-                    2,
-                    `❌ 오답입니다! 목숨이 1개 줄었습니다. (남은 생명: ${game.lives}개) 조금 더 쉬운 문제에 도전하세요!`
+            if (!game.isQuizRetry) {
+                // 1st wrong -> deduct 1 life & show easier problem
+                openMathQuizForLevelUp(
+                    true,
+                    '❌ 오답입니다! 목숨이 1개 차감되었습니다. 조금 더 쉬운 문제에 도전하세요!'
                 );
             } else {
+                // 2nd wrong -> deduct 1 life & continue game without leveling up
                 closeMathQuizModal();
-                game.expProgress = 0;
-                game.lastFrameTime = performance.now();
+                game.expInLevel = 0;
                 updateGameHud();
-                showToast('❌ 오답! 목숨이 1개 줄었습니다. 레벨업 없이 게임을 계속 진행합니다!', 3000);
-                const input = document.getElementById('wordInput');
-                setTimeout(() => input.focus(), 30);
+                showToast('❌ 아쉽습니다! 목숨 1개 차감 후 현재 레벨로 게임을 계속합니다.');
+                resumeGameFromModal();
             }
         }
 
-        function triggerLevelUpSequence() {
+        function proceedToLevelUpCelebration() {
+            pauseGameForModal();
+            game.level += 1;
+            game.expInLevel = 0;
+            game.requiredForNextLevel = getRequiredKillsForLevel(game.level);
             sfx.levelUp();
-            const banner = document.getElementById('levelUpBanner');
-            const bannerText = document.getElementById('levelUpBannerText');
-            bannerText.textContent = `Lv.${game.level} UP!`;
-            banner.classList.remove('hidden');
+            updateGameHud();
 
-            if (game.levelUpTimerId) clearTimeout(game.levelUpTimerId);
-            game.levelUpTimerId = setTimeout(() => {
-                game.levelUpTimerId = null;
-                banner.classList.add('hidden');
-                if (!game.active) return;
-                openSkillSelectionModal();
+            const levelModal = document.getElementById('levelUpModal');
+            const bannerText = document.getElementById('levelUpBannerText');
+            if (bannerText) bannerText.textContent = `Lv.${game.level} UP!`;
+            if (levelModal) {
+                levelModal.classList.remove('hidden');
+                levelModal.classList.add('flex');
+            }
+
+            // Show Lv.N UP! window with blurred background & frozen time for 2 seconds, then open 3-skill modal
+            setTimeout(() => {
+                if (levelModal) {
+                    levelModal.classList.add('hidden');
+                    levelModal.classList.remove('flex');
+                }
+                if (!game.active) {
+                    setGameplayBlur(false);
+                    return;
+                }
+                openSkillSelectModal();
             }, 2000);
         }
 
-        function openSkillSelectionModal() {
-            game.pausedForSkill = true;
-
-            const normalPool = SKILL_CATALOG.filter(s => !s.awakening);
-            const awakeningSkill = SKILL_CATALOG.find(s => s.awakening);
-            const shuffled = [...normalPool].sort(() => Math.random() - 0.5);
-            const picked = shuffled.slice(0, 3);
-
-            if (game.level >= 3 && game.skills.awakeningOverdrive === 0 && awakeningSkill && Math.random() < 0.45) {
-                picked[2] = awakeningSkill;
+        const ALL_SKILL_POOL = [
+            {
+                id: 'autoTurret',
+                icon: '🤖',
+                name: '오토 타자 포탑',
+                desc: '일정 시간마다 가장 아래 단어를 자동으로 격추합니다.',
+                apply: () => { game.skills.autoTurret += 1; }
+            },
+            {
+                id: 'multiLaser',
+                icon: '⚡',
+                name: '연쇄 레이저포',
+                desc: '단어 격추 시 주변 단어 1개를 추가로 함께 파괴합니다.',
+                apply: () => { game.skills.multiLaser += 1; }
+            },
+            {
+                id: 'scoreBoost',
+                icon: '💎',
+                name: '점수 증폭 코어',
+                desc: '단어 격추 및 보스 타격 점수가 +35% 증가합니다.',
+                apply: () => { game.skills.scoreBoost += 1; }
+            },
+            {
+                id: 'slowField',
+                icon: '❄️',
+                name: '중력 감속 역장',
+                desc: '낙하하는 단어의 하강 속도를 영구적으로 늦춥니다.',
+                apply: () => { game.skills.slowField += 1; }
+            },
+            {
+                id: 'healShip',
+                icon: '💖',
+                name: '긴급 선체 수리',
+                desc: '생명(HP)을 즉시 1칸 회복하고 화면의 단어를 밀어냅니다.',
+                apply: () => {
+                    game.lives = Math.min(game.maxLives, game.lives + 1);
+                    game.words.forEach(w => { w.y = Math.max(20, w.y - 65); });
+                }
             }
-            game.skillChoices = picked;
+        ];
 
-            document.getElementById('skillModalTitle').textContent = `⚡ Lv.${game.level} 달성! 스킬을 선택하세요`;
+        let currentSkillChoices = [];
+
+        function openSkillSelectModal() {
+            pauseGameForModal();
+            const modal = document.getElementById('skillSelectModal');
+            const title = document.getElementById('skillModalTitle');
             const grid = document.getElementById('skillCardsGrid');
-            grid.innerHTML = picked.map((skill, idx) => `
-                <button type="button" data-skill-idx="${idx}"
-                    class="skill-card ${skill.awakening ? 'awakening-card' : ''} rounded-md p-3.5 text-left flex flex-col justify-between gap-2">
-                    <div>
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-2xl">${skill.icon}</span>
-                            <span class="text-[11px] bg-yellow-400/20 border border-yellow-400/60 text-yellow-300 px-2 py-0.5 rounded font-bold">
-                                [${idx + 1}]
-                            </span>
-                        </div>
-                        <div class="text-sm font-bold ${skill.awakening ? 'text-yellow-300' : 'text-white'} mb-1">
-                            ${escapeHtml(skill.name)}
-                        </div>
-                        <p class="text-[11px] text-slate-300 leading-relaxed">
-                            ${escapeHtml(skill.desc)}
-                        </p>
-                    </div>
-                </button>
-            `).join('');
+            if (title) title.textContent = `⚡ Lv.${game.level} 달성! 스킬을 선택하세요`;
 
-            grid.querySelectorAll('[data-skill-idx]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const idx = Number(btn.getAttribute('data-skill-idx'));
-                    applySelectedSkill(idx);
+            const shuffled = [...ALL_SKILL_POOL].sort(() => Math.random() - 0.5).slice(0, 3);
+            const totalSkillLv = game.skills.autoTurret + game.skills.multiLaser + game.skills.scoreBoost + game.skills.slowField;
+            if (totalSkillLv >= 4 && !game.skills.awakened) {
+                shuffled[2] = {
+                    id: 'awakening',
+                    icon: '🌟',
+                    name: '초각성: 쿼카 오버드라이브',
+                    desc: '오토 포탑 속도가 2배로 폭주하고 모든 점수가 대폭 상승합니다!',
+                    awakening: true,
+                    apply: () => { game.skills.awakened = true; }
+                };
+            }
+            currentSkillChoices = shuffled;
+
+            if (grid) {
+                grid.innerHTML = shuffled.map((sk, idx) => `
+                    <button type="button" data-skill-idx="${idx}"
+                        class="skill-card-btn skill-card ${sk.awakening ? 'awakening-card' : ''} p-4 rounded-md flex flex-col items-center text-center gap-2">
+                        <div class="text-xs bg-yellow-400 text-[#141129] font-bold px-2 py-0.5 rounded">[${idx + 1}] 선택</div>
+                        <div class="text-3xl">${sk.icon}</div>
+                        <div class="text-sm sm:text-base font-bold text-yellow-300">${escapeHtml(sk.name)}</div>
+                        <div class="text-xs text-slate-300 leading-relaxed">${escapeHtml(sk.desc)}</div>
+                    </button>
+                `).join('');
+
+                grid.querySelectorAll('.skill-card-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const idx = Number(btn.getAttribute('data-skill-idx'));
+                        selectSkillChoice(idx);
+                    });
                 });
-            });
+            }
 
-            const modal = document.getElementById('skillSelectModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
         }
 
-        function applySelectedSkill(idx) {
-            if (!game.pausedForSkill) return;
-            const chosen = game.skillChoices[idx];
+        function selectSkillChoice(idx) {
+            const chosen = currentSkillChoices[idx];
             if (!chosen) return;
-
-            sfx.click();
-
-            if (chosen.id === 'healShip') {
-                game.lives = Math.min(game.maxLives, game.lives + 1);
-                game.score += 150;
-                showToast('💖 생명 +1 회복 및 +150점 보너스!');
-            } else if (chosen.id === 'freezeWave') {
-                game.skills.freezeWave += 1;
-                game.freezeRemaining = 4.5;
-                showToast('❄️ 빙결 충격파 발동! 적 단어가 얼어붙습니다!');
-            } else {
-                game.skills[chosen.id] = (game.skills[chosen.id] || 0) + 1;
-                showToast(`${chosen.icon} ${chosen.name} 장착 완료!`);
-            }
-
+            chosen.apply();
+            currentSkillChoices = [];
             const modal = document.getElementById('skillSelectModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            game.pausedForSkill = false;
-            game.lastFrameTime = performance.now();
-
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            sfx.hit();
             updateGameHud();
-            const input = document.getElementById('wordInput');
-            setTimeout(() => input.focus(), 30);
+            showToast(`✨ [${chosen.name}] 스킬 장착 완료!`);
+            resumeGameFromModal();
         }
 
-        function updateGameHud() {
-            const needed = getWordsNeededForLevel(game.level);
-            document.getElementById('hudLevelBadge').textContent = `Lv.${game.level}`;
-            document.getElementById('hudExpText').textContent = `EXP ${game.expProgress} / ${needed}개`;
-            document.getElementById('hudExpBar').style.width = `${Math.min(100, (game.expProgress / needed) * 100)}%`;
+        // ==========================================
+        // 8. WORD DESTRUCTION & GAME LOOP
+        // ==========================================
+        function destroyWordAtIndex(index, isAuto = false) {
+            const target = game.words[index];
+            if (!target) return;
 
-            const hearts = game.lives > 0 ? '❤️'.repeat(game.lives) : '💀';
-            document.getElementById('hudLives').textContent = hearts;
-            document.getElementById('hudScore').textContent = game.score.toLocaleString();
-            document.getElementById('hudCombo').textContent = String(game.combo);
-            document.getElementById('hudKills').textContent = `${game.wordsDestroyed}개`;
+            game.words.splice(index, 1);
+            fireLaserAt(target.x, target.y, isAuto ? '#facc15' : '#38bdf8');
+            createExplosion(target.x, target.y, target.special === 'freeze' ? '#38bdf8' : target.special === 'fever' ? '#f43f5e' : '#facc15');
 
-            const elapsedMin = Math.max(0.05, (Date.now() - game.startTime) / 60000);
-            const cpm = Math.round(game.totalTypedChars / elapsedMin);
-            document.getElementById('hudCpm').textContent = `${cpm} 타/분`;
-
-            const feverEl = document.getElementById('feverIndicator');
-            const frameEl = document.getElementById('arcadeFrame');
-            if (game.combo >= 5) {
-                feverEl.classList.remove('hidden');
-                frameEl.classList.add('fever-active');
-            } else {
-                feverEl.classList.add('hidden');
-                frameEl.classList.remove('fever-active');
+            if (target.special === 'freeze') {
+                game.freezeUntil = Date.now() + 4000;
+                showToast('❄️ 빙결 폭탄! 4초간 모든 단어가 정지합니다!');
+            } else if (target.special === 'fever') {
+                game.feverUntil = Date.now() + 6000;
+                showToast('🔥 피버 타임! 6초간 획득 점수 2배!');
             }
 
-            const freezeEl = document.getElementById('freezeIndicator');
-            if (game.freezeRemaining > 0) freezeEl.classList.remove('hidden');
-            else freezeEl.classList.add('hidden');
-
-            const awakeEl = document.getElementById('awakenedIndicator');
-            if (game.skills.awakeningOverdrive > 0) awakeEl.classList.remove('hidden');
-            else awakeEl.classList.add('hidden');
-
-            // Render equipped skills pills
-            const skillContainer = document.getElementById('hudEquippedSkills');
-            const tags = [];
-            if (game.skills.turret > 0) tags.push(`🔫포탑Lv.${game.skills.turret}`);
-            if (game.skills.scoreBoost > 0) tags.push(`💎점수Lv.${game.skills.scoreBoost}`);
-            if (game.skills.freezeWave > 0) tags.push(`❄️빙결Lv.${game.skills.freezeWave}`);
-            if (game.skills.pierceLaser > 0) tags.push(`⚡연쇄Lv.${game.skills.pierceLaser}`);
-            if (game.skills.awakeningOverdrive > 0) tags.push(`🌟각성오토`);
-
-            if (tags.length === 0) {
-                skillContainer.innerHTML = `<span class="text-slate-400">보유 스킬: 없음</span>`;
-            } else {
-                skillContainer.innerHTML = tags
-                    .map(t => `<span class="bg-indigo-500/25 border border-indigo-400/50 text-indigo-200 px-1.5 py-0.5 rounded">${t}</span>`)
-                    .join('');
+            game.kills += 1;
+            game.combo += 1;
+            if (game.combo > game.maxCombo) game.maxCombo = game.combo;
+            if (!isAuto) {
+                game.totalTypedChars += target.text.length * 2.4;
             }
-        }
 
-        function gameLoop(now) {
-            if (!game.active) return;
-            const dt = Math.min(0.08, (now - game.lastFrameTime) / 1000);
-            game.lastFrameTime = now;
+            const feverMult = Date.now() < game.feverUntil ? 2 : 1;
+            const boostMult = 1 + game.skills.scoreBoost * 0.35 + (game.skills.awakened ? 0.5 : 0);
+            const gained = Math.round((50 + target.text.length * 15 + game.combo * 5) * feverMult * boostMult);
+            game.score += gained;
 
-            const elapsedSec = (Date.now() - game.startTime) / 1000;
-            document.getElementById('hudSurvivalTime').textContent = formatElapsedMMSS(elapsedSec);
-
-            if (!game.pausedForSkill && !game.pausedForQuiz) {
-                updateGamePhysics(dt, elapsedSec);
-            }
-            renderGameCanvas();
-
-            if (game.active) {
-                game.animId = requestAnimationFrame(gameLoop);
-            }
-        }
-
-        function updateGamePhysics(dt, elapsedSec) {
-            const canvas = document.getElementById('gameCanvas');
-            const w = canvas ? canvas.width : 640;
-            const h = canvas ? canvas.height : 300;
-            const defenseLineY = h - 42;
-
-            // Starfield scroll
-            for (const s of game.stars) {
-                s.y += s.speed * dt;
-                if (s.y > h) {
-                    s.y = 0;
-                    s.x = Math.random() * w;
+            // Multi-laser bonus chain hit
+            if (!isAuto && game.skills.multiLaser > 0 && game.words.length > 0) {
+                const extraIdx = 0;
+                const extra = game.words[extraIdx];
+                if (extra) {
+                    game.words.splice(extraIdx, 1);
+                    fireLaserAt(extra.x, extra.y, '#a855f7');
+                    createExplosion(extra.x, extra.y, '#a855f7', 10);
+                    game.kills += 1;
+                    game.score += Math.round(40 * feverMult * boostMult);
+                    game.expInLevel += 1;
                 }
             }
 
-            // Freeze timer
-            if (game.freezeRemaining > 0) {
-                game.freezeRemaining = Math.max(0, game.freezeRemaining - dt);
-                if (game.freezeRemaining === 0) updateGameHud();
+            // Boss spawn check every 1,000 points
+            if (!game.boss && game.score >= game.nextBossScore) {
+                game.nextBossScore += 1000;
+                spawnBoss();
             }
 
-            // Spawn enemy words
-            const spawnInterval = Math.max(0.75, 1.95 - game.level * 0.12 - Math.min(0.5, elapsedSec * 0.004));
-            game.spawnTimer -= dt;
-            if (game.spawnTimer <= 0 && game.words.length < 8) {
-                spawnEnemyWord();
-                game.spawnTimer = spawnInterval;
+            // EXP & Level Up check (opens 6th-grade math quiz first)
+            game.expInLevel += 1;
+            updateGameHud();
+
+            if (game.expInLevel >= game.requiredForNextLevel) {
+                openMathQuizForLevelUp(false, '');
+            }
+        }
+
+        function handleWordSubmit() {
+            if (!game.active || game.paused) return;
+            const input = document.getElementById('wordInput');
+            if (!input) return;
+            const typed = input.value.trim();
+            if (!typed) return;
+
+            // 1) Check Boss word first
+            if (game.boss && typed.toLowerCase() === game.boss.word.toLowerCase()) {
+                clearWordInputSafely();
+                sfx.bossHit();
+                fireLaserAt(game.boss.x, game.boss.y, '#f43f5e');
+                createExplosion(game.boss.x, game.boss.y, '#f43f5e', 18);
+
+                const dmg = 65 + game.level * 15 + game.skills.scoreBoost * 20;
+                game.boss.hp -= dmg;
+                game.totalTypedChars += typed.length * 2.5;
+                game.combo += 1;
+                game.score += 180;
+
+                if (game.boss.hp <= 0) {
+                    sfx.bossDefeat();
+                    createExplosion(game.boss.x, game.boss.y, '#facc15', 32);
+                    showToast(`🎉 [${game.boss.name}] 격파 성공! +500점 & 생명 회복!`);
+                    game.score += 500;
+                    game.lives = Math.min(game.maxLives, game.lives + 1);
+                    game.boss = null;
+                } else {
+                    game.boss.word = pickRandomWord(true);
+                }
+                updateGameHud();
+                return;
             }
 
-            // Auto Turret & Awakening Overdrive auto-fire
-            const hasAuto = game.skills.turret > 0 || game.skills.awakeningOverdrive > 0;
-            if (hasAuto) {
-                const interval = game.skills.awakeningOverdrive > 0
-                    ? 1.2
-                    : Math.max(1.4, 3.2 - game.skills.turret * 0.45);
-                game.autoTurretTimer += dt;
-                if (game.autoTurretTimer >= interval) {
-                    game.autoTurretTimer = 0;
-                    if (game.words.length > 0) {
-                        const lowest = [...game.words].sort((a, b) => b.y - a.y)[0];
-                        destroyEnemyWord(lowest, 'auto', false);
-                    } else if (game.boss) {
-                        damageBoss();
+            // 2) Check lowest matching falling word
+            let matchIdx = -1;
+            let lowestY = -Infinity;
+            for (let i = 0; i < game.words.length; i++) {
+                if (game.words[i].text.toLowerCase() === typed.toLowerCase()) {
+                    if (game.words[i].y > lowestY) {
+                        lowestY = game.words[i].y;
+                        matchIdx = i;
                     }
                 }
             }
 
+            if (matchIdx !== -1) {
+                clearWordInputSafely();
+                sfx.hit();
+                destroyWordAtIndex(matchIdx, false);
+            } else {
+                sfx.error();
+                game.combo = 0;
+                input.classList.remove('shake');
+                void input.offsetWidth;
+                input.classList.add('shake');
+                clearWordInputSafely();
+                updateGameHud();
+            }
+        }
+
+        function startGame() {
+            const codeVal = (document.getElementById('classCodeInput')?.value || '').trim();
+            const roomVal = (document.getElementById('classRoomInput')?.value || '').trim();
+            const nickVal = (document.getElementById('nicknameInput')?.value || '').trim();
+
+            if (!codeVal || !roomVal || !nickVal) {
+                sfx.error();
+                showToast('⚠️ 학급 코드, 반, 닉네임을 모두 입력해주세요!');
+                return;
+            }
+
+            appState.classCode = codeVal;
+            appState.classRoom = roomVal;
+            appState.nickname = nickVal;
+            updateHeaderBadge();
+
+            const pilotLabel = document.getElementById('pilotHudLabel');
+            if (pilotLabel) pilotLabel.textContent = `🐹 ${nickVal}`;
+
+            // Reset gameplay state
+            game.active = true;
+            game.paused = false;
+            game.startTime = Date.now();
+            game.lastFrameTime = performance.now();
+            game.pausedAccumMs = 0;
+            game.pauseStartedAt = 0;
+            game.lives = 3;
+            game.score = 0;
+            game.kills = 0;
+            game.combo = 0;
+            game.maxCombo = 0;
+            game.totalTypedChars = 0;
+            game.level = 1;
+            game.expInLevel = 0;
+            game.requiredForNextLevel = getRequiredKillsForLevel(1); // 6 kills for Lv.1 -> Lv.2
+            game.spawnTimer = 0.4;
+            game.words = [];
+            game.lasers = [];
+            game.particles = [];
+            game.boss = null;
+            game.nextBossScore = 1000;
+            game.bossCount = 0;
+            game.freezeUntil = 0;
+            game.feverUntil = 0;
+            game.usedPrimaryQuizIndices.clear();
+            game.usedEasierQuizIndices.clear();
+            game.currentQuiz = null;
+            game.isQuizRetry = false;
+            game.skills = {
+                autoTurret: 0,
+                multiLaser: 0,
+                scoreBoost: 0,
+                slowField: 0,
+                awakened: false
+            };
+            game.autoTurretTimer = 0;
+
+            setGameplayBlur(false);
+            const levelModal = document.getElementById('levelUpModal');
+            if (levelModal) {
+                levelModal.classList.add('hidden');
+                levelModal.classList.remove('flex');
+            }
+            closeMathQuizModal();
+            const skillModal = document.getElementById('skillSelectModal');
+            if (skillModal) {
+                skillModal.classList.add('hidden');
+                skillModal.classList.remove('flex');
+            }
+
+            requestGameFullscreen();
+            showScreen('gameScreen');
+            resizeGameCanvas();
+            spawnFallingWord();
+            updateGameHud();
+
+            const wordInput = document.getElementById('wordInput');
+            if (wordInput) {
+                wordInput.value = '';
+                setTimeout(() => wordInput.focus(), 40);
+            }
+
+            if (game.animId) cancelAnimationFrame(game.animId);
+            game.animId = requestAnimationFrame(gameLoop);
+        }
+
+        function stopGame() {
+            game.active = false;
+            game.paused = false;
+            setGameplayBlur(false);
+            if (game.animId) {
+                cancelAnimationFrame(game.animId);
+                game.animId = null;
+            }
+        }
+
+        async function triggerGameOver() {
+            const elapsedSec = Math.max(1, (Date.now() - game.startTime - game.pausedAccumMs) / 1000);
+            const finalCpm = Math.round((game.totalTypedChars / elapsedSec) * 60);
+            const finalKills = game.kills;
+            const finalScore = game.score;
+            const finalCombo = game.maxCombo;
+
+            stopGame();
+            exitGameFullscreen();
+            sfx.gameOver();
+
+            document.getElementById('resKills').textContent = `${finalKills}개`;
+            document.getElementById('resScore').textContent = `${finalScore.toLocaleString()}점`;
+            document.getElementById('resCpm').textContent = `${finalCpm} 타`;
+            document.getElementById('resSurvivalCombo').textContent = `${formatElapsed(elapsedSec)} / ${finalCombo}`;
+
+            showScreen('gameOverScreen');
+
+            const res = await upsertHallOfFameRecord({
+                classCode: appState.classCode,
+                classRoom: appState.classRoom,
+                nickname: appState.nickname,
+                kills: finalKills,
+                score: finalScore,
+                cpm: finalCpm
+            });
+
+            const noticeEl = document.getElementById('gameOverHofNotice');
+            if (noticeEl) {
+                if (res.isExisting && res.isNewHigh) {
+                    noticeEl.textContent = '🎉 기존 기록을 경신하여 명예의 전당 최고 기록이 업데이트되었습니다!';
+                } else if (res.isExisting && !res.isNewHigh) {
+                    noticeEl.textContent = '📌 기존 명예의 전당 최고 기록이 더 높아 기존 기록을 유지합니다!';
+                } else {
+                    noticeEl.textContent = '🏆 명예의 전당에 새로운 기록이 등록되었습니다!';
+                }
+            }
+        }
+
+        function updateGame(dt) {
+            const canvas = document.getElementById('gameCanvas');
+            if (!canvas) return;
+            const now = Date.now();
+            const isFrozen = now < game.freezeUntil;
+
+            // Scroll background stars
+            for (const s of game.stars) {
+                s.y += s.speed * dt;
+                if (s.y > canvas.height) {
+                    s.y = 0;
+                    s.x = Math.random() * canvas.width;
+                }
+            }
+
+            // Spawn falling words
+            if (!isFrozen) {
+                game.spawnTimer -= dt;
+                if (game.spawnTimer <= 0) {
+                    spawnFallingWord();
+                    const interval = Math.max(0.85, 2.2 - (game.level - 1) * 0.14);
+                    game.spawnTimer = interval;
+                }
+            }
+
+            // Auto-turret skill
+            if (game.skills.autoTurret > 0 && game.words.length > 0) {
+                const rate = Math.max(0.8, (4.2 - game.skills.autoTurret * 0.65) / (game.skills.awakened ? 2 : 1));
+                game.autoTurretTimer += dt;
+                if (game.autoTurretTimer >= rate) {
+                    game.autoTurretTimer = 0;
+                    let lowestIdx = 0;
+                    for (let i = 1; i < game.words.length; i++) {
+                        if (game.words[i].y > game.words[lowestIdx].y) lowestIdx = i;
+                    }
+                    destroyWordAtIndex(lowestIdx, true);
+                }
+            }
+
+            // Move boss horizontally
+            if (game.boss) {
+                game.boss.x += game.boss.dir * 55 * dt;
+                if (game.boss.x < 95) {
+                    game.boss.x = 95;
+                    game.boss.dir = 1;
+                } else if (game.boss.x > canvas.width - 95) {
+                    game.boss.x = canvas.width - 95;
+                    game.boss.dir = -1;
+                }
+            }
+
             // Move falling words
-            const speedScale = game.freezeRemaining > 0 ? 0.35 : 1;
+            const dangerLineY = canvas.height - 44;
             for (let i = game.words.length - 1; i >= 0; i--) {
-                const word = game.words[i];
-                word.y += word.speed * speedScale * dt;
-
-                if (word.y >= defenseLineY) {
+                const w = game.words[i];
+                if (!isFrozen) {
+                    w.y += w.speed * dt;
+                }
+                if (w.y >= dangerLineY) {
                     game.words.splice(i, 1);
-                    game.lives -= 1;
+                    createExplosion(w.x, dangerLineY, '#f43f5e', 16);
+                    sfx.error();
+                    triggerDamageShake();
                     game.combo = 0;
-                    spawnExplosion(word.x, defenseLineY, '#f43f5e', 18);
-                    addFloatingText(word.x, defenseLineY - 14, '💥 방어선 피격! -1 HP', '#f43f5e');
-                    sfx.damage();
-
-                    const frame = document.getElementById('arcadeFrame');
-                    frame.classList.remove('damage-flash');
-                    void frame.offsetWidth;
-                    frame.classList.add('damage-flash');
+                    game.lives -= 1;
                     updateGameHud();
-
                     if (game.lives <= 0) {
-                        handlePlayerDeath();
+                        triggerGameOver();
                         return;
                     }
                 }
             }
 
-            // Lasers decay
+            // Update lasers
             for (let i = game.lasers.length - 1; i >= 0; i--) {
                 game.lasers[i].life -= dt;
                 if (game.lasers[i].life <= 0) game.lasers.splice(i, 1);
             }
 
-            // Particles decay
+            // Update particles
             for (let i = game.particles.length - 1; i >= 0; i--) {
                 const p = game.particles[i];
                 p.x += p.vx * dt;
@@ -2173,22 +2236,15 @@
                 if (p.life <= 0) game.particles.splice(i, 1);
             }
 
-            // Floating texts decay
-            for (let i = game.floatingTexts.length - 1; i >= 0; i--) {
-                const ft = game.floatingTexts[i];
-                ft.y -= 26 * dt;
-                ft.life -= dt;
-                if (ft.life <= 0) game.floatingTexts.splice(i, 1);
-            }
+            updateGameHud();
         }
 
-        function renderGameCanvas() {
+        function renderGame() {
             const canvas = document.getElementById('gameCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             const w = canvas.width;
             const h = canvas.height;
-            const defenseLineY = h - 42;
 
             // Space background
             ctx.fillStyle = '#090714';
@@ -2201,76 +2257,17 @@
             }
 
             // Defense line
+            const dangerLineY = h - 44;
             ctx.strokeStyle = 'rgba(244, 63, 94, 0.55)';
             ctx.lineWidth = 2;
-            ctx.setLineDash([8, 6]);
+            ctx.setLineDash([6, 6]);
             ctx.beginPath();
-            ctx.moveTo(0, defenseLineY);
-            ctx.lineTo(w, defenseLineY);
+            ctx.moveTo(0, dangerLineY);
+            ctx.lineTo(w, dangerLineY);
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Draw Boss if active
-            if (game.boss) {
-                const b = game.boss;
-                ctx.fillStyle = '#1e1b4b';
-                ctx.strokeStyle = b.color;
-                ctx.lineWidth = 3;
-                ctx.fillRect(b.x - 105, b.y - 24, 210, 52);
-                ctx.strokeRect(b.x - 105, b.y - 24, 210, 52);
-
-                ctx.fillStyle = b.color;
-                ctx.font = 'bold 11px Galmuri11, monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText(`👾 ${b.name}`, b.x, b.y - 8);
-
-                // Boss HP Bar
-                const barW = 180;
-                const hpRatio = Math.max(0, b.hp / b.maxHp);
-                ctx.fillStyle = '#090712';
-                ctx.fillRect(b.x - barW / 2, b.y - 2, barW, 8);
-                ctx.fillStyle = '#f43f5e';
-                ctx.fillRect(b.x - barW / 2, b.y - 2, barW * hpRatio, 8);
-
-                // Boss Target Word
-                ctx.fillStyle = '#facc15';
-                ctx.font = 'bold 15px Galmuri11, monospace';
-                ctx.fillText(`[ ${b.word} ]`, b.x, b.y + 22);
-            }
-
-            // Draw Falling Words
-            const currentTyped = (document.getElementById('wordInput')?.value || '').trim();
-            ctx.font = 'bold 14px Galmuri11, monospace';
-            ctx.textAlign = 'center';
-
-            for (const word of game.words) {
-                const textW = Math.max(64, ctx.measureText(word.text).width + 22);
-                const boxH = 26;
-                const isPrefix = currentTyped.length > 0 && word.text.startsWith(currentTyped);
-                const isDanger = word.y > defenseLineY - 55;
-
-                ctx.fillStyle = game.freezeRemaining > 0
-                    ? '#083344'
-                    : isPrefix
-                        ? '#3b2f06'
-                        : '#171433';
-                ctx.strokeStyle = game.freezeRemaining > 0
-                    ? '#38bdf8'
-                    : isPrefix
-                        ? '#facc15'
-                        : isDanger
-                            ? '#f43f5e'
-                            : '#4f46e5';
-                ctx.lineWidth = 2;
-
-                ctx.fillRect(word.x - textW / 2, word.y - boxH / 2, textW, boxH);
-                ctx.strokeRect(word.x - textW / 2, word.y - boxH / 2, textW, boxH);
-
-                ctx.fillStyle = isPrefix ? '#facc15' : '#ffffff';
-                ctx.fillText(word.text, word.x, word.y + 5);
-            }
-
-            // Draw Lasers
+            // Lasers
             for (const l of game.lasers) {
                 ctx.strokeStyle = l.color;
                 ctx.lineWidth = 3;
@@ -2280,143 +2277,104 @@
                 ctx.stroke();
             }
 
-            // Draw Quokka Spaceship at bottom center
-            const shipX = w / 2;
-            const shipY = h - 22;
-            ctx.fillStyle = '#38bdf8';
-            ctx.beginPath();
-            ctx.moveTo(shipX, shipY - 16);
-            ctx.lineTo(shipX - 18, shipY + 10);
-            ctx.lineTo(shipX + 18, shipY + 10);
-            ctx.closePath();
-            ctx.fill();
+            // Boss ship
+            if (game.boss) {
+                const b = game.boss;
+                ctx.fillStyle = '#1e1b4b';
+                ctx.strokeStyle = b.color;
+                ctx.lineWidth = 2;
+                ctx.fillRect(b.x - 75, b.y - 24, 150, 48);
+                ctx.strokeRect(b.x - 75, b.y - 24, 150, 48);
 
-            ctx.fillStyle = '#facc15';
-            ctx.fillRect(shipX - 6, shipY - 5, 12, 9);
+                // Boss HP bar
+                const hpPct = Math.max(0, b.hp / b.maxHp);
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(b.x - 65, b.y - 34, 130, 6);
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x - 65, b.y - 34, 130 * hpPct, 6);
 
-            // Draw Particles
+                ctx.font = 'bold 11px Galmuri11, monospace';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#facc15';
+                ctx.fillText(b.name, b.x, b.y - 8);
+
+                ctx.font = 'bold 14px Galmuri11, monospace';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(b.word, b.x, b.y + 13);
+            }
+
+            // Falling words
+            ctx.font = 'bold 14px Galmuri11, monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (const item of game.words) {
+                const textW = ctx.measureText(item.text).width;
+                const boxW = textW + 18;
+                const boxH = 26;
+                const dangerRatio = item.y / dangerLineY;
+
+                let borderCol = '#38bdf8';
+                let textCol = '#f8fafc';
+                if (item.special === 'freeze') {
+                    borderCol = '#22d3ee';
+                    textCol = '#67e8f9';
+                } else if (item.special === 'fever') {
+                    borderCol = '#fb7185';
+                    textCol = '#fda4af';
+                } else if (dangerRatio > 0.72) {
+                    borderCol = '#f43f5e';
+                    textCol = '#fecdd3';
+                }
+
+                ctx.fillStyle = 'rgba(15, 12, 33, 0.9)';
+                ctx.fillRect(item.x - boxW / 2, item.y - boxH / 2, boxW, boxH);
+                ctx.strokeStyle = borderCol;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(item.x - boxW / 2, item.y - boxH / 2, boxW, boxH);
+
+                ctx.fillStyle = textCol;
+                ctx.fillText(item.text, item.x, item.y + 1);
+            }
+
+            // Particles
             for (const p of game.particles) {
                 ctx.fillStyle = p.color;
                 ctx.fillRect(p.x, p.y, p.size, p.size);
             }
 
-            // Draw Floating Texts
-            ctx.font = 'bold 12px Galmuri11, monospace';
-            for (const ft of game.floatingTexts) {
-                ctx.fillStyle = ft.color;
-                ctx.fillText(ft.text, ft.x, ft.y);
-            }
+            // Quokka Spaceship at Bottom Center
+            const shipX = w / 2;
+            const shipY = h - 22;
+            ctx.fillStyle = '#facc15';
+            ctx.beginPath();
+            ctx.moveTo(shipX, shipY - 16);
+            ctx.lineTo(shipX - 18, shipY + 12);
+            ctx.lineTo(shipX + 18, shipY + 12);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(shipX - 5, shipY - 4, 10, 8);
         }
 
-        function handleFireWord() {
-            if (!game.active || game.pausedForSkill || game.pausedForQuiz) return;
-            const input = document.getElementById('wordInput');
-            const val = input.value.trim();
-            if (!val) return;
+        function gameLoop(timestamp) {
+            if (!game.active) return;
+            const dt = Math.min(0.05, Math.max(0.001, (timestamp - game.lastFrameTime) / 1000));
+            game.lastFrameTime = timestamp;
 
-            if (game.boss && game.boss.word === val) {
-                clearWordInputSafely();
-                game.combo += 1;
-                game.maxCombo = Math.max(game.maxCombo, game.combo);
-                damageBoss();
-                return;
+            if (!game.paused) {
+                updateGame(dt);
             }
-
-            const target = game.words.find(w => w.text === val);
-            if (target) {
-                clearWordInputSafely();
-                game.combo += 1;
-                game.maxCombo = Math.max(game.maxCombo, game.combo);
-                destroyEnemyWord(target, 'manual');
-                return;
-            }
-
-            // Wrong word shake feedback
-            game.combo = 0;
-            sfx.error();
-            input.classList.remove('shake');
-            void input.offsetWidth;
-            input.classList.add('shake');
-            updateGameHud();
-        }
-
-        async function handlePlayerDeath() {
-            stopGame();
-            sfx.gameOver();
-
-            document.getElementById('arcadeFrame').classList.remove('fever-active');
-            document.getElementById('skillSelectModal').classList.add('hidden');
-            document.getElementById('skillSelectModal').classList.remove('flex');
-            document.getElementById('mathQuizModal').classList.add('hidden');
-            document.getElementById('mathQuizModal').classList.remove('flex');
-            document.getElementById('levelUpBanner').classList.add('hidden');
-
-            const elapsedSec = Math.max(1, (Date.now() - game.startTime) / 1000);
-            const cpm = Math.round(game.totalTypedChars / (elapsedSec / 60));
-
-            document.getElementById('resKills').textContent = `${game.wordsDestroyed}개`;
-            document.getElementById('resScore').textContent = `${game.score.toLocaleString()}점`;
-            document.getElementById('resCpm').textContent = `${cpm} 타`;
-            document.getElementById('resSurvivalCombo').textContent = `${formatElapsedMMSS(elapsedSec)} / ${game.maxCombo}`;
-
-            showScreen('gameOverScreen');
-
-            const record = {
-                classCode: appState.classCode,
-                classRoom: appState.classRoom,
-                nickname: appState.nickname,
-                score: game.score,
-                wordsDestroyed: game.wordsDestroyed,
-                cpm,
-                maxCombo: game.maxCombo,
-                survivalSec: Math.round(elapsedSec),
-                updatedAt: Date.now()
-            };
-
-            const noticeEl = document.getElementById('gameOverHofNotice');
-            const result = await upsertHallOfFameRecord(record);
-            if (result.isFirst) {
-                noticeEl.textContent = '🏆 명예의 전당에 첫 기록이 등록되었습니다!';
-            } else if (result.updatedBest) {
-                noticeEl.textContent = `🎉 최고 기록 갱신! 기존 기록이 ${game.score.toLocaleString()}점으로 업데이트되었습니다!`;
-            } else {
-                noticeEl.textContent = `📌 기존 최고 기록(${result.bestScore.toLocaleString()}점)이 명예의 전당에 유지됩니다.`;
+            if (game.active) {
+                renderGame();
+                game.animId = requestAnimationFrame(gameLoop);
             }
         }
 
         // ==========================================
-        // 7. INITIALIZATION & DOM EVENT BINDINGS
+        // 9. EVENT WIRING & INITIALIZATION
         // ==========================================
-        function openHallOfFame(defaultTab = 'all') {
-            appState.hofTabMode = defaultTab;
-            const allBtn = document.getElementById('hofTabAllBtn');
-            const classBtn = document.getElementById('hofTabClassBtn');
-            const filterBar = document.getElementById('hofClassFilterBar');
-
-            if (defaultTab === 'class') {
-                allBtn.classList.remove('active');
-                classBtn.classList.add('active');
-                filterBar.classList.remove('hidden');
-                filterBar.classList.add('flex');
-                if (appState.classCode && !document.getElementById('hofClassCodeInput').value) {
-                    document.getElementById('hofClassCodeInput').value = appState.classCode;
-                }
-                if (appState.classRoom && !document.getElementById('hofClassRoomInput').value) {
-                    document.getElementById('hofClassRoomInput').value = appState.classRoom;
-                }
-                appState.hofFilterClassCode = document.getElementById('hofClassCodeInput').value.trim();
-                appState.hofFilterClassRoom = document.getElementById('hofClassRoomInput').value.trim();
-            } else {
-                allBtn.classList.add('active');
-                classBtn.classList.remove('active');
-                filterBar.classList.add('hidden');
-                filterBar.classList.remove('flex');
-            }
-
-            renderHallOfFameTable();
-            showScreen('hallOfFameScreen');
-        }
-
         window.addEventListener('DOMContentLoaded', () => {
             initBackend();
 
@@ -2424,22 +2382,17 @@
             document.getElementById('homeLogoBtn').addEventListener('click', () => {
                 sfx.click();
                 stopGame();
-                showScreen('entryScreen');
+                exitGameFullscreen();
+                showScreen('startScreen');
             });
 
-            document.getElementById('openHofHeaderBtn').addEventListener('click', () => {
+            document.getElementById('exitGameToHomeBtn').addEventListener('click', () => {
                 sfx.click();
-                openHallOfFame('all');
+                stopGame();
+                exitGameFullscreen();
+                showScreen('startScreen');
             });
 
-            document.getElementById('soundToggleBtn').addEventListener('click', () => {
-                soundEnabled = !soundEnabled;
-                const btn = document.getElementById('soundToggleBtn');
-                btn.textContent = soundEnabled ? '🔊 ON' : '🔇 OFF';
-                if (soundEnabled) sfx.click();
-            });
-
-            // Firebase Setup Modal
             document.getElementById('serverStatusBtn').addEventListener('click', () => {
                 sfx.click();
                 const modal = document.getElementById('firebaseSetupModal');
@@ -2458,26 +2411,32 @@
                 sfx.click();
                 const raw = document.getElementById('firebaseConfigInput').value.trim();
                 if (!raw) {
-                    showToast('Firebase 설정 JSON을 입력해주세요.');
+                    showToast('⚠️ Firebase 설정 JSON을 입력해주세요.');
                     return;
                 }
                 try {
                     const parsed = JSON.parse(raw);
                     const ok = await connectWithFirebaseConfig(parsed);
                     if (ok) {
-                        showToast('🟢 새 Firebase 설정이 적용되었습니다!');
+                        showToast('🟢 새 Firebase 설정이 연결되었습니다!');
                         const modal = document.getElementById('firebaseSetupModal');
                         modal.classList.add('hidden');
                         modal.classList.remove('flex');
                     } else {
-                        showToast('❌ 연결에 실패했습니다. 설정 값을 확인해주세요.');
+                        showToast('❌ 연결에 실패했습니다. 설정값을 확인해주세요.');
                     }
-                } catch (_) {
+                } catch (err) {
                     showToast('❌ 올바른 JSON 형식이 아닙니다.');
                 }
             });
 
-            // Entry Screen Language Toggle
+            document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
+                soundEnabled = !soundEnabled;
+                e.currentTarget.textContent = soundEnabled ? '🔊 ON' : '🔇 OFF';
+                if (soundEnabled) sfx.click();
+            });
+
+            // Language selection pills on Start Screen
             document.querySelectorAll('.lang-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     sfx.click();
@@ -2487,145 +2446,151 @@
                 });
             });
 
-            // Start Game Button
+            // Start Screen buttons
             document.getElementById('startGameBtn').addEventListener('click', () => {
                 sfx.click();
-                const classCode = document.getElementById('entryClassCodeInput').value.trim();
-                const classRoom = document.getElementById('entryClassRoomInput').value.trim();
-                const nickname = document.getElementById('entryNicknameInput').value.trim();
-
-                if (!classCode) {
-                    showToast('⚠️ 학급 코드를 입력해주세요!');
-                    document.getElementById('entryClassCodeInput').focus();
-                    return;
-                }
-                if (!classRoom) {
-                    showToast('⚠️ 반을 입력해주세요!');
-                    document.getElementById('entryClassRoomInput').focus();
-                    return;
-                }
-                if (!nickname) {
-                    showToast('⚠️ 닉네임을 입력해주세요!');
-                    document.getElementById('entryNicknameInput').focus();
-                    return;
-                }
-
-                appState.classCode = classCode;
-                appState.classRoom = classRoom;
-                appState.nickname = nickname;
-                updateHeaderBadge();
-                startNewGame();
+                startGame();
             });
 
-            document.getElementById('entryHofBtn').addEventListener('click', () => {
-                sfx.click();
-                openHallOfFame('all');
+            ['classCodeInput', 'classRoomInput', 'nicknameInput'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        startGame();
+                    }
+                });
             });
 
-            // Typing Input & Fire Controls
+            // Gameplay input & Dev test buttons
             const wordInput = document.getElementById('wordInput');
             wordInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && !e.isComposing) {
                     e.preventDefault();
-                    handleFireWord();
+                    handleWordSubmit();
                 }
             });
 
-            wordInput.addEventListener('input', () => {
-                if (performance.now() - lastWordClearedAt < 65) {
-                    wordInput.value = '';
-                    return;
-                }
-                if (!game.active || game.pausedForSkill || game.pausedForQuiz) return;
-                const val = wordInput.value.trim();
-                if (!val) return;
-
-                if (game.boss && game.boss.word === val) {
-                    clearWordInputSafely();
-                    game.combo += 1;
-                    game.maxCombo = Math.max(game.maxCombo, game.combo);
-                    damageBoss();
-                    return;
-                }
-
-                const exact = game.words.find(w => w.text === val);
-                if (exact) {
-                    clearWordInputSafely();
-                    game.combo += 1;
-                    game.maxCombo = Math.max(game.maxCombo, game.combo);
-                    destroyEnemyWord(exact, 'manual');
-                }
+            document.getElementById('fireBtn').addEventListener('click', () => {
+                handleWordSubmit();
+                wordInput.focus();
             });
 
-            document.getElementById('fireBtn').addEventListener('click', handleFireWord);
-
-            // Keyboard [1] [2] [3] [4] shortcuts for Math Quiz & Skill Selection Modals
+            // Keyboard shortcuts for Math Quiz [1-4] and Skill Cards [1-3]
             window.addEventListener('keydown', (e) => {
-                if (game.pausedForQuiz) {
-                    if (e.key === '1') { e.preventDefault(); handleQuizAnswer(0); }
-                    else if (e.key === '2') { e.preventDefault(); handleQuizAnswer(1); }
-                    else if (e.key === '3') { e.preventDefault(); handleQuizAnswer(2); }
-                    else if (e.key === '4') { e.preventDefault(); handleQuizAnswer(3); }
+                const quizModal = document.getElementById('mathQuizModal');
+                if (quizModal && !quizModal.classList.contains('hidden')) {
+                    if (['1', '2', '3', '4'].includes(e.key)) {
+                        e.preventDefault();
+                        handleQuizAnswer(Number(e.key) - 1);
+                    }
                     return;
                 }
-                if (!game.pausedForSkill) return;
-                if (e.key === '1') {
-                    e.preventDefault();
-                    applySelectedSkill(0);
-                } else if (e.key === '2') {
-                    e.preventDefault();
-                    applySelectedSkill(1);
-                } else if (e.key === '3') {
-                    e.preventDefault();
-                    applySelectedSkill(2);
+                const skillModal = document.getElementById('skillSelectModal');
+                if (skillModal && !skillModal.classList.contains('hidden')) {
+                    if (['1', '2', '3'].includes(e.key)) {
+                        e.preventDefault();
+                        selectSkillChoice(Number(e.key) - 1);
+                    }
                 }
             });
 
-            // Game Over Screen Buttons
+            // Game Over Screen buttons
             document.getElementById('restartGameBtn').addEventListener('click', () => {
                 sfx.click();
-                startNewGame();
-            });
-
-            document.getElementById('gameOverHofBtn').addEventListener('click', () => {
-                sfx.click();
-                openHallOfFame('all');
+                startGame();
             });
 
             document.getElementById('gameOverHomeBtn').addEventListener('click', () => {
                 sfx.click();
-                showScreen('entryScreen');
+                showScreen('startScreen');
             });
 
-            // Hall of Fame Tabs & Filter
-            document.getElementById('hofTabAllBtn').addEventListener('click', () => {
+            // Hall of Fame Navigation & Filter Controls
+            function openHallOfFameScreen() {
+                if (game.active) {
+                    stopGame();
+                }
+                showScreen('hallOfFameScreen');
+                renderHallOfFame();
+            }
+
+            document.getElementById('openHofHeaderBtn').addEventListener('click', () => {
                 sfx.click();
-                openHallOfFame('all');
+                openHallOfFameScreen();
             });
 
-            document.getElementById('hofTabClassBtn').addEventListener('click', () => {
+            document.getElementById('startHofBtn').addEventListener('click', () => {
                 sfx.click();
-                openHallOfFame('class');
+                openHallOfFameScreen();
             });
 
-            document.getElementById('hofSearchBtn').addEventListener('click', () => {
+            document.getElementById('gameOverHofBtn').addEventListener('click', () => {
                 sfx.click();
-                appState.hofFilterClassCode = document.getElementById('hofClassCodeInput').value.trim();
-                appState.hofFilterClassRoom = document.getElementById('hofClassRoomInput').value.trim();
-                renderHallOfFameTable();
+                openHallOfFameScreen();
             });
 
             document.getElementById('closeHofBtn').addEventListener('click', () => {
                 sfx.click();
-                const target = appState.previousScreenId === 'gameScreen' ? 'entryScreen' : appState.previousScreenId;
-                showScreen(target || 'entryScreen');
+                const target = appState.previousScreenId === 'gameScreen' ? 'startScreen' : (appState.previousScreenId || 'startScreen');
+                showScreen(target);
             });
 
-            // Responsive Canvas Resize
+            // '전체' vs '우리반' tabs
+            const hofTabAllBtn = document.getElementById('hofTabAllBtn');
+            const hofTabClassBtn = document.getElementById('hofTabClassBtn');
+            const hofClassFilterBar = document.getElementById('hofClassFilterBar');
+
+            hofTabAllBtn.addEventListener('click', () => {
+                sfx.click();
+                appState.hofTab = 'all';
+                hofTabAllBtn.classList.add('active');
+                hofTabClassBtn.classList.remove('active');
+                hofClassFilterBar.classList.add('hidden');
+                hofClassFilterBar.classList.remove('flex');
+                renderHallOfFame();
+            });
+
+            hofTabClassBtn.addEventListener('click', () => {
+                sfx.click();
+                appState.hofTab = 'class';
+                hofTabClassBtn.classList.add('active');
+                hofTabAllBtn.classList.remove('active');
+                hofClassFilterBar.classList.remove('hidden');
+                hofClassFilterBar.classList.add('flex');
+
+                const codeInput = document.getElementById('hofClassCodeInput');
+                const roomInput = document.getElementById('hofClassRoomInput');
+                if (!codeInput.value && appState.classCode) codeInput.value = appState.classCode;
+                if (!roomInput.value && appState.classRoom) roomInput.value = appState.classRoom;
+                appState.hofFilterCode = codeInput.value;
+                appState.hofFilterRoom = roomInput.value;
+                renderHallOfFame();
+            });
+
+            document.getElementById('hofSearchBtn').addEventListener('click', () => {
+                sfx.click();
+                appState.hofFilterCode = document.getElementById('hofClassCodeInput').value;
+                appState.hofFilterRoom = document.getElementById('hofClassRoomInput').value;
+                renderHallOfFame();
+            });
+
+            ['hofClassCodeInput', 'hofClassRoomInput'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        appState.hofFilterCode = document.getElementById('hofClassCodeInput').value;
+                        appState.hofFilterRoom = document.getElementById('hofClassRoomInput').value;
+                        renderHallOfFame();
+                    }
+                });
+            });
+
             window.addEventListener('resize', () => {
-                if (game.active) {
-                    resizeGameCanvas();
-                }
+                if (game.active) resizeGameCanvas();
             });
         });
     </script>
