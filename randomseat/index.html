@@ -135,6 +135,72 @@
         .anim-slide-out-right { animation: slideOutRight 0.32s ease forwards; }
         .anim-slide-in-left { animation: slideInLeft 0.32s ease forwards; }
 
+        /* 기본 모드: 걸어 들어오는 학생 캐릭터 걷기 모션 & 말풍선 */
+        @keyframes walkerBodyBob {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+        @keyframes walkerLegLeft {
+            0%, 100% { transform: translateY(0px) rotate(-14deg); }
+            50% { transform: translateY(-2.5px) rotate(14deg); }
+        }
+        @keyframes walkerLegRight {
+            0%, 100% { transform: translateY(-2.5px) rotate(14deg); }
+            50% { transform: translateY(0px) rotate(-14deg); }
+        }
+        @keyframes speechBubblePop {
+            0% { opacity: 0; transform: translate(-50%, 6px) scale(0.75); }
+            15% { opacity: 1; transform: translate(-50%, 0px) scale(1.04); }
+            85% { opacity: 1; transform: translate(-50%, 0px) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -4px) scale(0.9); }
+        }
+        .student-walker {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 30;
+            pointer-events: none;
+            will-change: transform;
+        }
+        .walker-sprite {
+            animation: walkerBodyBob 0.28s ease-in-out infinite;
+        }
+        .walker-leg-l {
+            transform-origin: top center;
+            animation: walkerLegLeft 0.28s ease-in-out infinite;
+        }
+        .walker-leg-r {
+            transform-origin: top center;
+            animation: walkerLegRight 0.28s ease-in-out infinite;
+        }
+        .walker-speech {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            margin-bottom: 5px;
+            background: #ffffff;
+            color: #2c1e12;
+            border: 2px solid #2c1e12;
+            border-radius: 10px;
+            padding: 2px 7px;
+            font-size: 10px;
+            line-height: 1.2;
+            white-space: nowrap;
+            box-shadow: 2px 2px 0px #2c1e12;
+            animation: speechBubblePop 1.35s ease forwards;
+            z-index: 40;
+        }
+        .walker-speech::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -4px;
+            border-width: 4px;
+            border-style: solid;
+            border-color: #2c1e12 transparent transparent transparent;
+        }
+
         /* 1~12번 지정 칸 드래그 오버 하이라이트 */
         .secret-slot-box {
             transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease;
@@ -165,7 +231,7 @@
     <!-- 상단 헤더 -->
     <header class="max-w-6xl w-full mx-auto px-4 pt-4 pb-3 flex flex-wrap items-center justify-between gap-3 no-print">
         <div class="flex items-center gap-3">
-            <div onclick="handleSecretLogoTap()" class="w-11 h-11 rounded-xl overflow-hidden bg-[#FFA400] flex items-center justify-center border-[2.5px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618] cursor-pointer" title="오둥이 자리뽑기">
+            <div class="w-11 h-11 rounded-xl overflow-hidden bg-[#FFA400] flex items-center justify-center border-[2.5px] border-[#3a2618] shadow-[3px_3px_0px_#3a2618]" title="오둥이 자리뽑기">
                 <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-label="오둥이 로고">
                     <rect width="200" height="200" fill="#FFA400" />
                     <path d="M 18 205 C 24 125, 38 52, 100 52 C 162 52, 176 125, 182 205 Z" fill="#FFFFFF" stroke="#000000" stroke-width="9" stroke-linejoin='round' />
@@ -182,11 +248,8 @@
             </div>
         </div>
 
-        <!-- 우측 컨트롤: laless 전용 모드 전환 & 효과음 토글 -->
+        <!-- 우측 컨트롤: 효과음 토글 -->
         <div class="flex items-center gap-2">
-            <button id="mode-switch-btn" onclick="toggleTeacherSecretMode()" class="hidden retro-btn px-3 py-1.5 bg-amber-300 text-[#2c1e12] text-xs cursor-pointer" title="자리 번호 지정(5단계) 모드와 기본 4단계 모드를 전환할 수 있습니다">
-                🦆 지정 모드 (5단계)
-            </button>
             <button id="sound-toggle-btn" onclick="toggleSound()" class="retro-btn px-3 py-1.5 bg-emerald-200 text-emerald-950 text-xs cursor-pointer">
                 🔊 효과음 ON
             </button>
@@ -499,16 +562,35 @@
                     </div>
 
                     <!-- 교실 바닥 & 책상 그리드 -->
-                    <div id="classroom-stage" class="classroom-floor p-4 sm:p-6 origin-top transition-transform duration-200">
+                    <div id="classroom-stage" class="classroom-floor p-4 sm:p-6 origin-top transition-transform duration-200 relative overflow-hidden">
                         <div class="chalkboard py-2.5 px-5 mb-5 flex items-center justify-between">
                             <span class="text-xs text-emerald-200" id="chalkboard-date">2026년 11월 23일</span>
-                            <span class="text-sm sm:text-base tracking-widest">칠 판 / 교 탁</span>
+                            <span id="chalkboard-center-text" class="text-sm sm:text-base tracking-widest">칠 판 / 교 탁</span>
                             <span class="text-xs text-amber-300" id="chalkboard-progress">0 / 24명</span>
                         </div>
 
-                        <div id="desks-grid" class="grid grid-cols-8 gap-2 sm:gap-3">
-                            <!-- JS로 6행x8열 교실 책상 렌더링 -->
+                        <!-- 기본 모드 전용: 왼쪽 벽 앞문 & 뒷문 + 교실 책상 영역 -->
+                        <div id="classroom-body-wrap" class="relative flex items-stretch gap-2.5 sm:gap-3.5">
+                            <!-- 왼쪽 벽 출입문 (앞문 / 뒷문) -->
+                            <div id="classroom-left-doors" class="flex flex-col justify-between py-2 shrink-0 select-none">
+                                <div id="classroom-front-door" class="px-2 py-2.5 rounded-xl bg-[#7c4a21] border-[2.5px] border-[#3a2618] shadow-[2px_2px_0px_#3a2618] text-amber-100 text-[11px] sm:text-xs flex flex-col items-center gap-1 transition-transform">
+                                    <span>🚪</span>
+                                    <span>앞문</span>
+                                </div>
+                                <div id="classroom-back-door" class="px-2 py-2.5 rounded-xl bg-[#7c4a21] border-[2.5px] border-[#3a2618] shadow-[2px_2px_0px_#3a2618] text-amber-100 text-[11px] sm:text-xs flex flex-col items-center gap-1 transition-transform">
+                                    <span>🚪</span>
+                                    <span>뒷문</span>
+                                </div>
+                            </div>
+
+                            <!-- 책상 그리드 -->
+                            <div id="desks-grid" class="flex-1 grid grid-cols-8 gap-2 sm:gap-3">
+                                <!-- JS로 6행x8열 교실 책상 렌더링 -->
+                            </div>
                         </div>
+
+                        <!-- 걸어 다니는 학생 캐릭터 오버레이 레이어 -->
+                        <div id="walkers-layer" class="pointer-events-none absolute inset-0 z-30 overflow-hidden"></div>
                     </div>
                 </div>
             </section>
@@ -614,19 +696,17 @@
         let chartPerspective = 'student'; // 'student' | 'teacher'
         let currentZoom = 1.0;
         let hasCustomLayout = false;
-        let logoTapCount = 0;
-        let logoTapTimer = null;
 
-        function handleSecretLogoTap() {
-            logoTapCount++;
-            clearTimeout(logoTapTimer);
-            logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1500);
-            if (logoTapCount >= 5) {
-                logoTapCount = 0;
-                isLalessAuthenticated = true;
-                toggleTeacherSecretMode();
-            }
-        }
+        const WALKER_SHIRT_COLORS = ['#fbbf24', '#60a5fa', '#f87171', '#34d399', '#c084fc', '#fb923c', '#38bdf8', '#f472b6'];
+        const WALKER_SPEECH_LINES = [
+            '이 자리다!?',
+            '어디 앉지...',
+            '음... 아니네!',
+            '우와~ 기대돼',
+            '여기가 내 자리?',
+            '내 자리 어디지?',
+            '여기다!'
+        ];
 
         function checkLalessLoginStatus() {
             let loggedInUser = null;
@@ -636,20 +716,15 @@
 
             let hasLalessPath = false;
             let hasLalessQuery = false;
-            let isBasicQuery = false;
-            let isPreviewEnv = false;
             try {
-                const host = (window.location.hostname || '').toLowerCase();
-                isPreviewEnv = !host.endsWith('github.io');
                 hasLalessPath = window.location.pathname.toLowerCase().includes('laless');
                 const params = new URLSearchParams(window.location.search);
                 const userParam = (params.get('user') || params.get('account') || '').toLowerCase();
                 hasLalessQuery = (userParam === 'laless');
-                isBasicQuery = (params.get('mode') === 'basic');
             } catch (e) {}
 
-            isLalessAuthenticated = isPreviewEnv || (loggedInUser === 'laless') || hasLalessPath || hasLalessQuery;
-            return isLalessAuthenticated && !isBasicQuery;
+            isLalessAuthenticated = (loggedInUser === 'laless') || hasLalessPath || hasLalessQuery;
+            return isLalessAuthenticated;
         }
 
         function detectLalessAccount() {
@@ -659,41 +734,14 @@
                 : ['students', 'layout', 'draw', 'chart'];
         }
 
-        function toggleTeacherSecretMode() {
-            if (!isLalessAuthenticated || isAnimating || isTransitioning) return;
-            isLalessUser = !isLalessUser;
-            stepOrder = isLalessUser
-                ? ['students', 'layout', 'secret', 'draw', 'chart']
-                : ['students', 'layout', 'draw', 'chart'];
-
-            configureStepUIForAccount();
-            if (!stepOrder.includes(currentStep)) {
-                setInitialStepView('layout');
-            } else {
-                setInitialStepView(currentStep);
-            }
-            showToast(
-                isLalessUser
-                    ? '지정 모드 (5단계: 1~12번 자리 번호 지정)로 전환되었습니다.'
-                    : '기본 4단계 자리뽑기 모드로 전환되었습니다.'
-            );
-        }
-
         function configureStepUIForAccount() {
             const navBar = document.getElementById('step-nav-bar');
             const secretTab = document.getElementById('step-tab-secret');
             const layoutNextBtn = document.getElementById('layout-next-btn');
             const step3BackBtn = document.getElementById('step3-back-btn');
             const chartStepBadge = document.getElementById('chart-step-badge');
-            const modeBtn = document.getElementById('mode-switch-btn');
-
-            if (modeBtn) {
-                if (isLalessAuthenticated) {
-                    modeBtn.classList.remove('hidden');
-                } else {
-                    modeBtn.classList.add('hidden');
-                }
-            }
+            const leftDoors = document.getElementById('classroom-left-doors');
+            const teacherBubble = document.getElementById('teacher-bubble');
 
             if (isLalessUser) {
                 navBar.classList.remove('sm:grid-cols-4');
@@ -702,9 +750,9 @@
                 layoutNextBtn.textContent = '다음: 자리 번호 지정 ▶';
                 step3BackBtn.textContent = '◀ 번호 지정 수정';
                 chartStepBadge.textContent = 'STEP 05';
-                if (modeBtn) {
-                    modeBtn.textContent = '🦆 지정 모드 (5단계)';
-                    modeBtn.className = 'retro-btn px-3 py-1.5 bg-amber-300 text-[#2c1e12] text-xs cursor-pointer';
+                if (leftDoors) leftDoors.classList.add('hidden');
+                if (teacherBubble && !isAnimating) {
+                    teacherBubble.innerHTML = '책상마다 랜덤 번호가 준비되었어요! <strong>[🎬 자리 뽑기!]</strong> 버튼을 눌러 시작해 보세요.';
                 }
             } else {
                 navBar.classList.remove('sm:grid-cols-5');
@@ -713,9 +761,9 @@
                 layoutNextBtn.textContent = '다음: 교실 자리뽑기 ▶';
                 step3BackBtn.textContent = '◀ 배치 수정';
                 chartStepBadge.textContent = 'STEP 04';
-                if (modeBtn && isLalessAuthenticated) {
-                    modeBtn.textContent = '🧭 기본 모드 (4단계)';
-                    modeBtn.className = 'retro-btn px-3 py-1.5 bg-[#fff9ed] hover:bg-amber-100 text-[#2c1e12] text-xs cursor-pointer';
+                if (leftDoors) leftDoors.classList.remove('hidden');
+                if (teacherBubble && !isAnimating) {
+                    teacherBubble.innerHTML = '앞문과 뒷문 앞에 친구들이 줄 서 있어요! <strong>[🎬 자리 뽑기!]</strong> 버튼을 누르면 교실로 걸어 들어와 자리를 찾아요.';
                 }
             }
 
@@ -726,145 +774,174 @@
                     badge.textContent = String(idx + 1).padStart(2, '0');
                 }
             });
-        }
 
-        // --- 2. 초기화 및 단계 전환 (좌우 슬라이드 교차 애니메이션) ---
-        function init() {
-            detectLalessAccount();
-            configureStepUIForAccount();
-
-            const today = new Date();
-            const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
-            document.getElementById('chalkboard-date').textContent = dateStr;
-            document.getElementById('chart-date-text').textContent = dateStr;
-
-            const restored = loadRosterFromLocal();
-            if (!restored) {
-                buildStudentsFromCount(24, false);
-                applyPreset('pair3');
+            if (currentStep === 'draw') {
+                if (isLalessUser) assignRandomDeskNumbers();
+                renderDesksGrid();
             }
-            setInitialStepView('students');
         }
 
-        function setInitialStepView(stepKey) {
-            currentStep = stepKey;
-            stepOrder.forEach(key => {
-                const view = document.getElementById(`step-view-${key}`);
-                const tab = document.getElementById(`step-tab-${key}`);
-                const badge = tab?.querySelector('.step-num-badge');
-
-                if (key === stepKey) {
-                    view?.classList.remove('hidden');
-                    if (tab) tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
+        // --- 2. 단계 이동 & 초기화 로직 ---
+        function updateStepTabsUI(activeStep) {
+            stepOrder.forEach((stepKey, idx) => {
+                const tab = document.getElementById(`step-tab-${stepKey}`);
+                if (!tab) return;
+                const badge = tab.querySelector('.step-num-badge');
+                if (stepKey === activeStep) {
+                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
                     if (badge) badge.className = 'step-num-badge px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-300 text-[11px]';
                 } else {
-                    view?.classList.add('hidden');
-                    if (tab) tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
+                    tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
                     if (badge) badge.className = 'step-num-badge px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]';
                 }
-            });
-            updateCountsUI();
-        }
-
-        function goToNextFromLayout() {
-            goToStep(isLalessUser ? 'secret' : 'draw');
-        }
-
-        function goBackFromDraw() {
-            goToStep(isLalessUser ? 'secret' : 'layout');
-        }
-
-        function goToStep(stepKey) {
-            if (isAnimating || isTransitioning) {
-                if (isAnimating) showToast('자리 뽑기가 진행 중일 때는 이동할 수 없습니다!');
-                return;
-            }
-            if (!stepOrder.includes(stepKey) || currentStep === stepKey) return;
-
-            const presentCount = students.filter(s => !s.absent).length;
-            const deskCount = deskMap.filter(Boolean).length;
-            const targetIdx = stepOrder.indexOf(stepKey);
-            const drawIdx = stepOrder.indexOf('draw');
-            const chartIdx = stepOrder.indexOf('chart');
-
-            if (targetIdx >= 1 && presentCount === 0) {
-                showToast('최소 1명 이상의 출석 학생이 필요합니다!');
-                return;
-            }
-
-            if (targetIdx === drawIdx && deskCount < presentCount) {
-                showToast(`책상(${deskCount}석)이 출석 인원(${presentCount}명)보다 부족합니다! 배치를 조정해 주세요.`);
-                return;
-            }
-
-            if (targetIdx === chartIdx && Object.keys(seatAssignments).length === 0) {
-                showToast('먼저 교실 자리뽑기 단계에서 자리 뽑기를 진행해 주세요!');
-                return;
-            }
-
-            if (isEditMode && stepKey !== 'layout') {
-                toggleEditMode();
-            }
-
-            isTransitioning = true;
-            const prevStep = currentStep;
-            currentStep = stepKey;
-            const isForward = stepOrder.indexOf(stepKey) > stepOrder.indexOf(prevStep);
-
-            const outClass = isForward ? 'anim-slide-out-left' : 'anim-slide-out-right';
-            const inClass = isForward ? 'anim-slide-in-right' : 'anim-slide-in-left';
-
-            stepOrder.forEach(key => {
-                const tab = document.getElementById(`step-tab-${key}`);
-                const badge = tab?.querySelector('.step-num-badge');
-                if (key === stepKey) {
-                    if (tab) tab.className = 'step-tab retro-btn py-2 px-3 bg-[#ff9f1c] text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
-                    if (badge) badge.className = 'step-num-badge px-1.5 py-0.5 rounded bg-[#2c1e12] text-amber-300 text-[11px]';
-                } else {
-                    if (tab) tab.className = 'step-tab retro-btn py-2 px-3 bg-[#f3eadc] text-stone-600 hover:text-[#2c1e12] text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer';
-                    if (badge) badge.className = 'step-num-badge px-1.5 py-0.5 rounded bg-stone-500 text-white text-[11px]';
+                if (badge) {
+                    badge.textContent = String(idx + 1).padStart(2, '0');
                 }
             });
+        }
 
-            if (stepKey === 'layout') {
-                if (!hasCustomLayout) {
-                    applyPreset(currentPreset);
-                } else {
-                    renderPreviewDesksGrid();
-                }
+        function prepareStepData(stepKey) {
+            if (stepKey === 'students') {
+                renderStep1Students();
+            } else if (stepKey === 'layout') {
+                renderPreviewDesksGrid();
             } else if (stepKey === 'secret') {
                 sanitizeSecretAssignments();
                 renderSecretStepUI();
             } else if (stepKey === 'draw') {
-                assignRandomDeskNumbers();
+                if (isLalessUser) {
+                    assignRandomDeskNumbers();
+                }
                 renderDesksGrid();
             } else if (stepKey === 'chart') {
                 renderSeatChartGrid();
             }
             updateCountsUI();
-
-            const prevView = document.getElementById(`step-view-${prevStep}`);
-            const nextView = document.getElementById(`step-view-${stepKey}`);
-
-            prevView.classList.remove('anim-slide-in-right', 'anim-slide-in-left', 'anim-slide-out-left', 'anim-slide-out-right');
-            nextView.classList.remove('anim-slide-in-right', 'anim-slide-in-left', 'anim-slide-out-left', 'anim-slide-out-right');
-
-            nextView.classList.remove('hidden');
-            prevView.classList.add(outClass);
-            nextView.classList.add(inClass);
-
-            playTone(isForward ? 560 : 480, 'square', 0.05, 0, 0.04);
-
-            setTimeout(() => {
-                prevView.classList.add('hidden');
-                prevView.classList.remove(outClass);
-                nextView.classList.remove(inClass);
-                isTransitioning = false;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 340);
         }
 
-        // --- 3. [STEP 1] 학생 명단 & 출결 관리 ---
+        function setInitialStepView(stepKey) {
+            currentStep = stepKey;
+            const allSteps = ['students', 'layout', 'secret', 'draw', 'chart'];
+            allSteps.forEach(key => {
+                const el = document.getElementById(`step-view-${key}`);
+                if (!el) return;
+                el.classList.remove('anim-slide-out-left', 'anim-slide-in-right', 'anim-slide-out-right', 'anim-slide-in-left');
+                if (key === stepKey) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+            updateStepTabsUI(stepKey);
+            prepareStepData(stepKey);
+        }
+
+        function goToStep(targetStep) {
+            if (isAnimating || isTransitioning) return;
+            if (!stepOrder.includes(targetStep)) return;
+            if (targetStep === currentStep) {
+                prepareStepData(targetStep);
+                return;
+            }
+
+            if (targetStep === 'draw' || targetStep === 'chart') {
+                const presentCount = students.filter(s => !s.absent).length;
+                const deskCount = deskMap.filter(Boolean).length;
+                if (presentCount === 0) {
+                    showToast('출석한 학생이 최소 1명 이상 있어야 합니다!');
+                    return;
+                }
+                if (deskCount < presentCount) {
+                    showToast(`책상 수(${deskCount}석)가 출석 인원(${presentCount}명)보다 적습니다!`);
+                    return;
+                }
+            }
+
+            const prevIdx = stepOrder.indexOf(currentStep);
+            const nextIdx = stepOrder.indexOf(targetStep);
+            const isForward = nextIdx > prevIdx;
+
+            const currentEl = document.getElementById(`step-view-${currentStep}`);
+            const nextEl = document.getElementById(`step-view-${targetStep}`);
+
+            currentStep = targetStep;
+            updateStepTabsUI(targetStep);
+            prepareStepData(targetStep);
+            playTone(isForward ? 560 : 440, 'square', 0.05, 0, 0.04);
+
+            if (!currentEl || !nextEl) {
+                setInitialStepView(targetStep);
+                return;
+            }
+
+            isTransitioning = true;
+            nextEl.classList.remove('hidden');
+            currentEl.classList.add(isForward ? 'anim-slide-out-left' : 'anim-slide-out-right');
+            nextEl.classList.add(isForward ? 'anim-slide-in-right' : 'anim-slide-in-left');
+
+            setTimeout(() => {
+                currentEl.classList.add('hidden');
+                currentEl.classList.remove('anim-slide-out-left', 'anim-slide-out-right');
+                nextEl.classList.remove('anim-slide-in-right', 'anim-slide-in-left');
+                isTransitioning = false;
+            }, 320);
+        }
+
+        function goToNextFromLayout() {
+            if (isLalessUser) {
+                goToStep('secret');
+            } else {
+                goToStep('draw');
+            }
+        }
+
+        function goBackFromDraw() {
+            if (isLalessUser) {
+                goToStep('secret');
+            } else {
+                goToStep('layout');
+            }
+        }
+
+        function init() {
+            detectLalessAccount();
+            configureStepUIForAccount();
+
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+            const cbDate = document.getElementById('chalkboard-date');
+            const chDate = document.getElementById('chart-date-text');
+            if (cbDate) cbDate.textContent = dateStr;
+            if (chDate) chDate.textContent = dateStr;
+
+            let restored = false;
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && Array.isArray(parsed.students) && parsed.students.length > 0) {
+                        students = parsed.students;
+                        studentCount = students.length;
+                        inputMode = parsed.inputMode === 'name' ? 'name' : 'number';
+                        const cntInput = document.getElementById('student-count-input');
+                        if (cntInput) cntInput.value = studentCount;
+                        setInputMode(inputMode, true);
+                        renderStep1Students();
+                        restored = true;
+                    }
+                }
+            } catch (e) {}
+
+            if (!restored) {
+                buildStudentsFromCount(studentCount, false);
+            }
+
+            applyPreset('pair3', true);
+            updateCountsUI();
+            setInitialStepView('students');
+        }
+
+        // --- 3. [STEP 1] 우리 반 명단 & 출결 설정 ---
         function saveRosterToLocal() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -872,27 +949,6 @@
                     students
                 }));
             } catch (e) {}
-        }
-
-        function loadRosterFromLocal() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (!raw) return false;
-                const parsed = JSON.parse(raw);
-                if (parsed && Array.isArray(parsed.students) && parsed.students.length > 0) {
-                    students = parsed.students;
-                    studentCount = students.length;
-                    document.getElementById('student-count-input').value = studentCount;
-                    if (parsed.inputMode === 'name') {
-                        setInputMode('name', true);
-                        document.getElementById('names-textarea').value = students.map(s => s.label).join('\n');
-                    }
-                    renderStep1Students();
-                    applyPreset('pair3', true);
-                    return true;
-                }
-            } catch (e) {}
-            return false;
         }
 
         function syncDesksWithPresentCount() {
@@ -950,6 +1006,7 @@
                     absent: prevAbsentMap.get(id) || false
                 };
             });
+            studentCount = count;
             seatAssignments = {};
             renderStep1Students();
             syncDesksWithPresentCount();
@@ -1443,7 +1500,9 @@
         function renderDesksGrid() {
             const grid = document.getElementById('desks-grid');
             if (!grid) return;
-            ensureDeskNumbersSynced();
+            if (isLalessUser) {
+                ensureDeskNumbersSynced();
+            }
             grid.innerHTML = '';
 
             for (let idx = 0; idx < ROWS * COLS; idx++) {
@@ -1453,20 +1512,38 @@
                 cell.dataset.cellIdx = idx;
 
                 if (hasDesk) {
-                    const randSeatNum = deskNumbers[idx];
                     cell.className = 'desk-unit h-14 sm:h-16 flex flex-col items-center justify-center p-1 relative';
-                    if (assigned) {
-                        cell.innerHTML = `
-                            <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm relative">
-                                <span class="absolute top-0.5 left-1 text-[10px] text-amber-800 leading-none">${randSeatNum}</span>
-                                <span class="text-[10px] leading-none mb-0.5">🦆</span>
-                                <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(assigned.label)}</span>
-                            </div>
-                        `;
+                    if (isLalessUser) {
+                        const randSeatNum = deskNumbers[idx];
+                        if (assigned) {
+                            cell.innerHTML = `
+                                <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm relative">
+                                    <span class="absolute top-0.5 left-1 text-[10px] text-amber-800 leading-none">${randSeatNum}</span>
+                                    <span class="text-[10px] leading-none mb-0.5">🦆</span>
+                                    <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(assigned.label)}</span>
+                                </div>
+                            `;
+                        } else {
+                            cell.innerHTML = `
+                                <span class="px-2 py-0.5 rounded-md bg-[#fff8eb]/85 border border-[#6b3e19]/40 text-xs sm:text-sm text-[#5c3312]">${randSeatNum}</span>
+                            `;
+                        }
                     } else {
-                        cell.innerHTML = `
-                            <span class="px-2 py-0.5 rounded-md bg-[#fff8eb]/85 border border-[#6b3e19]/40 text-xs sm:text-sm text-[#5c3312]">${randSeatNum}</span>
-                        `;
+                        if (assigned) {
+                            cell.innerHTML = `
+                                <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm">
+                                    <div class="w-4 h-4 rounded-full bg-amber-300 border border-[#2c1e12] flex items-center justify-center text-[9px] leading-none mb-0.5">😊</div>
+                                    <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(assigned.label)}</span>
+                                </div>
+                            `;
+                        } else {
+                            cell.innerHTML = `
+                                <div class="flex flex-col items-center justify-center opacity-60">
+                                    <span class="text-xs leading-none">🪑</span>
+                                    <span class="mt-0.5 w-3.5 h-1.5 rounded-sm bg-sky-500 border border-[#2c1e12]"></span>
+                                </div>
+                            `;
+                        }
                     }
                 } else {
                     cell.className = 'desk-unit empty-slot h-14 sm:h-16 flex items-center justify-center relative opacity-40';
@@ -1478,6 +1555,188 @@
 
         const sleep = ms => new Promise(res => setTimeout(res, ms));
 
+        function getStageCenterPoint(el) {
+            const stage = document.getElementById('classroom-stage');
+            const stageRect = stage.getBoundingClientRect();
+            const rect = el.getBoundingClientRect();
+            const scale = currentZoom || 1;
+            return {
+                x: (rect.left + rect.width / 2 - stageRect.left) / scale,
+                y: (rect.top + rect.height / 2 - stageRect.top) / scale
+            };
+        }
+
+        function createStudentWalkerElement(student, colorIdx) {
+            const shirtColor = WALKER_SHIRT_COLORS[colorIdx % WALKER_SHIRT_COLORS.length];
+            const el = document.createElement('div');
+            el.className = 'student-walker flex flex-col items-center select-none';
+            el.innerHTML = `
+                <div class="walker-sprite flex flex-col items-center">
+                    <div class="px-2 py-0.5 rounded-full bg-[#fffdf8] border-2 border-[#2c1e12] shadow-[1px_2px_0px_#2c1e12] text-[10px] sm:text-xs text-[#2c1e12] whitespace-nowrap leading-tight">
+                        ${escapeHtml(student.label)}
+                    </div>
+                    <div class="w-4 h-2.5 rounded-t-md border-x-2 border-t-2 border-[#2c1e12] -mt-0.5" style="background-color: ${shirtColor};"></div>
+                    <div class="flex items-center gap-1 -mt-0.5">
+                        <span class="walker-leg-l block w-1.5 h-2 bg-[#2c1e12] rounded-b-sm"></span>
+                        <span class="walker-leg-r block w-1.5 h-2 bg-[#2c1e12] rounded-b-sm"></span>
+                    </div>
+                </div>
+            `;
+            return el;
+        }
+
+        function triggerWalkerSpeech(walkerEl, text) {
+            if (!walkerEl || !walkerEl.parentNode) return;
+            const prev = walkerEl.querySelector('.walker-speech');
+            if (prev) prev.remove();
+            const bubble = document.createElement('div');
+            bubble.className = 'walker-speech';
+            bubble.textContent = text;
+            walkerEl.appendChild(bubble);
+            setTimeout(() => {
+                if (bubble.parentNode) bubble.remove();
+            }, 1350);
+        }
+
+        function moveWalkerSmooth(walkerEl, waypoints, durationMs) {
+            if (!walkerEl || waypoints.length < 2) return Promise.resolve();
+            const keyframes = waypoints.map((pt, i) => ({
+                transform: `translate(${pt.x}px, ${pt.y}px) translate(-50%, -50%)`,
+                offset: i / (waypoints.length - 1)
+            }));
+            if (typeof walkerEl.animate === 'function') {
+                const anim = walkerEl.animate(keyframes, {
+                    duration: durationMs,
+                    easing: 'ease-in-out',
+                    fill: 'forwards'
+                });
+                return anim.finished.catch(() => {});
+            }
+            const last = waypoints[waypoints.length - 1];
+            walkerEl.style.transform = `translate(${last.x}px, ${last.y}px) translate(-50%, -50%)`;
+            return sleep(durationMs);
+        }
+
+        async function runBasicClassroomWalkSequence(pairs, progressLabel, teacherBubble) {
+            const walkersLayer = document.getElementById('walkers-layer');
+            const frontDoor = document.getElementById('classroom-front-door');
+            const backDoor = document.getElementById('classroom-back-door');
+            const boardText = document.getElementById('chalkboard-center-text');
+            if (!walkersLayer || !frontDoor || !backDoor) return;
+
+            walkersLayer.innerHTML = '';
+            const frontPt = getStageCenterPoint(frontDoor);
+            const backPt = getStageCenterPoint(backDoor);
+
+            // 복도/통로 웨이포인트 수집 (책상 사이 통로 및 빈 책상 주변)
+            const allCells = Array.from(document.querySelectorAll('#desks-grid > div'));
+            const aislePoints = [];
+            allCells.forEach((cell, idx) => {
+                if (!deskMap[idx]) {
+                    aislePoints.push(getStageCenterPoint(cell));
+                }
+            });
+            // 통로가 적은 배치(예: 4분단 32석 등)를 대비한 기본 중앙·측면 복도 좌표 보강
+            if (aislePoints.length < 6) {
+                [0, 3, 7, 16, 20, 23, 32, 36, 39, 43].forEach(idx => {
+                    if (allCells[idx]) aislePoints.push(getStageCenterPoint(allCells[idx]));
+                });
+            }
+
+            // [1단계: 앞문과 뒷문으로 줄지어 입장]
+            frontDoor.classList.add('scale-105', 'bg-amber-600');
+            backDoor.classList.add('scale-105', 'bg-amber-600');
+            if (boardText) boardText.textContent = '입 장 중 ...';
+            teacherBubble.innerHTML = `🚪 <strong>앞문과 뒷문</strong>에서 우리 반 친구들이 줄지어 교실로 들어오고 있어요!`;
+
+            const activeWalkers = pairs.map((pair, i) => {
+                const useFrontDoor = (i % 2 === 0);
+                const doorPt = useFrontDoor ? frontPt : backPt;
+                const el = createStudentWalkerElement(pair.student, i);
+                el.style.transform = `translate(${doorPt.x}px, ${doorPt.y}px) translate(-50%, -50%)`;
+                walkersLayer.appendChild(el);
+
+                const p1 = aislePoints[(i * 3) % aislePoints.length];
+                const p2 = aislePoints[(i * 5 + 2) % aislePoints.length];
+                const entryStart = { x: doorPt.x + 18, y: doorPt.y + ((i % 3) - 1) * 10 };
+
+                return {
+                    pair,
+                    el,
+                    currentPt: p2,
+                    entryPromise: (async () => {
+                        await sleep((i % 8) * 75);
+                        playTone(420 + (i % 6) * 35, 'square', 0.04, 0, 0.03);
+                        await moveWalkerSmooth(el, [doorPt, entryStart, p1, p2], 950);
+                    })()
+                };
+            });
+
+            await Promise.all(activeWalkers.map(w => w.entryPromise));
+            frontDoor.classList.remove('scale-105', 'bg-amber-600');
+            backDoor.classList.remove('scale-105', 'bg-amber-600');
+
+            // [2단계: 복도 배회 및 앉을 듯 말 듯 탐색 + 말풍선 연출]
+            if (boardText) boardText.textContent = '두근... 두근두근...';
+            teacherBubble.innerHTML = `💭 친구들이 교실 통로를 돌아다니며 <strong>내 자리가 어디일지</strong> 두근두근 찾고 있어요!`;
+
+            let speechTimer = setInterval(() => {
+                if (activeWalkers.length === 0) return;
+                const pickCount = Math.min(3, activeWalkers.length);
+                for (let k = 0; k < pickCount; k++) {
+                    const randW = activeWalkers[Math.floor(Math.random() * activeWalkers.length)];
+                    const line = WALKER_SPEECH_LINES[Math.floor(Math.random() * WALKER_SPEECH_LINES.length)];
+                    triggerWalkerSpeech(randW.el, line);
+                }
+                playTone(520 + Math.floor(Math.random() * 140), 'square', 0.035, 0, 0.025);
+            }, 480);
+
+            await Promise.all(activeWalkers.map(async (w, idx) => {
+                const w1 = aislePoints[(idx * 7 + 1) % aislePoints.length];
+                const w2 = aislePoints[(idx * 11 + 4) % aislePoints.length];
+                const w3 = aislePoints[(idx * 13 + 3) % aislePoints.length];
+                // 앉을 듯 말 듯 잠시 멈칫했다가 이동하는 2구간 배회
+                await moveWalkerSmooth(w.el, [w.currentPt, w1, w2], 1050);
+                await sleep(160);
+                await moveWalkerSmooth(w.el, [w2, w3], 850);
+                w.currentPt = w3;
+            }));
+
+            clearInterval(speechTimer);
+
+            // [3단계: 자기 자리를 찾아 순차 착석 및 확정]
+            teacherBubble.innerHTML = `🪑 드디어 자기 자리를 찾았어요! 한 명씩 차례대로 자리에 앉습니다!`;
+            const seatInterval = activeWalkers.length > 24 ? 75 : 115;
+
+            await Promise.all(activeWalkers.map(async (w, i) => {
+                await sleep(i * seatInterval);
+                const { student, seatIdx } = w.pair;
+                const cell = allCells[seatIdx];
+                if (!cell) return;
+
+                const targetPt = getStageCenterPoint(cell);
+                const midPt = { x: w.currentPt.x, y: targetPt.y };
+                triggerWalkerSpeech(w.el, '여기다!');
+                await moveWalkerSmooth(w.el, [w.currentPt, midPt, targetPt], 340);
+
+                w.el.remove();
+                seatAssignments[seatIdx] = student;
+                cell.innerHTML = `
+                    <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm">
+                        <div class="w-4 h-4 rounded-full bg-amber-300 border border-[#2c1e12] flex items-center justify-center text-[9px] leading-none mb-0.5">😊</div>
+                        <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(student.label)}</span>
+                    </div>
+                `;
+                const seatedDone = Object.keys(seatAssignments).length;
+                progressLabel.textContent = `${seatedDone} / ${pairs.length}명`;
+                playTone(460 + (seatedDone % 8) * 45, 'square', 0.055, 0, 0.04);
+            }));
+
+            walkersLayer.innerHTML = '';
+            if (boardText) boardText.textContent = '짝꿍한테 인사해 볼까요?';
+            teacherBubble.innerHTML = `🎉 <strong>짝꿍한테 인사해 볼까요?</strong> 우리 반 전원 자리 배정이 완료되었습니다!`;
+        }
+
         async function startSeatAssignment(isInstant = false) {
             if (isAnimating) return;
 
@@ -1488,7 +1747,7 @@
             });
 
             if (presentStudents.length === 0) {
-                showToast('출석한 학생이 없습니다!');
+                showToast('출석한 학생이 최소 1명 이상 있어야 합니다!');
                 return;
             }
             if (activeDeskIndices.length < presentStudents.length) {
@@ -1499,8 +1758,10 @@
             isAnimating = true;
             seatAssignments = {};
 
-            // 자리 뽑기 때마다 책상 번호를 완전 랜덤으로 새로 부여
-            assignRandomDeskNumbers();
+            // laless 로그인(지정 모드)일 때만 책상마다 랜덤 번호 부여
+            if (isLalessUser) {
+                assignRandomDeskNumbers();
+            }
             renderDesksGrid();
 
             const startBtn = document.getElementById('start-anim-btn');
@@ -1510,6 +1771,9 @@
             const stageBadge = document.getElementById('stage-badge');
             const teacherBubble = document.getElementById('teacher-bubble');
             const progressLabel = document.getElementById('chalkboard-progress');
+            const boardText = document.getElementById('chalkboard-center-text');
+
+            if (boardText) boardText.textContent = '칠 판 / 교 탁';
 
             startBtn.disabled = true;
             instantBtn.disabled = true;
@@ -1574,15 +1838,17 @@
                 });
                 renderDesksGrid();
                 progressLabel.textContent = `${pairs.length} / ${pairs.length}명`;
+                if (!isLalessUser && boardText) {
+                    boardText.textContent = '짝꿍한테 인사해 볼까요?';
+                }
                 teacherBubble.innerHTML = `⚡ 단번에 <strong>${pairs.length}명</strong>의 새 자리가 모두 배정되었습니다!`;
-            } else {
+            } else if (isLalessUser) {
                 const stepDelay = pairs.length > 26 ? 95 : 145;
                 for (let i = 0; i < pairs.length; i++) {
                     const { student, seatIdx } = pairs[i];
                     seatAssignments[seatIdx] = student;
-                    const seatNum = deskNumbers[seatIdx];
-
                     const cell = document.querySelector(`#desks-grid [data-cell-idx="${seatIdx}"]`);
+                    const seatNum = deskNumbers[seatIdx];
                     if (cell) {
                         cell.innerHTML = `
                             <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm relative">
@@ -1592,13 +1858,14 @@
                             </div>
                         `;
                     }
-
                     progressLabel.textContent = `${i + 1} / ${pairs.length}명`;
                     teacherBubble.innerHTML = `🦆 <strong>${escapeHtml(student.label)}</strong> 학생이 <strong>${seatNum}번</strong> 책상에 앉았습니다! (${i + 1}/${pairs.length})`;
                     playTone(440 + (i % 8) * 45, 'square', 0.06, 0, 0.045);
                     await sleep(stepDelay);
                 }
                 teacherBubble.innerHTML = `🎉 <strong>우리 반 전원 자리 배정 완료!</strong> [📋 자리표 저장하기]를 눌러 확인해 보세요.`;
+            } else {
+                await runBasicClassroomWalkSequence(pairs, progressLabel, teacherBubble);
             }
 
             playFanfare();
