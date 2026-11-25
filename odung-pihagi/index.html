@@ -1,0 +1,2640 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GAME 02 - 오둥이 피하기</title>
+    <!-- 레트로 감성 폰트 로드 (도현체 Do Hyeon + Pretendard) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap" rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tone.js (레트로 8비트 사운드 효과용) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        :root {
+            --bg-light: #fef9c3;
+            --card-bg: #ffffff;
+            --border-orange: #f59e0b;
+            --accent-yellow: #fbbf24;
+            --accent-mint: #10b981;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #fffbeb;
+            background-image: 
+                radial-gradient(circle at 50% 20%, rgba(253, 224, 71, 0.45), transparent 70%),
+                linear-gradient(to right, rgba(245, 158, 11, 0.14) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(245, 158, 11, 0.14) 1px, transparent 1px);
+            background-size: 100% 100%, 32px 32px, 32px 32px;
+            color: #1e293b;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .font-retro {
+            font-family: 'Do Hyeon', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        .arcade-frame {
+            background-color: var(--card-bg);
+            border: 3px solid var(--border-orange);
+            box-shadow: 0 14px 36px rgba(217, 119, 6, 0.22), inset 0 0 24px rgba(254, 243, 199, 0.6);
+        }
+
+        .crt-overlay {
+            background: linear-gradient(
+                rgba(255, 255, 255, 0) 50%, 
+                rgba(245, 158, 11, 0.04) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .neon-text {
+            text-shadow: 0 2px 0 #fde047, 0 4px 12px rgba(245, 158, 11, 0.35);
+        }
+
+        .retro-btn {
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 0 #d97706;
+        }
+        .retro-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #d97706;
+        }
+
+        .pixelated {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* 커스텀 스크롤바 (명예의 전당용) */
+        .retro-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .retro-scroll::-webkit-scrollbar-track {
+            background: #fef3c7;
+        }
+        .retro-scroll::-webkit-scrollbar-thumb {
+            background: #f59e0b;
+            border-radius: 4px;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: #f59e0b; }
+            50% { border-color: #fb923c; }
+        }
+        .animate-border {
+            animation: pulse-border 2s infinite;
+        }
+
+        /* 명예의 전당 모달 열기/닫기 및 리스트 등장 애니메이션 */
+        @keyframes modalBackdropFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes modalBackdropFadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @keyframes modalPopIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.82) translateY(20px);
+            }
+            70% {
+                opacity: 1;
+                transform: scale(1.03) translateY(-2px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        @keyframes modalPopOut {
+            0% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.88) translateY(14px);
+            }
+        }
+        @keyframes rankRowSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes trophyWiggle {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-12deg) scale(1.15); }
+            50% { transform: rotate(10deg) scale(1.15); }
+            75% { transform: rotate(-6deg) scale(1.05); }
+        }
+
+        .hof-backdrop-enter {
+            animation: modalBackdropFadeIn 0.22s ease-out forwards;
+        }
+        .hof-backdrop-exit {
+            animation: modalBackdropFadeOut 0.18s ease-in forwards;
+        }
+        .hof-panel-enter {
+            animation: modalPopIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .hof-panel-exit {
+            animation: modalPopOut 0.18s ease-in forwards;
+        }
+        .hof-row-anim {
+            opacity: 0;
+            animation: rankRowSlideIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .trophy-bounce {
+            display: inline-block;
+            animation: trophyWiggle 0.6s ease-in-out 0.15s;
+        }
+
+        /* 보스 등장 연출 애니메이션 */
+        @keyframes bossBannerPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) translateY(30px);
+            }
+            60% {
+                opacity: 1;
+                transform: scale(1.08) translateY(-6px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        @keyframes bossFloat {
+            0%, 100% { transform: translateY(0px) rotate(-2deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        @keyframes warningStripe {
+            0% { background-position: 0 0; }
+            100% { background-position: 56px 0; }
+        }
+        .boss-intro-card {
+            animation: bossBannerPop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .boss-char-float {
+            animation: bossFloat 1.4s ease-in-out infinite;
+        }
+        .warning-bar {
+            background-image: repeating-linear-gradient(
+                -45deg,
+                #f59e0b,
+                #f59e0b 14px,
+                #1e293b 14px,
+                #1e293b 28px
+            );
+            background-size: 56px 56px;
+            animation: warningStripe 0.8s linear infinite;
+        }
+    </style>
+</head>
+<body id="mainBody" class="h-screen w-screen flex flex-col items-center justify-center p-3 sm:p-6 overflow-hidden">
+
+    <!-- 상단 GAME 02 뱃지 및 사운드 토글 (타이틀 화면용) -->
+    <div id="topHeaderBar" class="w-full max-w-4xl flex justify-between items-end mb-0 z-10 px-1 transition-all duration-300">
+        <div class="bg-[#f59e0b] text-white font-retro font-bold px-3 py-1 text-sm sm:text-base tracking-wider rounded-t-md shadow-sm">
+            GAME 02
+        </div>
+        <button id="soundToggleBtn" class="bg-white border-2 border-b-0 border-[#f59e0b] text-xs font-retro px-2.5 py-1 rounded-t-md text-amber-800 hover:bg-amber-50 transition font-bold">
+            🔊 BGM/SFX ON
+        </button>
+    </div>
+
+    <!-- 메인 아케이드 캐비닛 프레임 (게임 시작 시 화면 전체로 확장됨) -->
+    <div id="arcadeFrame" class="arcade-frame animate-border relative w-full max-w-4xl h-[86vh] max-h-[740px] rounded-xl rounded-tl-none flex flex-col overflow-hidden transition-all duration-300">
+        
+        <!-- 상단 HUD (점수, 생존시간, 최고기록, 목숨/스킬) -->
+        <div id="gameHud" class="hidden flex-col px-4 sm:px-6 py-2.5 bg-white/95 border-b-2 border-amber-300 z-10 shadow-sm">
+            <div class="flex justify-between items-center font-retro max-w-5xl w-full mx-auto">
+                <div class="flex items-center gap-3 sm:gap-5">
+                    <span class="hidden sm:inline-block bg-[#f59e0b] text-white font-bold px-2 py-0.5 text-xs rounded">GAME 02</span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] sm:text-[11px] text-amber-700 font-bold">SCORE</span>
+                        <span id="scoreDisplay" class="text-lg sm:text-2xl text-slate-900 font-bold tracking-wider">0</span>
+                    </div>
+                    <div class="flex flex-col border-l border-amber-200 pl-3 sm:pl-5">
+                        <span class="text-[10px] sm:text-[11px] text-emerald-700 font-bold">TIME (목표 10:00)</span>
+                        <span id="survivalTimeDisplay" class="text-lg sm:text-2xl text-emerald-600 font-bold tracking-wider">00:00.0</span>
+                    </div>
+                </div>
+                
+                <!-- 콤보 & 속도 배율 -->
+                <div class="flex flex-col items-center">
+                    <div class="flex items-center gap-1.5">
+                        <span id="levelBadge" class="text-xs bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded font-bold">LV.1</span>
+                        <span id="speedBadge" class="text-xs bg-rose-100 text-rose-700 border border-rose-400 px-2 py-0.5 rounded font-bold">SPD 1.0x</span>
+                    </div>
+                    <span id="comboText" class="text-xs text-orange-600 mt-0.5 h-4 font-bold"></span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="flex flex-col items-end">
+                        <span class="text-[10px] sm:text-[11px] text-amber-700 font-bold">BEST</span>
+                        <span id="bestScoreDisplay" class="text-base sm:text-xl text-amber-600 font-bold">0</span>
+                    </div>
+                    <button id="hudSoundToggleBtn" class="bg-amber-50 border border-amber-300 text-xs px-2 py-1.5 rounded text-amber-800 hover:bg-amber-100 transition" title="소리 켜기/끄기">
+                        🔊
+                    </button>
+                </div>
+            </div>
+
+            <!-- 하단 상태바 (플레이어 정보, 하트 & 대시 쿨타임) -->
+            <div class="flex justify-between items-center mt-2 pt-1.5 border-t border-amber-200/80 max-w-5xl w-full mx-auto">
+                <div class="flex items-center gap-3">
+                    <div id="livesContainer" class="flex gap-1 text-base">
+                        ❤️❤️❤️
+                    </div>
+                    <span id="hudPlayerTag" class="hidden sm:inline-block text-[11px] font-retro text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded border border-amber-300 font-bold"></span>
+                </div>
+                <div class="flex items-center gap-2 font-retro text-xs">
+                    <span class="text-emerald-700 font-bold">DASH</span>
+                    <div class="w-24 sm:w-32 h-2.5 bg-slate-200 rounded-full overflow-hidden border border-emerald-400">
+                        <div id="dashBar" class="h-full bg-emerald-400 w-full transition-all duration-75"></div>
+                    </div>
+                    <span id="dashTimerText" class="text-[11px] font-bold text-emerald-700 min-w-[44px] text-right">READY</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 실제 게임 캔버스 영역 -->
+        <div id="canvasContainer" class="relative flex-1 w-full bg-[#e0f2fe] overflow-hidden">
+            <canvas id="gameCanvas" class="block w-full h-full"></canvas>
+            
+            <!-- CRT 스캔라인 오버레이 -->
+            <div class="crt-overlay absolute inset-0"></div>
+
+            <!-- 보스 등장 5초 연출 오버레이 (시간 정지 & 배경 블러) -->
+            <div id="bossIntroOverlay" class="hidden absolute inset-0 bg-slate-900/55 backdrop-blur-md flex flex-col items-center justify-center z-30 p-4">
+                <div class="warning-bar w-full max-w-md h-3 rounded-full mb-4 shadow-md"></div>
+                <div id="bossIntroCard" class="boss-intro-card bg-white/95 border-4 border-rose-500 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl relative overflow-hidden">
+                    <div id="bossWarningBadge" class="inline-block bg-rose-600 text-white font-retro text-xs sm:text-sm px-3 py-1 rounded-full tracking-widest mb-3 animate-pulse">
+                        ⚠️ WARNING! BOSS STAGE <span id="bossStageNum">1</span>
+                    </div>
+                    <div class="my-2 flex justify-center">
+                        <div class="w-28 h-28 sm:w-32 sm:h-32 bg-amber-100 border-4 border-amber-400 rounded-2xl flex items-center justify-center shadow-inner">
+                            <canvas id="bossIntroCanvas" width="96" height="96" class="boss-char-float w-24 h-24 sm:w-28 sm:h-28 pixelated"></canvas>
+                        </div>
+                    </div>
+                    <h2 id="bossIntroName" class="font-retro text-3xl sm:text-4xl text-slate-900 mt-3 mb-1 tracking-wide">
+                        오둥이 폭탄자
+                    </h2>
+                    <p id="bossIntroDesc" class="text-xs sm:text-sm text-rose-600 font-bold mb-4">
+                        폭탄을 투하해 사방으로 파편을 터뜨립니다!
+                    </p>
+                    <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden border border-slate-300">
+                        <div id="bossIntroProgress" class="h-full bg-rose-500 w-full transition-all duration-100"></div>
+                    </div>
+                    <p class="font-retro text-xs text-slate-500 mt-1.5">
+                        전투 시작까지 <span id="bossIntroCountdown" class="text-rose-600 font-bold">5.0</span>초
+                    </p>
+                </div>
+                <div class="warning-bar w-full max-w-md h-3 rounded-full mt-4 shadow-md"></div>
+            </div>
+
+            <!-- 1. 타이틀(시작) 화면 오버레이 (왼쪽: 타이틀 & 캐릭터 / 오른쪽: 참가자 입력 & 게임시작, 명예의 전당 버튼) -->
+            <div id="startScreen" class="absolute inset-0 bg-gradient-to-br from-[#fffbeb] via-[#ffffff] to-[#fef3c7] flex flex-col md:flex-row items-center justify-between p-5 sm:p-8 gap-6 sm:gap-8 z-20 overflow-y-auto">
+                
+                <!-- 왼쪽 영역: 타이틀 & 오둥이 캐릭터 -->
+                <div class="w-full md:w-1/2 flex flex-col items-center md:items-start justify-center text-center md:text-left px-1 sm:px-3">
+                    <div class="flex items-end gap-3 mb-4">
+                        <div class="w-24 h-24 sm:w-28 sm:h-28 bg-amber-100 border-2 border-amber-400 p-2 rounded-2xl shadow-md flex items-center justify-center">
+                            <div class="w-full h-full bg-[#6ee7b7] rounded-xl flex items-center justify-center relative overflow-hidden">
+                                <canvas id="previewQuokkaCanvas" width="84" height="84" class="w-20 h-20 sm:w-24 sm:h-24 pixelated"></canvas>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1.5 pb-0.5">
+                            <label for="charImageInput" class="cursor-pointer bg-white hover:bg-amber-50 border-2 border-amber-400 text-amber-900 font-retro font-bold text-xs px-3 py-1.5 rounded-xl shadow-sm transition flex items-center gap-1.5">
+                                <span>🖼️ 사진 넣기</span>
+                            </label>
+                            <input id="charImageInput" type="file" accept="image/*" class="hidden">
+                            <button id="resetCharImageBtn" type="button" class="hidden bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-700 font-retro font-bold text-[11px] px-2.5 py-1 rounded-lg transition">
+                                기본 캐릭터로 복구
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="inline-flex items-center gap-1 border border-amber-400 bg-amber-100 text-amber-800 font-retro text-xs font-bold px-2.5 py-0.5 rounded-full mb-2">
+                        <span>★</span>
+                        <span>SURVIVAL ARCADE</span>
+                    </div>
+
+                    <h1 class="font-retro text-4xl sm:text-5xl font-bold text-slate-900 tracking-wider neon-text mb-3">
+                        오둥이 피하기
+                    </h1>
+
+                    <p class="text-slate-600 text-xs sm:text-sm leading-relaxed max-w-sm mb-5 break-keep font-medium">
+                        목표 제한 시간은 <strong>10분</strong>! 1분마다 강력한 보스들이 차례로 등장하며, 10분을 돌파하면 최강 최종 보스가 나타납니다!
+                    </p>
+
+                    <!-- 조작법 간단 안내 -->
+                    <div class="bg-amber-50 border border-amber-300 rounded-xl px-3.5 py-2.5 w-full max-w-sm text-xs text-slate-700 flex justify-between shadow-sm">
+                        <span><strong class="text-amber-700">이동:</strong> ◀ ▶ / 터치</span>
+                        <span><strong class="text-emerald-700">무적대시:</strong> SPACE</span>
+                    </div>
+                </div>
+
+                <!-- 오른쪽 영역: 학급코드, 반, 닉네임 입력 폼 + 게임 시작 & 명예의 전당 버튼 -->
+                <div class="w-full md:w-1/2 flex flex-col items-center md:items-end justify-center px-1 sm:px-3">
+                    <div class="w-full max-w-sm bg-white border-2 border-amber-300 rounded-2xl p-4 sm:p-5 text-left space-y-3 shadow-lg">
+                        <div class="border-b border-amber-200 pb-2 mb-1 flex items-center justify-between">
+                            <span class="font-retro text-sm text-slate-800 font-bold">도전자 정보 입력</span>
+                            <span class="font-retro text-[11px] text-amber-700 font-bold">* 닉네임 필수</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label for="inputClassCode" class="block font-retro text-xs text-slate-700 font-bold mb-1">학급 코드</label>
+                                <input id="inputClassCode" type="text" maxlength="12" placeholder="예: ODUNG01" 
+                                    class="w-full bg-amber-50/70 border border-amber-300 focus:border-amber-500 focus:bg-white focus:outline-none rounded-lg px-3 py-2 text-xs sm:text-sm font-retro text-slate-900 uppercase placeholder-slate-400">
+                            </div>
+                            <div>
+                                <label for="inputClassName" class="block font-retro text-xs text-slate-700 font-bold mb-1">반</label>
+                                <input id="inputClassName" type="text" maxlength="10" placeholder="예: 3반" 
+                                    class="w-full bg-amber-50/70 border border-amber-300 focus:border-amber-500 focus:bg-white focus:outline-none rounded-lg px-3 py-2 text-xs sm:text-sm font-retro text-slate-900 placeholder-slate-400">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="inputNickname" class="block font-retro text-xs text-emerald-700 font-bold mb-1">닉네임 <span class="text-rose-500">*</span></label>
+                            <input id="inputNickname" type="text" maxlength="10" placeholder="명예의 전당에 등록할 닉네임" 
+                                class="w-full bg-amber-50/70 border border-amber-300 focus:border-emerald-500 focus:bg-white focus:outline-none rounded-lg px-3 py-2 text-xs sm:text-sm font-retro text-slate-900 placeholder-slate-400">
+                        </div>
+
+                        <!-- 입력 검증 안내 메시지 -->
+                        <p id="formErrorMsg" class="hidden text-xs font-retro text-rose-600 font-bold pt-0.5">
+                            ⚠️ 닉네임을 입력해 주세요!
+                        </p>
+
+                        <!-- 버튼 영역: 게임 시작 & 명예의 전당 -->
+                        <div class="pt-2 space-y-2.5">
+                            <button id="startBtn" class="retro-btn w-full bg-[#fbbf24] hover:bg-[#f59e0b] text-slate-900 font-retro font-bold text-base sm:text-lg py-3 rounded-xl tracking-wider cursor-pointer">
+                                [ 게임 시작하기 ]
+                            </button>
+
+                            <button id="openHallOfFameBtn" type="button" class="retro-btn w-full bg-amber-100 hover:bg-amber-200 text-amber-900 border-2 border-amber-400 font-retro font-bold text-sm sm:text-base py-2.5 rounded-xl tracking-wider cursor-pointer flex items-center justify-center gap-2" style="box-shadow: 0 4px 0 #f59e0b;">
+                                <span>🏆</span>
+                                <span>[ 명예의 전당 ]</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 명예의 전당 모달 오버레이 -->
+            <div id="hallOfFameModal" class="hidden absolute inset-0 bg-slate-900/35 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 z-30">
+                <div id="hallOfFamePanel" class="w-full max-w-lg bg-white border-2 border-amber-400 rounded-2xl p-4 sm:p-5 flex flex-col shadow-2xl">
+                    <div class="flex items-center justify-between border-b border-amber-200 pb-3 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span id="hofTrophyIcon" class="text-amber-500 text-xl">🏆</span>
+                            <h2 class="font-retro text-xl sm:text-2xl text-slate-900 font-bold tracking-wider">명예의 전당</h2>
+                        </div>
+                        <div class="flex items-center gap-1.5 font-retro text-xs">
+                            <button id="filterAllBtn" class="px-2.5 py-1 rounded-lg bg-[#fbbf24] text-slate-900 font-bold transition">전체</button>
+                            <button id="filterClassBtn" class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 hover:bg-amber-200 font-bold transition">우리 학급</button>
+                            <button id="closeHallOfFameBtn" class="ml-1 px-2.5 py-1 rounded-lg bg-rose-100 border border-rose-300 text-rose-700 hover:bg-rose-200 font-bold transition">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- 랭킹 리스트 헤더 -->
+                    <div class="grid grid-cols-12 text-xs font-retro text-amber-800 font-bold px-2.5 pb-2 border-b border-amber-200">
+                        <span class="col-span-2">순위</span>
+                        <span class="col-span-5">학급 / 닉네임</span>
+                        <span class="col-span-3 text-right">생존시간</span>
+                        <span class="col-span-2 text-right">점수</span>
+                    </div>
+
+                    <!-- 랭킹 목록 -->
+                    <div id="hallOfFameList" class="retro-scroll h-[260px] sm:h-[300px] overflow-y-auto divide-y divide-amber-100 mt-1.5 space-y-1">
+                        <!-- JS로 동적 렌더링 -->
+                    </div>
+
+                    <div class="mt-3 pt-2.5 border-t border-amber-200 flex justify-between items-center text-xs text-slate-600 font-retro">
+                        <span id="currentCodeLabel">학급코드 미입력 (전체 랭킹)</span>
+                        <button id="closeHallOfFameBottomBtn" class="px-3 py-1 rounded-lg bg-amber-100 text-amber-900 font-bold hover:bg-amber-200 transition">닫기</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 게임 오버 / 클리어 오버레이 -->
+            <div id="gameOverScreen" class="hidden absolute inset-0 bg-white/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
+                <div id="gameOverTitle" class="font-retro text-rose-600 text-4xl sm:text-5xl font-bold mb-1.5 tracking-widest animate-pulse">
+                    GAME OVER
+                </div>
+                <p id="deathReasonText" class="text-slate-700 font-medium text-xs sm:text-sm mb-5">
+                    하늘에서 떨어진 물체에 부딪혔습니다!
+                </p>
+
+                <div class="w-full max-w-xs bg-white border-2 border-amber-400 rounded-2xl p-4 mb-5 space-y-2.5 font-retro shadow-xl">
+                    <div id="finalPlayerInfo" class="text-xs text-amber-700 border-b border-amber-200 pb-2 font-bold">
+                        플레이어 정보
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-600">생존 시간</span>
+                        <span id="finalSurvivalTime" class="text-emerald-600 font-bold">00:00.0 (0.0초)</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-600">최종 점수</span>
+                        <span id="finalScore" class="text-slate-900 text-xl font-bold">0</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-600">개인 최고 기록</span>
+                        <span id="finalBestScore" class="text-amber-600 font-bold">0</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500">아슬아슬 회피</span>
+                        <span id="finalGrazeCount" class="text-orange-600 font-bold">0회</span>
+                    </div>
+                    <div id="newRecordBadge" class="hidden bg-amber-100 border border-amber-400 text-amber-800 text-xs py-1 rounded font-bold animate-bounce">
+                        🎉 NEW RECORD! 명예의 전당 등록!
+                    </div>
+                </div>
+
+                <div class="w-full max-w-xs space-y-2.5">
+                    <button id="restartBtn" class="retro-btn w-full bg-[#fbbf24] hover:bg-[#f59e0b] text-slate-900 font-retro font-bold text-base py-3 rounded-xl tracking-wider cursor-pointer">
+                        [ 다시 도전하기 ]
+                    </button>
+                    <button id="backToHomeBtn" class="w-full bg-amber-100 hover:bg-amber-200 text-amber-900 border-2 border-amber-400 font-retro font-bold text-sm py-2.5 rounded-xl tracking-wider cursor-pointer transition">
+                        [ 타이틀 / 명예의 전당 ]
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 모바일 / 터치 하단 컨트롤 바 -->
+        <div id="mobileControls" class="hidden grid grid-cols-3 gap-2.5 p-3 bg-white/95 border-t-2 border-amber-300 z-10">
+            <button id="btnLeft" class="retro-btn bg-amber-100 active:bg-amber-200 border-2 border-amber-400 text-amber-900 font-retro font-bold text-xl py-3 rounded-xl flex items-center justify-center">
+                ◀
+            </button>
+            <button id="btnDash" class="retro-btn bg-emerald-400 active:bg-emerald-500 border-2 border-emerald-600 text-slate-900 font-retro font-bold text-sm py-3 rounded-xl flex items-center justify-center" style="box-shadow: 0 4px 0 #059669;">
+                DASH ⚡
+            </button>
+            <button id="btnRight" class="retro-btn bg-amber-100 active:bg-amber-200 border-2 border-amber-400 text-amber-900 font-retro font-bold text-xl py-3 rounded-xl flex items-center justify-center">
+                ▶
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 8비트 레트로 사운드 엔진 (Tone.js) ---
+        class SoundFX {
+            constructor() {
+                this.enabled = true;
+                this.initialized = false;
+                this.synth = null;
+            }
+            async init() {
+                if (this.initialized) return;
+                try {
+                    if (typeof Tone !== 'undefined') {
+                        await Tone.start();
+                        this.synth = new Tone.PolySynth(Tone.Synth, {
+                            oscillator: { type: 'square' },
+                            envelope: { attack: 0.01, decay: 0.1, sustain: 0.05, release: 0.1 }
+                        }).toDestination();
+                        this.synth.volume.value = -12;
+                        this.initialized = true;
+                    }
+                } catch (e) {}
+            }
+            playDash() {
+                if (!this.enabled || !this.synth) return;
+                try { this.synth.triggerAttackRelease(['C5', 'G5'], '16n'); } catch (e) {}
+            }
+            playGraze() {
+                if (!this.enabled || !this.synth) return;
+                try { this.synth.triggerAttackRelease('E6', '32n'); } catch (e) {}
+            }
+            playItem() {
+                if (!this.enabled || !this.synth) return;
+                try { this.synth.triggerAttackRelease(['E5', 'G5', 'C6'], '16n'); } catch (e) {}
+            }
+            playHit() {
+                if (!this.enabled || !this.synth) return;
+                try { this.synth.triggerAttackRelease(['C3', 'F#2'], '8n'); } catch (e) {}
+            }
+            playBossWarning() {
+                if (!this.enabled || !this.synth) return;
+                try { this.synth.triggerAttackRelease(['A3', 'Eb4', 'A4'], '4n'); } catch (e) {}
+            }
+            playGameOver() {
+                if (!this.enabled || !this.synth) return;
+                try { this.synth.triggerAttackRelease(['G4', 'E4', 'C4', 'G3'], '4n'); } catch (e) {}
+            }
+        }
+        const sfx = new SoundFX();
+
+        // --- 1분~10분 보스 10종 스프라이트 및 패턴 정의 ---
+        const bossConfigs = [
+            {
+                stage: 1,
+                name: '오둥이 폭탄자',
+                desc: '[1분] 폭탄을 투하해 바닥 근처에서 사방 파편을 터뜨립니다!',
+                duration: 24,
+                hpColor: '#ef4444',
+                palette: { '.': null, 'K': '#0f172a', 'W': '#334155', 'R': '#ef4444', 'Y': '#facc15', 'O': '#f97316' },
+                grid: [
+                    "............RRRR............",
+                    "...........RYYYYR...........",
+                    "..........KKRRRRKK..........",
+                    "........KKWWWWWWWWKK........",
+                    "......KKWWWWWWWWWWWWKK......",
+                    ".....KWWWWKKKKKKKKWWWWK.....",
+                    "....KWWWWKRRRRKRRRRKWWWK....",
+                    "....KWWWWKRRRRKRRRRKWWWK....",
+                    "...KWWWWWWKKKKKKKKKWWWWWK...",
+                    "..KWWKYYYYYYYYYYYYYKKWWWWK..",
+                    "..KWKYYYYYYYYYYYYYYOOKWWWK..",
+                    "..KWWKOOOOOOOOOOOOOOKWWWWK..",
+                    "..KWWKKKKKKKKKKKKKKKWWWWWK..",
+                    ".KWWWWWWWWWWWWWWWWWWWWWWWWK.",
+                    ".KWWWWWWWWWRRRRRRWWWWWWWWWK.",
+                    ".KWWWWWWWWRYYYYYYRWWWWWWWWK.",
+                    ".KWWWWWWWWRYYYYYYRWWWWWWWWK.",
+                    "..KWWWWWWWWRRRRRRWWWWWWWWK..",
+                    "...KKWWWWWWWWWWWWWWWWWWKK...",
+                    ".....KYYKKKKKKKKKKKKYYK.....",
+                    ".....KOOOK........KOOOK....."
+                ]
+            },
+            {
+                stage: 2,
+                name: '삐둥이',
+                desc: '[2분] 초고속 이동 후 경고선 위치에 번개 창을 꽂아 넣습니다!',
+                duration: 26,
+                hpColor: '#eab308',
+                palette: { '.': null, 'K': '#0f172a', 'Y': '#fde047', 'A': '#f59e0b', 'W': '#ffffff', 'O': '#ea580c' },
+                grid: [
+                    ".........KK......KK.........",
+                    "........KYYK....KYYK........",
+                    ".......KYYYYKKKKYYYYK.......",
+                    "......KYYYYYYYYYYYYYYK......",
+                    ".....KYYYYKKKKKKKKYYYYK.....",
+                    "....KYYYYKWWWWKWWWWKYYYK....",
+                    "....KYYYYKWWWWKWWWWKYYYK....",
+                    "...KYYYYYYKKKKKKKKKYYYYYK...",
+                    "..KYYKOOOOOOOOOOOOOOKKYYYK..",
+                    "..KYKOOOOOOOOOOOOOOOOOOKYK..",
+                    "..KYYKAAAAAAAAAAAAAAAAKYYK..",
+                    "..KYYKKKKKKKKKKKKKKKKKYYYK..",
+                    ".KYYYYYYYYYYYYYYYYYYYYYYYYK.",
+                    ".KYYYYYYYAAYYYYYYAAYYYYYYYK.",
+                    ".KYYYYYYYYYYYYYYYYYYYYYYYYK.",
+                    "..KYYYYYYYYYYYYYYYYYYYYYYK..",
+                    "...KKYYYYYYYYYYYYYYYYYYKK...",
+                    ".....KOOOKKKKKKKKKKOOOK.....",
+                    ".....KAAAK........KAAAK....."
+                ]
+            },
+            {
+                stage: 3,
+                name: '메카 오둥이 킹',
+                desc: '[3분] 거대 강철 오둥이가 5갈래 레이저 탄막을 발사합니다!',
+                duration: 28,
+                hpColor: '#3b82f6',
+                palette: { '.': null, 'K': '#0f172a', 'M': '#94a3b8', 'D': '#475569', 'C': '#38bdf8', 'R': '#ef4444', 'Y': '#facc15' },
+                grid: [
+                    "...........RRRRRR...........",
+                    ".........KKMMMMMMKK.........",
+                    ".......KKMMMMMMMMMMKK.......",
+                    "......KMMDDDDDDDDDDMMK......",
+                    ".....KMMKKKKKKKKKKKKMMK.....",
+                    "....KMMKCCCCCCCCCCCCKMMK....",
+                    "....KMMKCCRRRRCCRRRRKMMK....",
+                    "...KMMMMKKKKKKKKKKKKMMMMK...",
+                    "..KMMKYYYYYYYYYYYYYYKKMMMK..",
+                    "..KMKYYYYYYYYYYYYYYYYOKMMK..",
+                    "..KMMKYYYYYYYYYYYYYYOKMMMK..",
+                    "..KMMKKKKKKKKKKKKKKKKMMMMK..",
+                    ".KMMMMDDDDDDDDDDDDDDDDMMMMK.",
+                    ".KMMMMDCCCCCCCCCCCCCCCDMMMK.",
+                    ".KMMMMDCCCCCCCCCCCCCCCDMMMK.",
+                    "..KMMMDDDDDDDDDDDDDDDDMMMK..",
+                    "...KKMMMMMMMMMMMMMMMMMMKK...",
+                    ".....KDDKKKKKKKKKKKKDDK.....",
+                    ".....KMMMK........KMMMK....."
+                ]
+            },
+            {
+                stage: 4,
+                name: '닌자 그림자 오둥이',
+                desc: '[4분] 분신처럼 빠르게 움직이며 사방으로 고속 표창을 난사합니다!',
+                duration: 28,
+                hpColor: '#10b981',
+                palette: { '.': null, 'K': '#0f172a', 'N': '#1e293b', 'G': '#10b981', 'W': '#f8fafc', 'Y': '#facc15' },
+                grid: [
+                    ".........KKKKKKKKKK.........",
+                    ".......KKNNNNNNNNNNKK.......",
+                    "......KNNNNNNNNNNNNNNK......",
+                    ".....KNNNNKKKKKKKKNNNNK.....",
+                    "....KNNNNKWWWWKWWWWKNNNK....",
+                    "....KNNNNKWKKWKWWKWKNNNK....",
+                    "...KNNNNNNKKKKKKKKKNNNNNK...",
+                    "..KNNGGGGGGGGGGGGGGGGGGNNK..",
+                    "..KNGGGGGGGGGGGGGGGGGGGGNK..",
+                    "..KNNGGGGGGGGGGGGGGGGGGNNK..",
+                    "..KNNKKKKKKKKKKKKKKKKKKNNK..",
+                    ".KNNNNNNNNNNNNNNNNNNNNNNNNK.",
+                    ".KNNNNNNNNGGGGGGGGNNNNNNNNK.",
+                    ".KNNNNNNNNGGGGGGGGNNNNNNNNK.",
+                    "..KNNNNNNNNNNNNNNNNNNNNNNK..",
+                    "...KKNNNNNNNNNNNNNNNNNNKK...",
+                    ".....KYYKKKKKKKKKKKKYYK.....",
+                    ".....KGGGK........KGGGK....."
+                ]
+            },
+            {
+                stage: 5,
+                name: '빙결 마법사 오둥이',
+                desc: '[5분] 서리 고드름 회오리 탄막을 퍼부어 시야와 길을 얼립니다!',
+                duration: 30,
+                hpColor: '#06b6d4',
+                palette: { '.': null, 'K': '#0f172a', 'B': '#0284c7', 'C': '#67e8f9', 'W': '#ffffff', 'Y': '#fde047' },
+                grid: [
+                    "............CCCC............",
+                    "...........CWWWWC...........",
+                    "..........KKCCCCKK..........",
+                    "........KKBBBBBBBBKK........",
+                    "......KKBBBBBBBBBBBBKK......",
+                    ".....KBBBBKKKKKKKKBBBBK.....",
+                    "....KBBBBKWWWWKWWWWKBBBK....",
+                    "....KBBBBKWCCWKWCCWKBBBK....",
+                    "...KBBBBBBKKKKKKKKKBBBBBK...",
+                    "..KBBKYYYYYYYYYYYYYYKKBBBK..",
+                    "..KBKYYYYYYYYYYYYYYYYOKBBK..",
+                    "..KBBKYYYYYYYYYYYYYYOKBBBK..",
+                    "..KBBKKKKKKKKKKKKKKKKBBBBK..",
+                    ".KBBBBCCCCCCCCCCCCCCCCBBBBK.",
+                    ".KBBBBCWWWWWWWWWWWWWWCBBBBK.",
+                    ".KBBBBCCCCCCCCCCCCCCCCBBBBK.",
+                    "..KBBBBBBBBBBBBBBBBBBBBBBK..",
+                    "...KKBBBBBBBBBBBBBBBBBBKK...",
+                    ".....KCCKKKKKKKKKKKKCCK.....",
+                    ".....KWWWK........KWWWK....."
+                ]
+            },
+            {
+                stage: 6,
+                name: '해적 선장 오둥이',
+                desc: '[6분] 쌍발 대포알 폭탄을 연사하여 연쇄 폭발을 일으킵니다!',
+                duration: 30,
+                hpColor: '#f97316',
+                palette: { '.': null, 'K': '#0f172a', 'B': '#78350f', 'R': '#dc2626', 'Y': '#facc15', 'W': '#ffffff' },
+                grid: [
+                    "........KKKKKKKKKKKK........",
+                    "......KKBBBBBBBBBBBBKK......",
+                    ".....KBBBBBBWWWWBBBBBBK.....",
+                    "....KBBBBBBBBWWWWBBBBBBK....",
+                    "....KRRRRRRRRRRRRRRRRRRK....",
+                    "....KWWWWKKKKKKKKKKWWWWK....",
+                    "...KWWWWKWWWWKKKKKKWWWWK....",
+                    "...KWWWWKWKKWKKKKKKWWWWK....",
+                    "..KWWWWWWKKKKKKKKKKWWWWWK...",
+                    ".KWWKYYYYYYYYYYYYYYKKWWWWK..",
+                    ".KWKYYYYYYYYYYYYYYYYOKWWWK..",
+                    ".KWWKYYYYYYYYYYYYYYOKWWWWK..",
+                    ".KWWKKKKKKKKKKKKKKKKWWWWWK..",
+                    "KRRRRRRRRRYYYYYYYYRRRRRRRRRK",
+                    "KRRRRRRRRRYYYYYYYYRRRRRRRRRK",
+                    ".KRRRRRRRRRRRRRRRRRRRRRRRRK.",
+                    "..KKRRRRRRRRRRRRRRRRRRRRKK..",
+                    "....KYYKKKKKKKKKKKKKKYYK....",
+                    "....KBBBK..........KBBBK...."
+                ]
+            },
+            {
+                stage: 7,
+                name: '사이버 해커 오둥이',
+                desc: '[7분] 3연속 디지털 레이저 경고선을 동시에 해킹 소환합니다!',
+                duration: 32,
+                hpColor: '#22c55e',
+                palette: { '.': null, 'K': '#090d16', 'D': '#1e293b', 'G': '#22c55e', 'L': '#86efac', 'Y': '#facc15' },
+                grid: [
+                    ".........GGGGGGGGGG.........",
+                    ".......KKDDDDDDDDDDKK.......",
+                    "......KDDDDDDDDDDDDDDK......",
+                    ".....KDDDDKKKKKKKKDDDDK.....",
+                    "....KDDDDKGGGGGGGGKDDDK.....",
+                    "....KDDDDKGLLLLLLGKDDDK.....",
+                    "....KDDDDKGGGGGGGGKDDDK.....",
+                    "...KDDDDDDKKKKKKKKDDDDDK....",
+                    "..KDDKYYYYYYYYYYYYYYKKDDK...",
+                    "..KDKYYYYYYYYYYYYYYYYOKDK...",
+                    "..KDDKYYYYYYYYYYYYYYOKDDK...",
+                    "..KDDKKKKKKKKKKKKKKKKDDDK...",
+                    ".KDDDDGGGGGGGGGGGGGGGGDDDDK.",
+                    ".KDDDDGLLLLLLLLLLLLLLGDDDDK.",
+                    ".KDDDDGGGGGGGGGGGGGGGGDDDDK.",
+                    "..KDDDDDDDDDDDDDDDDDDDDDDK..",
+                    "...KKDDDDDDDDDDDDDDDDDDKK...",
+                    ".....KGGKKKKKKKKKKKKGGK.....",
+                    ".....KLLLK........KLLLK....."
+                ]
+            },
+            {
+                stage: 8,
+                name: '용암 군주 오둥이',
+                desc: '[8분] 하늘에서 불타는 운석과 용암 파편을 쉴 새 없이 떨어뜨립니다!',
+                duration: 32,
+                hpColor: '#ea580c',
+                palette: { '.': null, 'K': '#1c1917', 'R': '#991b1b', 'O': '#ea580c', 'Y': '#fde047', 'W': '#ffffff' },
+                grid: [
+                    "......YY....YYYY....YY......",
+                    ".....YOOY..YOOOOY..YOOY.....",
+                    "....KKOOOKKKOOOOKKKOOOKK....",
+                    "...KRRRRRRRRRRRRRRRRRRRRK...",
+                    "..KRRRRRKKKKKKKKKKKKRRRRRK..",
+                    ".KRRRRRKYYYYKWWKYYYYKRRRRRK.",
+                    ".KRRRRRKYYYYKWWKYYYYKRRRRRK.",
+                    ".KRRRRRRKKKKKKKKKKKKRRRRRRK.",
+                    "KRRKYYYYYYYYYYYYYYYYYYKKRRRK",
+                    "KRKYYYYYYYYYYYYYYYYYYYYOKRRK",
+                    "KRRKOOOOOOOOOOOOOOOOOOOKRRRK",
+                    "KRRKKKKKKKKKKKKKKKKKKKKRRRRK",
+                    "KRRRRRROOOOOOOOOOOOOORRRRRRK",
+                    "KRRRRRROYYYYYYYYYYYYORRRRRRK",
+                    ".KRRRRROOOOOOOOOOOOOORRRRRK.",
+                    "..KKRRRRRRRRRRRRRRRRRRRRKK..",
+                    "....KOOOKKKKKKKKKKKKOOOK....",
+                    "....KYYYK..........KYYYK...."
+                ]
+            },
+            {
+                stage: 9,
+                name: '암흑 대마왕 오둥이',
+                desc: '[9분] 최종 관문 직전! 폭탄·번개·암흑 탄막을 동시에 구사합니다!',
+                duration: 34,
+                hpColor: '#9333ea',
+                palette: { '.': null, 'K': '#090d16', 'P': '#6b21a8', 'V': '#a855f7', 'R': '#f43f5e', 'G': '#facc15' },
+                grid: [
+                    "......GG....GGGG....GG......",
+                    "......GGG..GGGGGG..GGG......",
+                    "......GGGGGGGGGGGGGGGG......",
+                    ".......KKPPPPPPPPPPKK.......",
+                    ".....KKPPPPPPPPPPPPPPKK.....",
+                    "....KPPPPKKKKKKKKKKKKPPK....",
+                    "...KPPPPKRRRRKVVRRRRKPPPK...",
+                    "...KPPPPKRRRRKVVRRRRKPPPK...",
+                    "..KPPPPPPKKKKKKKKKKKKPPPPK..",
+                    ".KPPKGGGGGGGGGGGGGGGGKKPPPK.",
+                    ".KPKGGGGGGGGGGGGGGGGGGOKPPK.",
+                    ".KPPKRRRRRRRRRRRRRRRRRKPPPK.",
+                    ".KPPKKKKKKKKKKKKKKKKKKPPPPK.",
+                    "KPPPPVVVVVVVVVVVVVVVVVVPPPPK",
+                    "KPPPPVVRRRRRRRRRRRRRRVVPPPPK",
+                    ".KPPPVVVVVVVVVVVVVVVVVVPPPK.",
+                    "..KKPPPPPPPPPPPPPPPPPPPPKK..",
+                    "....KGGKKKKKKKKKKKKKKGGK....",
+                    "....KRRRK..........KRRRK...."
+                ]
+            },
+            {
+                stage: 10,
+                isFinal: true,
+                name: '👑 신(GOD) 오메가 오둥이',
+                desc: '[10분 FINAL BOSS] 최강 최종 보스! 3분간 모든 필살기를 버텨내면 클리어!',
+                duration: 180,
+                hpColor: '#f59e0b',
+                palette: { '.': null, 'K': '#090d16', 'G': '#f59e0b', 'Y': '#fef08a', 'W': '#ffffff', 'C': '#38bdf8', 'R': '#f43f5e' },
+                grid: [
+                    "....YY......YYYY......YY....",
+                    "...YGGY....YGGGGY....YGGY...",
+                    "..YGGGGY..YGGGGGGY..YGGGGY..",
+                    ".KKGGGGGGGGGGGGGGGGGGGGGGKK.",
+                    "KGGGGGGGGKKKKKKKKKKGGGGGGGGK",
+                    "KGGGGGGGKCCCCKKCCCCKGGGGGGGK",
+                    "KGGGGGGGKCWWCKKCWWCKGGGGGGGK",
+                    "KGGGGGGGGKKKKKKKKKKGGGGGGGGK",
+                    "KGGKRRRRRRRRRRRRRRRRRRKKGGGK",
+                    "KGKRRRRRRRRRRRRRRRRRRRROKGGK",
+                    "KGGKYYYYYYYYYYYYYYYYYYOKGGGK",
+                    "KGGKKKKKKKKKKKKKKKKKKKKGGGGK",
+                    "KGGGGGGWWWWWWWWWWWWWWGGGGGGK",
+                    "KGGGGGGWCCCCCCCCCCCCWGGGGGGK",
+                    "KGGGGGGWCCCCCCCCCCCCWGGGGGGK",
+                    ".KGGGGGGWWWWWWWWWWWWGGGGGGK.",
+                    "..KKGGGGGGGGGGGGGGGGGGGGKK..",
+                    "....KCCKKKKKKKKKKKKKKCCK....",
+                    "....KYYYK..........KYYYK...."
+                ]
+            }
+        ];
+
+        function createBossSprite(cfg) {
+            const offCanvas = document.createElement('canvas');
+            const scale = 4;
+            const h = cfg.grid.length;
+            const w = cfg.grid[0].length;
+            offCanvas.width = w * scale;
+            offCanvas.height = h * scale;
+            const octx = offCanvas.getContext('2d');
+            for (let y = 0; y < h; y++) {
+                const row = cfg.grid[y];
+                for (let x = 0; x < row.length; x++) {
+                    const color = cfg.palette[row[x]];
+                    if (color) {
+                        octx.fillStyle = color;
+                        octx.fillRect(x * scale, y * scale, scale, scale);
+                    }
+                }
+            }
+            return offCanvas;
+        }
+
+        const bossSprites = bossConfigs.map(cfg => createBossSprite(cfg));
+
+        // --- 오둥이 (2번 사진 픽셀 오리) 스프라이트 생성기 ---
+        const quokkaPalette = {
+            '.': null,
+            'K': '#0f172a', // 짙은 검정 외곽선 & 눈동자
+            'W': '#ffffff', // 하얀 몸통
+            'S': '#cbd5e1', // 연회색 몸통 입체 그림자
+            'Y': '#facc15', // 밝은 노랑 부리/발
+            'O': '#f59e0b', // 주황빛 노랑 부리/발 그라데이션
+            'H': '#fef9c3'  // 부리 하이라이트
+        };
+
+        // 28x28 픽셀 오둥이 도트 맵 (2번 이미지 재현)
+        const quokkaGrid = [
+            "............................",
+            "............................",
+            ".........KKKKKKKKK..........",
+            ".......KKWWWWWWWWWKK........",
+            "......KWWWWWWWWWWWWWKK......",
+            ".....KWWWWKKKKKKKKWWWWK.....",
+            "....KWWWWKWWWWKWWWWKWWWK....",
+            "....KWWWWKWWWWKWWWWKWWWK....",
+            "....KWWWWKWWWKWWWKWWKWWK....",
+            "...KWWWWWWKKKKKKKKKWWWWWK...",
+            "...KWWKKKKKKKKKKKWWWWWWWK...",
+            "..KWWKHHHHHHHHYYYKKWWWWWWK..",
+            "..KWKYYYYYYYYYYYYYYKWWWWWK..",
+            "..KWKYYYYYYYYYYYYOOKWWWWWK..",
+            "..KWWKOOOOOOOOOOOOKWWWWWWK..",
+            "..KWWKKKKKKKKKKKKKWWWWWWWK..",
+            ".KWWSSWWWWWWWWWWWWWWWWWWWK..",
+            ".KWSSWWWWWWWWWWWWWWWWKKKK...",
+            ".KWKWWWWWWWWWWWWWWWWKWWWWK..",
+            ".KWKWWWWWWWWWWWWWWWWKWWWWK..",
+            ".KWKWWWWWWWWWWWWWWWWKWWWWK..",
+            ".KWKWWWWWWWWWWWWWWWWKWWWWK..",
+            ".KWKWWWWWWWWWWWWWWWWKWWWK...",
+            "..KWKWWWWWWWWWWWWWWKKKK.....",
+            "...KWKWWWWWWWWWWWWWWK.......",
+            "....KKKWWWWWWWWWWWWKK.......",
+            ".....KYYKKKKKKKKKYYK........",
+            ".....KOOOK.....KOOOK........"
+        ];
+
+        function createQuokkaSprite() {
+            const offCanvas = document.createElement('canvas');
+            const scale = 3;
+            offCanvas.width = 28 * scale;
+            offCanvas.height = 28 * scale;
+            const octx = offCanvas.getContext('2d');
+
+            for (let y = 0; y < quokkaGrid.length; y++) {
+                const row = quokkaGrid[y];
+                for (let x = 0; x < row.length; x++) {
+                    const color = quokkaPalette[row[x]];
+                    if (color) {
+                        octx.fillStyle = color;
+                        octx.fillRect(x * scale, y * scale, scale, scale);
+                    }
+                }
+            }
+            return offCanvas;
+        }
+
+        const quokkaSprite = createQuokkaSprite();
+        let customCharImg = null; // 사용자가 직접 업로드한 사진 객체
+
+        // 시작 화면 미리보기 캔버스에 캐릭터 그리기 (정지 상태)
+        function renderPreviewQuokka() {
+            const pCanvas = document.getElementById('previewQuokkaCanvas');
+            if (!pCanvas) return;
+            const pctx = pCanvas.getContext('2d');
+            pctx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+
+            if (customCharImg) {
+                pctx.imageSmoothingEnabled = true;
+                pctx.save();
+                pctx.beginPath();
+                pctx.arc(42, 42, 38, 0, Math.PI * 2);
+                pctx.closePath();
+                pctx.clip();
+
+                // 정사각형 비율로 중앙 크롭하여 그리기
+                const size = Math.min(customCharImg.width, customCharImg.height);
+                const sx = (customCharImg.width - size) / 2;
+                const sy = (customCharImg.height - size) / 2;
+                pctx.drawImage(customCharImg, sx, sy, size, size, 4, 4, 76, 76);
+                pctx.restore();
+
+                pctx.strokeStyle = '#ffffff';
+                pctx.lineWidth = 3;
+                pctx.beginPath();
+                pctx.arc(42, 42, 38, 0, Math.PI * 2);
+                pctx.stroke();
+            } else {
+                pctx.imageSmoothingEnabled = false;
+                pctx.drawImage(quokkaSprite, 3, 3, 78, 78);
+            }
+        }
+
+        // 업로드된 이미지 로드 및 저장 처리
+        function applyCustomCharDataUrl(dataUrl, saveToStorage = true) {
+            const img = new Image();
+            img.onload = () => {
+                customCharImg = img;
+                document.getElementById('resetCharImageBtn').classList.remove('hidden');
+                renderPreviewQuokka();
+                if (saveToStorage) {
+                    try {
+                        // 용량 절약을 위해 160x160 캔버스에 리사이즈 후 저장
+                        const tmp = document.createElement('canvas');
+                        tmp.width = 160;
+                        tmp.height = 160;
+                        const tctx = tmp.getContext('2d');
+                        const size = Math.min(img.width, img.height);
+                        const sx = (img.width - size) / 2;
+                        const sy = (img.height - size) / 2;
+                        tctx.drawImage(img, sx, sy, size, size, 0, 0, 160, 160);
+                        localStorage.setItem('odungi_custom_char_img', tmp.toDataURL('image/png'));
+                    } catch (e) {}
+                }
+            };
+            img.src = dataUrl;
+        }
+
+        function loadSavedCustomChar() {
+            try {
+                const savedImg = localStorage.getItem('odungi_custom_char_img');
+                if (savedImg) {
+                    applyCustomCharDataUrl(savedImg, false);
+                }
+            } catch (e) {}
+        }
+
+        // --- DOM 요소 참조 ---
+        const mainBody = document.getElementById('mainBody');
+        const topHeaderBar = document.getElementById('topHeaderBar');
+        const arcadeFrame = document.getElementById('arcadeFrame');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasContainer = document.getElementById('canvasContainer');
+
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const gameHud = document.getElementById('gameHud');
+        const mobileControls = document.getElementById('mobileControls');
+
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const survivalTimeDisplay = document.getElementById('survivalTimeDisplay');
+        const bestScoreDisplay = document.getElementById('bestScoreDisplay');
+        const levelBadge = document.getElementById('levelBadge');
+        const speedBadge = document.getElementById('speedBadge');
+        const comboText = document.getElementById('comboText');
+        const livesContainer = document.getElementById('livesContainer');
+        const hudPlayerTag = document.getElementById('hudPlayerTag');
+        const dashBar = document.getElementById('dashBar');
+        const dashTimerText = document.getElementById('dashTimerText');
+
+        const finalPlayerInfo = document.getElementById('finalPlayerInfo');
+        const finalSurvivalTime = document.getElementById('finalSurvivalTime');
+        const finalScore = document.getElementById('finalScore');
+        const finalBestScore = document.getElementById('finalBestScore');
+        const finalGrazeCount = document.getElementById('finalGrazeCount');
+        const newRecordBadge = document.getElementById('newRecordBadge');
+
+        // 보스 인트로 오버레이 DOM
+        const bossIntroOverlay = document.getElementById('bossIntroOverlay');
+        const bossStageNum = document.getElementById('bossStageNum');
+        const bossIntroCanvas = document.getElementById('bossIntroCanvas');
+        const bossIntroName = document.getElementById('bossIntroName');
+        const bossIntroDesc = document.getElementById('bossIntroDesc');
+        const bossIntroProgress = document.getElementById('bossIntroProgress');
+        const bossIntroCountdown = document.getElementById('bossIntroCountdown');
+
+        // 입력 폼 및 명예의 전당 DOM
+        const inputClassCode = document.getElementById('inputClassCode');
+        const inputClassName = document.getElementById('inputClassName');
+        const inputNickname = document.getElementById('inputNickname');
+        const formErrorMsg = document.getElementById('formErrorMsg');
+        const hallOfFameList = document.getElementById('hallOfFameList');
+        const filterAllBtn = document.getElementById('filterAllBtn');
+        const filterClassBtn = document.getElementById('filterClassBtn');
+        const currentCodeLabel = document.getElementById('currentCodeLabel');
+        const hallOfFameModal = document.getElementById('hallOfFameModal');
+        const hallOfFamePanel = document.getElementById('hallOfFamePanel');
+        const hofTrophyIcon = document.getElementById('hofTrophyIcon');
+        const openHallOfFameBtn = document.getElementById('openHallOfFameBtn');
+        const closeHallOfFameBtn = document.getElementById('closeHallOfFameBtn');
+        const closeHallOfFameBottomBtn = document.getElementById('closeHallOfFameBottomBtn');
+        let isClosingHof = false;
+
+        // --- 게임 상태 변수 ---
+        let isPlaying = false;
+        let animationId = null;
+        let lastTime = 0;
+
+        let score = 0;
+        let survivalTime = 0;
+        let speedMultiplier = 1.0;
+        let bestScore = parseInt(localStorage.getItem('odungi_dodge_best') || '0', 10);
+        let level = 1;
+        let grazeCount = 0;
+        let combo = 0;
+        let comboTimer = 0;
+        let slowMotionTimer = 0;
+        let screenShake = 0;
+
+        // 보스전 및 5초 인트로 정지 상태 변수
+        const MAX_SURVIVAL_TIME = 600; // 제한 시간 10분 (600초)
+        let nextBossIndex = 0; // 0: 1분, 1: 2분, ... 9: 10분 최강 보스
+        let bossIntroTimer = 0; // > 0 일 때 게임 시간 및 모든 움직임 정지 (5초)
+        let activeBoss = null;
+        let bossProjectiles = [];
+        let bossWarnings = [];
+        let isGameCleared = false;
+
+        // 참가자 정보 및 명예의 전당 상태
+        let playerProfile = {
+            classCode: '',
+            className: '',
+            nickname: ''
+        };
+        let rankingFilter = 'ALL'; // 'ALL' | 'CLASS'
+
+        function loadHallOfFame() {
+            try {
+                const saved = localStorage.getItem('odungi_hall_of_fame_v2');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (e) {}
+            return [];
+        }
+
+        function saveHallOfFame(records) {
+            try {
+                localStorage.setItem('odungi_hall_of_fame_v2', JSON.stringify(records));
+            } catch (e) {}
+        }
+
+        function loadSavedProfile() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('odungi_player_profile') || '{}');
+                if (saved.classCode) inputClassCode.value = saved.classCode;
+                if (saved.className) inputClassName.value = saved.className;
+                if (saved.nickname) inputNickname.value = saved.nickname;
+            } catch (e) {}
+        }
+
+        function savePlayerProfile() {
+            try {
+                localStorage.setItem('odungi_player_profile', JSON.stringify(playerProfile));
+            } catch (e) {}
+        }
+
+        function renderHallOfFame() {
+            const allRecords = loadHallOfFame();
+            const typedCode = inputClassCode.value.trim().toUpperCase();
+
+            currentCodeLabel.textContent = typedCode
+                ? `코드 [${typedCode}] 활성화됨`
+                : '학급코드 미입력 (전체 랭킹)';
+
+            let filtered = allRecords;
+            if (rankingFilter === 'CLASS' && typedCode) {
+                filtered = allRecords.filter(r => (r.classCode || '').toUpperCase() === typedCode);
+            }
+
+            // 점수 내림차순 정렬 (동점 시 생존시간 내림차순)
+            filtered.sort((a, b) => b.score - a.score || b.survivalTime - a.survivalTime);
+            const top10 = filtered.slice(0, 10);
+
+            if (top10.length === 0) {
+                hallOfFameList.innerHTML = `
+                    <div class="py-10 text-center font-retro text-xs text-slate-500">
+                        아직 등록된 기록이 없습니다.<br>첫 번째 명예의 전당 주인공이 되어보세요!
+                    </div>
+                `;
+                return;
+            }
+
+            hallOfFameList.innerHTML = top10.map((item, idx) => {
+                const rank = idx + 1;
+                let rankBadge = `<span class="text-slate-600 font-bold">#${rank}</span>`;
+                if (rank === 1) rankBadge = `<span class="text-amber-500 font-bold">🥇 1</span>`;
+                else if (rank === 2) rankBadge = `<span class="text-slate-500 font-bold">🥈 2</span>`;
+                else if (rank === 3) rankBadge = `<span class="text-orange-600 font-bold">🥉 3</span>`;
+
+                const classTag = [item.classCode, item.className].filter(Boolean).join(' ');
+                const isMe = playerProfile.nickname && item.nickname === playerProfile.nickname && item.score === Math.floor(score);
+
+                return `
+                    <div style="animation-delay: ${idx * 45}ms" class="hof-row-anim grid grid-cols-12 items-center px-2.5 py-2 rounded-lg font-retro text-xs ${isMe ? 'bg-amber-200/80 border border-amber-400' : 'bg-amber-50/70'}">
+                        <div class="col-span-2">${rankBadge}</div>
+                        <div class="col-span-5 truncate pr-1">
+                            <div class="text-slate-900 font-bold truncate">${escapeHtml(item.nickname)}</div>
+                            <div class="text-[10px] text-amber-700 truncate">${escapeHtml(classTag || '자유참가')}</div>
+                        </div>
+                        <div class="col-span-3 text-right text-emerald-700 font-bold">${Number(item.survivalTime || 0).toFixed(1)}s</div>
+                        <div class="col-span-2 text-right text-amber-700 font-bold">${Number(item.score).toLocaleString()}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, s => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[s]));
+        }
+
+        function recordScoreToHallOfFame(finalScoreVal, finalTimeVal) {
+            if (finalScoreVal <= 0) return false;
+            const records = loadHallOfFame();
+            const prevTop = records.length > 0 ? Math.max(...records.map(r => r.score)) : 0;
+
+            records.push({
+                classCode: playerProfile.classCode,
+                className: playerProfile.className,
+                nickname: playerProfile.nickname,
+                survivalTime: Number(finalTimeVal.toFixed(1)),
+                score: finalScoreVal,
+                createdAt: Date.now()
+            });
+
+            records.sort((a, b) => b.score - a.score || b.survivalTime - a.survivalTime);
+            saveHallOfFame(records.slice(0, 50));
+            return finalScoreVal > prevTop;
+        }
+
+        // 입력 상태
+        const keys = { left: false, right: false };
+
+        // 플레이어 (쿼카) 객체
+        const player = {
+            x: 0,
+            y: 0,
+            width: 48,
+            height: 48,
+            speed: 420,
+            vx: 0,
+            lives: 3,
+            maxLives: 3,
+            hasShield: false,
+            invincibleTimer: 0,
+            isDashing: false,
+            dashTimer: 0,
+            dashCooldown: 0,
+            dashMaxCooldown: 10.0,
+            dashDirection: 1,
+            animTimer: 0,
+            facing: 1
+        };
+
+        // 엔티티 배열
+        let obstacles = [];
+        let items = [];
+        let particles = [];
+        let floatingTexts = [];
+        let spawnTimer = 0;
+        let itemSpawnTimer = 0;
+
+        // --- 화면 전체 확장 / 타이틀 복귀 전환 함수 ---
+        function expandToFullViewport() {
+            mainBody.classList.remove('p-3', 'sm:p-6');
+            mainBody.classList.add('p-0');
+            topHeaderBar.classList.add('hidden');
+
+            arcadeFrame.classList.remove('max-w-4xl', 'h-[86vh]', 'max-h-[740px]', 'rounded-xl', 'rounded-tl-none', 'border-[3px]');
+            arcadeFrame.classList.add('w-screen', 'h-screen', 'max-w-none', 'max-h-none', 'rounded-none', 'border-0');
+        }
+
+        function restoreTitleViewport() {
+            mainBody.classList.remove('p-0');
+            mainBody.classList.add('p-3', 'sm:p-6');
+            topHeaderBar.classList.remove('hidden');
+
+            arcadeFrame.classList.remove('w-screen', 'h-screen', 'max-w-none', 'max-h-none', 'rounded-none', 'border-0');
+            arcadeFrame.classList.add('max-w-4xl', 'h-[86vh]', 'max-h-[740px]', 'rounded-xl', 'rounded-tl-none', 'border-[3px]');
+        }
+
+        // --- 캔버스 리사이즈 처리 ---
+        function resizeCanvas() {
+            const rect = canvasContainer.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.imageSmoothingEnabled = false;
+            
+            player.y = canvas.height - player.height - 14;
+            if (!isPlaying) {
+                player.x = canvas.width / 2 - player.width / 2;
+            } else {
+                player.x = Math.max(8, Math.min(canvas.width - player.width - 8, player.x));
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function formatSurvivalClock(sec) {
+            const mins = Math.floor(sec / 60);
+            const rem = sec % 60;
+            const minStr = String(mins).padStart(2, '0');
+            const secStr = rem < 10 ? `0${rem.toFixed(1)}` : rem.toFixed(1);
+            return `${minStr}:${secStr}`;
+        }
+
+        // --- HUD 업데이트 ---
+        function updateHUD() {
+            scoreDisplay.textContent = Math.floor(score).toLocaleString();
+            survivalTimeDisplay.textContent = formatSurvivalClock(survivalTime);
+            bestScoreDisplay.textContent = bestScore.toLocaleString();
+            levelBadge.textContent = `LV.${level}`;
+            speedBadge.textContent = `SPD ${speedMultiplier.toFixed(2)}x`;
+
+            if (combo > 1) {
+                comboText.textContent = `${combo} COMBO!`;
+            } else {
+                comboText.textContent = '';
+            }
+
+            let hearts = '';
+            for (let i = 0; i < player.maxLives; i++) {
+                hearts += i < player.lives ? '❤️' : '🖤';
+            }
+            if (player.hasShield) {
+                hearts += ' 🛡️';
+            }
+            livesContainer.innerHTML = hearts;
+
+            const dashRatio = Math.max(0, Math.min(1, 1 - player.dashCooldown / player.dashMaxCooldown));
+            dashBar.style.width = `${dashRatio * 100}%`;
+            if (dashRatio >= 1) {
+                dashBar.classList.add('bg-emerald-400');
+                dashBar.classList.remove('bg-amber-400');
+                dashTimerText.textContent = 'READY';
+                dashTimerText.classList.add('text-emerald-700');
+                dashTimerText.classList.remove('text-amber-700');
+                if (btnDash) {
+                    btnDash.textContent = 'DASH ⚡';
+                    btnDash.classList.remove('opacity-60');
+                }
+            } else {
+                dashBar.classList.remove('bg-emerald-400');
+                dashBar.classList.add('bg-amber-400');
+                dashTimerText.textContent = `${player.dashCooldown.toFixed(1)}s`;
+                dashTimerText.classList.remove('text-emerald-700');
+                dashTimerText.classList.add('text-amber-700');
+                if (btnDash) {
+                    btnDash.textContent = `DASH (${player.dashCooldown.toFixed(1)}s)`;
+                    btnDash.classList.add('opacity-60');
+                }
+            }
+        }
+
+        // --- 화면 렌더링 ---
+        function render() {
+            ctx.save();
+            if (screenShake > 0) {
+                const sx = (Math.random() - 0.5) * screenShake;
+                const sy = (Math.random() - 0.5) * screenShake;
+                ctx.translate(sx, sy);
+            }
+
+            // 배경 클리어 (화사한 맑은 하늘 그라데이션)
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            bgGrad.addColorStop(0, '#bae6fd');
+            bgGrad.addColorStop(0.65, '#e0f2fe');
+            bgGrad.addColorStop(1, '#fef9c3');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 은은한 레트로 그리드 라인
+            ctx.strokeStyle = 'rgba(2, 132, 199, 0.08)';
+            ctx.lineWidth = 1;
+            const gridSize = 40;
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // 슬로우 모션 테두리 이펙트
+            if (slowMotionTimer > 0) {
+                ctx.strokeStyle = 'rgba(168, 85, 247, 0.65)';
+                ctx.lineWidth = 8;
+                ctx.strokeRect(4, 4, canvas.width - 8, canvas.height - 8);
+            }
+
+            // 잔디밭 바닥 라인
+            ctx.fillStyle = '#34d399';
+            ctx.fillRect(0, canvas.height - 14, canvas.width, 14);
+            ctx.fillStyle = '#059669';
+            ctx.fillRect(0, canvas.height - 14, canvas.width, 3);
+
+            // 보스 경고선 (레이저/번개 예고) 그리기
+            for (const warn of bossWarnings) {
+                ctx.save();
+                const alpha = 0.25 + 0.35 * Math.sin(warn.timer * 24);
+                ctx.fillStyle = `rgba(239, 68, 68, ${alpha})`;
+                ctx.fillRect(warn.x - warn.width / 2, 0, warn.width, canvas.height - 14);
+                ctx.strokeStyle = '#ef4444';
+                ctx.setLineDash([8, 6]);
+                ctx.lineWidth = 2;
+                ctx.strokeRect(warn.x - warn.width / 2, 0, warn.width, canvas.height - 14);
+                ctx.restore();
+            }
+
+            // 아이템 그리기
+            for (const it of items) {
+                drawItem(it);
+            }
+
+            // 장애물 그리기
+            for (const ob of obstacles) {
+                drawObstacle(ob);
+            }
+
+            // 보스 투사체 그리기
+            for (const bp of bossProjectiles) {
+                drawBossProjectile(bp);
+            }
+
+            // 활성화된 보스 그리기
+            if (activeBoss) {
+                drawActiveBoss(activeBoss);
+            }
+
+            // 플레이어 (쿼카 캐릭터) 그리기
+            drawQuokka();
+
+            // 파티클 그리기
+            for (const p of particles) {
+                ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+            }
+            ctx.globalAlpha = 1;
+
+            // 플로팅 텍스트 그리기
+            ctx.font = 'bold 16px "Do Hyeon", sans-serif';
+            ctx.textAlign = 'center';
+            for (const ft of floatingTexts) {
+                ctx.globalAlpha = Math.max(0, ft.life / ft.maxLife);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(ft.text, ft.x + 1, ft.y + 1);
+                ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+            }
+            ctx.globalAlpha = 1;
+
+            ctx.restore();
+        }
+
+        function drawObstacle(ob) {
+            ctx.save();
+            ctx.translate(ob.x, ob.y);
+            ctx.rotate(ob.rotation);
+
+            if (ob.type === 'meteor') {
+                // 불타는 유성
+                ctx.fillStyle = '#ea580c';
+                ctx.beginPath();
+                ctx.arc(0, 0, ob.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath();
+                ctx.arc(0, 0, ob.radius * 0.55, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (ob.type === 'slime') {
+                // 흔들리는 보라 슬라임
+                ctx.fillStyle = '#9333ea';
+                ctx.beginPath();
+                ctx.arc(0, 0, ob.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#d8b4fe';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // 눈
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(-6, -3, 4, 4);
+                ctx.fillRect(3, -3, 4, 4);
+            } else {
+                // 바위 / 거대 바위 (다각형 픽셀 느낌)
+                ctx.fillStyle = ob.type === 'giant' ? '#dc2626' : '#64748b';
+                ctx.strokeStyle = ob.type === 'giant' ? '#fca5a5' : '#cbd5e1';
+                ctx.lineWidth = 2;
+
+                ctx.beginPath();
+                const sides = 7;
+                for (let i = 0; i < sides; i++) {
+                    const a = (i / sides) * Math.PI * 2;
+                    const r = ob.radius * (i % 2 === 0 ? 1 : 0.85);
+                    if (i === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+                    else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function drawItem(it) {
+            ctx.save();
+            ctx.translate(it.x, it.y);
+            const scale = 1 + Math.sin(it.pulse) * 0.12;
+            ctx.scale(scale, scale);
+
+            // 배경 후광
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.beginPath();
+            ctx.arc(0, 0, it.radius + 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.font = '20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const emojiMap = {
+                star: '⭐',
+                shield: '🛡️',
+                slow: '⏳',
+                heart: '💖'
+            };
+            ctx.fillText(emojiMap[it.type] || '⭐', 0, 1);
+            ctx.restore();
+        }
+
+        function drawActiveBoss(boss) {
+            ctx.save();
+            const bobY = Math.sin(boss.animTimer * 4) * 5;
+            ctx.translate(boss.x, boss.y + bobY);
+
+            // 보스 오라
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.14)';
+            ctx.beginPath();
+            ctx.arc(0, 0, boss.width * 0.62, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(
+                boss.sprite,
+                -boss.width / 2,
+                -boss.height / 2,
+                boss.width,
+                boss.height
+            );
+
+            // 보스 상단 이름표 & 남은 버티기 게이지
+            const barW = 120;
+            const barH = 8;
+            const ratio = Math.max(0, boss.timer / boss.maxDuration);
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+            ctx.fillRect(-barW / 2 - 2, -boss.height / 2 - 24, barW + 4, barH + 4);
+            ctx.fillStyle = boss.hpColor || '#ef4444';
+            ctx.fillRect(-barW / 2, -boss.height / 2 - 22, barW * ratio, barH);
+
+            ctx.font = 'bold 14px "Do Hyeon", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#0f172a';
+            ctx.fillText(`BOSS: ${boss.name}`, 0, -boss.height / 2 - 30);
+
+            ctx.restore();
+        }
+
+        function drawBossProjectile(bp) {
+            ctx.save();
+            ctx.translate(bp.x, bp.y);
+            if (bp.kind === 'bomb') {
+                // 폭탄
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.arc(0, 0, bp.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                // 심지 불꽃
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath();
+                ctx.arc(0, -bp.radius - 3, 4 + Math.sin(bp.age * 25) * 2, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (bp.kind === 'lightning') {
+                // 삐둥이 번개 창
+                ctx.fillStyle = '#facc15';
+                ctx.strokeStyle = '#ea580c';
+                ctx.lineWidth = 2;
+                ctx.fillRect(-bp.radius * 0.6, -bp.radius * 1.8, bp.radius * 1.2, bp.radius * 3.6);
+                ctx.strokeRect(-bp.radius * 0.6, -bp.radius * 1.8, bp.radius * 1.2, bp.radius * 3.6);
+            } else {
+                // 파편 / 레이저 탄막
+                ctx.fillStyle = bp.color || '#ef4444';
+                ctx.beginPath();
+                ctx.arc(0, 0, bp.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(0, 0, bp.radius * 0.45, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        // --- 쿼카 캐릭터 커스텀 드로잉 ---
+        function drawQuokka() {
+            if (player.invincibleTimer > 0 && Math.floor(player.invincibleTimer * 16) % 2 === 0) {
+                return;
+            }
+
+            ctx.save();
+            const cx = player.x + player.width / 2;
+            const cy = player.y + player.height / 2;
+
+            const isMoving = Math.abs(player.animTimer) > 0;
+            const bounceY = isMoving ? -Math.abs(Math.sin(player.animTimer)) * 5 : 0;
+            const tilt = isMoving ? Math.sin(player.animTimer) * 0.08 : 0;
+
+            // 1. 발 그림자
+            ctx.fillStyle = 'rgba(0,0,0,0.38)';
+            ctx.beginPath();
+            ctx.ellipse(cx, player.y + player.height - 1, 16, 4.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.translate(cx, cy + bounceY);
+            ctx.rotate(tilt);
+
+            if (player.isDashing) {
+                ctx.globalAlpha = 0.8;
+                ctx.shadowColor = '#34d399';
+                ctx.shadowBlur = 18;
+            }
+
+            // 좌우 방향 반전
+            ctx.scale(-player.facing, 1);
+
+            if (customCharImg) {
+                ctx.imageSmoothingEnabled = true;
+                ctx.save();
+                const r = player.width / 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.clip();
+
+                const size = Math.min(customCharImg.width, customCharImg.height);
+                const sx = (customCharImg.width - size) / 2;
+                const sy = (customCharImg.height - size) / 2;
+                ctx.drawImage(
+                    customCharImg,
+                    sx, sy, size, size,
+                    -player.width / 2,
+                    -player.height / 2,
+                    player.width,
+                    player.height
+                );
+                ctx.restore();
+
+                // 사진 테두리
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
+                ctx.stroke();
+            } else {
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(
+                    quokkaSprite,
+                    -player.width / 2,
+                    -player.height / 2,
+                    player.width,
+                    player.height
+                );
+            }
+
+            ctx.restore();
+
+            // 2. 보호막(Shield) 활성화 시 원형 배리어 표시
+            if (player.hasShield) {
+                ctx.save();
+                ctx.strokeStyle = '#38bdf8';
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 29, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        // --- 이펙트 및 스폰 헬퍼 함수 ---
+        function addFloatingText(x, y, text, color) {
+            floatingTexts.push({
+                x, y, text, color,
+                life: 0.9,
+                maxLife: 0.9
+            });
+        }
+
+        function spawnParticles(x, y, color, count = 10) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 60 + Math.random() * 180;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    size: 3 + Math.random() * 4,
+                    color,
+                    life: 0.35 + Math.random() * 0.25,
+                    maxLife: 0.6
+                });
+            }
+        }
+
+        function spawnObstacle() {
+            const margin = 24;
+            const x = margin + Math.random() * Math.max(10, canvas.width - margin * 2);
+            const r = Math.random();
+            let type = 'rock';
+            let radius = 16 + Math.random() * 6;
+            let vy = (190 + Math.random() * 90) * speedMultiplier;
+            let vx = (Math.random() - 0.5) * 40;
+
+            if (level >= 2 && r < 0.28) {
+                type = 'slime';
+                radius = 17;
+                vy = (180 + Math.random() * 70) * speedMultiplier;
+                vx = (Math.random() < 0.5 ? -1 : 1) * (95 + Math.random() * 60);
+            } else if (level >= 3 && r < 0.5) {
+                type = 'meteor';
+                radius = 13;
+                vy = (330 + Math.random() * 110) * speedMultiplier;
+                vx = (Math.random() - 0.5) * 70;
+            } else if (level >= 4 && r < 0.66) {
+                type = 'giant';
+                radius = 29 + Math.random() * 6;
+                vy = (155 + Math.random() * 65) * speedMultiplier;
+                vx = 0;
+            }
+
+            obstacles.push({
+                x,
+                y: -radius - 10,
+                radius,
+                vx,
+                vy,
+                type,
+                rotation: Math.random() * Math.PI * 2,
+                rotSpeed: (Math.random() - 0.5) * 4,
+                grazed: false
+            });
+        }
+
+        function spawnItem() {
+            const margin = 30;
+            const x = margin + Math.random() * Math.max(10, canvas.width - margin * 2);
+            const r = Math.random();
+            let type = 'star';
+            if (r < 0.24) type = 'shield';
+            else if (r < 0.44) type = 'slow';
+            else if (r < 0.58 && player.lives < player.maxLives) type = 'heart';
+
+            items.push({
+                x,
+                y: -20,
+                radius: 16,
+                vy: 170 + Math.random() * 50,
+                type,
+                pulse: 0
+            });
+        }
+
+        function triggerDash() {
+            if (!isPlaying || player.isDashing || player.dashCooldown > 0) return;
+            player.isDashing = true;
+            player.dashTimer = 0.22;
+            player.dashCooldown = player.dashMaxCooldown; // 10초 제한 시간 시작
+
+            if (keys.left && !keys.right) player.dashDirection = -1;
+            else if (keys.right && !keys.left) player.dashDirection = 1;
+            else player.dashDirection = player.facing || 1;
+
+            player.facing = player.dashDirection;
+            sfx.playDash();
+            spawnParticles(player.x + player.width / 2, player.y + player.height / 2, '#34d399', 14);
+            addFloatingText(player.x + player.width / 2, player.y - 10, 'DASH!', '#059669');
+        }
+
+        function handlePlayerHit(ob) {
+            if (player.hasShield) {
+                player.hasShield = false;
+                player.invincibleTimer = 1.1;
+                screenShake = 8;
+                sfx.playHit();
+                spawnParticles(player.x + player.width / 2, player.y + player.height / 2, '#38bdf8', 18);
+                addFloatingText(player.x + player.width / 2, player.y - 12, 'SHIELD BLOCK!', '#0284c7');
+                return false;
+            }
+
+            player.lives -= 1;
+            player.invincibleTimer = 1.4;
+            combo = 0;
+            screenShake = 14;
+            sfx.playHit();
+            spawnParticles(player.x + player.width / 2, player.y + player.height / 2, '#ef4444', 22);
+            addFloatingText(player.x + player.width / 2, player.y - 12, '-1 ❤️', '#dc2626');
+            updateHUD();
+
+            if (player.lives <= 0) {
+                endGame(ob.type);
+                return true;
+            }
+            return false;
+        }
+
+        // --- 1분(60초)마다 보스 인트로 발동 (5초간 화면 흐림 + 시간 정지) ---
+        function triggerBossIntro(stageIdx) {
+            const cfgIndex = Math.min(stageIdx, bossConfigs.length - 1);
+            const cfg = bossConfigs[cfgIndex];
+            const sprite = bossSprites[cfgIndex];
+            const stageNumber = stageIdx + 1;
+
+            bossIntroTimer = 5.0; // 정확히 5초 동안 시간 정지 및 연출
+            sfx.playBossWarning();
+
+            const bossIntroCard = document.getElementById('bossIntroCard');
+            const bossWarningBadge = document.getElementById('bossWarningBadge');
+
+            if (cfg.isFinal) {
+                bossIntroCard.classList.remove('border-rose-500');
+                bossIntroCard.classList.add('border-amber-400');
+                bossWarningBadge.className = 'inline-block bg-gradient-to-r from-amber-500 via-rose-600 to-purple-600 text-white font-retro text-xs sm:text-sm px-4 py-1 rounded-full tracking-widest mb-3 animate-pulse shadow';
+                bossWarningBadge.innerHTML = `👑 FINAL BOSS STAGE ${stageNumber} (10분 돌파!)`;
+            } else {
+                bossIntroCard.classList.remove('border-amber-400');
+                bossIntroCard.classList.add('border-rose-500');
+                bossWarningBadge.className = 'inline-block bg-rose-600 text-white font-retro text-xs sm:text-sm px-3 py-1 rounded-full tracking-widest mb-3 animate-pulse';
+                bossWarningBadge.innerHTML = `⚠️ WARNING! BOSS STAGE <span id="bossStageNum">${stageNumber}</span>`;
+            }
+
+            bossIntroName.textContent = cfg.name;
+            bossIntroDesc.textContent = cfg.desc;
+            bossIntroCountdown.textContent = '5.0';
+            bossIntroProgress.style.width = '100%';
+
+            const bctx = bossIntroCanvas.getContext('2d');
+            bctx.imageSmoothingEnabled = false;
+            bctx.clearRect(0, 0, bossIntroCanvas.width, bossIntroCanvas.height);
+            bctx.drawImage(sprite, 6, 6, 84, 84);
+
+            bossIntroOverlay.classList.remove('hidden');
+
+            // 5초 후 투입될 보스 객체 생성 (10분 최강 보스는 더 크고 위압감 있게 등장)
+            const bossSize = cfg.isFinal ? 112 : 86;
+            activeBoss = {
+                stageIndex: cfgIndex,
+                stageNumber,
+                isFinal: !!cfg.isFinal,
+                name: cfg.name,
+                hpColor: cfg.hpColor,
+                sprite,
+                x: canvas.width / 2,
+                y: cfg.isFinal ? 98 : 88,
+                width: bossSize,
+                height: bossSize,
+                vx: 145 + stageNumber * 18,
+                timer: cfg.duration,
+                maxDuration: cfg.duration,
+                attackTimer: 0.9,
+                subAttackTimer: 1.8,
+                animTimer: 0
+            };
+
+            // 기존 일반 장애물 일부 정리해서 보스전 집중도 향상
+            obstacles = obstacles.filter(o => o.y > canvas.height * 0.65);
+        }
+
+        function updateBossBattle(dt, timeScale) {
+            if (!activeBoss) return;
+
+            activeBoss.animTimer += dt;
+            activeBoss.timer -= dt;
+            activeBoss.attackTimer -= dt * timeScale;
+            activeBoss.subAttackTimer -= dt * timeScale;
+
+            // 보스 이동 패턴
+            const speedBoost = (activeBoss.stageIndex === 1 || activeBoss.stageIndex === 3 || activeBoss.isFinal) ? 1.45 : 1.0;
+            activeBoss.x += activeBoss.vx * speedBoost * dt * timeScale;
+
+            const margin = 65;
+            if (activeBoss.x < margin) {
+                activeBoss.x = margin;
+                activeBoss.vx = Math.abs(activeBoss.vx);
+            } else if (activeBoss.x > canvas.width - margin) {
+                activeBoss.x = canvas.width - margin;
+                activeBoss.vx = -Math.abs(activeBoss.vx);
+            }
+
+            const pcx = player.x + player.width / 2;
+
+            // 보스별 고유 공격 패턴 실행
+            if (activeBoss.attackTimer <= 0) {
+                const st = activeBoss.stageIndex;
+                if (st === 0) {
+                    // [1분 보스: 오둥이 폭탄자] 폭탄 투하 -> 6방향 파편 폭발
+                    activeBoss.attackTimer = 1.3;
+                    bossProjectiles.push({
+                        kind: 'bomb',
+                        x: activeBoss.x,
+                        y: activeBoss.y + 34,
+                        vx: (Math.random() - 0.5) * 90,
+                        vy: 235,
+                        radius: 14,
+                        explodeY: canvas.height - 95 - Math.random() * 55,
+                        age: 0
+                    });
+                } else if (st === 1) {
+                    // [2분 보스: 삐둥이] 경고선 낙뢰
+                    activeBoss.attackTimer = 1.2;
+                    const targetX = Math.max(30, Math.min(canvas.width - 30, pcx + (Math.random() - 0.5) * 80));
+                    bossWarnings.push({ x: targetX, width: 34, timer: 0.72 });
+                } else if (st === 2) {
+                    // [3분 보스: 메카 오둥이 킹] 5갈래 부채꼴 레이저탄
+                    activeBoss.attackTimer = 1.4;
+                    for (let k = -2; k <= 2; k++) {
+                        const angle = Math.PI / 2 + k * 0.24;
+                        bossProjectiles.push({
+                            kind: 'shard',
+                            x: activeBoss.x,
+                            y: activeBoss.y + 36,
+                            vx: Math.cos(angle) * 265,
+                            vy: Math.sin(angle) * 265,
+                            radius: 9,
+                            color: '#38bdf8',
+                            age: 0
+                        });
+                    }
+                } else if (st === 3) {
+                    // [4분 보스: 닌자 그림자 오둥이] 초고속 표창 4연발
+                    activeBoss.attackTimer = 1.05;
+                    for (let k = -1.5; k <= 1.5; k += 1) {
+                        const angle = Math.PI / 2 + k * 0.22;
+                        bossProjectiles.push({
+                            kind: 'shard',
+                            x: activeBoss.x,
+                            y: activeBoss.y + 34,
+                            vx: Math.cos(angle) * 330,
+                            vy: Math.sin(angle) * 330,
+                            radius: 8,
+                            color: '#10b981',
+                            age: 0
+                        });
+                    }
+                } else if (st === 4) {
+                    // [5분 보스: 빙결 마법사 오둥이] 나선형 빙결 탄막 7발
+                    activeBoss.attackTimer = 1.45;
+                    const twist = Math.sin(activeBoss.animTimer * 3) * 0.2;
+                    for (let k = -3; k <= 3; k++) {
+                        const angle = Math.PI / 2 + k * 0.21 + twist;
+                        bossProjectiles.push({
+                            kind: 'shard',
+                            x: activeBoss.x,
+                            y: activeBoss.y + 36,
+                            vx: Math.cos(angle) * 250,
+                            vy: Math.sin(angle) * 250,
+                            radius: 9,
+                            color: '#06b6d4',
+                            age: 0
+                        });
+                    }
+                } else if (st === 5) {
+                    // [6분 보스: 해적 선장 오둥이] 쌍발 대포 폭탄 연사
+                    activeBoss.attackTimer = 1.35;
+                    [-28, 28].forEach(offsetX => {
+                        bossProjectiles.push({
+                            kind: 'bomb',
+                            x: activeBoss.x + offsetX,
+                            y: activeBoss.y + 34,
+                            vx: offsetX * 1.8,
+                            vy: 250,
+                            radius: 13,
+                            explodeY: canvas.height - 105 - Math.random() * 50,
+                            age: 0
+                        });
+                    });
+                } else if (st === 6) {
+                    // [7분 보스: 사이버 해커 오둥이] 3중 동시 레이저 해킹 경고선
+                    activeBoss.attackTimer = 1.45;
+                    [-95, 0, 95].forEach(dx => {
+                        const tx = Math.max(26, Math.min(canvas.width - 26, pcx + dx));
+                        bossWarnings.push({ x: tx, width: 30, timer: 0.78 });
+                    });
+                } else if (st === 7) {
+                    // [8분 보스: 용암 군주 오둥이] 화염 메테오 폭격 + 부채꼴 용암탄
+                    activeBoss.attackTimer = 1.25;
+                    for (let k = -2; k <= 2; k++) {
+                        const angle = Math.PI / 2 + k * 0.26;
+                        bossProjectiles.push({
+                            kind: 'shard',
+                            x: activeBoss.x,
+                            y: activeBoss.y + 36,
+                            vx: Math.cos(angle) * 290,
+                            vy: Math.sin(angle) * 290,
+                            radius: 10,
+                            color: '#ea580c',
+                            age: 0
+                        });
+                    }
+                } else if (st === 8) {
+                    // [9분 보스: 암흑 대마왕 오둥이] 폭탄 + 번개 경고선 + 암흑탄 복합
+                    activeBoss.attackTimer = 1.3;
+                    bossProjectiles.push({
+                        kind: 'bomb',
+                        x: activeBoss.x,
+                        y: activeBoss.y + 34,
+                        vx: (Math.random() - 0.5) * 120,
+                        vy: 260,
+                        radius: 14,
+                        explodeY: canvas.height - 110,
+                        age: 0
+                    });
+                    bossWarnings.push({
+                        x: Math.max(30, Math.min(canvas.width - 30, pcx)),
+                        width: 34,
+                        timer: 0.75
+                    });
+                } else {
+                    // [10분 FINAL BOSS: 신(GOD) 오메가 오둥이] 최강 필살기 연쇄 패턴!
+                    activeBoss.attackTimer = 1.1;
+                    // 1) 7갈래 신성 오메가 탄막
+                    const wave = Math.sin(activeBoss.animTimer * 4) * 0.18;
+                    for (let k = -3; k <= 3; k++) {
+                        const angle = Math.PI / 2 + k * 0.22 + wave;
+                        bossProjectiles.push({
+                            kind: 'shard',
+                            x: activeBoss.x,
+                            y: activeBoss.y + 44,
+                            vx: Math.cos(angle) * 310,
+                            vy: Math.sin(angle) * 310,
+                            radius: 10,
+                            color: k % 2 === 0 ? '#f59e0b' : '#f43f5e',
+                            age: 0
+                        });
+                    }
+                }
+            }
+
+            // 10분 최종 보스 전용 보조 필살기 (폭탄 + 2중 낙뢰 동시 시전)
+            if (activeBoss.isFinal && activeBoss.subAttackTimer <= 0) {
+                activeBoss.subAttackTimer = 1.85;
+                bossProjectiles.push({
+                    kind: 'bomb',
+                    x: activeBoss.x,
+                    y: activeBoss.y + 40,
+                    vx: (pcx - activeBoss.x) * 0.45,
+                    vy: 275,
+                    radius: 15,
+                    explodeY: canvas.height - 115,
+                    age: 0
+                });
+                [-65, 65].forEach(offset => {
+                    const tx = Math.max(28, Math.min(canvas.width - 28, pcx + offset));
+                    bossWarnings.push({ x: tx, width: 32, timer: 0.72 });
+                });
+            }
+
+            // 보스 퇴장 (버티기 성공 보너스 / 10분 최강 보스 격퇴 시 완전 클리어!)
+            if (activeBoss.timer <= 0) {
+                const clearedFinal = activeBoss.isFinal;
+                const bonus = clearedFinal ? 10000 : 1000 + activeBoss.stageNumber * 200;
+                score += bonus;
+                sfx.playItem();
+                spawnParticles(activeBoss.x, activeBoss.y, '#facc15', 36);
+                addFloatingText(activeBoss.x, activeBoss.y + 20, `${activeBoss.name} 격퇴! +${bonus}`, '#059669');
+                activeBoss = null;
+                bossWarnings = [];
+
+                if (clearedFinal) {
+                    isGameCleared = true;
+                    endGame('clear');
+                }
+            }
+        }
+
+        function update(dt) {
+            // 보스 등장 5초 연출 중에는 게임 시간(survivalTime) 및 모든 물리 시간이 멈춤
+            if (bossIntroTimer > 0) {
+                bossIntroTimer = Math.max(0, bossIntroTimer - dt);
+                bossIntroCountdown.textContent = bossIntroTimer.toFixed(1);
+                bossIntroProgress.style.width = `${(bossIntroTimer / 5.0) * 100}%`;
+
+                if (bossIntroTimer <= 0) {
+                    bossIntroOverlay.classList.add('hidden');
+                }
+                return;
+            }
+
+            const timeScale = slowMotionTimer > 0 ? 0.45 : 1.0;
+
+            // 10분(600초) 도달 시 최종 보스전 구간으로 고정
+            if (survivalTime < MAX_SURVIVAL_TIME) {
+                survivalTime = Math.min(MAX_SURVIVAL_TIME, survivalTime + dt);
+            }
+
+            // 1분(60초)마다 새로운 보스 등장 체크 (60s ~ 540s: 1~9번 보스, 600s: 10번 최강 최종 보스)
+            if (nextBossIndex < bossConfigs.length && survivalTime >= (nextBossIndex + 1) * 60) {
+                const currentStage = nextBossIndex;
+                nextBossIndex += 1;
+                triggerBossIntro(currentStage);
+                return;
+            }
+
+            // 생존 시간이 길어질수록 점진적으로 낙하 속도와 빈도가 빨라짐
+            speedMultiplier = Math.min(3.4, 1.0 + survivalTime * 0.004);
+            level = 1 + Math.floor(survivalTime / 20);
+            score += dt * (25 + level * 5);
+
+            if (slowMotionTimer > 0) slowMotionTimer = Math.max(0, slowMotionTimer - dt);
+            if (screenShake > 0) screenShake = Math.max(0, screenShake - dt * 35);
+            if (player.invincibleTimer > 0) player.invincibleTimer = Math.max(0, player.invincibleTimer - dt);
+            if (player.dashCooldown > 0) player.dashCooldown = Math.max(0, player.dashCooldown - dt);
+
+            if (comboTimer > 0) {
+                comboTimer -= dt;
+                if (comboTimer <= 0) combo = 0;
+            }
+
+            // 플레이어 이동 & 대시 처리
+            if (player.isDashing) {
+                player.dashTimer -= dt;
+                player.x += player.dashDirection * player.speed * 2.5 * dt;
+                if (Math.random() < 0.6) {
+                    spawnParticles(player.x + player.width / 2, player.y + player.height / 2, '#6ee7b7', 1);
+                }
+                if (player.dashTimer <= 0) {
+                    player.isDashing = false;
+                }
+            } else {
+                let moveDir = 0;
+                if (keys.left) moveDir -= 1;
+                if (keys.right) moveDir += 1;
+
+                if (moveDir !== 0) {
+                    player.facing = moveDir;
+                    player.x += moveDir * player.speed * dt;
+                    player.animTimer += dt * 16;
+                } else {
+                    player.animTimer = 0;
+                }
+            }
+
+            player.x = Math.max(8, Math.min(canvas.width - player.width - 8, player.x));
+            player.y = canvas.height - player.height - 14;
+
+            // 보스전 업데이트
+            if (activeBoss) {
+                updateBossBattle(dt, timeScale);
+            }
+
+            // 보스 경고선 업데이트 -> 시간 완료 시 초고속 번개 투하
+            for (let i = bossWarnings.length - 1; i >= 0; i--) {
+                const warn = bossWarnings[i];
+                warn.timer -= dt * timeScale;
+                if (warn.timer <= 0) {
+                    bossProjectiles.push({
+                        kind: 'lightning',
+                        x: warn.x,
+                        y: 20,
+                        vx: 0,
+                        vy: 760,
+                        radius: 13,
+                        age: 0
+                    });
+                    bossWarnings.splice(i, 1);
+                }
+            }
+
+            // 장애물 스폰 (보스전 중에는 스폰 간격을 조금 완화해 패턴 회피 가능하게 조정)
+            const widthFactor = Math.max(0.45, Math.min(1.1, 480 / Math.max(320, canvas.width)));
+            const bossSpawnModifier = activeBoss ? 1.65 : 1.0;
+            const spawnInterval = Math.max(0.16, ((0.58 * widthFactor) / speedMultiplier) * bossSpawnModifier);
+            spawnTimer += dt * timeScale;
+            if (spawnTimer >= spawnInterval) {
+                spawnTimer = 0;
+                spawnObstacle();
+            }
+
+            // 아이템 스폰
+            itemSpawnTimer += dt;
+            if (itemSpawnTimer >= 6.5) {
+                itemSpawnTimer = 0;
+                spawnItem();
+            }
+
+            const pcx = player.x + player.width / 2;
+            const pcy = player.y + player.height / 2;
+            const pHitRadius = 17;
+            const grazeRadius = 42;
+
+            // 보스 투사체 업데이트 및 충돌 판정
+            for (let i = bossProjectiles.length - 1; i >= 0; i--) {
+                const bp = bossProjectiles[i];
+                bp.age += dt;
+                bp.x += bp.vx * dt * timeScale;
+                bp.y += bp.vy * dt * timeScale;
+
+                // 오둥이 폭탄자의 폭탄 기폭 처리
+                if (bp.kind === 'bomb' && bp.y >= bp.explodeY) {
+                    sfx.playHit();
+                    spawnParticles(bp.x, bp.y, '#f97316', 18);
+                    for (let k = 0; k < 6; k++) {
+                        const ang = (k / 6) * Math.PI * 2;
+                        bossProjectiles.push({
+                            kind: 'shard',
+                            x: bp.x,
+                            y: bp.y,
+                            vx: Math.cos(ang) * 210,
+                            vy: Math.sin(ang) * 210,
+                            radius: 8,
+                            color: '#ef4444',
+                            age: 0
+                        });
+                    }
+                    bossProjectiles.splice(i, 1);
+                    continue;
+                }
+
+                const dist = Math.hypot(bp.x - pcx, bp.y - pcy);
+                if (dist < bp.radius + pHitRadius) {
+                    if (!player.isDashing && player.invincibleTimer <= 0) {
+                        bossProjectiles.splice(i, 1);
+                        if (handlePlayerHit({ type: 'boss' })) return;
+                        continue;
+                    }
+                }
+
+                if (bp.y - bp.radius > canvas.height + 30 || bp.y < -60 || bp.x < -40 || bp.x > canvas.width + 40) {
+                    bossProjectiles.splice(i, 1);
+                }
+            }
+
+            // 장애물 업데이트 및 충돌/아슬아슬 회피 판정
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const ob = obstacles[i];
+                ob.x += ob.vx * dt * timeScale;
+                ob.y += ob.vy * dt * timeScale;
+                ob.rotation += ob.rotSpeed * dt * timeScale;
+
+                if (ob.type === 'slime') {
+                    if (ob.x - ob.radius < 8) {
+                        ob.x = 8 + ob.radius;
+                        ob.vx = Math.abs(ob.vx);
+                    } else if (ob.x + ob.radius > canvas.width - 8) {
+                        ob.x = canvas.width - 8 - ob.radius;
+                        ob.vx = -Math.abs(ob.vx);
+                    }
+                }
+
+                const dx = ob.x - pcx;
+                const dy = ob.y - pcy;
+                const dist = Math.hypot(dx, dy);
+
+                // 충돌 판정
+                if (dist < ob.radius + pHitRadius) {
+                    if (!player.isDashing && player.invincibleTimer <= 0) {
+                        obstacles.splice(i, 1);
+                        if (handlePlayerHit(ob)) return;
+                        continue;
+                    }
+                } else if (!ob.grazed && dist < ob.radius + grazeRadius && ob.y > pcy - 20) {
+                    // 아슬아슬 회피 (Graze) 보너스
+                    ob.grazed = true;
+                    grazeCount += 1;
+                    combo += 1;
+                    comboTimer = 2.8;
+                    const bonus = 50 * Math.min(10, combo);
+                    score += bonus;
+                    sfx.playGraze();
+                    addFloatingText(pcx, player.y - 16, `아슬아슬! +${bonus}`, '#ea580c');
+                }
+
+                if (ob.y - ob.radius > canvas.height + 20) {
+                    score += 10;
+                    obstacles.splice(i, 1);
+                }
+            }
+
+            // 아이템 업데이트 및 획득 판정
+            for (let i = items.length - 1; i >= 0; i--) {
+                const it = items[i];
+                it.y += it.vy * dt;
+                it.pulse += dt * 6;
+
+                const dist = Math.hypot(it.x - pcx, it.y - pcy);
+                if (dist < it.radius + pHitRadius + 6) {
+                    sfx.playItem();
+                    spawnParticles(it.x, it.y, '#fbbf24', 14);
+
+                    if (it.type === 'star') {
+                        score += 300;
+                        addFloatingText(it.x, it.y - 10, '+300 STAR!', '#d97706');
+                    } else if (it.type === 'shield') {
+                        player.hasShield = true;
+                        addFloatingText(it.x, it.y - 10, 'SHIELD ON!', '#0284c7');
+                    } else if (it.type === 'slow') {
+                        slowMotionTimer = 4.5;
+                        addFloatingText(it.x, it.y - 10, 'SLOW MOTION!', '#9333ea');
+                    } else if (it.type === 'heart') {
+                        player.lives = Math.min(player.maxLives, player.lives + 1);
+                        addFloatingText(it.x, it.y - 10, '+1 ❤️', '#e11d48');
+                    }
+
+                    items.splice(i, 1);
+                    continue;
+                }
+
+                if (it.y - it.radius > canvas.height + 20) {
+                    items.splice(i, 1);
+                }
+            }
+
+            // 파티클 업데이트
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.life -= dt;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+
+            // 플로팅 텍스트 업데이트
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const ft = floatingTexts[i];
+                ft.y -= 36 * dt;
+                ft.life -= dt;
+                if (ft.life <= 0) floatingTexts.splice(i, 1);
+            }
+        }
+
+        function gameLoop(timestamp) {
+            if (!isPlaying) return;
+            const dt = Math.min(0.05, (timestamp - lastTime) / 1000 || 0.016);
+            lastTime = timestamp;
+
+            update(dt);
+            if (!isPlaying) return;
+            updateHUD();
+            render();
+
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        async function startGame() {
+            const nickname = inputNickname.value.trim();
+            if (!nickname) {
+                formErrorMsg.classList.remove('hidden');
+                inputNickname.focus();
+                return;
+            }
+            formErrorMsg.classList.add('hidden');
+
+            playerProfile = {
+                classCode: inputClassCode.value.trim().toUpperCase(),
+                className: inputClassName.value.trim(),
+                nickname
+            };
+            savePlayerProfile();
+
+            await sfx.init();
+
+            expandToFullViewport();
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameHud.classList.remove('hidden');
+            gameHud.classList.add('flex');
+            mobileControls.classList.remove('hidden');
+
+            resizeCanvas();
+
+            // 게임 상태 초기화
+            score = 0;
+            survivalTime = 0;
+            speedMultiplier = 1.0;
+            level = 1;
+            grazeCount = 0;
+            combo = 0;
+            comboTimer = 0;
+            slowMotionTimer = 0;
+            screenShake = 0;
+
+            nextBossIndex = 0;
+            bossIntroTimer = 0;
+            activeBoss = null;
+            bossProjectiles = [];
+            bossWarnings = [];
+            isGameCleared = false;
+            bossIntroOverlay.classList.add('hidden');
+
+            obstacles = [];
+            items = [];
+            particles = [];
+            floatingTexts = [];
+            spawnTimer = 0;
+            itemSpawnTimer = 0;
+
+            player.lives = player.maxLives;
+            player.hasShield = false;
+            player.invincibleTimer = 0;
+            player.isDashing = false;
+            player.dashTimer = 0;
+            player.dashCooldown = 0;
+            player.x = canvas.width / 2 - player.width / 2;
+            player.y = canvas.height - player.height - 14;
+            player.animTimer = 0;
+
+            const tagParts = [playerProfile.classCode, playerProfile.className, playerProfile.nickname].filter(Boolean);
+            hudPlayerTag.textContent = tagParts.join(' · ');
+
+            updateHUD();
+            isPlaying = true;
+            lastTime = performance.now();
+            if (animationId) cancelAnimationFrame(animationId);
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // --- 게임 오버 처리 ---
+        function endGame(lastHitType) {
+            isPlaying = false;
+            if (animationId) cancelAnimationFrame(animationId);
+            sfx.playGameOver();
+
+            const roundedScore = Math.floor(score);
+            let isNewRecord = false;
+            if (roundedScore > bestScore) {
+                bestScore = roundedScore;
+                localStorage.setItem('odungi_dodge_best', bestScore.toString());
+                isNewRecord = true;
+            }
+
+            const isHallTop = recordScoreToHallOfFame(roundedScore, survivalTime);
+            renderHallOfFame();
+
+            const tagParts = [playerProfile.classCode, playerProfile.className, playerProfile.nickname].filter(Boolean);
+            finalPlayerInfo.textContent = tagParts.join(' / ');
+            finalSurvivalTime.textContent = `${formatSurvivalClock(survivalTime)} (${survivalTime.toFixed(1)}초)`;
+            finalScore.textContent = roundedScore.toLocaleString();
+            finalBestScore.textContent = bestScore.toLocaleString();
+            finalGrazeCount.textContent = `${grazeCount}회`;
+
+            if ((isNewRecord || isHallTop) && roundedScore > 0) {
+                newRecordBadge.classList.remove('hidden');
+            } else {
+                newRecordBadge.classList.add('hidden');
+            }
+
+            const gameOverTitle = document.getElementById('gameOverTitle');
+            if (lastHitType === 'clear' || isGameCleared) {
+                gameOverTitle.textContent = '🎉 최종 결전 CLEAR! 🎉';
+                gameOverTitle.className = 'font-retro text-emerald-600 text-3xl sm:text-5xl font-bold mb-1.5 tracking-wider animate-bounce';
+                document.getElementById('deathReasonText').textContent = '10분 생존과 최강 보스 [신(GOD) 오메가 오둥이]의 3분 필살기까지 모두 이겨냈습니다!';
+            } else {
+                gameOverTitle.textContent = 'GAME OVER';
+                gameOverTitle.className = 'font-retro text-rose-600 text-4xl sm:text-5xl font-bold mb-1.5 tracking-widest animate-pulse';
+                const reasonMap = {
+                    meteor: '초고속 유성에 정통으로 맞았습니다!',
+                    slime: '통통 튀는 슬라임과 부딪혔습니다!',
+                    giant: '거대한 운석에 깔리고 말았습니다!',
+                    boss: '보스의 필살기 공격에 당했습니다!',
+                    rock: '하늘에서 떨어진 바위에 부딪혔습니다!'
+                };
+                document.getElementById('deathReasonText').textContent = reasonMap[lastHitType] || '하늘에서 떨어진 물체에 부딪혔습니다!';
+            }
+
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        function goBackToHome() {
+            isPlaying = false;
+            if (animationId) cancelAnimationFrame(animationId);
+
+            bossIntroTimer = 0;
+            activeBoss = null;
+            bossProjectiles = [];
+            bossWarnings = [];
+            bossIntroOverlay.classList.add('hidden');
+
+            restoreTitleViewport();
+            gameOverScreen.classList.add('hidden');
+            gameHud.classList.add('hidden');
+            gameHud.classList.remove('flex');
+            mobileControls.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+
+            renderHallOfFame();
+            resizeCanvas();
+        }
+
+        // --- 키보드 및 터치 입력 바인딩 ---
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+            if (e.code === 'Space' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+                e.preventDefault();
+                triggerDash();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+        });
+
+        // 모바일 버튼 이벤트
+        const btnLeft = document.getElementById('btnLeft');
+        const btnRight = document.getElementById('btnRight');
+        const btnDash = document.getElementById('btnDash');
+
+        const bindHoldBtn = (btn, keyName) => {
+            btn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                keys[keyName] = true;
+            });
+            const release = () => { keys[keyName] = false; };
+            btn.addEventListener('pointerup', release);
+            btn.addEventListener('pointerleave', release);
+            btn.addEventListener('pointercancel', release);
+        };
+
+        bindHoldBtn(btnLeft, 'left');
+        bindHoldBtn(btnRight, 'right');
+
+        btnDash.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            triggerDash();
+        });
+
+        // 명예의 전당 모달 열기/닫기 (애니메이션 적용)
+        async function openHallOfFameModal() {
+            if (isClosingHof) return;
+            await sfx.init();
+            sfx.playItem();
+
+            renderHallOfFame();
+            hallOfFameModal.classList.remove('hidden', 'hof-backdrop-exit');
+            hallOfFamePanel.classList.remove('hof-panel-exit');
+            hofTrophyIcon.classList.remove('trophy-bounce');
+
+            // 리플로우 강제로 애니메이션 재시작 보장
+            void hallOfFameModal.offsetWidth;
+
+            hallOfFameModal.classList.add('hof-backdrop-enter');
+            hallOfFamePanel.classList.add('hof-panel-enter');
+            hofTrophyIcon.classList.add('trophy-bounce');
+        }
+
+        function closeHallOfFameModal() {
+            if (isClosingHof || hallOfFameModal.classList.contains('hidden')) return;
+            isClosingHof = true;
+
+            hallOfFameModal.classList.remove('hof-backdrop-enter');
+            hallOfFamePanel.classList.remove('hof-panel-enter');
+
+            hallOfFameModal.classList.add('hof-backdrop-exit');
+            hallOfFamePanel.classList.add('hof-panel-exit');
+
+            setTimeout(() => {
+                hallOfFameModal.classList.add('hidden');
+                hallOfFameModal.classList.remove('hof-backdrop-exit');
+                hallOfFamePanel.classList.remove('hof-panel-exit');
+                isClosingHof = false;
+            }, 180);
+        }
+
+        openHallOfFameBtn.addEventListener('click', openHallOfFameModal);
+        closeHallOfFameBtn.addEventListener('click', closeHallOfFameModal);
+        closeHallOfFameBottomBtn.addEventListener('click', closeHallOfFameModal);
+        hallOfFameModal.addEventListener('click', (e) => {
+            if (e.target === hallOfFameModal) {
+                closeHallOfFameModal();
+            }
+        });
+
+        // 명예의 전당 필터 및 학급 코드 실시간 연동
+        filterAllBtn.addEventListener('click', () => {
+            rankingFilter = 'ALL';
+            filterAllBtn.className = 'px-2.5 py-1 rounded-lg bg-[#fbbf24] text-slate-900 font-bold transition';
+            filterClassBtn.className = 'px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 hover:bg-amber-200 font-bold transition';
+            renderHallOfFame();
+        });
+
+        filterClassBtn.addEventListener('click', () => {
+            rankingFilter = 'CLASS';
+            filterClassBtn.className = 'px-2.5 py-1 rounded-lg bg-[#fbbf24] text-slate-900 font-bold transition';
+            filterAllBtn.className = 'px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 hover:bg-amber-200 font-bold transition';
+            renderHallOfFame();
+        });
+
+        inputClassCode.addEventListener('input', () => {
+            renderHallOfFame();
+        });
+
+        inputNickname.addEventListener('input', () => {
+            if (inputNickname.value.trim()) {
+                formErrorMsg.classList.add('hidden');
+            }
+        });
+
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
+        const hudSoundToggleBtn = document.getElementById('hudSoundToggleBtn');
+
+        async function toggleSound() {
+            await sfx.init();
+            sfx.enabled = !sfx.enabled;
+            soundToggleBtn.textContent = sfx.enabled ? '🔊 BGM/SFX ON' : '🔇 MUTE';
+            soundToggleBtn.classList.toggle('opacity-50', !sfx.enabled);
+            hudSoundToggleBtn.textContent = sfx.enabled ? '🔊' : '🔇';
+            hudSoundToggleBtn.classList.toggle('opacity-50', !sfx.enabled);
+        }
+
+        soundToggleBtn.addEventListener('click', toggleSound);
+        hudSoundToggleBtn.addEventListener('click', toggleSound);
+
+        // 게임 시작 / 재시작 / 홈 복귀 버튼 바인딩
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('click', startGame);
+        document.getElementById('backToHomeBtn').addEventListener('click', goBackToHome);
+
+        // 사용자 사진 파일 업로드 & 기본 복구 이벤트
+        const charImageInput = document.getElementById('charImageInput');
+        const resetCharImageBtn = document.getElementById('resetCharImageBtn');
+
+        charImageInput.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                if (ev.target && ev.target.result) {
+                    applyCustomCharDataUrl(ev.target.result, true);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        resetCharImageBtn.addEventListener('click', () => {
+            customCharImg = null;
+            charImageInput.value = '';
+            resetCharImageBtn.classList.add('hidden');
+            try {
+                localStorage.removeItem('odungi_custom_char_img');
+            } catch (e) {}
+            renderPreviewQuokka();
+        });
+
+        // 초기 화면 세팅
+        window.onload = () => {
+            loadSavedProfile();
+            loadSavedCustomChar();
+            renderPreviewQuokka();
+            renderHallOfFame();
+            resizeCanvas();
+            bestScoreDisplay.textContent = bestScore.toLocaleString();
+        };
+    </script>
+</body>
+</html>
