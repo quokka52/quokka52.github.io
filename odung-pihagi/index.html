@@ -310,6 +310,43 @@
                 <div class="warning-bar w-full max-w-md h-3 rounded-full mt-4 shadow-md"></div>
             </div>
 
+            <!-- 200점마다 등장하는 초등 6학년 2학기 4단원 비례식과 비례배분 퀴즈 오버레이 -->
+            <div id="mathQuizOverlay" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-40">
+                <div class="boss-intro-card bg-white border-4 border-amber-400 rounded-3xl p-5 sm:p-6 max-w-md w-full shadow-2xl text-left">
+                    <div class="flex items-center justify-between border-b-2 border-amber-200 pb-2.5 mb-3">
+                        <span id="quizStageBadge" class="bg-amber-400 text-slate-900 font-retro text-xs sm:text-sm px-3 py-1 rounded-full font-bold">
+                            📐 200점 돌파! 수학 퀴즈
+                        </span>
+                        <span class="font-retro text-xs text-emerald-700 font-bold">6-2 4단원 비례식과 비례배분</span>
+                    </div>
+
+                    <div id="quizQuestionBox" class="bg-amber-50/90 border-2 border-amber-200 rounded-2xl p-3.5 mb-3.5 text-slate-900 text-sm sm:text-base font-bold leading-relaxed break-keep">
+                        문제가 여기에 표시됩니다.
+                    </div>
+
+                    <!-- 4개 보기 버튼 -->
+                    <div id="quizChoicesContainer" class="grid grid-cols-1 gap-2">
+                        <!-- JS로 4개 보기 동적 생성 -->
+                    </div>
+
+                    <!-- 정답 / 오답 결과 및 풀이 영역 -->
+                    <div id="quizFeedbackBox" class="hidden mt-3.5 p-3.5 rounded-2xl border-2 text-xs sm:text-sm leading-relaxed break-keep">
+                        <div id="quizResultTitle" class="font-retro text-base sm:text-lg font-bold mb-1"></div>
+                        <div id="quizAnswerText" class="font-bold mb-1"></div>
+                        <div id="quizExplanationText" class="text-slate-700"></div>
+
+                        <div class="mt-3 pt-2.5 border-t border-slate-200/80 flex justify-end">
+                            <button id="quizContinueBtn" type="button" class="hidden retro-btn w-full bg-emerald-400 hover:bg-emerald-500 text-slate-900 font-retro font-bold text-sm sm:text-base py-2.5 rounded-xl cursor-pointer" style="box-shadow: 0 4px 0 #059669;">
+                                ▶ 정답입니다! 게임 계속하기
+                            </button>
+                            <button id="quizRetryEasyBtn" type="button" class="hidden retro-btn w-full bg-amber-300 hover:bg-amber-400 text-slate-900 font-retro font-bold text-sm sm:text-base py-2.5 rounded-xl cursor-pointer">
+                                🔄 틀린 문제 다시 풀기 (더 쉬운 문제)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 1. 타이틀(시작) 화면 오버레이 (왼쪽: 타이틀 & 캐릭터 / 오른쪽: 참가자 입력 & 게임시작, 명예의 전당 버튼) -->
             <div id="startScreen" class="absolute inset-0 bg-gradient-to-br from-[#fffbeb] via-[#ffffff] to-[#fef3c7] flex flex-col md:flex-row items-center justify-between p-5 sm:p-8 gap-6 sm:gap-8 z-20 overflow-y-auto">
                 
@@ -409,8 +446,21 @@
                         </div>
                         <div class="flex items-center gap-1.5 font-retro text-xs">
                             <button id="filterAllBtn" class="px-2.5 py-1 rounded-lg bg-[#fbbf24] text-slate-900 font-bold transition">전체</button>
-                            <button id="filterClassBtn" class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 hover:bg-amber-200 font-bold transition">우리 학급</button>
+                            <button id="filterClassBtn" class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 hover:bg-amber-200 font-bold transition">우리 반</button>
                             <button id="closeHallOfFameBtn" class="ml-1 px-2.5 py-1 rounded-lg bg-rose-100 border border-rose-300 text-rose-700 hover:bg-rose-200 font-bold transition">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- 우리 반 필터 선택 시 나타나는 학급 코드 & 반 조회 바 -->
+                    <div id="hofClassSearchBar" class="hidden bg-amber-50 border border-amber-300 rounded-xl p-2.5 mb-3">
+                        <div class="flex items-center gap-2 font-retro text-xs">
+                            <input id="hofSearchCode" type="text" maxlength="12" placeholder="학급 코드" 
+                                class="w-1/3 bg-white border border-amber-300 focus:border-amber-500 focus:outline-none rounded-lg px-2.5 py-1.5 text-slate-900 uppercase placeholder-slate-400">
+                            <input id="hofSearchClass" type="text" maxlength="10" placeholder="반 (예: 3반)" 
+                                class="w-1/3 bg-white border border-amber-300 focus:border-amber-500 focus:outline-none rounded-lg px-2.5 py-1.5 text-slate-900 placeholder-slate-400">
+                            <button id="hofSearchBtn" type="button" class="w-1/3 bg-[#fbbf24] hover:bg-[#f59e0b] text-slate-900 font-bold py-1.5 px-3 rounded-lg border border-amber-500 transition cursor-pointer">
+                                🔍 조회
+                            </button>
                         </div>
                     </div>
 
@@ -1042,6 +1092,10 @@
         const hallOfFameList = document.getElementById('hallOfFameList');
         const filterAllBtn = document.getElementById('filterAllBtn');
         const filterClassBtn = document.getElementById('filterClassBtn');
+        const hofClassSearchBar = document.getElementById('hofClassSearchBar');
+        const hofSearchCode = document.getElementById('hofSearchCode');
+        const hofSearchClass = document.getElementById('hofSearchClass');
+        const hofSearchBtn = document.getElementById('hofSearchBtn');
         const currentCodeLabel = document.getElementById('currentCodeLabel');
         const hallOfFameModal = document.getElementById('hallOfFameModal');
         const hallOfFamePanel = document.getElementById('hallOfFamePanel');
@@ -1050,6 +1104,8 @@
         const closeHallOfFameBtn = document.getElementById('closeHallOfFameBtn');
         const closeHallOfFameBottomBtn = document.getElementById('closeHallOfFameBottomBtn');
         let isClosingHof = false;
+        let queriedClassCode = '';
+        let queriedClassName = '';
 
         // --- 게임 상태 변수 ---
         let isPlaying = false;
@@ -1076,7 +1132,241 @@
         let bossWarnings = [];
         let isGameCleared = false;
 
-        // 참가자 정보 및 명예의 전당 상태
+        // 200점마다 출제되는 6학년 2학기 4단원 비례식과 비례배분 퀴즈 상태
+        const mathQuizOverlay = document.getElementById('mathQuizOverlay');
+        const quizStageBadge = document.getElementById('quizStageBadge');
+        const quizQuestionBox = document.getElementById('quizQuestionBox');
+        const quizChoicesContainer = document.getElementById('quizChoicesContainer');
+        const quizFeedbackBox = document.getElementById('quizFeedbackBox');
+        const quizResultTitle = document.getElementById('quizResultTitle');
+        const quizAnswerText = document.getElementById('quizAnswerText');
+        const quizExplanationText = document.getElementById('quizExplanationText');
+        const quizContinueBtn = document.getElementById('quizContinueBtn');
+        const quizRetryEasyBtn = document.getElementById('quizRetryEasyBtn');
+
+        let isQuizPaused = false;
+        let nextQuizScore = 200;
+        let currentQuizItem = null;
+        let quizPoolIndex = 0;
+
+        // 초등 6학년 2학기 2022 개정 4단원 [비례식과 비례배분] 문제 은행 (기본 문제 + 오답 시 더 쉬운 보충 문제 쌍)
+        const mathQuizBank = [
+            {
+                normal: {
+                    question: "비 18 : 24를 가장 간단한 자연수의 비로 나타내었을 때, 전항과 후항의 합은 얼마인가요?",
+                    choices: ["5", "7", "9", "12"],
+                    answerIndex: 1,
+                    explanation: "18과 24의 최대공약수인 6으로 전항과 후항을 각각 나누면 3 : 4가 됩니다. 따라서 전항(3)과 후항(4)의 합은 3 + 4 = 7입니다."
+                },
+                easy: {
+                    question: "[쉬운 문제] 비 4 : 6을 가장 간단한 자연수의 비로 나타낸 것은 어느 것인가요?",
+                    choices: ["1 : 2", "2 : 3", "3 : 2", "2 : 4"],
+                    answerIndex: 1,
+                    explanation: "4와 6을 공약수 2로 각각 나누면 4÷2 = 2, 6÷2 = 3이므로 가장 간단한 자연수의 비는 2 : 3입니다."
+                }
+            },
+            {
+                normal: {
+                    question: "비례식 5 : 8 = 15 : □ 에서 □ 안에 들어갈 알맞은 수는 무엇인가요?",
+                    choices: ["18", "20", "24", "32"],
+                    answerIndex: 2,
+                    explanation: "비례식에서 외항의 곱과 내항의 곱은 같습니다. 5 × □ = 8 × 15 = 120이므로 □ = 120 ÷ 5 = 24입니다."
+                },
+                easy: {
+                    question: "[쉬운 문제] 비례식 2 : 3 = 4 : □ 에서 □ 안에 들어갈 알맞은 수는 무엇인가요?",
+                    choices: ["5", "6", "7", "8"],
+                    answerIndex: 1,
+                    explanation: "전항 2가 4로 2배 되었으므로 후항 3도 2배 하면 3 × 2 = 6입니다. (외항의 곱 2×6 = 내항의 곱 3×4 = 12)"
+                }
+            },
+            {
+                normal: {
+                    question: "소수의 비 0.4 : 1.2를 가장 간단한 자연수의 비로 바르게 나타낸 것은 무엇인가요?",
+                    choices: ["1 : 3", "2 : 5", "1 : 4", "4 : 12"],
+                    answerIndex: 0,
+                    explanation: "전항과 후항에 각각 10을 곱하면 4 : 12가 되고, 최대공약수 4로 나누면 가장 간단한 자연수의 비인 1 : 3이 됩니다."
+                },
+                easy: {
+                    question: "[쉬운 문제] 소수의 비 0.3 : 0.7을 가장 간단한 자연수의 비로 나타낸 것은 무엇인가요?",
+                    choices: ["3 : 7", "7 : 3", "1 : 3", "30 : 7"],
+                    answerIndex: 0,
+                    explanation: "전항과 후항에 각각 10을 곱하면 소수점이 오른쪽으로 한 칸 이동하여 3 : 7이 됩니다."
+                }
+            },
+            {
+                normal: {
+                    question: "분수의 비 1/3 : 1/4 을 가장 간단한 자연수의 비로 바르게 나타낸 것은 무엇인가요?",
+                    choices: ["3 : 4", "4 : 3", "1 : 12", "12 : 1"],
+                    answerIndex: 1,
+                    explanation: "분모 3과 4의 최소공배수인 12를 전항과 후항에 각각 곱하면 (1/3 × 12) : (1/4 × 12) = 4 : 3이 됩니다."
+                },
+                easy: {
+                    question: "[쉬운 문제] 분수의 비 1/2 : 1/3 을 가장 간단한 자연수의 비로 나타낸 것은 무엇인가요?",
+                    choices: ["2 : 3", "3 : 2", "1 : 6", "5 : 6"],
+                    answerIndex: 1,
+                    explanation: "분모 2와 3의 공배수인 6을 양쪽에 곱하면 (1/2 × 6) : (1/3 × 6) = 3 : 2가 됩니다."
+                }
+            },
+            {
+                normal: {
+                    question: "공책 35권을 지수와 민준이가 3 : 4로 비례배분하여 나누어 가지려고 합니다. 민준이가 갖게 되는 공책은 몇 권인가요?",
+                    choices: ["15권", "18권", "20권", "21권"],
+                    answerIndex: 2,
+                    explanation: "전체를 3 + 4 = 7묶음으로 나눈 것 중 민준이는 4묶음을 가집니다. 35 × (4 / 7) = 20권입니다."
+                },
+                easy: {
+                    question: "[쉬운 문제] 사탕 10개를 형과 동생이 3 : 2로 비례배분할 때, 형이 갖는 사탕은 몇 개인가요?",
+                    choices: ["4개", "5개", "6개", "8개"],
+                    answerIndex: 2,
+                    explanation: "전체를 3 + 2 = 5묶음으로 나누면 한 묶음에 2개씩입니다. 형은 3묶음이므로 10 × (3 / 5) = 6개입니다."
+                }
+            },
+            {
+                normal: {
+                    question: "둘레가 48cm인 직사각형이 있습니다. 가로와 세로의 비가 5 : 3일 때, 이 직사각형의 가로는 몇 cm인가요?",
+                    choices: ["9cm", "15cm", "18cm", "30cm"],
+                    answerIndex: 1,
+                    explanation: "직사각형 둘레 48cm의 절반인 24cm가 (가로 + 세로)의 길이입니다. 가로 = 24 × (5 / (5 + 3)) = 24 × 5/8 = 15cm입니다."
+                },
+                easy: {
+                    question: "[쉬운 문제] 20cm인 끈을 1 : 3으로 비례배분하여 자를 때, 더 긴 끈의 길이는 몇 cm인가요?",
+                    choices: ["5cm", "10cm", "15cm", "16cm"],
+                    answerIndex: 2,
+                    explanation: "전체를 1 + 3 = 4등분한 것 중 긴 쪽은 3조각이므로 20 × (3 / 4) = 15cm입니다."
+                }
+            },
+            {
+                normal: {
+                    question: "비례식 7 : □ = 21 : 12 에서 내항의 곱은 얼마인가요?",
+                    choices: ["28", "48", "84", "147"],
+                    answerIndex: 2,
+                    explanation: "비례식에서 내항의 곱은 외항의 곱과 같습니다. 외항이 7과 12이므로 내항의 곱 = 7 × 12 = 84입니다."
+                },
+                easy: {
+                    question: "[쉬운 문제] 비례식 3 : 4 = 6 : 8 에서 외항의 곱은 얼마인가요?",
+                    choices: ["12", "18", "24", "32"],
+                    answerIndex: 2,
+                    explanation: "비례식에서 바깥쪽에 있는 두 항(외항)은 3과 8입니다. 따라서 외항의 곱은 3 × 8 = 24입니다."
+                }
+            },
+            {
+                normal: {
+                    question: "어느 학교 6학년 남학생과 여학생 수의 비는 4 : 5입니다. 남학생이 36명일 때, 6학년 전체 학생은 모두 몇 명인가요?",
+                    choices: ["45명", "72명", "81명", "90명"],
+                    answerIndex: 2,
+                    explanation: "여학생 수를 □명이라 하면 4 : 5 = 36 : □ 이므로 여학생은 45명입니다. 전체 학생 수는 36 + 45 = 81명입니다."
+                },
+                easy: {
+                    question: "[쉬운 문제] 빨간 공과 파란 공 수의 비가 2 : 3입니다. 빨간 공이 6개일 때, 파란 공은 몇 개인가요?",
+                    choices: ["6개", "8개", "9개", "12개"],
+                    answerIndex: 2,
+                    explanation: "2 : 3 = 6 : □ 에서 전항 2가 6으로 3배 되었으므로 파란 공은 3 × 3 = 9개입니다."
+                }
+            }
+        ];
+
+        function openMathQuiz(milestoneScore) {
+            isQuizPaused = true;
+            keys.left = false;
+            keys.right = false;
+            sfx.playBossWarning();
+
+            const pair = mathQuizBank[quizPoolIndex % mathQuizBank.length];
+            quizPoolIndex += 1;
+            currentQuizItem = {
+                pair,
+                mode: 'normal',
+                milestoneScore
+            };
+
+            quizStageBadge.textContent = `📐 ${milestoneScore.toLocaleString()}점 돌파! 수학 퀴즈`;
+            renderQuizContent(pair.normal);
+            mathQuizOverlay.classList.remove('hidden');
+        }
+
+        function renderQuizContent(qData) {
+            quizQuestionBox.textContent = `Q. ${qData.question}`;
+            quizFeedbackBox.classList.add('hidden');
+            quizContinueBtn.classList.add('hidden');
+            quizRetryEasyBtn.classList.add('hidden');
+
+            const numLabels = ['①', '②', '③', '④'];
+            quizChoicesContainer.innerHTML = qData.choices.map((choice, idx) => `
+                <button type="button" data-choice-idx="${idx}"
+                    class="quiz-choice-btn w-full text-left bg-white hover:bg-amber-50 border-2 border-amber-300 rounded-xl px-3.5 py-2.5 font-retro text-sm sm:text-base text-slate-800 transition flex items-center gap-2.5 cursor-pointer shadow-sm">
+                    <span class="text-amber-600 font-bold">${numLabels[idx]}</span>
+                    <span>${escapeHtml(choice)}</span>
+                </button>
+            `).join('');
+
+            quizChoicesContainer.querySelectorAll('.quiz-choice-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const selectedIdx = parseInt(btn.getAttribute('data-choice-idx'), 10);
+                    handleQuizChoice(selectedIdx, qData);
+                });
+            });
+        }
+
+        function handleQuizChoice(selectedIdx, qData) {
+            const isCorrect = selectedIdx === qData.answerIndex;
+            const numLabels = ['①', '②', '③', '④'];
+            const buttons = quizChoicesContainer.querySelectorAll('.quiz-choice-btn');
+
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-amber-50', 'cursor-pointer');
+                if (idx === qData.answerIndex) {
+                    btn.classList.remove('border-amber-300', 'bg-white');
+                    btn.classList.add('border-emerald-500', 'bg-emerald-100', 'text-emerald-950', 'font-bold');
+                } else if (idx === selectedIdx && !isCorrect) {
+                    btn.classList.remove('border-amber-300', 'bg-white');
+                    btn.classList.add('border-rose-500', 'bg-rose-100', 'text-rose-950');
+                } else {
+                    btn.classList.add('opacity-55');
+                }
+            });
+
+            quizFeedbackBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-400', 'bg-rose-50', 'border-rose-400');
+
+            if (isCorrect) {
+                sfx.playItem();
+                quizFeedbackBox.classList.add('bg-emerald-50', 'border-emerald-400');
+                quizResultTitle.className = 'font-retro text-base sm:text-lg font-bold mb-1 text-emerald-700';
+                quizResultTitle.textContent = '⭕ 정답입니다! 훌륭해요!';
+                quizAnswerText.className = 'font-bold mb-1 text-emerald-800';
+                quizAnswerText.textContent = `정답: ${numLabels[qData.answerIndex]} ${qData.choices[qData.answerIndex]}`;
+                quizExplanationText.textContent = `풀이: ${qData.explanation}`;
+
+                quizContinueBtn.classList.remove('hidden');
+                quizRetryEasyBtn.classList.add('hidden');
+            } else {
+                sfx.playHit();
+                quizFeedbackBox.classList.add('bg-rose-50', 'border-rose-400');
+                quizResultTitle.className = 'font-retro text-base sm:text-lg font-bold mb-1 text-rose-600';
+                quizResultTitle.textContent = '❌ 아쉽네요! 틀렸습니다.';
+                quizAnswerText.className = 'font-bold mb-1 text-rose-800';
+                quizAnswerText.textContent = `정답: ${numLabels[qData.answerIndex]} ${qData.choices[qData.answerIndex]}`;
+                quizExplanationText.textContent = `풀이: ${qData.explanation}`;
+
+                quizRetryEasyBtn.classList.remove('hidden');
+                quizContinueBtn.classList.add('hidden');
+            }
+        }
+
+        quizRetryEasyBtn.addEventListener('click', () => {
+            if (!currentQuizItem) return;
+            currentQuizItem.mode = 'easy';
+            quizStageBadge.textContent = `🌱 보충 문제 도전! (더 쉬운 문제)`;
+            renderQuizContent(currentQuizItem.pair.easy);
+        });
+
+        quizContinueBtn.addEventListener('click', () => {
+            mathQuizOverlay.classList.add('hidden');
+            isQuizPaused = false;
+            lastTime = performance.now();
+        });
+
+        // --- 참가자 정보 및 명예의 전당 데이터 관리 ---
         let playerProfile = {
             classCode: '',
             className: '',
@@ -1084,49 +1374,67 @@
         };
         let rankingFilter = 'ALL'; // 'ALL' | 'CLASS'
 
-        function loadHallOfFame() {
-            try {
-                const saved = localStorage.getItem('odungi_hall_of_fame_v2');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    if (Array.isArray(parsed)) return parsed;
-                }
-            } catch (e) {}
-            return [];
-        }
-
-        function saveHallOfFame(records) {
-            try {
-                localStorage.setItem('odungi_hall_of_fame_v2', JSON.stringify(records));
-            } catch (e) {}
-        }
-
         function loadSavedProfile() {
             try {
-                const saved = JSON.parse(localStorage.getItem('odungi_player_profile') || '{}');
-                if (saved.classCode) inputClassCode.value = saved.classCode;
-                if (saved.className) inputClassName.value = saved.className;
-                if (saved.nickname) inputNickname.value = saved.nickname;
+                const saved = JSON.parse(localStorage.getItem('odungi_dodge_profile') || 'null');
+                if (saved) {
+                    playerProfile = saved;
+                    inputClassCode.value = saved.classCode || '';
+                    inputClassName.value = saved.className || '';
+                    inputNickname.value = saved.nickname || '';
+                }
             } catch (e) {}
         }
 
         function savePlayerProfile() {
             try {
-                localStorage.setItem('odungi_player_profile', JSON.stringify(playerProfile));
+                localStorage.setItem('odungi_dodge_profile', JSON.stringify(playerProfile));
+            } catch (e) {}
+        }
+
+        function loadHallOfFame() {
+            try {
+                return JSON.parse(localStorage.getItem('odungi_dodge_hof') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveHallOfFame(list) {
+            try {
+                localStorage.setItem('odungi_dodge_hof', JSON.stringify(list));
             } catch (e) {}
         }
 
         function renderHallOfFame() {
-            const allRecords = loadHallOfFame();
-            const typedCode = inputClassCode.value.trim().toUpperCase();
+            const records = loadHallOfFame();
+            let filtered = records;
 
-            currentCodeLabel.textContent = typedCode
-                ? `코드 [${typedCode}] 활성화됨`
-                : '학급코드 미입력 (전체 랭킹)';
+            if (rankingFilter === 'CLASS') {
+                const targetCode = queriedClassCode.trim().toUpperCase();
+                const targetClass = queriedClassName.trim();
 
-            let filtered = allRecords;
-            if (rankingFilter === 'CLASS' && typedCode) {
-                filtered = allRecords.filter(r => (r.classCode || '').toUpperCase() === typedCode);
+                if (!targetCode && !targetClass) {
+                    currentCodeLabel.textContent = '학급 코드와 반을 입력 후 [조회]를 눌러주세요';
+                    hallOfFameList.innerHTML = `
+                        <div class="py-10 text-center font-retro text-xs text-slate-500">
+                            위 입력 칸에 <strong>학급 코드</strong>와 <strong>반</strong>을 입력하고<br>
+                            <strong>[🔍 조회]</strong> 버튼을 누르면 우리 반 순위가 나타납니다!
+                        </div>
+                    `;
+                    return;
+                }
+
+                filtered = records.filter(r => {
+                    const codeMatch = !targetCode || (r.classCode || '').trim().toUpperCase() === targetCode;
+                    const classMatch = !targetClass || (r.className || '').trim() === targetClass;
+                    return codeMatch && classMatch;
+                });
+
+                const labelText = [targetCode, targetClass].filter(Boolean).join(' ');
+                currentCodeLabel.textContent = `[${labelText}] 조회 결과 (${filtered.length}명)`;
+            } else {
+                currentCodeLabel.textContent = '전체 참가자 랭킹 TOP 10';
             }
 
             // 점수 내림차순 정렬 (동점 시 생존시간 내림차순)
@@ -1136,7 +1444,9 @@
             if (top10.length === 0) {
                 hallOfFameList.innerHTML = `
                     <div class="py-10 text-center font-retro text-xs text-slate-500">
-                        아직 등록된 기록이 없습니다.<br>첫 번째 명예의 전당 주인공이 되어보세요!
+                        ${rankingFilter === 'CLASS'
+                            ? '입력한 학급 코드·반과 일치하는 기록이 없습니다.'
+                            : '아직 등록된 기록이 없습니다.<br>첫 번째 명예의 전당 주인공이 되어보세요!'}
                     </div>
                 `;
                 return;
@@ -1913,6 +2223,7 @@
             bossIntroOverlay.classList.remove('hidden');
 
             // 5초 후 투입될 보스 객체 생성 (10분 최강 보스는 더 크고 위압감 있게 등장)
+            // 5초 후 투입될 보스 객체 생성 (보스 이동 속도를 원래대로 빠르게 설정)
             const bossSize = cfg.isFinal ? 112 : 86;
             activeBoss = {
                 stageIndex: cfgIndex,
@@ -1925,11 +2236,11 @@
                 y: cfg.isFinal ? 98 : 88,
                 width: bossSize,
                 height: bossSize,
-                vx: 145 + stageNumber * 18,
+                vx: 230 + stageNumber * 26,
                 timer: cfg.duration,
                 maxDuration: cfg.duration,
-                attackTimer: 0.9,
-                subAttackTimer: 1.8,
+                attackTimer: 0.65,
+                subAttackTimer: 1.35,
                 animTimer: 0
             };
 
@@ -1945,8 +2256,8 @@
             activeBoss.attackTimer -= dt * timeScale;
             activeBoss.subAttackTimer -= dt * timeScale;
 
-            // 보스 이동 패턴
-            const speedBoost = (activeBoss.stageIndex === 1 || activeBoss.stageIndex === 3 || activeBoss.isFinal) ? 1.45 : 1.0;
+            // 보스 이동 패턴 (빠른 순찰 속도)
+            const speedBoost = (activeBoss.stageIndex === 1 || activeBoss.stageIndex === 3 || activeBoss.isFinal) ? 1.55 : 1.15;
             activeBoss.x += activeBoss.vx * speedBoost * dt * timeScale;
 
             const margin = 65;
@@ -1960,38 +2271,38 @@
 
             const pcx = player.x + player.width / 2;
 
-            // 보스별 고유 공격 패턴 실행
+            // 보스별 고유 공격 패턴 실행 (빠른 템포)
             if (activeBoss.attackTimer <= 0) {
                 const st = activeBoss.stageIndex;
                 if (st === 0) {
                     // [1분 보스: 오둥이 폭탄자] 폭탄 투하 -> 6방향 파편 폭발
-                    activeBoss.attackTimer = 1.3;
+                    activeBoss.attackTimer = 1.05;
                     bossProjectiles.push({
                         kind: 'bomb',
                         x: activeBoss.x,
                         y: activeBoss.y + 34,
-                        vx: (Math.random() - 0.5) * 90,
-                        vy: 235,
+                        vx: (Math.random() - 0.5) * 110,
+                        vy: 285,
                         radius: 14,
                         explodeY: canvas.height - 95 - Math.random() * 55,
                         age: 0
                     });
                 } else if (st === 1) {
                     // [2분 보스: 삐둥이] 경고선 낙뢰
-                    activeBoss.attackTimer = 1.2;
+                    activeBoss.attackTimer = 0.95;
                     const targetX = Math.max(30, Math.min(canvas.width - 30, pcx + (Math.random() - 0.5) * 80));
-                    bossWarnings.push({ x: targetX, width: 34, timer: 0.72 });
+                    bossWarnings.push({ x: targetX, width: 34, timer: 0.62 });
                 } else if (st === 2) {
                     // [3분 보스: 메카 오둥이 킹] 5갈래 부채꼴 레이저탄
-                    activeBoss.attackTimer = 1.4;
+                    activeBoss.attackTimer = 1.1;
                     for (let k = -2; k <= 2; k++) {
                         const angle = Math.PI / 2 + k * 0.24;
                         bossProjectiles.push({
                             kind: 'shard',
                             x: activeBoss.x,
                             y: activeBoss.y + 36,
-                            vx: Math.cos(angle) * 265,
-                            vy: Math.sin(angle) * 265,
+                            vx: Math.cos(angle) * 310,
+                            vy: Math.sin(angle) * 310,
                             radius: 9,
                             color: '#38bdf8',
                             age: 0
@@ -1999,15 +2310,15 @@
                     }
                 } else if (st === 3) {
                     // [4분 보스: 닌자 그림자 오둥이] 초고속 표창 4연발
-                    activeBoss.attackTimer = 1.05;
+                    activeBoss.attackTimer = 0.85;
                     for (let k = -1.5; k <= 1.5; k += 1) {
                         const angle = Math.PI / 2 + k * 0.22;
                         bossProjectiles.push({
                             kind: 'shard',
                             x: activeBoss.x,
                             y: activeBoss.y + 34,
-                            vx: Math.cos(angle) * 330,
-                            vy: Math.sin(angle) * 330,
+                            vx: Math.cos(angle) * 370,
+                            vy: Math.sin(angle) * 370,
                             radius: 8,
                             color: '#10b981',
                             age: 0
@@ -2015,16 +2326,16 @@
                     }
                 } else if (st === 4) {
                     // [5분 보스: 빙결 마법사 오둥이] 나선형 빙결 탄막 7발
-                    activeBoss.attackTimer = 1.45;
-                    const twist = Math.sin(activeBoss.animTimer * 3) * 0.2;
+                    activeBoss.attackTimer = 1.15;
+                    const twist = Math.sin(activeBoss.animTimer * 3.5) * 0.2;
                     for (let k = -3; k <= 3; k++) {
                         const angle = Math.PI / 2 + k * 0.21 + twist;
                         bossProjectiles.push({
                             kind: 'shard',
                             x: activeBoss.x,
                             y: activeBoss.y + 36,
-                            vx: Math.cos(angle) * 250,
-                            vy: Math.sin(angle) * 250,
+                            vx: Math.cos(angle) * 295,
+                            vy: Math.sin(angle) * 295,
                             radius: 9,
                             color: '#06b6d4',
                             age: 0
@@ -2032,14 +2343,14 @@
                     }
                 } else if (st === 5) {
                     // [6분 보스: 해적 선장 오둥이] 쌍발 대포 폭탄 연사
-                    activeBoss.attackTimer = 1.35;
+                    activeBoss.attackTimer = 1.1;
                     [-28, 28].forEach(offsetX => {
                         bossProjectiles.push({
                             kind: 'bomb',
                             x: activeBoss.x + offsetX,
                             y: activeBoss.y + 34,
-                            vx: offsetX * 1.8,
-                            vy: 250,
+                            vx: offsetX * 2.0,
+                            vy: 295,
                             radius: 13,
                             explodeY: canvas.height - 105 - Math.random() * 50,
                             age: 0
@@ -2047,22 +2358,22 @@
                     });
                 } else if (st === 6) {
                     // [7분 보스: 사이버 해커 오둥이] 3중 동시 레이저 해킹 경고선
-                    activeBoss.attackTimer = 1.45;
+                    activeBoss.attackTimer = 1.15;
                     [-95, 0, 95].forEach(dx => {
                         const tx = Math.max(26, Math.min(canvas.width - 26, pcx + dx));
-                        bossWarnings.push({ x: tx, width: 30, timer: 0.78 });
+                        bossWarnings.push({ x: tx, width: 30, timer: 0.68 });
                     });
                 } else if (st === 7) {
                     // [8분 보스: 용암 군주 오둥이] 화염 메테오 폭격 + 부채꼴 용암탄
-                    activeBoss.attackTimer = 1.25;
+                    activeBoss.attackTimer = 1.0;
                     for (let k = -2; k <= 2; k++) {
                         const angle = Math.PI / 2 + k * 0.26;
                         bossProjectiles.push({
                             kind: 'shard',
                             x: activeBoss.x,
                             y: activeBoss.y + 36,
-                            vx: Math.cos(angle) * 290,
-                            vy: Math.sin(angle) * 290,
+                            vx: Math.cos(angle) * 335,
+                            vy: Math.sin(angle) * 335,
                             radius: 10,
                             color: '#ea580c',
                             age: 0
@@ -2070,13 +2381,13 @@
                     }
                 } else if (st === 8) {
                     // [9분 보스: 암흑 대마왕 오둥이] 폭탄 + 번개 경고선 + 암흑탄 복합
-                    activeBoss.attackTimer = 1.3;
+                    activeBoss.attackTimer = 1.05;
                     bossProjectiles.push({
                         kind: 'bomb',
                         x: activeBoss.x,
                         y: activeBoss.y + 34,
-                        vx: (Math.random() - 0.5) * 120,
-                        vy: 260,
+                        vx: (Math.random() - 0.5) * 140,
+                        vy: 305,
                         radius: 14,
                         explodeY: canvas.height - 110,
                         age: 0
@@ -2084,21 +2395,20 @@
                     bossWarnings.push({
                         x: Math.max(30, Math.min(canvas.width - 30, pcx)),
                         width: 34,
-                        timer: 0.75
+                        timer: 0.65
                     });
                 } else {
                     // [10분 FINAL BOSS: 신(GOD) 오메가 오둥이] 최강 필살기 연쇄 패턴!
-                    activeBoss.attackTimer = 1.1;
-                    // 1) 7갈래 신성 오메가 탄막
-                    const wave = Math.sin(activeBoss.animTimer * 4) * 0.18;
+                    activeBoss.attackTimer = 0.88;
+                    const wave = Math.sin(activeBoss.animTimer * 4.5) * 0.18;
                     for (let k = -3; k <= 3; k++) {
                         const angle = Math.PI / 2 + k * 0.22 + wave;
                         bossProjectiles.push({
                             kind: 'shard',
                             x: activeBoss.x,
                             y: activeBoss.y + 44,
-                            vx: Math.cos(angle) * 310,
-                            vy: Math.sin(angle) * 310,
+                            vx: Math.cos(angle) * 355,
+                            vy: Math.sin(angle) * 355,
                             radius: 10,
                             color: k % 2 === 0 ? '#f59e0b' : '#f43f5e',
                             age: 0
@@ -2109,27 +2419,27 @@
 
             // 10분 최종 보스 전용 보조 필살기 (폭탄 + 2중 낙뢰 동시 시전)
             if (activeBoss.isFinal && activeBoss.subAttackTimer <= 0) {
-                activeBoss.subAttackTimer = 1.85;
+                activeBoss.subAttackTimer = 1.45;
                 bossProjectiles.push({
                     kind: 'bomb',
                     x: activeBoss.x,
                     y: activeBoss.y + 40,
-                    vx: (pcx - activeBoss.x) * 0.45,
-                    vy: 275,
+                    vx: (pcx - activeBoss.x) * 0.55,
+                    vy: 315,
                     radius: 15,
                     explodeY: canvas.height - 115,
                     age: 0
                 });
                 [-65, 65].forEach(offset => {
                     const tx = Math.max(28, Math.min(canvas.width - 28, pcx + offset));
-                    bossWarnings.push({ x: tx, width: 32, timer: 0.72 });
+                    bossWarnings.push({ x: tx, width: 32, timer: 0.64 });
                 });
             }
 
             // 보스 퇴장 (버티기 성공 보너스 / 10분 최강 보스 격퇴 시 완전 클리어!)
             if (activeBoss.timer <= 0) {
                 const clearedFinal = activeBoss.isFinal;
-                const bonus = clearedFinal ? 10000 : 1000 + activeBoss.stageNumber * 200;
+                const bonus = clearedFinal ? 5000 : 400 + activeBoss.stageNumber * 100;
                 score += bonus;
                 sfx.playItem();
                 spawnParticles(activeBoss.x, activeBoss.y, '#facc15', 36);
@@ -2145,6 +2455,11 @@
         }
 
         function update(dt) {
+            // 200점 수학 퀴즈 풀이 중에는 게임 시간 및 모든 물리 정지
+            if (isQuizPaused) {
+                return;
+            }
+
             // 보스 등장 5초 연출 중에는 게임 시간(survivalTime) 및 모든 물리 시간이 멈춤
             if (bossIntroTimer > 0) {
                 bossIntroTimer = Math.max(0, bossIntroTimer - dt);
@@ -2172,10 +2487,19 @@
                 return;
             }
 
-            // 생존 시간이 길어질수록 점진적으로 낙하 속도와 빈도가 빨라짐
+            // 생존 시간이 길어질수록 점진적으로 낙하 속도와 빈도가 빨라짐 (점수 상승 속도는 완만하게 조정)
             speedMultiplier = Math.min(3.4, 1.0 + survivalTime * 0.004);
             level = 1 + Math.floor(survivalTime / 20);
-            score += dt * (25 + level * 5);
+            score += dt * (8 + level * 1.5);
+
+            // 200점 단위에 도달할 때마다 6-2 4단원 비례식과 비례배분 퀴즈 출제
+            if (Math.floor(score) >= nextQuizScore) {
+                const triggeredMilestone = nextQuizScore;
+                nextQuizScore += 200;
+                updateHUD();
+                openMathQuiz(triggeredMilestone);
+                return;
+            }
 
             if (slowMotionTimer > 0) slowMotionTimer = Math.max(0, slowMotionTimer - dt);
             if (screenShake > 0) screenShake = Math.max(0, screenShake - dt * 35);
@@ -2335,14 +2659,14 @@
                     grazeCount += 1;
                     combo += 1;
                     comboTimer = 2.8;
-                    const bonus = 50 * Math.min(10, combo);
+                    const bonus = 15 * Math.min(10, combo);
                     score += bonus;
                     sfx.playGraze();
                     addFloatingText(pcx, player.y - 16, `아슬아슬! +${bonus}`, '#ea580c');
                 }
 
                 if (ob.y - ob.radius > canvas.height + 20) {
-                    score += 10;
+                    score += 3;
                     obstacles.splice(i, 1);
                 }
             }
@@ -2359,8 +2683,8 @@
                     spawnParticles(it.x, it.y, '#fbbf24', 14);
 
                     if (it.type === 'star') {
-                        score += 300;
-                        addFloatingText(it.x, it.y - 10, '+300 STAR!', '#d97706');
+                        score += 120;
+                        addFloatingText(it.x, it.y - 10, '+120 STAR!', '#d97706');
                     } else if (it.type === 'shield') {
                         player.hasShield = true;
                         addFloatingText(it.x, it.y - 10, 'SHIELD ON!', '#0284c7');
@@ -2458,6 +2782,11 @@
             isGameCleared = false;
             bossIntroOverlay.classList.add('hidden');
 
+            isQuizPaused = false;
+            nextQuizScore = 200;
+            currentQuizItem = null;
+            mathQuizOverlay.classList.add('hidden');
+
             obstacles = [];
             items = [];
             particles = [];
@@ -2545,6 +2874,9 @@
             bossProjectiles = [];
             bossWarnings = [];
             bossIntroOverlay.classList.add('hidden');
+
+            isQuizPaused = false;
+            mathQuizOverlay.classList.add('hidden');
 
             restoreTitleViewport();
             gameOverScreen.classList.add('hidden');
@@ -2642,11 +2974,12 @@
             }
         });
 
-        // 명예의 전당 필터 및 학급 코드 실시간 연동
+        // 명예의 전당 필터 및 우리 반 조회 연동
         filterAllBtn.addEventListener('click', () => {
             rankingFilter = 'ALL';
             filterAllBtn.className = 'px-2.5 py-1 rounded-lg bg-[#fbbf24] text-slate-900 font-bold transition';
             filterClassBtn.className = 'px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 hover:bg-amber-200 font-bold transition';
+            hofClassSearchBar.classList.add('hidden');
             renderHallOfFame();
         });
 
@@ -2654,11 +2987,32 @@
             rankingFilter = 'CLASS';
             filterClassBtn.className = 'px-2.5 py-1 rounded-lg bg-[#fbbf24] text-slate-900 font-bold transition';
             filterAllBtn.className = 'px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 hover:bg-amber-200 font-bold transition';
+            hofClassSearchBar.classList.remove('hidden');
+
+            // 홈 화면에 이미 입력해 둔 학급 코드/반이 있으면 검색 칸에 자동 채우기
+            if (!hofSearchCode.value && inputClassCode.value.trim()) {
+                hofSearchCode.value = inputClassCode.value.trim().toUpperCase();
+            }
+            if (!hofSearchClass.value && inputClassName.value.trim()) {
+                hofSearchClass.value = inputClassName.value.trim();
+            }
+            queriedClassCode = hofSearchCode.value.trim().toUpperCase();
+            queriedClassName = hofSearchClass.value.trim();
             renderHallOfFame();
         });
 
-        inputClassCode.addEventListener('input', () => {
+        function executeClassSearch() {
+            queriedClassCode = hofSearchCode.value.trim().toUpperCase();
+            queriedClassName = hofSearchClass.value.trim();
             renderHallOfFame();
+        }
+
+        hofSearchBtn.addEventListener('click', executeClassSearch);
+        hofSearchCode.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') executeClassSearch();
+        });
+        hofSearchClass.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') executeClassSearch();
         });
 
         inputNickname.addEventListener('input', () => {
