@@ -1,0 +1,2243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2027 수능 감독관 3D - AI 부정행위를 잡아라!</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js for 3D Classroom Environment -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Tone.js for Procedural Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Google Fonts (배달의민족 주아체) -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <style>
+        body, button, input, select, textarea {
+            font-family: 'Jua', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            background-color: #0f172a;
+        }
+        .title-font {
+            font-family: 'Jua', sans-serif;
+            letter-spacing: 0.02em;
+        }
+        /* 가상 조이스틱 스타일 */
+        #joystick-zone {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            border-radius: 9999px;
+            background: rgba(15, 23, 42, 0.45);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(4px);
+        }
+        #joystick-knob {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            border-radius: 9999px;
+            background: rgba(251, 191, 36, 0.9);
+            border: 2px solid #fff;
+            top: 31px;
+            left: 31px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            pointer-events: none;
+        }
+        /* 조준점(크로스헤어) */
+        #crosshair {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 18px;
+            height: 18px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 20;
+        }
+        /* EMP / 재난문자 화면 플래시 효과 */
+        @keyframes empFlash {
+            0% { background-color: rgba(56, 189, 248, 0.55); }
+            100% { background-color: transparent; }
+        }
+        .flash-emp {
+            animation: empFlash 0.6s ease-out;
+        }
+        @keyframes alertFlash {
+            0%, 50% { background-color: rgba(239, 68, 68, 0.35); }
+            25%, 75%, 100% { background-color: transparent; }
+        }
+        .flash-alert {
+            animation: alertFlash 0.9s ease-out;
+        }
+        /* 명예의 전당 열기 팝업 & 순위 스태거 애니메이션 */
+        @keyframes hofBackdropIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes hofCardPopIn {
+            0% {
+                opacity: 0;
+                transform: translateY(24px) scale(0.92);
+            }
+            70% {
+                opacity: 1;
+                transform: translateY(-4px) scale(1.015);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @keyframes hofRowSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes trophyBounce {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-12deg) scale(1.18); }
+            50% { transform: rotate(10deg) scale(1.18); }
+            75% { transform: rotate(-6deg) scale(1.08); }
+        }
+        .hof-backdrop-anim {
+            animation: hofBackdropIn 0.25s ease-out forwards;
+        }
+        .hof-card-anim {
+            animation: hofCardPopIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .hof-row-anim {
+            opacity: 0;
+            animation: hofRowSlideIn 0.32s ease-out forwards;
+        }
+        .trophy-anim {
+            display: inline-block;
+            animation: trophyBounce 0.75s ease-in-out;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen relative text-white">
+
+    <!-- 3D 캔버스 컨테이너 -->
+    <div id="canvas-container" class="absolute inset-0 w-full h-full z-0"></div>
+
+    <!-- 화면 특수효과 오버레이 -->
+    <div id="screen-fx" class="pointer-events-none absolute inset-0 z-10"></div>
+
+    <!-- 중앙 크로스헤어 -->
+    <div id="crosshair" class="hidden flex items-center justify-center">
+        <div id="crosshair-ring" class="w-4 h-4 rounded-full border-2 border-white/80 transition-all duration-150 flex items-center justify-center">
+            <div class="w-1 h-1 bg-amber-400 rounded-full"></div>
+        </div>
+    </div>
+
+    <!-- 상단 HUD (원작 스타일 반영) -->
+    <header id="hud-top" class="hidden absolute top-0 left-0 right-0 z-20 p-2.5 sm:p-4 flex flex-col gap-2 pointer-events-none">
+        <div class="max-w-5xl w-full mx-auto flex flex-wrap items-center justify-between gap-2 bg-slate-900/80 backdrop-blur-md border border-slate-700/80 rounded-2xl px-3.5 py-2 shadow-xl pointer-events-auto">
+            
+            <!-- 교시 및 시험 시간 -->
+            <div class="flex items-center gap-2.5">
+                <span id="hud-period" class="bg-emerald-600 text-white font-black text-xs sm:text-sm px-2.5 py-1 rounded-lg shadow">
+                    1교시 국어
+                </span>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-slate-400 leading-none">시험 진행 시간</span>
+                    <span id="hud-clock" class="font-mono font-black text-sm sm:text-lg text-amber-300 leading-tight">
+                        08:40 <span class="text-xs text-slate-400 font-normal">/ 종료 10:00</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- 핵심 상태 지표: 남은 부정행위, 민원, 점수 -->
+            <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+                <div class="bg-red-950/80 border border-red-500/40 px-2.5 py-1 rounded-xl text-center">
+                    <div class="text-[10px] text-red-300">남은 부정행위</div>
+                    <div id="hud-remaining" class="font-black text-red-400 text-sm sm:text-base">2명</div>
+                </div>
+                <div class="bg-amber-950/80 border border-amber-500/40 px-2.5 py-1 rounded-xl text-center">
+                    <div class="text-[10px] text-amber-300">민원 (최대 3건)</div>
+                    <div id="hud-complaints" class="font-black text-amber-400 text-sm sm:text-base">0건</div>
+                </div>
+                <div class="bg-slate-800 border border-slate-600 px-2.5 py-1 rounded-xl text-center">
+                    <div class="text-[10px] text-slate-300">점수</div>
+                    <div id="hud-score" class="font-black text-white text-sm sm:text-base">0점</div>
+                </div>
+            </div>
+
+            <!-- 우측 메뉴/사운드 버튼 -->
+            <div class="flex items-center gap-1.5">
+                <button id="btn-sound" class="bg-slate-800 hover:bg-slate-700 text-white text-xs sm:text-sm px-2.5 py-1.5 rounded-lg border border-slate-600 transition">
+                    🔊 소리 켜짐
+                </button>
+                <button id="btn-quit" class="bg-slate-800 hover:bg-red-900/80 text-slate-300 hover:text-white text-xs px-2.5 py-1.5 rounded-lg border border-slate-600 transition">
+                    종료
+                </button>
+            </div>
+        </div>
+
+        <!-- 근접 타겟 상태 안내 배너 -->
+        <div id="target-indicator" class="hidden mx-auto bg-slate-900/90 border border-amber-400/70 text-amber-200 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <span id="target-seat-text">제 12번 수험생</span>
+            <span class="text-slate-400">|</span>
+            <span id="target-hint-text" class="text-white">가까이 다가가 관찰하세요</span>
+        </div>
+    </header>
+
+    <!-- 플로팅 알림 메시지 컨테이너 -->
+    <div id="toast-container" class="pointer-events-none fixed top-24 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2 w-full max-w-md px-4"></div>
+
+    <!-- 하단 컨트롤 & 특수 장비 HUD -->
+    <footer id="hud-bottom" class="hidden absolute bottom-0 left-0 right-0 z-20 p-3 sm:p-5 flex items-end justify-between pointer-events-none">
+        
+        <!-- 좌측: 모바일/마우스 가상 조이스틱 + PC 조작 가이드 -->
+        <div class="flex flex-col items-start gap-2 pointer-events-auto">
+            <div id="joystick-zone" class="sm:opacity-80 hover:opacity-100 transition">
+                <div id="joystick-knob"></div>
+            </div>
+            <div class="hidden md:block bg-slate-900/75 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-700 text-[11px] text-slate-300">
+                <span class="text-amber-400 font-bold">WASD/방향키</span> 이동 · <span class="text-amber-400 font-bold">드래그</span> 시점 회전 · <span class="text-amber-400 font-bold">Shift</span> 달리기
+            </div>
+        </div>
+
+        <!-- 우측: 액션 버튼 (적발, EMP, 위급재난문자, 달리기) -->
+        <div class="flex flex-col items-end gap-2.5 pointer-events-auto">
+            <!-- 특수 장비 2종 (EMP & 위급재난문자) -->
+            <div class="flex gap-2">
+                <button id="btn-emp" class="group relative bg-sky-900/90 hover:bg-sky-800 active:scale-95 disabled:opacity-40 disabled:pointer-events-none border-2 border-sky-400 text-white px-3 py-2 rounded-xl shadow-lg flex flex-col items-center min-w-[82px] transition">
+                    <span class="text-base sm:text-lg">⚡</span>
+                    <span class="text-xs font-black">EMP <span id="emp-count" class="text-sky-300">×1</span></span>
+                    <span class="text-[9px] text-sky-200">AI기기 교란 [E]</span>
+                </button>
+
+                <button id="btn-alert" class="group relative bg-rose-900/90 hover:bg-rose-800 active:scale-95 disabled:opacity-40 disabled:pointer-events-none border-2 border-rose-400 text-white px-3 py-2 rounded-xl shadow-lg flex flex-col items-center min-w-[88px] transition">
+                    <span class="text-base sm:text-lg">📢</span>
+                    <span class="text-xs font-black">재난문자 <span id="alert-count" class="text-rose-300">×1</span></span>
+                    <span class="text-[9px] text-rose-200">휴대폰 호출 [R]</span>
+                </button>
+            </div>
+
+            <!-- 달리기 & 메인 적발 버튼 -->
+            <div class="flex items-center gap-2.5">
+                <button id="btn-sprint" class="bg-slate-800/90 hover:bg-slate-700 active:bg-amber-600 border-2 border-slate-500 text-white font-bold text-xs sm:text-sm px-3.5 py-3.5 rounded-2xl shadow-lg transition">
+                    🏃 달리기
+                </button>
+
+                <button id="btn-catch" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 active:scale-95 border-2 border-amber-300 text-white font-black text-base sm:text-lg px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-2 transition">
+                    <span>🚨 적발</span>
+                    <span class="hidden sm:inline text-xs font-normal bg-black/30 px-1.5 py-0.5 rounded">[Space]</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 시작 화면 모달 -->
+    <div id="start-modal" class="absolute inset-0 z-40 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-slate-900 border-2 border-emerald-500/60 rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl my-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+                
+                <!-- 왼쪽 영역: 타이틀, 소제목, 게임 설명 및 규칙 -->
+                <div class="lg:col-span-7 flex flex-col justify-between text-left">
+                    <div>
+                        <div class="inline-block bg-amber-500 text-slate-950 font-black text-xs px-3 py-1 rounded-full mb-3">
+                            2027학년도 대학수학능력시험
+                        </div>
+                        <h1 class="title-font text-3xl sm:text-5xl text-white mb-2 tracking-wide">
+                            수능 감독관 3D
+                        </h1>
+                        <p class="text-emerald-300 text-sm sm:text-base font-medium mb-5">
+                            고사실을 직접 순찰하며 AI 스마트글래스·휴대폰 부정행위자를 적발하세요!
+                        </p>
+                    </div>
+
+                    <!-- 핵심 규칙 안내 -->
+                    <div class="bg-slate-800/70 rounded-2xl p-4 text-left text-xs sm:text-sm space-y-3 border border-slate-700/80">
+                        <div class="flex items-start gap-2.5">
+                            <span class="text-lg leading-none">🕶️</span>
+                            <div><strong class="text-sky-300">AI 스마트글래스 & 전자기기:</strong> 푸른 광학 빛이 번쩍이거나 책상 아래 스마트폰 불빛이 새어나오는 수험생을 적발하세요.</div>
+                        </div>
+                        <div class="flex items-start gap-2.5">
+                            <span class="text-lg leading-none">⚡</span>
+                            <div><strong class="text-amber-300">EMP & 위급재난문자:</strong> 교시당 1회 사용! <strong>EMP</strong>는 AI 기기 스파크를, <strong>재난문자</strong>는 반입금지 휴대폰 진동/벨소리를 유발합니다.</div>
+                        </div>
+                        <div class="flex items-start gap-2.5">
+                            <span class="text-lg leading-none">⚠️</span>
+                            <div><strong class="text-rose-400">민원 주의:</strong> 선량한 수험생을 <strong>🚨 적발</strong>하면 민원 1건이 누적되며, <strong>3건</strong> 시 즉시 감독 교체됩니다.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 오른쪽 영역: 감독관 정보 입력 & 명예의 전당 & 시작 버튼 -->
+                <div class="lg:col-span-5 bg-slate-800/95 rounded-2xl p-5 border border-emerald-500/30 flex flex-col justify-between gap-4">
+                    <div>
+                        <div class="flex items-center justify-between mb-3.5">
+                            <span class="text-xs sm:text-sm font-black text-emerald-400">📋 감독관 정보 입력</span>
+                            <button id="btn-open-hof" type="button" class="text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/50 px-2.5 py-1 rounded-lg transition">
+                                🏆 명예의 전당
+                            </button>
+                        </div>
+
+                        <div class="space-y-3 text-left">
+                            <div>
+                                <label for="input-class-code" class="block text-xs text-slate-300 font-bold mb-1">학급 코드 (선택)</label>
+                                <input id="input-class-code" type="text" maxlength="12" placeholder="예: BUSAN27"
+                                    class="w-full bg-slate-900 border border-slate-600 focus:border-emerald-400 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none uppercase" />
+                            </div>
+                            <div>
+                                <label for="input-class-num" class="block text-xs text-slate-300 font-bold mb-1">반</label>
+                                <input id="input-class-num" type="text" maxlength="8" placeholder="예: 3반"
+                                    class="w-full bg-slate-900 border border-slate-600 focus:border-emerald-400 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none" />
+                            </div>
+                            <div>
+                                <label for="input-nickname" class="block text-xs text-slate-300 font-bold mb-1">감독관 닉네임 *</label>
+                                <input id="input-nickname" type="text" maxlength="10" placeholder="닉네임을 입력하세요"
+                                    class="w-full bg-slate-900 border border-slate-600 focus:border-emerald-400 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none" />
+                            </div>
+                        </div>
+                        <p id="form-error-msg" class="hidden text-xs text-rose-400 font-bold mt-2 text-left">⚠️ 닉네임을 입력해 주세요!</p>
+                    </div>
+
+                    <button id="btn-start" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-base sm:text-lg rounded-2xl shadow-lg transform transition active:scale-95 border-b-4 border-emerald-800">
+                        1교시 고사실 입실하기 🔔
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 명예의 전당 모달 -->
+    <div id="hof-modal" class="hidden absolute inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div id="hof-card" class="bg-slate-900 border-2 border-amber-400/70 rounded-3xl max-w-lg w-full p-6 shadow-2xl flex flex-col max-h-[85vh]">
+            <!-- 상단 헤더 & 닫기 버튼 -->
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span id="hof-trophy-icon" class="text-2xl">🏆</span>
+                    <h2 class="title-font text-2xl text-amber-300">명예의 전당</h2>
+                </div>
+                <button id="btn-close-hof" type="button" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-black text-sm flex items-center justify-center transition">
+                    ✕
+                </button>
+            </div>
+
+            <!-- 전체 / 우리 반 랭킹 필터 탭 -->
+            <div class="flex gap-2 mb-3">
+                <button id="tab-hof-all" class="flex-1 py-2 rounded-xl text-xs font-black bg-amber-500 text-slate-950 transition">
+                    🌐 전체 랭킹
+                </button>
+                <button id="tab-hof-class" class="flex-1 py-2 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                    🏫 우리 반 랭킹
+                </button>
+            </div>
+
+            <!-- 우리 반 조회 검색 바 ('우리 반 랭킹' 탭 선택 시 표시) -->
+            <div id="hof-class-search-box" class="hidden bg-slate-800/90 border border-amber-400/40 rounded-2xl p-3 mb-3 flex flex-col sm:flex-row gap-2">
+                <input id="hof-search-code" type="text" maxlength="12" placeholder="학급 코드 (예: BUSAN27)"
+                    class="flex-1 bg-slate-900 border border-slate-600 focus:border-amber-400 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none uppercase" />
+                <input id="hof-search-num" type="text" maxlength="8" placeholder="반 (예: 3반)"
+                    class="w-full sm:w-28 bg-slate-900 border border-slate-600 focus:border-amber-400 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none" />
+                <button id="btn-hof-search" type="button"
+                    class="bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black text-xs px-4 py-2 rounded-xl transition shrink-0">
+                    🔍 조회
+                </button>
+            </div>
+
+            <div id="hof-filter-info" class="text-left text-[11px] text-slate-400 mb-2">
+                전체 고사실 최고 득점 감독관 순위입니다.
+            </div>
+
+            <!-- 순위 리스트 -->
+            <div id="hof-list" class="flex-1 overflow-y-auto space-y-2 pr-1">
+                <!-- JS로 동적 렌더링 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 부정행위 적발 확인 퀴즈 모달 (6학년 2학기 5단원: 원의 넓이) -->
+    <div id="quiz-modal" class="hidden absolute inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-slate-900 border-2 border-sky-400/80 rounded-3xl max-w-md w-full p-6 shadow-2xl text-left">
+            <div class="flex items-center justify-between mb-3">
+                <span class="bg-sky-500/20 border border-sky-400 text-sky-300 font-black text-xs px-3 py-1 rounded-full">
+                    📐 6학년 2학기 5단원 · 원의 넓이
+                </span>
+                <span id="quiz-target-badge" class="text-xs font-bold text-amber-300">제 1번 수험생 적발 확인</span>
+            </div>
+
+            <h3 class="text-base sm:text-lg font-black text-white mb-2">
+                부정행위 적발 확인 문제를 풀어주세요!
+            </h3>
+            <div id="quiz-question" class="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 text-sm sm:text-base font-bold text-slate-100 leading-relaxed mb-4">
+                문제가 여기에 표시됩니다.
+            </div>
+
+            <!-- 4지선다 보기 영역 -->
+            <div id="quiz-choices" class="grid grid-cols-1 gap-2.5 mb-3">
+                <!-- JS로 4개 보기 버튼 렌더링 -->
+            </div>
+
+            <p id="quiz-feedback" class="hidden text-xs font-bold text-rose-400 text-center mt-2">
+                ❌ 오답입니다! 다시 계산해서 정답을 선택하세요.
+            </p>
+        </div>
+    </div>
+
+    <!-- 교시 클리어 / 결과 모달 -->
+    <div id="result-modal" class="hidden absolute inset-0 z-40 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl">
+            <div id="result-badge" class="inline-block bg-emerald-600 text-white font-black text-xs px-3 py-1 rounded-full mb-2">
+                1교시 종료
+            </div>
+            <h2 id="result-title" class="title-font text-3xl sm:text-4xl text-amber-300 mb-2">
+                부정행위 전원 적발!
+            </h2>
+            <p id="result-desc" class="text-slate-300 text-sm mb-4">
+                완벽한 감독으로 고사실의 공정성을 지켰습니다.
+            </p>
+
+            <!-- 감독관 소속 배지 -->
+            <div id="res-proctor-tag" class="inline-block bg-slate-800 border border-slate-600 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full mb-4">
+                [전체] 3반 · 김감독
+            </div>
+
+            <div class="bg-slate-800/90 rounded-2xl p-4 mb-5 border border-slate-700 space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">현재 누적 점수</span>
+                    <span id="res-score" class="font-black text-amber-400 text-lg">0점</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">적발한 부정행위자</span>
+                    <span id="res-caught" class="font-bold text-emerald-400">0명</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">누적 민원 건수</span>
+                    <span id="res-complaints" class="font-bold text-rose-400">0건</span>
+                </div>
+            </div>
+
+            <button id="btn-res-hof" class="w-full mb-2.5 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/60 text-amber-300 font-black text-sm rounded-xl transition">
+                🏆 명예의 전당 순위 확인하기
+            </button>
+
+            <div class="flex gap-2.5">
+                <button id="btn-end-now" class="flex-1 py-3.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition">
+                    이대로 끝내기
+                </button>
+                <button id="btn-next-period" class="flex-[2] py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-base sm:text-lg rounded-xl shadow-lg transition active:scale-95">
+                    다음 교시 감독 ▶
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        /**
+         * 2027 수능 감독관 3D 게임 엔진 (Three.js + Tone.js + Cloud Hall of Fame)
+         */
+        class CSATProctor3DGame {
+            constructor() {
+                // 교시별 스테이지 설정
+                this.PERIODS = [
+                    { name: '1교시 국어', startStr: '08:40', endStr: '10:00', duration: 75, cheaters: 2 },
+                    { name: '2교시 수학', startStr: '10:30', endStr: '12:10', duration: 80, cheaters: 3 },
+                    { name: '3교시 영어', startStr: '13:10', endStr: '14:20', duration: 75, cheaters: 4 },
+                    { name: '4교시 탐구', startStr: '14:50', endStr: '16:37', duration: 70, cheaters: 5 }
+                ];
+
+                // 부정행위 유형 정의 (AI 컨닝 및 전자기기 중심)
+                this.CHEAT_PROFILES = [
+                    {
+                        type: 'ai_glasses',
+                        name: 'AI 스마트글래스',
+                        hint: '안경테에서 미세한 푸른 광학 신호가 감지됩니다!',
+                        empReact: true,
+                        alertReact: false,
+                        points: 300
+                    },
+                    {
+                        type: 'smartphone',
+                        name: '반입금지 스마트폰 검색',
+                        hint: '책상 아래에서 화면 불빛과 미세한 진동이 느껴집니다!',
+                        empReact: true,
+                        alertReact: true,
+                        points: 250
+                    },
+                    {
+                        type: 'earpiece',
+                        name: '초소형 골전도 이어폰',
+                        hint: '귀를 매만지며 외부 음성 수신 신호가 잡힙니다!',
+                        empReact: true,
+                        alertReact: false,
+                        points: 280
+                    },
+                    {
+                        type: 'peek',
+                        name: '옆자리 답안지 곁눈질',
+                        hint: '고개를 비정상적으로 돌려 옆 수험생 OMR을 훔쳐봅니다!',
+                        empReact: false,
+                        alertReact: false,
+                        points: 200
+                    }
+                ];
+
+                // 초등학교 6학년 2학기 5단원 (원의 넓이) 4지선다 문제은행
+                this.GRADE6_UNIT5_QUIZZES = [
+                    {
+                        q: '원주율에 대한 설명으로 옳은 것은 어느 것인가요?',
+                        choices: [
+                            '원의 크기가 커지면 원주율도 함께 커진다.',
+                            '(원주) ÷ (지름)의 값으로, 원의 크기에 관계없이 항상 일정하다.',
+                            '(지름) ÷ (원주)의 값으로, 약 3.14이다.',
+                            '원주율은 반지름에 따라 달라진다.'
+                        ],
+                        answer: 1
+                    },
+                    {
+                        q: '지름이 10 cm인 원의 원주(원의 둘레)는 몇 cm인가요? (원주율: 3.14)',
+                        choices: ['15.7 cm', '31.4 cm', '62.8 cm', '314 cm'],
+                        answer: 1
+                    },
+                    {
+                        q: '반지름이 6 cm인 원의 원주는 몇 cm인가요? (원주율: 3.1)',
+                        choices: ['18.6 cm', '37.2 cm', '111.6 cm', '24.8 cm'],
+                        answer: 1
+                    },
+                    {
+                        q: '반지름이 5 cm인 원의 넓이는 몇 cm²인가요? (원주율: 3.14)',
+                        choices: ['15.7 cm²', '31.4 cm²', '78.5 cm²', '157 cm²'],
+                        answer: 2
+                    },
+                    {
+                        q: '지름이 8 cm인 원의 넓이는 몇 cm²인가요? (원주율: 3)',
+                        choices: ['24 cm²', '48 cm²', '96 cm²', '192 cm²'],
+                        answer: 1
+                    },
+                    {
+                        q: '원주가 62.8 cm인 원의 지름은 몇 cm인가요? (원주율: 3.14)',
+                        choices: ['10 cm', '15 cm', '20 cm', '30 cm'],
+                        answer: 2
+                    },
+                    {
+                        q: '원주가 30 cm인 원의 반지름은 몇 cm인가요? (원주율: 3)',
+                        choices: ['5 cm', '10 cm', '15 cm', '20 cm'],
+                        answer: 0
+                    },
+                    {
+                        q: '원을 한없이 잘게 잘라 이어 붙이면 어떤 도형에 가까워지나요?',
+                        choices: ['삼각형', '직사각형', '오각형', '사다리꼴'],
+                        answer: 1
+                    },
+                    {
+                        q: '원의 넓이를 구하는 공식으로 알맞은 것은 무엇인가요?',
+                        choices: [
+                            '(지름) × (원주율)',
+                            '(반지름) × 2 × (원주율)',
+                            '(반지름) × (반지름) × (원주율)',
+                            '(원주) × (지름)'
+                        ],
+                        answer: 2
+                    },
+                    {
+                        q: '지름이 20 cm인 원 모양 피자의 넓이는 몇 cm²인가요? (원주율: 3.14)',
+                        choices: ['62.8 cm²', '125.6 cm²', '314 cm²', '1256 cm²'],
+                        answer: 2
+                    },
+                    {
+                        q: '반지름이 4 cm인 원과 지름이 8 cm인 원의 넓이를 비교하면 어떠한가요?',
+                        choices: [
+                            '반지름이 4 cm인 원이 더 넓다.',
+                            '지름이 8 cm인 원이 더 넓다.',
+                            '두 원의 넓이는 같다.',
+                            '원주율을 알아야 비교할 수 있다.'
+                        ],
+                        answer: 2
+                    },
+                    {
+                        q: '반지름이 10 cm인 반원(원의 절반)의 넓이는 몇 cm²인가요? (원주율: 3.14)',
+                        choices: ['31.4 cm²', '157 cm²', '314 cm²', '628 cm²'],
+                        answer: 1
+                    }
+                ];
+
+                // 게임 상태
+                this.state = {
+                    isPlaying: false,
+                    isQuizOpen: false,
+                    pendingTarget: null,
+                    periodIdx: 0,
+                    timeLeft: 75,
+                    score: 0,
+                    complaints: 0,
+                    totalCaught: 0,
+                    remainingCheaters: 2,
+                    empCharges: 1,
+                    alertCharges: 1,
+                    soundEnabled: true,
+                    classCode: '',
+                    classNum: '',
+                    nickname: ''
+                };
+
+                // 명예의 전당 데이터 (실시간 기록만 표시)
+                this.hofRecords = [];
+                this.hofFilterMode = 'all'; // 'all' | 'class'
+                this.hofQueriedCode = '';
+                this.hofQueriedNum = '';
+                this.hofHasQueried = false;
+                this.db = null;
+                this.user = null;
+                this.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                // 플레이어(감독관) 물리 및 카메라 상태
+                this.player = {
+                    pos: new THREE.Vector3(0, 1.65, -6.2),
+                    yaw: Math.PI, // 교실 뒤쪽(학생들 방향)을 바라봄
+                    pitch: -0.12,
+                    speed: 4.5,
+                    sprintMult: 1.75,
+                    isSprinting: false
+                };
+
+                // 입력 상태
+                this.keys = {};
+                this.joystick = { active: false, dx: 0, dy: 0, id: null };
+                this.lookTouch = { active: false, lastX: 0, lastY: 0, id: null };
+
+                // 3D 씬 객체 저장소
+                this.students = [];
+                this.nearestStudent = null;
+                this.clock = new THREE.Clock();
+
+                this.initDOM();
+                this.initCloudHallOfFame();
+                this.initAudio();
+                this.initThree();
+                this.buildClassroom();
+                this.bindEvents();
+                this.animate();
+            }
+
+            // 클라우드 명예의 전당 초기화 (실시간 공유 순위)
+            async initCloudHallOfFame() {
+                try {
+                    if (typeof __firebase_config === 'undefined') return;
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    const auth = getAuth(app);
+                    this.db = getFirestore(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        const cred = await signInWithCustomToken(auth, __initial_auth_token);
+                        this.user = cred.user;
+                    } else {
+                        const cred = await signInAnonymously(auth);
+                        this.user = cred.user;
+                    }
+
+                    if (!this.user) return;
+                    const hofCol = collection(this.db, 'artifacts', this.appId, 'public', 'data', 'hall_of_fame');
+                    onSnapshot(
+                        hofCol,
+                        (snapshot) => {
+                            const cloudItems = [];
+                            snapshot.forEach((docSnap) => {
+                                cloudItems.push(docSnap.data());
+                            });
+                            if (cloudItems.length > 0) {
+                                this.hofRecords = cloudItems;
+                                if (!this.dom.hofModal.classList.contains('hidden')) {
+                                    this.renderHallOfFame();
+                                }
+                            }
+                        },
+                        (err) => {
+                            console.warn('명예의 전당 실시간 수신 대기:', err);
+                        }
+                    );
+                } catch (e) {
+                    console.warn('로컬 명예의 전당 모드로 동작합니다:', e);
+                }
+            }
+
+            // 명예의 전당 기록 저장
+            async submitScoreToHallOfFame(periodLabel) {
+                if (this.state.score <= 0) return;
+
+                const entry = {
+                    classCode: this.state.classCode || '자유참가',
+                    classNum: this.state.classNum || '-',
+                    nickname: this.state.nickname || '익명감독관',
+                    score: this.state.score,
+                    caught: this.state.totalCaught,
+                    period: periodLabel,
+                    createdAt: Date.now()
+                };
+
+                // 메모리 리스트 즉시 반영
+                this.hofRecords.push(entry);
+
+                // 클라우드 저장 (인증 완료 상태일 때만)
+                if (this.db && this.user) {
+                    try {
+                        const hofCol = collection(this.db, 'artifacts', this.appId, 'public', 'data', 'hall_of_fame');
+                        await addDoc(hofCol, entry);
+                    } catch (e) {
+                        console.warn('점수 업로드 실패:', e);
+                    }
+                }
+            }
+
+            // 명예의 전당 UI 렌더링
+            renderHallOfFame() {
+                let list = [...this.hofRecords];
+
+                if (this.hofFilterMode === 'class') {
+                    this.dom.hofClassSearchBox.classList.remove('hidden');
+
+                    if (!this.hofHasQueried) {
+                        this.dom.hofFilterInfo.textContent = '🏫 학급 코드와 반을 입력한 뒤 [조회] 버튼을 눌러주세요.';
+                        this.dom.hofList.innerHTML = `
+                            <div class="bg-slate-800/70 border border-slate-700 rounded-2xl p-6 text-center text-sm text-slate-400">
+                                위 입력칸에 <span class="text-amber-300 font-bold">학급 코드</span>와 <span class="text-amber-300 font-bold">반</span>을 입력하고<br/>
+                                <span class="text-amber-300 font-bold">[🔍 조회]</span> 버튼을 눌러 우리 반 순위를 확인하세요!
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    const qCode = this.hofQueriedCode;
+                    const qNum = this.hofQueriedNum;
+
+                    if (!qCode && !qNum) {
+                        this.dom.hofFilterInfo.textContent = '⚠️ 학급 코드 또는 반을 입력하고 조회해 주세요.';
+                        list = [];
+                    } else {
+                        const labelParts = [];
+                        if (qCode) labelParts.push(`[${qCode}]`);
+                        if (qNum) labelParts.push(qNum);
+                        this.dom.hofFilterInfo.textContent = `🏫 ${labelParts.join(' ')} 소속 감독관 조회 결과입니다.`;
+
+                        list = list.filter(item => {
+                            const matchCode = !qCode || (item.classCode || '').trim().toUpperCase() === qCode;
+                            const matchNum = !qNum || (item.classNum || '').trim() === qNum;
+                            return matchCode && matchNum;
+                        });
+                    }
+                } else {
+                    this.dom.hofClassSearchBox.classList.add('hidden');
+                    this.dom.hofFilterInfo.textContent = '🌐 전체 고사실 최고 득점 감독관 순위입니다.';
+                }
+
+                // 점수 내림차순 정렬
+                list.sort((a, b) => (b.score || 0) - (a.score || 0));
+                const topList = list.slice(0, 20);
+
+                if (topList.length === 0) {
+                    this.dom.hofList.innerHTML = `
+                        <div class="bg-slate-800/70 border border-slate-700 rounded-2xl p-6 text-center text-sm text-slate-400">
+                            ${this.hofFilterMode === 'class'
+                                ? '조회된 우리 반 기록이 없습니다.<br/>학급 코드와 반을 다시 확인해 주세요!'
+                                : '아직 등록된 기록이 없습니다.<br/>첫 번째 명예의 전당 주인공이 되어보세요!'}
+                        </div>
+                    `;
+                    return;
+                }
+
+                this.dom.hofList.innerHTML = topList.map((item, idx) => {
+                    const rank = idx + 1;
+                    let rankBadge = `<span class="w-7 h-7 rounded-full bg-slate-700 text-slate-200 font-black text-xs flex items-center justify-center">${rank}</span>`;
+                    if (rank === 1) rankBadge = `<span class="w-7 h-7 rounded-full bg-amber-400 text-slate-950 font-black text-sm flex items-center justify-center shadow">🥇</span>`;
+                    if (rank === 2) rankBadge = `<span class="w-7 h-7 rounded-full bg-slate-300 text-slate-950 font-black text-sm flex items-center justify-center shadow">🥈</span>`;
+                    if (rank === 3) rankBadge = `<span class="w-7 h-7 rounded-full bg-amber-700 text-white font-black text-sm flex items-center justify-center shadow">🥉</span>`;
+
+                    const isMe = this.state.nickname && item.nickname === this.state.nickname && item.score === this.state.score;
+                    const rowBorder = isMe ? 'border-emerald-400 bg-emerald-950/40' : 'border-slate-700/80 bg-slate-800/80';
+                    const delayMs = Math.min(idx * 55, 600);
+
+                    return `
+                        <div style="animation-delay: ${delayMs}ms" class="hof-row-anim flex items-center justify-between p-3 rounded-2xl border ${rowBorder}">
+                            <div class="flex items-center gap-3 text-left">
+                                ${rankBadge}
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[10px] font-bold bg-slate-700 text-emerald-300 px-1.5 py-0.5 rounded">${this.escapeHTML(item.classCode || '자유')}</span>
+                                        <span class="text-xs text-slate-300 font-bold">${this.escapeHTML(item.classNum || '-')}</span>
+                                        <span class="text-sm font-black text-white">${this.escapeHTML(item.nickname)}</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-400 mt-0.5">
+                                        적발 ${item.caught || 0}명 · ${this.escapeHTML(item.period || '')}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-black text-amber-400 text-base">${(item.score || 0).toLocaleString()}점</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            escapeHTML(str) {
+                return String(str).replace(/[&<>"']/g, (m) => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+                }[m]));
+            }
+
+            initDOM() {
+                this.dom = {
+                    container: document.getElementById('canvas-container'),
+                    screenFx: document.getElementById('screen-fx'),
+                    crosshair: document.getElementById('crosshair'),
+                    crosshairRing: document.getElementById('crosshair-ring'),
+                    hudTop: document.getElementById('hud-top'),
+                    hudBottom: document.getElementById('hud-bottom'),
+                    period: document.getElementById('hud-period'),
+                    clock: document.getElementById('hud-clock'),
+                    remaining: document.getElementById('hud-remaining'),
+                    complaints: document.getElementById('hud-complaints'),
+                    score: document.getElementById('hud-score'),
+                    targetBox: document.getElementById('target-indicator'),
+                    targetSeat: document.getElementById('target-seat-text'),
+                    targetHint: document.getElementById('target-hint-text'),
+                    toastContainer: document.getElementById('toast-container'),
+                    empCount: document.getElementById('emp-count'),
+                    alertCount: document.getElementById('alert-count'),
+                    btnEmp: document.getElementById('btn-emp'),
+                    btnAlert: document.getElementById('btn-alert'),
+                    btnCatch: document.getElementById('btn-catch'),
+                    btnSprint: document.getElementById('btn-sprint'),
+                    btnSound: document.getElementById('btn-sound'),
+                    btnQuit: document.getElementById('btn-quit'),
+                    startModal: document.getElementById('start-modal'),
+                    resultModal: document.getElementById('result-modal'),
+                    btnStart: document.getElementById('btn-start'),
+                    btnNextPeriod: document.getElementById('btn-next-period'),
+                    btnEndNow: document.getElementById('btn-end-now'),
+                    joystickZone: document.getElementById('joystick-zone'),
+                    joystickKnob: document.getElementById('joystick-knob'),
+                    // 신원 입력 & 명예의 전당 DOM
+                    inputClassCode: document.getElementById('input-class-code'),
+                    inputClassNum: document.getElementById('input-class-num'),
+                    inputNickname: document.getElementById('input-nickname'),
+                    formErrorMsg: document.getElementById('form-error-msg'),
+                    resProctorTag: document.getElementById('res-proctor-tag'),
+                    hofModal: document.getElementById('hof-modal'),
+                    hofCard: document.getElementById('hof-card'),
+                    hofTrophyIcon: document.getElementById('hof-trophy-icon'),
+                    hofList: document.getElementById('hof-list'),
+                    hofFilterInfo: document.getElementById('hof-filter-info'),
+                    btnOpenHof: document.getElementById('btn-open-hof'),
+                    btnResHof: document.getElementById('btn-res-hof'),
+                    btnCloseHof: document.getElementById('btn-close-hof'),
+                    tabHofAll: document.getElementById('tab-hof-all'),
+                    tabHofClass: document.getElementById('tab-hof-class'),
+                    hofClassSearchBox: document.getElementById('hof-class-search-box'),
+                    hofSearchCode: document.getElementById('hof-search-code'),
+                    hofSearchNum: document.getElementById('hof-search-num'),
+                    btnHofSearch: document.getElementById('btn-hof-search'),
+                    // 6학년 2학기 5단원 퀴즈 DOM
+                    quizModal: document.getElementById('quiz-modal'),
+                    quizTargetBadge: document.getElementById('quiz-target-badge'),
+                    quizQuestion: document.getElementById('quiz-question'),
+                    quizChoices: document.getElementById('quiz-choices'),
+                    quizFeedback: document.getElementById('quiz-feedback')
+                };
+            }
+
+            initAudio() {
+                try {
+                    this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                    this.synth.volume.value = -6;
+                } catch (e) {
+                    console.warn('Audio disabled:', e);
+                }
+            }
+
+            playSound(type) {
+                if (!this.state.soundEnabled || !this.synth) return;
+                try {
+                    if (Tone.context.state !== 'running') Tone.start();
+                    const now = Tone.now();
+                    if (type === 'bell') {
+                        this.synth.triggerAttackRelease(['C5', 'E5', 'G5'], '0.45', now);
+                    } else if (type === 'catch') {
+                        this.synth.triggerAttackRelease('A5', '0.1', now);
+                        this.synth.triggerAttackRelease('E6', '0.3', now + 0.08);
+                    } else if (type === 'wrong') {
+                        this.synth.triggerAttackRelease(['E3', 'F3'], '0.35', now);
+                    } else if (type === 'emp') {
+                        this.synth.triggerAttackRelease(['C6', 'G5', 'C4'], '0.4', now);
+                    } else if (type === 'alert') {
+                        // 재난문자 사이렌 2연음
+                        this.synth.triggerAttackRelease('A5', '0.18', now);
+                        this.synth.triggerAttackRelease('F5', '0.18', now + 0.2);
+                        this.synth.triggerAttackRelease('A5', '0.18', now + 0.4);
+                    }
+                } catch (e) {}
+            }
+
+            // Three.js 씬, 카메라, 렌더러 초기화
+            initThree() {
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0xc7d2fe); // 상쾌한 수능 아침 하늘색
+                this.scene.fog = new THREE.Fog(0xdbeafe, 16, 36);
+
+                this.camera = new THREE.PerspectiveCamera(
+                    65,
+                    window.innerWidth / window.innerHeight,
+                    0.1,
+                    100
+                );
+
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                this.renderer.toneMappingExposure = 1.08;
+                this.dom.container.appendChild(this.renderer.domElement);
+
+                // 조명 세팅 (교실 형광등 + 창가 아침 햇살)
+                const hemiLight = new THREE.HemisphereLight(0xf8fafc, 0xcbd5e1, 0.72);
+                this.scene.add(hemiLight);
+
+                const sunLight = new THREE.DirectionalLight(0xfffbeb, 0.85);
+                sunLight.position.set(-10, 11, -3);
+                sunLight.castShadow = true;
+                sunLight.shadow.mapSize.width = 2048;
+                sunLight.shadow.mapSize.height = 2048;
+                sunLight.shadow.camera.near = 1;
+                sunLight.shadow.camera.far = 30;
+                const d = 10;
+                sunLight.shadow.camera.left = -d;
+                sunLight.shadow.camera.right = d;
+                sunLight.shadow.camera.top = d;
+                sunLight.shadow.camera.bottom = -d;
+                sunLight.shadow.bias = -0.0005;
+                this.scene.add(sunLight);
+
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+
+            // 프로시저럴 캔버스 텍스처 생성 헬퍼
+            createCanvasTexture(width, height, drawFn) {
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                drawFn(ctx, width, height);
+                const tex = new THREE.CanvasTexture(canvas);
+                tex.needsUpdate = true;
+                return tex;
+            }
+
+            // 3D 고사실 건축 및 고퀄리티 소품/수험생 배치
+            buildClassroom() {
+                // 1. 고퀄리티 교실 마룻바닥 텍스처
+                const floorTex = this.createCanvasTexture(512, 512, (ctx, w, h) => {
+                    ctx.fillStyle = '#c8a97e';
+                    ctx.fillRect(0, 0, w, h);
+                    const plankW = 64;
+                    const plankH = 128;
+                    for (let y = 0; y < h; y += plankH) {
+                        for (let x = 0; x < w; x += plankW) {
+                            const offset = (y / plankH) % 2 === 0 ? 0 : plankW / 2;
+                            const shade = 185 + Math.floor(Math.random() * 22);
+                            ctx.fillStyle = `rgb(${shade}, ${Math.floor(shade * 0.82)}, ${Math.floor(shade * 0.6)})`;
+                            ctx.fillRect((x + offset) % w, y, plankW - 2, plankH - 2);
+                        }
+                    }
+                });
+                floorTex.wrapS = THREE.RepeatWrapping;
+                floorTex.wrapT = THREE.RepeatWrapping;
+                floorTex.repeat.set(5, 6);
+
+                const floor = new THREE.Mesh(
+                    new THREE.PlaneGeometry(14, 18),
+                    new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.65, metalness: 0.05 })
+                );
+                floor.rotation.x = -Math.PI / 2;
+                floor.receiveShadow = true;
+                this.scene.add(floor);
+
+                // 2. 천장 및 형광등기구
+                const ceiling = new THREE.Mesh(
+                    new THREE.PlaneGeometry(14, 18),
+                    new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.9 })
+                );
+                ceiling.rotation.x = Math.PI / 2;
+                ceiling.position.y = 4.2;
+                this.scene.add(ceiling);
+
+                const lampFrameMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8 });
+                const lampBulbMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                [-3.2, 3.2].forEach(lx => {
+                    [-4.5, 0, 4.5].forEach(lz => {
+                        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.08, 2.2), lampFrameMat);
+                        frame.position.set(lx, 4.15, lz);
+                        this.scene.add(frame);
+                        const bulb = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.04, 2.05), lampBulbMat);
+                        bulb.position.set(lx, 4.1, lz);
+                        this.scene.add(bulb);
+                    });
+                });
+
+                // 3. 교실 벽면 (상단 아이보리 + 하단 민트그레이 투톤 웨인스코팅)
+                const upperWallMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.85 });
+                const lowerWallMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.8 });
+
+                const buildWall = (w, h, d, x, y, z) => {
+                    const wallGroup = new THREE.Group();
+                    const topMesh = new THREE.Mesh(new THREE.BoxGeometry(w, h * 0.72, d), upperWallMat);
+                    topMesh.position.y = h * 0.64;
+                    topMesh.receiveShadow = true;
+                    wallGroup.add(topMesh);
+
+                    const botMesh = new THREE.Mesh(new THREE.BoxGeometry(w, h * 0.28, d + 0.03), lowerWallMat);
+                    botMesh.position.y = h * 0.14;
+                    botMesh.receiveShadow = true;
+                    wallGroup.add(botMesh);
+
+                    wallGroup.position.set(x, y, z);
+                    this.scene.add(wallGroup);
+                };
+
+                buildWall(14, 4.2, 0.3, 0, 0, -8.5); // 앞벽
+                buildWall(14, 4.2, 0.3, 0, 0, 8.5);  // 뒷벽
+                buildWall(0.3, 4.2, 17, 7, 0, 0);    // 우측 복도벽
+
+                // 좌측 창가 벽 (창문 개구부 및 햇살 표현)
+                const leftLower = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.15, 17), lowerWallMat);
+                leftLower.position.set(-7, 0.575, 0);
+                this.scene.add(leftLower);
+
+                const leftUpper = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.8, 17), upperWallMat);
+                leftUpper.position.set(-7, 3.8, 0);
+                this.scene.add(leftUpper);
+
+                // 창틀 및 바깥 전경 패널
+                const windowGlass = new THREE.Mesh(
+                    new THREE.PlaneGeometry(16.5, 2.3),
+                    new THREE.MeshBasicMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.45 })
+                );
+                windowGlass.rotation.y = Math.PI / 2;
+                windowGlass.position.set(-7.05, 2.25, 0);
+                this.scene.add(windowGlass);
+
+                const frameMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.4 });
+                for (let wz = -7.5; wz <= 7.5; wz += 2.5) {
+                    const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.25, 2.3, 0.14), frameMat);
+                    pillar.position.set(-7, 2.25, wz);
+                    this.scene.add(pillar);
+                }
+
+                // 4. 칠판 (2027 수능 안내 판서 텍스처 적용)
+                const boardTex = this.createCanvasTexture(1024, 320, (ctx, w, h) => {
+                    ctx.fillStyle = '#14532d';
+                    ctx.fillRect(0, 0, w, h);
+                    // 테두리 격자
+                    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(20, 20, w - 40, h - 40);
+
+                    ctx.fillStyle = '#fef08a';
+                    ctx.font = 'bold 34px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('2027학년도 대학수학능력시험 제 14시험장', w / 2, 68);
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 24px sans-serif';
+                    ctx.fillText('▶ 휴대폰·스마트워치·AI안경 등 모든 전자기기 반입 금지', w / 2, 125);
+                    ctx.font = '21px sans-serif';
+                    ctx.fillStyle = '#cbd5e1';
+                    ctx.fillText('1교시 국어 08:40~10:00 | 2교시 수학 10:30~12:10 | 3교시 영어 13:10~14:20', w / 2, 178);
+
+                    ctx.fillStyle = '#fca5a5';
+                    ctx.font = 'bold 22px sans-serif';
+                    ctx.fillText('※ 부정행위 적발 시 당해 시험 무효 및 응시자격 정지', w / 2, 240);
+                });
+
+                const boardFrame = new THREE.Mesh(
+                    new THREE.BoxGeometry(6.8, 2.0, 0.14),
+                    new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.6 })
+                );
+                boardFrame.position.set(0, 2.15, -8.3);
+                this.scene.add(boardFrame);
+
+                const chalkboard = new THREE.Mesh(
+                    new THREE.BoxGeometry(6.5, 1.75, 0.04),
+                    new THREE.MeshStandardMaterial({ map: boardTex, roughness: 0.75 })
+                );
+                chalkboard.position.set(0, 2.15, -8.21);
+                this.scene.add(chalkboard);
+
+                // 칠판 분필 받침대 & 지우개
+                const chalkTray = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.06, 0.16), frameMat);
+                chalkTray.position.set(0, 1.25, -8.18);
+                this.scene.add(chalkTray);
+
+                const eraser = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.12), new THREE.MeshStandardMaterial({ color: 0xf97316 }));
+                eraser.position.set(-1.2, 1.32, -8.16);
+                this.scene.add(eraser);
+
+                // 교실 벽시계 (칠판 위)
+                const clockBody = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.32, 0.32, 0.08, 24),
+                    new THREE.MeshStandardMaterial({ color: 0x1e293b })
+                );
+                clockBody.rotation.x = Math.PI / 2;
+                clockBody.position.set(0, 3.55, -8.3);
+                this.scene.add(clockBody);
+
+                const clockFace = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.27, 0.27, 0.09, 24),
+                    new THREE.MeshBasicMaterial({ color: 0xffffff })
+                );
+                clockFace.rotation.x = Math.PI / 2;
+                clockFace.position.set(0, 3.55, -8.29);
+                this.scene.add(clockFace);
+
+                // 태극기 & 급훈 액자
+                const flagTex = this.createCanvasTexture(256, 170, (ctx, w, h) => {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.beginPath();
+                    ctx.arc(w / 2, h / 2, 36, Math.PI, 0);
+                    ctx.fillStyle = '#dc2626';
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(w / 2, h / 2, 36, 0, Math.PI);
+                    ctx.fillStyle = '#2563eb';
+                    ctx.fill();
+                });
+                const flagFrame = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.75, 0.06), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+                flagFrame.position.set(-4.3, 3.2, -8.32);
+                this.scene.add(flagFrame);
+                const flagMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.98, 0.64), new THREE.MeshBasicMaterial({ map: flagTex }));
+                flagMesh.position.set(-4.3, 3.2, -8.28);
+                this.scene.add(flagMesh);
+
+                // 5. 교탁 (감독관 명패 포함)
+                const podium = new THREE.Mesh(
+                    new THREE.BoxGeometry(1.7, 1.05, 0.85),
+                    new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.55 })
+                );
+                podium.position.set(0, 0.525, -6.8);
+                podium.castShadow = true;
+                podium.receiveShadow = true;
+                this.scene.add(podium);
+
+                // 교실 뒷벽 게시판 & 사물함
+                const backBoard = new THREE.Mesh(
+                    new THREE.BoxGeometry(5.6, 1.5, 0.08),
+                    new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 })
+                );
+                backBoard.position.set(0, 2.1, 8.32);
+                this.scene.add(backBoard);
+
+                const lockerMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.3, roughness: 0.5 });
+                for (let lx = -5.6; lx <= 5.6; lx += 1.4) {
+                    if (Math.abs(lx) < 3.0) continue;
+                    const locker = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.6, 0.55), lockerMat);
+                    locker.position.set(lx, 0.8, 8.05);
+                    locker.castShadow = true;
+                    this.scene.add(locker);
+                }
+
+                // 6. 고퀄리티 수험생 책상 & 3D 캐릭터 생성 (4열 x 5행 = 20명)
+                const cols = [-4.2, -1.4, 1.4, 4.2];
+                const rows = [-4.2, -1.7, 0.8, 3.3, 5.8];
+
+                const deskMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.55 });
+                const chairWoodMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.6 });
+                const legMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6, roughness: 0.4 });
+                const paperMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+                const omrMat = new THREE.MeshStandardMaterial({ color: 0xfce7f3, roughness: 0.8 });
+                const uniformColors = [0x1e293b, 0x334155, 0x1e3a8a, 0x3f3f46, 0x14532d, 0x4c1d95];
+                const skinTones = [0xfde68a, 0xfcd34d, 0xfed7aa, 0xfecaca];
+                const hairColors = [0x18181b, 0x27272a, 0x3f2e21, 0x09090b];
+
+                let seatNum = 1;
+                for (let r = 0; r < rows.length; r++) {
+                    for (let c = 0; c < cols.length; c++) {
+                        const x = cols[c];
+                        const z = rows[r];
+
+                        const group = new THREE.Group();
+                        group.position.set(x, 0, z);
+
+                        // 책상 상판 + 테두리 몰딩
+                        const deskTop = new THREE.Mesh(new THREE.BoxGeometry(1.18, 0.055, 0.78), deskMat);
+                        deskTop.position.set(0, 0.74, 0);
+                        deskTop.castShadow = true;
+                        deskTop.receiveShadow = true;
+                        group.add(deskTop);
+
+                        // 책상 서랍 선반
+                        const deskShelf = new THREE.Mesh(new THREE.BoxGeometry(1.02, 0.03, 0.62), deskMat);
+                        deskShelf.position.set(0, 0.56, 0);
+                        group.add(deskShelf);
+
+                        // 시험지 + OMR 답안지 + 컴퓨터용 사인펜 + 물병
+                        const examPaper = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.008, 0.34), paperMat);
+                        examPaper.position.set(-0.08, 0.772, -0.02);
+                        examPaper.rotation.y = (Math.random() - 0.5) * 0.08;
+                        group.add(examPaper);
+
+                        const omrCard = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.009, 0.28), omrMat);
+                        omrCard.position.set(0.28, 0.773, 0.02);
+                        group.add(omrCard);
+
+                        const penMesh = new THREE.Mesh(
+                            new THREE.CylinderGeometry(0.008, 0.008, 0.16, 8),
+                            new THREE.MeshStandardMaterial({ color: 0x0f172a })
+                        );
+                        penMesh.rotation.z = Math.PI / 2;
+                        penMesh.rotation.y = 0.4;
+                        penMesh.position.set(0.16, 0.776, 0.14);
+                        group.add(penMesh);
+
+                        // 수험생 개인 물병 (일부 책상)
+                        if (seatNum % 2 === 1) {
+                            const bottle = new THREE.Mesh(
+                                new THREE.CylinderGeometry(0.035, 0.035, 0.18, 12),
+                                new THREE.MeshStandardMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.75 })
+                            );
+                            bottle.position.set(-0.44, 0.86, -0.22);
+                            group.add(bottle);
+                        }
+
+                        // 수험번호 스티커 (책상 우측 상단)
+                        const stickerTex = this.createCanvasTexture(128, 64, (ctx, w, h) => {
+                            ctx.fillStyle = '#fef08a';
+                            ctx.fillRect(0, 0, w, h);
+                            ctx.strokeStyle = '#0f172a';
+                            ctx.lineWidth = 4;
+                            ctx.strokeRect(2, 2, w - 4, h - 4);
+                            ctx.fillStyle = '#0f172a';
+                            ctx.font = 'bold 28px sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(`No.${seatNum}`, w / 2, 42);
+                        });
+                        const sticker = new THREE.Mesh(
+                            new THREE.PlaneGeometry(0.16, 0.08),
+                            new THREE.MeshBasicMaterial({ map: stickerTex })
+                        );
+                        sticker.rotation.x = -Math.PI / 2;
+                        sticker.position.set(0.42, 0.771, -0.26);
+                        group.add(sticker);
+
+                        // 책상 다리 4개
+                        const legGeo = new THREE.CylinderGeometry(0.022, 0.022, 0.74, 8);
+                        [[-0.52, -0.32], [0.52, -0.32], [-0.52, 0.32], [0.52, 0.32]].forEach(([lx, lz]) => {
+                            const leg = new THREE.Mesh(legGeo, legMat);
+                            leg.position.set(lx, 0.37, lz);
+                            group.add(leg);
+                        });
+
+                        // 학생 의자 (좌판 + 등받이 + 다리)
+                        const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.04, 0.44), chairWoodMat);
+                        chairSeat.position.set(0, 0.44, 0.48);
+                        chairSeat.castShadow = true;
+                        group.add(chairSeat);
+
+                        const chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.24, 0.035), chairWoodMat);
+                        chairBack.position.set(0, 0.74, 0.69);
+                        chairBack.castShadow = true;
+                        group.add(chairBack);
+
+                        [[-0.2, 0.28], [0.2, 0.28], [-0.2, 0.68], [0.2, 0.68]].forEach(([cx, cz]) => {
+                            const isBack = cz > 0.5;
+                            const cLeg = new THREE.Mesh(
+                                new THREE.CylinderGeometry(0.018, 0.018, isBack ? 0.82 : 0.44, 8),
+                                legMat
+                            );
+                            cLeg.position.set(cx, isBack ? 0.41 : 0.22, cz);
+                            group.add(cLeg);
+                        });
+
+                        // ── 고퀄리티 수험생 3D 캐릭터 ──
+                        const bodyColor = uniformColors[(seatNum * 3 + r) % uniformColors.length];
+                        const skinColor = skinTones[seatNum % skinTones.length];
+                        const hairColor = hairColors[(seatNum + c) % hairColors.length];
+                        const bodyMat = new THREE.MeshStandardMaterial({ color: bodyColor, roughness: 0.75 });
+                        const skinMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.6 });
+                        const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.85 });
+
+                        // 상체 (둥근 어깨 + 몸통)
+                        const torsoMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.22, 0.52, 16), bodyMat);
+                        torsoMesh.position.set(0, 0.72, 0.46);
+                        torsoMesh.rotation.x = -0.14; // 약간 앞으로 숙인 자세
+                        torsoMesh.castShadow = true;
+                        group.add(torsoMesh);
+
+                        const shoulderMesh = new THREE.Mesh(new THREE.SphereGeometry(0.21, 16, 12), bodyMat);
+                        shoulderMesh.scale.set(1.25, 0.65, 0.85);
+                        shoulderMesh.position.set(0, 0.96, 0.43);
+                        shoulderMesh.castShadow = true;
+                        group.add(shoulderMesh);
+
+                        // 목
+                        const neckMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.075, 0.12, 12), skinMat);
+                        neckMesh.position.set(0, 1.04, 0.41);
+                        group.add(neckMesh);
+
+                        // 양팔 & 손 (책상 위 시험지 쪽으로 뻗음)
+                        const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.042, 0.38, 10), bodyMat);
+                        leftArm.position.set(-0.22, 0.85, 0.26);
+                        leftArm.rotation.x = 1.05;
+                        leftArm.rotation.z = -0.2;
+                        group.add(leftArm);
+
+                        const rightArmGroup = new THREE.Group();
+                        rightArmGroup.position.set(0.22, 0.92, 0.40);
+                        const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.042, 0.38, 10), bodyMat);
+                        rightArm.position.set(0, -0.08, -0.16);
+                        rightArm.rotation.x = 1.05;
+                        rightArm.rotation.z = 0.2;
+                        rightArmGroup.add(rightArm);
+
+                        const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.042, 10, 10), skinMat);
+                        rightHand.position.set(-0.04, -0.14, -0.32);
+                        rightArmGroup.add(rightHand);
+                        group.add(rightArmGroup);
+
+                        // 하체 (무릎 & 종아리)
+                        [-0.11, 0.11].forEach(lx => {
+                            const thigh = new THREE.Mesh(
+                                new THREE.CylinderGeometry(0.065, 0.058, 0.34, 10),
+                                new THREE.MeshStandardMaterial({ color: 0x1e293b })
+                            );
+                            thigh.rotation.x = Math.PI / 2;
+                            thigh.position.set(lx, 0.48, 0.30);
+                            group.add(thigh);
+
+                            const shin = new THREE.Mesh(
+                                new THREE.CylinderGeometry(0.055, 0.048, 0.42, 10),
+                                new THREE.MeshStandardMaterial({ color: 0x1e293b })
+                            );
+                            shin.position.set(lx, 0.25, 0.15);
+                            group.add(shin);
+                        });
+
+                        // 수험생 머리 그룹 (회전 애니메이션용)
+                        const headGroup = new THREE.Group();
+                        headGroup.position.set(0, 1.18, 0.40);
+
+                        const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.165, 20, 20), skinMat);
+                        headMesh.scale.set(0.95, 1.05, 1.0);
+                        headMesh.castShadow = true;
+                        headGroup.add(headMesh);
+
+                        // 귀 (좌/우)
+                        [-0.16, 0.16].forEach(ex => {
+                            const ear = new THREE.Mesh(new THREE.SphereGeometry(0.032, 10, 10), skinMat);
+                            ear.position.set(ex, -0.01, 0);
+                            headGroup.add(ear);
+                        });
+
+                        // 눈동자 (좌/우 - 곁눈질 시 시선 확인 가능)
+                        const eyeMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+                        [-0.055, 0.055].forEach(eyeX => {
+                            const eye = new THREE.Mesh(new THREE.SphereGeometry(0.018, 8, 8), eyeMat);
+                            eye.position.set(eyeX, 0.01, -0.155);
+                            headGroup.add(eye);
+                        });
+
+                        // 다양한 헤어스타일 (0: 기본 숏컷, 1: 포니테일, 2: 단발머리)
+                        const hairStyle = seatNum % 3;
+                        const hairCap = new THREE.Mesh(
+                            new THREE.SphereGeometry(0.174, 20, 14, 0, Math.PI * 2, 0, Math.PI * 0.58),
+                            hairMat
+                        );
+                        hairCap.rotation.x = -0.15;
+                        headGroup.add(hairCap);
+
+                        if (hairStyle === 1) {
+                            // 포니테일 묶음
+                            const ponytail = new THREE.Mesh(new THREE.ConeGeometry(0.065, 0.22, 12), hairMat);
+                            ponytail.position.set(0, -0.02, 0.21);
+                            ponytail.rotation.x = 0.55;
+                            headGroup.add(ponytail);
+                        } else if (hairStyle === 2) {
+                            // 단발 뒷머리
+                            const bobHair = new THREE.Mesh(
+                                new THREE.CylinderGeometry(0.17, 0.185, 0.18, 16, 1, true, -Math.PI * 0.65, Math.PI * 1.3),
+                                hairMat
+                            );
+                            bobHair.position.set(0, -0.06, 0.01);
+                            headGroup.add(bobHair);
+                        }
+
+                        // AI 스마트글래스 시각 단서 (홀로그램 푸른 광학 프레임 + 렌즈)
+                        const glassesMesh = new THREE.Group();
+                        const frameBar = new THREE.Mesh(
+                            new THREE.BoxGeometry(0.28, 0.025, 0.04),
+                            new THREE.MeshBasicMaterial({ color: 0x0284c7 })
+                        );
+                        const leftLens = new THREE.Mesh(
+                            new THREE.BoxGeometry(0.10, 0.055, 0.02),
+                            new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85 })
+                        );
+                        leftLens.position.set(-0.07, -0.01, -0.01);
+                        const rightLens = leftLens.clone();
+                        rightLens.position.set(0.07, -0.01, -0.01);
+                        glassesMesh.add(frameBar, leftLens, rightLens);
+                        glassesMesh.position.set(0, 0.015, -0.162);
+                        glassesMesh.visible = false;
+                        headGroup.add(glassesMesh);
+
+                        group.add(headGroup);
+
+                        // 책상 아래 스마트폰/전자기기 불빛 단서
+                        const phoneGlow = new THREE.Mesh(
+                            new THREE.BoxGeometry(0.14, 0.018, 0.22),
+                            new THREE.MeshBasicMaterial({ color: 0x60a5fa })
+                        );
+                        phoneGlow.position.set(0.15, 0.60, 0.16);
+                        phoneGlow.visible = false;
+                        group.add(phoneGlow);
+
+                        // EMP / 재난문자 발동 시 머리 위 3D 경고 링
+                        const alertRing = new THREE.Mesh(
+                            new THREE.TorusGeometry(0.28, 0.035, 8, 24),
+                            new THREE.MeshBasicMaterial({ color: 0xef4444 })
+                        );
+                        alertRing.rotation.x = Math.PI / 2;
+                        alertRing.position.set(0, 1.54, 0.40);
+                        alertRing.visible = false;
+                        group.add(alertRing);
+
+                        // 조준 타겟 바닥 선택 링 (가까이 다가갔을 때 표시)
+                        const selectRing = new THREE.Mesh(
+                            new THREE.RingGeometry(0.68, 0.78, 32),
+                            new THREE.MeshBasicMaterial({ color: 0xfbbf24, side: THREE.DoubleSide })
+                        );
+                        selectRing.rotation.x = -Math.PI / 2;
+                        selectRing.position.set(0, 0.02, 0.15);
+                        selectRing.visible = false;
+                        group.add(selectRing);
+
+                        this.scene.add(group);
+
+                        this.students.push({
+                            id: seatNum,
+                            x,
+                            z,
+                            group,
+                            headGroup,
+                            rightArmGroup,
+                            glassesMesh,
+                            phoneGlow,
+                            alertRing,
+                            selectRing,
+                            isCheater: false,
+                            isCaught: false,
+                            isExiting: false,
+                            exitTimer: 0,
+                            wrongReactionTimer: 0,
+                            cheatProfile: null,
+                            animPhase: Math.random() * Math.PI * 2,
+                            pingTimer: 0
+                        });
+
+                        seatNum++;
+                    }
+                }
+            }
+
+            // 교시 시작 및 부정행위자 무작위 배정
+            startPeriod(periodIdx) {
+                this.state.periodIdx = periodIdx;
+                const config = this.PERIODS[periodIdx];
+
+                this.state.isPlaying = true;
+                this.state.isQuizOpen = false;
+                this.state.pendingTarget = null;
+                this.state.timeLeft = config.duration;
+                this.state.remainingCheaters = config.cheaters;
+                this.state.empCharges = 1;
+                this.state.alertCharges = 1;
+
+                // 감독관 위치 교탁 앞으로 초기화
+                this.player.pos.set(0, 1.65, -6.2);
+                this.player.yaw = Math.PI;
+                this.player.pitch = -0.12;
+
+                // 모든 수험생 초기화
+                this.students.forEach(s => {
+                    s.isCheater = false;
+                    s.isCaught = false;
+                    s.isExiting = false;
+                    s.exitTimer = 0;
+                    s.wrongReactionTimer = 0;
+                    s.cheatProfile = null;
+                    s.glassesMesh.visible = false;
+                    s.phoneGlow.visible = false;
+                    s.alertRing.visible = false;
+                    s.selectRing.visible = false;
+                    s.pingTimer = 0;
+                    s.group.visible = true;
+                    s.group.position.set(s.x, 0, s.z);
+                    s.group.rotation.set(0, 0, 0);
+                    s.group.scale.set(1, 1, 1);
+                    s.headGroup.rotation.set(0.22, 0, 0); // 고개 숙여 문제 푸는 자세
+                });
+
+                // 무작위 N명을 부정행위자로 지정
+                const shuffled = [...this.students].sort(() => Math.random() - 0.5);
+                for (let i = 0; i < config.cheaters; i++) {
+                    const target = shuffled[i];
+                    target.isCheater = true;
+                    target.cheatProfile = this.CHEAT_PROFILES[Math.floor(Math.random() * this.CHEAT_PROFILES.length)];
+
+                    // 부정행위 유형에 따른 3D 시각 단서 활성화
+                    if (target.cheatProfile.type === 'ai_glasses' || target.cheatProfile.type === 'earpiece') {
+                        target.glassesMesh.visible = true;
+                    }
+                    if (target.cheatProfile.type === 'smartphone') {
+                        target.phoneGlow.visible = true;
+                    }
+                }
+
+                // UI 표시 전환
+                this.dom.startModal.classList.add('hidden');
+                this.dom.resultModal.classList.add('hidden');
+                this.dom.quizModal.classList.add('hidden');
+                this.dom.hudTop.classList.remove('hidden');
+                this.dom.hudBottom.classList.remove('hidden');
+                this.dom.crosshair.classList.remove('hidden');
+
+                this.updateHUD();
+                this.playSound('bell');
+                this.showToast(`🔔 ${config.name} 시작! 숨은 부정행위자 ${config.cheaters}명을 적발하세요!`, 'bg-emerald-700 border-emerald-400');
+
+                clearInterval(this.timerInterval);
+                this.timerInterval = setInterval(() => {
+                    if (!this.state.isPlaying || this.state.isQuizOpen) return;
+                    this.state.timeLeft--;
+                    this.updateHUD();
+                    if (this.state.timeLeft <= 0) {
+                        this.finishPeriod(false, '시험 종료령이 울렸습니다! 일부 부정행위자를 놓쳤습니다.');
+                    }
+                }, 1000);
+            }
+
+            // EMP 발동: AI 안경/스마트폰 등 전자기기 부정행위자에게 스파크 링 노출
+            triggerEMP() {
+                if (!this.state.isPlaying || this.state.empCharges <= 0) return;
+                this.state.empCharges--;
+                this.updateHUD();
+                this.playSound('emp');
+
+                // 화면 플래시
+                this.dom.screenFx.classList.remove('flash-emp', 'flash-alert');
+                void this.dom.screenFx.offsetWidth;
+                this.dom.screenFx.classList.add('flash-emp');
+
+                let detectedCount = 0;
+                this.students.forEach(s => {
+                    if (s.isCheater && !s.isCaught && s.cheatProfile.empReact) {
+                        s.pingTimer = 4.5; // 4.5초간 붉은 경고 링 표시
+                        s.alertRing.material.color.setHex(0x38bdf8);
+                        s.alertRing.visible = true;
+                        detectedCount++;
+                    }
+                });
+
+                if (detectedCount > 0) {
+                    this.showToast(`⚡ EMP 작동! 전자기기 이상 신호 ${detectedCount}건 포착!`, 'bg-sky-800 border-sky-400');
+                } else {
+                    this.showToast(`⚡ EMP 작동 완료. 전자기기 반응이 없습니다. (육안 순찰 필요!)`, 'bg-slate-800 border-slate-500');
+                }
+            }
+
+            // 위급재난문자 발동: 반입금지 휴대폰 소지자 일제 호출
+            triggerEmergencyAlert() {
+                if (!this.state.isPlaying || this.state.alertCharges <= 0) return;
+                this.state.alertCharges--;
+                this.updateHUD();
+                this.playSound('alert');
+
+                this.dom.screenFx.classList.remove('flash-emp', 'flash-alert');
+                void this.dom.screenFx.offsetWidth;
+                this.dom.screenFx.classList.add('flash-alert');
+
+                let phoneCount = 0;
+                this.students.forEach(s => {
+                    if (s.isCheater && !s.isCaught && s.cheatProfile.alertReact) {
+                        s.pingTimer = 5.0;
+                        s.alertRing.material.color.setHex(0xf43f5e);
+                        s.alertRing.visible = true;
+                        phoneCount++;
+                    }
+                });
+
+                if (phoneCount > 0) {
+                    this.showToast(`📢 재난문자 발송! 고사실 내 진동음 ${phoneCount}곳에서 발생!`, 'bg-rose-800 border-rose-400');
+                } else {
+                    this.showToast(`📢 재난문자 발송 완료. 휴대폰 벨/진동 반응이 없습니다.`, 'bg-slate-800 border-slate-500');
+                }
+            }
+
+            // 적발 버튼 실행 (가장 가까이 바라보고 있는 수험생 판정)
+            attemptCatch() {
+                if (!this.state.isPlaying || this.state.isQuizOpen) return;
+
+                if (!this.nearestStudent) {
+                    this.showToast('👀 적발할 수험생 책상 가까이 다가가서 바라보세요!', 'bg-slate-800 border-slate-500');
+                    return;
+                }
+
+                const target = this.nearestStudent;
+
+                if (target.isCheater && !target.isCaught) {
+                    // 부정행위자 포착 시 6학년 2학기 5단원(원의 넓이) 확인 문제 출제!
+                    this.openUnit5Quiz(target);
+                } else {
+                    // 선량한 수험생 오인 적발 -> 억울함 모션 & 민원 발생!
+                    target.wrongReactionTimer = 1.4;
+                    this.state.complaints++;
+                    this.state.score = Math.max(0, this.state.score - 100);
+                    this.playSound('wrong');
+                    this.updateHUD();
+
+                    this.showToast(
+                        `⚠️ 제${target.id}번은 정상 수험생입니다! 민원 발생 (${this.state.complaints}/3건)`,
+                        'bg-amber-800 border-red-400'
+                    );
+
+                    if (this.state.complaints >= 3) {
+                        setTimeout(() => {
+                            this.finishPeriod(false, '민원이 3건 누적되어 감독관 직무가 정지되었습니다!');
+                        }, 700);
+                    }
+                }
+            }
+
+            // 6학년 2학기 5단원(원의 넓이) 4지선다 퀴즈 열기
+            openUnit5Quiz(target) {
+                this.state.isQuizOpen = true;
+                this.state.pendingTarget = target;
+                this.keys = {};
+                this.joystick.active = false;
+                this.joystick.dx = 0;
+                this.joystick.dy = 0;
+                this.dom.joystickKnob.style.transform = 'translate(0px, 0px)';
+
+                const quiz = this.GRADE6_UNIT5_QUIZZES[Math.floor(Math.random() * this.GRADE6_UNIT5_QUIZZES.length)];
+                const labels = ['①', '②', '③', '④'];
+
+                this.dom.quizTargetBadge.textContent = `제 ${target.id}번 수험생 적발 확인`;
+                this.dom.quizQuestion.textContent = quiz.q;
+                this.dom.quizFeedback.classList.add('hidden');
+
+                this.dom.quizChoices.innerHTML = quiz.choices.map((choiceText, idx) => `
+                    <button type="button" data-idx="${idx}"
+                        class="quiz-choice-btn w-full text-left bg-slate-800 hover:bg-sky-900/70 active:scale-[0.99] border border-slate-600 hover:border-sky-400 rounded-xl px-4 py-3 text-xs sm:text-sm font-bold text-white transition flex items-center gap-2.5">
+                        <span class="text-sky-300 font-black">${labels[idx]}</span>
+                        <span>${this.escapeHTML(choiceText)}</span>
+                    </button>
+                `).join('');
+
+                this.dom.quizChoices.querySelectorAll('.quiz-choice-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const selectedIdx = Number(btn.getAttribute('data-idx'));
+                        if (selectedIdx === quiz.answer) {
+                            this.confirmCatchAfterQuiz();
+                        } else {
+                            this.playSound('wrong');
+                            btn.classList.remove('bg-slate-800', 'border-slate-600');
+                            btn.classList.add('bg-rose-950/90', 'border-rose-500', 'text-rose-200');
+                            btn.disabled = true;
+                            this.dom.quizFeedback.classList.remove('hidden');
+                        }
+                    });
+                });
+
+                this.dom.quizModal.classList.remove('hidden');
+            }
+
+            // 퀴즈 정답 후 실제 적발 및 퇴실 처리 완료
+            confirmCatchAfterQuiz() {
+                const target = this.state.pendingTarget;
+                this.dom.quizModal.classList.add('hidden');
+                this.state.isQuizOpen = false;
+                this.state.pendingTarget = null;
+
+                if (!target || target.isCaught) return;
+
+                target.isCaught = true;
+                target.isExiting = true;
+                target.exitTimer = 1.2;
+                target.selectRing.visible = false;
+                target.alertRing.visible = true;
+                target.alertRing.material.color.setHex(0xef4444);
+
+                this.state.remainingCheaters--;
+                this.state.totalCaught++;
+                this.state.score += target.cheatProfile.points;
+
+                this.playSound('catch');
+                this.updateHUD();
+                this.showToast(
+                    `⭕ 정답! 제${target.id}번 적발 완료 [${target.cheatProfile.name}] (+${target.cheatProfile.points}점)`,
+                    'bg-red-700 border-amber-300'
+                );
+
+                if (this.state.remainingCheaters <= 0) {
+                    setTimeout(() => {
+                        this.finishPeriod(true, '고사실 내 모든 부정행위자를 완벽히 적발했습니다!');
+                    }, 1100);
+                }
+            }
+
+            // 교시 종료 처리
+            finishPeriod(isSuccess, message) {
+                this.state.isPlaying = false;
+                this.state.isQuizOpen = false;
+                this.dom.quizModal.classList.add('hidden');
+                clearInterval(this.timerInterval);
+                this.playSound('bell');
+
+                const badge = document.getElementById('result-badge');
+                const title = document.getElementById('result-title');
+                const desc = document.getElementById('result-desc');
+                const resScore = document.getElementById('res-score');
+                const resCaught = document.getElementById('res-caught');
+                const resComplaints = document.getElementById('res-complaints');
+
+                const periodName = this.PERIODS[this.state.periodIdx].name;
+                badge.textContent = `${periodName} 종료`;
+
+                let recordLabel = `${periodName} 종료`;
+
+                if (this.state.complaints >= 3) {
+                    badge.className = 'inline-block bg-red-600 text-white font-black text-xs px-3 py-1 rounded-full mb-2';
+                    title.textContent = '민원 누적으로 감독 교체!';
+                    this.dom.btnNextPeriod.classList.add('hidden');
+                    recordLabel = `${periodName} 교체`;
+                } else if (this.state.periodIdx >= this.PERIODS.length - 1) {
+                    badge.className = 'inline-block bg-amber-500 text-slate-950 font-black text-xs px-3 py-1 rounded-full mb-2';
+                    title.textContent = '2027 수능 전 교시 완료!';
+                    this.dom.btnNextPeriod.textContent = '1교시부터 다시하기 🔄';
+                    this.dom.btnNextPeriod.classList.remove('hidden');
+                    recordLabel = '전 교시 완료';
+                } else {
+                    badge.className = isSuccess
+                        ? 'inline-block bg-emerald-600 text-white font-black text-xs px-3 py-1 rounded-full mb-2'
+                        : 'inline-block bg-slate-600 text-white font-black text-xs px-3 py-1 rounded-full mb-2';
+                    title.textContent = isSuccess ? '부정행위 전원 적발!' : '종료령 타종!';
+                    this.dom.btnNextPeriod.textContent = `${this.PERIODS[this.state.periodIdx + 1].name} 감독 ▶`;
+                    this.dom.btnNextPeriod.classList.remove('hidden');
+                }
+
+                // 게임이 완전히 끝나는 시점(민원 3건, 시간초과 실패, 또는 4교시 최종 완료)에 명예의 전당 등록
+                const isRunFinished = !isSuccess || this.state.complaints >= 3 || this.state.periodIdx >= this.PERIODS.length - 1;
+                if (isRunFinished) {
+                    this.submitScoreToHallOfFame(recordLabel);
+                }
+
+                const codeTag = this.state.classCode ? `[${this.state.classCode}] ` : '';
+                const classTag = this.state.classNum ? `${this.state.classNum} · ` : '';
+                this.dom.resProctorTag.textContent = `${codeTag}${classTag}${this.state.nickname} 감독관`;
+
+                desc.textContent = message;
+                resScore.textContent = `${this.state.score.toLocaleString()}점`;
+                resCaught.textContent = `${this.state.totalCaught}명`;
+                resComplaints.textContent = `${this.state.complaints}건`;
+
+                this.dom.resultModal.classList.remove('hidden');
+            }
+
+            updateHUD() {
+                const config = this.PERIODS[this.state.periodIdx];
+                this.dom.period.textContent = config.name;
+
+                // 남은 시간을 시험 시계 느낌으로 표시
+                const mins = String(Math.floor(this.state.timeLeft / 60)).padStart(2, '0');
+                const secs = String(this.state.timeLeft % 60).padStart(2, '0');
+                this.dom.clock.innerHTML = `${config.startStr} <span class="text-xs text-amber-400 font-bold">(남은시간 ${mins}:${secs})</span>`;
+
+                this.dom.remaining.textContent = `${this.state.remainingCheaters}명`;
+                this.dom.complaints.textContent = `${this.state.complaints}건`;
+                this.dom.score.textContent = `${this.state.score.toLocaleString()}점`;
+
+                this.dom.empCount.textContent = `×${this.state.empCharges}`;
+                this.dom.btnEmp.disabled = this.state.empCharges <= 0;
+
+                this.dom.alertCount.textContent = `×${this.state.alertCharges}`;
+                this.dom.btnAlert.disabled = this.state.alertCharges <= 0;
+            }
+
+            showToast(msg, colorClasses) {
+                const el = document.createElement('div');
+                el.textContent = msg;
+                el.className = `px-4 py-2 rounded-full text-xs sm:text-sm font-black text-white border shadow-2xl text-center transition-all duration-300 ${colorClasses}`;
+                this.dom.toastContainer.appendChild(el);
+
+                setTimeout(() => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-10px)';
+                    setTimeout(() => el.remove(), 300);
+                }, 2600);
+            }
+
+            // 키보드, 마우스 드래그, 모바일 터치 및 가상 조이스틱 바인딩
+            bindEvents() {
+                // 버튼 이벤트
+                this.dom.btnStart.addEventListener('click', () => {
+                    const nick = this.dom.inputNickname.value.trim();
+                    if (!nick) {
+                        this.dom.formErrorMsg.classList.remove('hidden');
+                        this.dom.inputNickname.focus();
+                        return;
+                    }
+                    this.dom.formErrorMsg.classList.add('hidden');
+                    this.state.classCode = this.dom.inputClassCode.value.trim().toUpperCase();
+                    this.state.classNum = this.dom.inputClassNum.value.trim();
+                    this.state.nickname = nick;
+
+                    this.state.score = 0;
+                    this.state.complaints = 0;
+                    this.state.totalCaught = 0;
+                    this.startPeriod(0);
+                });
+
+                // 명예의 전당 열기/닫기 및 탭 전환
+                const openHofModal = () => {
+                    this.dom.hofModal.classList.remove('hidden', 'hof-backdrop-anim');
+                    this.dom.hofCard.classList.remove('hof-card-anim');
+                    this.dom.hofTrophyIcon.classList.remove('trophy-anim');
+                    void this.dom.hofModal.offsetWidth;
+                    this.dom.hofModal.classList.add('hof-backdrop-anim');
+                    this.dom.hofCard.classList.add('hof-card-anim');
+                    this.dom.hofTrophyIcon.classList.add('trophy-anim');
+                    this.renderHallOfFame();
+                };
+                this.dom.btnOpenHof.addEventListener('click', openHofModal);
+                this.dom.btnResHof.addEventListener('click', openHofModal);
+                this.dom.btnCloseHof.addEventListener('click', () => {
+                    this.dom.hofModal.classList.add('hidden');
+                });
+
+                this.dom.tabHofAll.addEventListener('click', () => {
+                    this.hofFilterMode = 'all';
+                    this.dom.tabHofAll.className = 'flex-1 py-2 rounded-xl text-xs font-black bg-amber-500 text-slate-950 transition';
+                    this.dom.tabHofClass.className = 'flex-1 py-2 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+                    this.renderHallOfFame();
+                });
+
+                this.dom.tabHofClass.addEventListener('click', () => {
+                    this.hofFilterMode = 'class';
+                    this.dom.tabHofClass.className = 'flex-1 py-2 rounded-xl text-xs font-black bg-amber-500 text-slate-950 transition';
+                    this.dom.tabHofAll.className = 'flex-1 py-2 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+
+                    // 기존 입력된 학급 코드/반이 있으면 검색창에 미리 채워줌 (조회는 버튼 클릭 시 실행)
+                    if (!this.dom.hofSearchCode.value) {
+                        this.dom.hofSearchCode.value = (this.dom.inputClassCode.value || this.state.classCode || '').trim().toUpperCase();
+                    }
+                    if (!this.dom.hofSearchNum.value) {
+                        this.dom.hofSearchNum.value = (this.dom.inputClassNum.value || this.state.classNum || '').trim();
+                    }
+                    this.renderHallOfFame();
+                });
+
+                // 우리 반 랭킹 조회 버튼 클릭 & 엔터키 처리
+                const executeClassSearch = () => {
+                    this.hofQueriedCode = this.dom.hofSearchCode.value.trim().toUpperCase();
+                    this.hofQueriedNum = this.dom.hofSearchNum.value.trim();
+                    this.hofHasQueried = true;
+                    this.renderHallOfFame();
+                };
+                this.dom.btnHofSearch.addEventListener('click', executeClassSearch);
+                this.dom.hofSearchCode.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') executeClassSearch();
+                });
+                this.dom.hofSearchNum.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') executeClassSearch();
+                });
+
+                this.dom.btnNextPeriod.addEventListener('click', () => {
+                    if (this.state.periodIdx >= this.PERIODS.length - 1 || this.state.complaints >= 3) {
+                        this.state.score = 0;
+                        this.state.complaints = 0;
+                        this.state.totalCaught = 0;
+                        this.startPeriod(0);
+                    } else {
+                        this.startPeriod(this.state.periodIdx + 1);
+                    }
+                });
+
+                this.dom.btnEndNow.addEventListener('click', () => {
+                    // 중간에 '이대로 끝내기'를 누를 때도 현재 점수를 명예의 전당에 등록
+                    const periodName = this.PERIODS[this.state.periodIdx].name;
+                    this.submitScoreToHallOfFame(`${periodName} 완료`);
+                    this.dom.resultModal.classList.add('hidden');
+                    this.dom.hudTop.classList.add('hidden');
+                    this.dom.hudBottom.classList.add('hidden');
+                    this.dom.crosshair.classList.add('hidden');
+                    this.dom.startModal.classList.remove('hidden');
+                });
+
+                this.dom.btnQuit.addEventListener('click', () => {
+                    this.state.isPlaying = false;
+                    clearInterval(this.timerInterval);
+                    this.dom.hudTop.classList.add('hidden');
+                    this.dom.hudBottom.classList.add('hidden');
+                    this.dom.crosshair.classList.add('hidden');
+                    this.dom.startModal.classList.remove('hidden');
+                });
+
+                this.dom.btnSound.addEventListener('click', () => {
+                    this.state.soundEnabled = !this.state.soundEnabled;
+                    this.dom.btnSound.textContent = this.state.soundEnabled ? '🔊 소리 켜짐' : '🔇 음소거';
+                });
+
+                this.dom.btnCatch.addEventListener('click', () => this.attemptCatch());
+                this.dom.btnEmp.addEventListener('click', () => this.triggerEMP());
+                this.dom.btnAlert.addEventListener('click', () => this.triggerEmergencyAlert());
+
+                // 달리기 버튼 (누르고 있는 동안 가속)
+                const startSprint = () => { this.player.isSprinting = true; };
+                const stopSprint = () => { this.player.isSprinting = false; };
+                this.dom.btnSprint.addEventListener('mousedown', startSprint);
+                this.dom.btnSprint.addEventListener('mouseup', stopSprint);
+                this.dom.btnSprint.addEventListener('mouseleave', stopSprint);
+                this.dom.btnSprint.addEventListener('touchstart', (e) => { e.preventDefault(); startSprint(); });
+                this.dom.btnSprint.addEventListener('touchend', stopSprint);
+
+                // 키보드 단축키
+                window.addEventListener('keydown', (e) => {
+                    this.keys[e.code] = true;
+                    if (!this.state.isPlaying || this.state.isQuizOpen) return;
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        this.attemptCatch();
+                    } else if (e.code === 'KeyE') {
+                        this.triggerEMP();
+                    } else if (e.code === 'KeyR') {
+                        this.triggerEmergencyAlert();
+                    }
+                });
+                window.addEventListener('keyup', (e) => {
+                    this.keys[e.code] = false;
+                });
+
+                // 마우스 드래그 시점 회전
+                let isMouseDown = false;
+                let prevMouseX = 0;
+                let prevMouseY = 0;
+
+                this.dom.container.addEventListener('mousedown', (e) => {
+                    isMouseDown = true;
+                    prevMouseX = e.clientX;
+                    prevMouseY = e.clientY;
+                });
+                window.addEventListener('mouseup', () => { isMouseDown = false; });
+                window.addEventListener('mousemove', (e) => {
+                    if (!isMouseDown || !this.state.isPlaying) return;
+                    const dx = e.clientX - prevMouseX;
+                    const dy = e.clientY - prevMouseY;
+                    prevMouseX = e.clientX;
+                    prevMouseY = e.clientY;
+                    this.player.yaw -= dx * 0.0045;
+                    this.player.pitch = Math.max(-0.7, Math.min(0.5, this.player.pitch - dy * 0.004));
+                });
+
+                // 모바일 터치 시점 회전 (캔버스 영역 드래그)
+                this.dom.container.addEventListener('touchstart', (e) => {
+                    if (!this.state.isPlaying) return;
+                    const touch = e.changedTouches[0];
+                    this.lookTouch.active = true;
+                    this.lookTouch.id = touch.identifier;
+                    this.lookTouch.lastX = touch.clientX;
+                    this.lookTouch.lastY = touch.clientY;
+                }, { passive: true });
+
+                this.dom.container.addEventListener('touchmove', (e) => {
+                    if (!this.lookTouch.active || !this.state.isPlaying) return;
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        const t = e.changedTouches[i];
+                        if (t.identifier === this.lookTouch.id) {
+                            const dx = t.clientX - this.lookTouch.lastX;
+                            const dy = t.clientY - this.lookTouch.lastY;
+                            this.lookTouch.lastX = t.clientX;
+                            this.lookTouch.lastY = t.clientY;
+                            this.player.yaw -= dx * 0.0055;
+                            this.player.pitch = Math.max(-0.7, Math.min(0.5, this.player.pitch - dy * 0.005));
+                        }
+                    }
+                }, { passive: true });
+
+                this.dom.container.addEventListener('touchend', (e) => {
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].identifier === this.lookTouch.id) {
+                            this.lookTouch.active = false;
+                        }
+                    }
+                });
+
+                // 가상 조이스틱 (마우스 + 터치 동시 지원)
+                const updateJoystick = (clientX, clientY) => {
+                    const rect = this.dom.joystickZone.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const maxRadius = 36;
+
+                    let dx = clientX - centerX;
+                    let dy = clientY - centerY;
+                    const dist = Math.hypot(dx, dy);
+
+                    if (dist > maxRadius) {
+                        dx = (dx / dist) * maxRadius;
+                        dy = (dy / dist) * maxRadius;
+                    }
+
+                    this.dom.joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+                    this.joystick.dx = dx / maxRadius;
+                    this.joystick.dy = dy / maxRadius;
+                };
+
+                const resetJoystick = () => {
+                    this.joystick.active = false;
+                    this.joystick.dx = 0;
+                    this.joystick.dy = 0;
+                    this.dom.joystickKnob.style.transform = 'translate(0px, 0px)';
+                };
+
+                this.dom.joystickZone.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    this.joystick.active = true;
+                    updateJoystick(e.clientX, e.clientY);
+                });
+                window.addEventListener('mousemove', (e) => {
+                    if (this.joystick.active) updateJoystick(e.clientX, e.clientY);
+                });
+                window.addEventListener('mouseup', () => {
+                    if (this.joystick.active) resetJoystick();
+                });
+
+                this.dom.joystickZone.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                    const t = e.changedTouches[0];
+                    this.joystick.active = true;
+                    this.joystick.id = t.identifier;
+                    updateJoystick(t.clientX, t.clientY);
+                }, { passive: true });
+
+                this.dom.joystickZone.addEventListener('touchmove', (e) => {
+                    e.stopPropagation();
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        const t = e.changedTouches[i];
+                        if (t.identifier === this.joystick.id) {
+                            updateJoystick(t.clientX, t.clientY);
+                        }
+                    }
+                }, { passive: true });
+
+                this.dom.joystickZone.addEventListener('touchend', (e) => {
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].identifier === this.joystick.id) {
+                            resetJoystick();
+                        }
+                    }
+                });
+            }
+
+            // 매 프레임 플레이어 이동 및 3D 수험생 애니메이션 갱신
+            updateSimulation(dt) {
+                if (!this.state.isPlaying || this.state.isQuizOpen) return;
+
+                // 1. 이동 벡터 계산 (WASD + 가상 조이스틱)
+                let moveForward = 0;
+                let moveRight = 0;
+
+                if (this.keys['KeyW'] || this.keys['ArrowUp']) moveForward += 1;
+                if (this.keys['KeyS'] || this.keys['ArrowDown']) moveForward -= 1;
+                if (this.keys['KeyD'] || this.keys['ArrowRight']) moveRight += 1;
+                if (this.keys['KeyA'] || this.keys['ArrowLeft']) moveRight -= 1;
+
+                if (this.joystick.active) {
+                    moveForward -= this.joystick.dy;
+                    moveRight += this.joystick.dx;
+                }
+
+                const isSprinting = this.player.isSprinting || this.keys['ShiftLeft'] || this.keys['ShiftRight'];
+                const currentSpeed = this.player.speed * (isSprinting ? this.player.sprintMult : 1);
+
+                const forwardDir = new THREE.Vector3(-Math.sin(this.player.yaw), 0, -Math.cos(this.player.yaw));
+                const rightDir = new THREE.Vector3(Math.cos(this.player.yaw), 0, -Math.sin(this.player.yaw));
+
+                const velocity = new THREE.Vector3();
+                velocity.addScaledVector(forwardDir, moveForward);
+                velocity.addScaledVector(rightDir, moveRight);
+
+                if (velocity.lengthSq() > 0.001) {
+                    velocity.normalize().multiplyScalar(currentSpeed * dt);
+                    this.player.pos.add(velocity);
+
+                    // 교실 벽 경계 충돌 처리
+                    this.player.pos.x = Math.max(-6.2, Math.min(6.2, this.player.pos.x));
+                    this.player.pos.z = Math.max(-7.6, Math.min(7.6, this.player.pos.z));
+                }
+
+                // 카메라 위치 및 회전 적용
+                this.camera.position.copy(this.player.pos);
+                const euler = new THREE.Euler(this.player.pitch, this.player.yaw, 0, 'YXZ');
+                this.camera.quaternion.setFromEuler(euler);
+
+                // 2. 수험생 애니메이션 & 플레이어 시선 내 근접 타겟 탐색
+                let closest = null;
+                let bestScore = Infinity;
+
+                // 감독관 전방 단위 벡터 (XZ 평면)
+                const lookDir = new THREE.Vector3(-Math.sin(this.player.yaw), 0, -Math.cos(this.player.yaw)).normalize();
+
+                this.students.forEach(s => {
+                    s.selectRing.visible = false;
+
+                    // 적발 후 퇴실 애니메이션 처리
+                    if (s.isCaught) {
+                        if (s.isExiting && s.exitTimer > 0) {
+                            s.exitTimer -= dt;
+                            const progress = 1 - Math.max(0, s.exitTimer / 1.2);
+                            // 화들짝 위로 튀어오른 뒤 고개 숙여 뒷문 방향으로 퇴장
+                            s.group.position.y = Math.sin(Math.min(progress * 2.5, 1) * Math.PI) * 0.25;
+                            s.group.position.z = s.z + progress * 1.6;
+                            s.headGroup.rotation.x = 0.65;
+                            s.group.scale.setScalar(Math.max(0.01, 1 - Math.max(0, (progress - 0.5) * 2)));
+                            if (s.exitTimer <= 0) {
+                                s.isExiting = false;
+                                s.group.visible = false;
+                            }
+                        }
+                        return;
+                    }
+
+                    s.animPhase += dt * 3.2;
+
+                    // 근접 및 시야각 판정 (거리 2.9m 이내 & 전방 시야각 내)
+                    const toStudent = new THREE.Vector3(s.x - this.player.pos.x, 0, (s.z + 0.25) - this.player.pos.z);
+                    const dist = toStudent.length();
+                    if (dist < 2.9 && dist > 0.01) {
+                        const dirToStudent = toStudent.clone().divideScalar(dist);
+                        const dot = lookDir.dot(dirToStudent); // 1이면 정면, 0이면 90도 측면
+                        if (dot > 0.35) {
+                            // 거리가 가까울수록, 화면 정중앙에 가까울수록 높은 우선순위
+                            const score = dist * (1.4 - dot);
+                            if (score < bestScore) {
+                                bestScore = score;
+                                closest = s;
+                            }
+                        }
+                    }
+
+                    // EMP/재난문자 경고 링 타이머 감소
+                    if (s.pingTimer > 0) {
+                        s.pingTimer -= dt;
+                        s.alertRing.scale.setScalar(1 + Math.sin(s.animPhase * 4) * 0.15);
+                        if (s.pingTimer <= 0) {
+                            s.alertRing.visible = false;
+                        }
+                    }
+
+                    // 오인 적발 시 고개 절레절레 억울함 애니메이션
+                    if (s.wrongReactionTimer > 0) {
+                        s.wrongReactionTimer -= dt;
+                        s.headGroup.rotation.x = -0.15;
+                        s.headGroup.rotation.y = Math.sin(s.wrongReactionTimer * 18) * 0.45;
+                        return;
+                    }
+
+                    // 부정행위자 행동 모션
+                    if (s.isCheater) {
+                        if (s.cheatProfile.type === 'peek') {
+                            // 옆자리 곁눈질: 주기적으로 고개를 좌우로 확 돌리고 어깨도 살짝 기울임
+                            const glance = Math.sin(s.animPhase * 1.4);
+                            s.headGroup.rotation.y = glance > 0.35 ? 0.78 : (glance < -0.35 ? -0.78 : 0);
+                            s.headGroup.rotation.x = 0.05;
+                            s.group.rotation.z = glance > 0.35 ? -0.04 : (glance < -0.35 ? 0.04 : 0);
+                        } else if (s.cheatProfile.type === 'ai_glasses') {
+                            // AI 안경: 푸른 렌즈가 주기적으로 점멸하며 허공 스캔
+                            s.glassesMesh.visible = Math.sin(s.animPhase * 3) > -0.25;
+                            s.headGroup.rotation.x = 0.06 + Math.sin(s.animPhase * 1.2) * 0.05;
+                            s.headGroup.rotation.y = Math.sin(s.animPhase * 0.9) * 0.2;
+                        } else if (s.cheatProfile.type === 'smartphone') {
+                            // 스마트폰: 고개를 깊이 숙이고 책상 밑 푸른 불빛 깜빡임
+                            s.phoneGlow.visible = Math.sin(s.animPhase * 2.5) > -0.35;
+                            s.headGroup.rotation.x = 0.52 + Math.sin(s.animPhase * 2) * 0.04;
+                            s.headGroup.rotation.y = 0;
+                        } else if (s.cheatProfile.type === 'earpiece') {
+                            // 초소형 이어폰: 고개를 갸웃거리며 신호 수신 & 긴장한 떨림
+                            s.headGroup.rotation.z = Math.sin(s.animPhase * 2) * 0.28;
+                            s.headGroup.rotation.x = 0.12;
+                            s.glassesMesh.visible = Math.sin(s.animPhase * 4) > 0.25;
+                        }
+                    } else {
+                        // 정상 수험생: 시험지에 집중해 호흡하듯 상체가 미세하게 움직이고 오른손으로 필기 모션
+                        s.group.rotation.z = 0;
+                        s.headGroup.rotation.y = Math.sin(s.animPhase * 0.5) * 0.05;
+                        s.headGroup.rotation.z = 0;
+                        s.headGroup.rotation.x = 0.26 + Math.sin(s.animPhase * 0.9) * 0.035;
+                        if (s.rightArmGroup) {
+                            s.rightArmGroup.rotation.y = Math.sin(s.animPhase * 4.2) * 0.08;
+                            s.rightArmGroup.rotation.x = Math.cos(s.animPhase * 4.2) * 0.04;
+                        }
+                    }
+                });
+
+                this.nearestStudent = closest;
+
+                // 근접 타겟 UI 및 바닥 선택 링 갱신
+                if (closest) {
+                    closest.selectRing.visible = true;
+                    closest.selectRing.scale.setScalar(1 + Math.sin(this.clock.elapsedTime * 6) * 0.05);
+
+                    this.dom.targetBox.classList.remove('hidden');
+                    this.dom.targetSeat.textContent = `제 ${closest.id}번 수험생`;
+                    this.dom.crosshairRing.classList.add('border-amber-400', 'scale-125');
+
+                    if (closest.isCheater) {
+                        this.dom.targetHint.textContent = `⚠️ 이상 징후: ${closest.cheatProfile.hint}`;
+                        this.dom.targetHint.className = 'text-amber-300 font-black';
+                    } else {
+                        this.dom.targetHint.textContent = '차분하게 시험지를 풀고 있습니다.';
+                        this.dom.targetHint.className = 'text-slate-200';
+                    }
+                } else {
+                    this.dom.targetBox.classList.add('hidden');
+                    this.dom.crosshairRing.classList.remove('border-amber-400', 'scale-125');
+                }
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                const dt = Math.min(this.clock.getDelta(), 0.1);
+                this.updateSimulation(dt);
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+
+        window.onload = () => {
+            window.proctor3D = new CSATProctor3DGame();
+        };
+    </script>
+</body>
+</html>
