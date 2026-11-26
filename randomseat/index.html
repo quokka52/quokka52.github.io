@@ -1626,6 +1626,28 @@
 
             walkersLayer.innerHTML = '';
             const frontPt = getStageCenterPoint(frontDoor);
+            const backPt = getStageCenterPoint(backDoor);
+            const desksGrid = document.getElementById('desks-grid');
+            const allCells = desksGrid ? Array.from(desksGrid.children) : [];
+            const gridRect = desksGrid.getBoundingClientRect();
+            const stageRect = document.getElementById('classroom-stage').getBoundingClientRect();
+            const scale = currentZoom || 1;
+            const gLeft = (gridRect.left - stageRect.left) / scale;
+            const gTop = (gridRect.top - stageRect.top) / scale;
+            const gW = gridRect.width / scale;
+            const gH = gridRect.height / scale;
+
+            // 교실 내부 복도 경유 포인트 생성
+            const aislePoints = [];
+            for (let r = 0; r <= 4; r++) {
+                for (let c = 0; c <= 4; c++) {
+                    aislePoints.push({
+                        x: gLeft + gW * (0.08 + c * 0.21),
+                        y: gTop + gH * (0.1 + r * 0.2)
+                    });
+                }
+            }
+
             // [1단계: 뒷문(및 앞문)으로 출석 인원수대로 줄지어 입장]
             frontDoor.classList.add('scale-105', 'bg-amber-600');
             backDoor.classList.add('scale-105', 'bg-amber-600');
