@@ -146,7 +146,7 @@
                 </button>
             </div>
             <div class="text-xs sm:text-sm tracking-wider text-slate-400 font-bold">
-                GAMES <span id="total-games-count" class="text-amber-400 text-sm sm:text-base ml-1">5</span>
+                GAMES <span id="total-games-count" class="text-amber-400 text-sm sm:text-base ml-1">6</span>
             </div>
         </div>
     </header>
@@ -191,13 +191,13 @@
         <!-- 레트로 사각 탭 버튼 (카테고리 필터) -->
         <div id="category-filters" class="flex flex-wrap justify-center gap-2 sm:gap-2.5">
             <button data-category="all" class="filter-btn active px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#4ade80] bg-[#4ade80] text-[#121629] shadow-[0_0_12px_rgba(74,222,128,0.4)] transition-all cursor-pointer">
-                전체 <span class="count-badge ml-1 opacity-80">5</span>
+                전체 <span class="count-badge ml-1 opacity-80">6</span>
             </button>
             <button data-category="multi" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
                 멀티 / 파티 <span class="count-badge ml-1 text-slate-400">1</span>
             </button>
             <button data-category="arcade" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
-                아케이드 / 퍼즐 <span class="count-badge ml-1 text-slate-400">2</span>
+                아케이드 / 퍼즐 <span class="count-badge ml-1 text-slate-400">3</span>
             </button>
             <button data-category="teacher" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
                 선생님용 <span class="count-badge ml-1 text-slate-400">2</span>
@@ -474,18 +474,33 @@
                 openAsPopup: true
             },
             {
-                id: 'classtyping',
+                id: 'coming-soon-2',
                 gameNumber: 'GAME 03',
-                title: '우리반 타자왕',
-                description: '우주선을 탄 쿼카와 함께 날아오는 단어들을 빠르게 입력해 방어하는 우리 반 신나는 타자 대결 게임입니다!',
-                url: 'https://quokka52.github.io/classtyping/',
+                title: '스피드 타자 왕',
+                description: '제한 시간 안에 떨어지는 단어들을 빠르게 입력해 방어하는 타자 게임입니다.',
+                url: '#coming-soon',
                 category: 'arcade',
-                subBadge: '★ 우주 타자 디펜스',
-                tags: ['#우리반타자왕', '#타자연습', '#우주선쿼카'],
+                subBadge: '★ 출시 예정',
+                tags: ['#타자연습', '#시간도전'],
                 themeColor: '#fbbf24', // 네온 옐로우
-                glowColor: 'rgba(251, 191, 36, 0.28)',
-                iconBg: 'from-slate-950 via-indigo-950 to-black',
-                icon: quokkaSpaceshipSvg,
+                glowColor: 'rgba(251, 191, 36, 0.25)',
+                iconBg: 'from-blue-400 to-indigo-500',
+                icon: '⌨️',
+                isReady: false
+            },
+            {
+                id: 'gamdok2027',
+                gameNumber: 'GAME 04',
+                title: '부정행위를 잡아라!',
+                description: '시험 감독관이 되어 학생들의 수상한 움직임을 포착하고 부정행위를 적발하는 스릴 만점 관찰 추리 게임입니다!',
+                url: 'https://quokka52.github.io/2027gamdok/',
+                category: 'arcade',
+                subBadge: '★ 관찰 추리 액션',
+                tags: ['#시험감독관', '#부정행위적발', '#순발력'],
+                themeColor: '#fb7185', // 네온 로즈레드
+                glowColor: 'rgba(251, 113, 133, 0.25)',
+                iconBg: 'from-rose-500 to-red-600',
+                icon: '🕵️',
                 actionLabel: '▶ 게임 시작하기',
                 isReady: true,
                 openAsPopup: true
