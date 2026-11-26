@@ -750,9 +750,9 @@
                 layoutNextBtn.textContent = '다음: 자리 번호 지정 ▶';
                 step3BackBtn.textContent = '◀ 번호 지정 수정';
                 chartStepBadge.textContent = 'STEP 05';
-                if (leftDoors) leftDoors.classList.add('hidden');
+                if (leftDoors) leftDoors.classList.remove('hidden');
                 if (teacherBubble && !isAnimating) {
-                    teacherBubble.innerHTML = '책상마다 랜덤 번호가 준비되었어요! <strong>[🎬 자리 뽑기!]</strong> 버튼을 눌러 시작해 보세요.';
+                    teacherBubble.innerHTML = '책상마다 랜덤 번호가 준비되었어요! <strong>[🎬 자리 뽑기!]</strong> 버튼을 누르면 뒷문으로 친구들이 걸어 들어와 자기 번호 책상에 앉아요.';
                 }
             } else {
                 navBar.classList.remove('sm:grid-cols-5');
@@ -1626,31 +1626,17 @@
 
             walkersLayer.innerHTML = '';
             const frontPt = getStageCenterPoint(frontDoor);
-            const backPt = getStageCenterPoint(backDoor);
-
-            // 복도/통로 웨이포인트 수집 (책상 사이 통로 및 빈 책상 주변)
-            const allCells = Array.from(document.querySelectorAll('#desks-grid > div'));
-            const aislePoints = [];
-            allCells.forEach((cell, idx) => {
-                if (!deskMap[idx]) {
-                    aislePoints.push(getStageCenterPoint(cell));
-                }
-            });
-            // 통로가 적은 배치(예: 4분단 32석 등)를 대비한 기본 중앙·측면 복도 좌표 보강
-            if (aislePoints.length < 6) {
-                [0, 3, 7, 16, 20, 23, 32, 36, 39, 43].forEach(idx => {
-                    if (allCells[idx]) aislePoints.push(getStageCenterPoint(allCells[idx]));
-                });
-            }
-
-            // [1단계: 앞문과 뒷문으로 줄지어 입장]
+            // [1단계: 뒷문(및 앞문)으로 출석 인원수대로 줄지어 입장]
             frontDoor.classList.add('scale-105', 'bg-amber-600');
             backDoor.classList.add('scale-105', 'bg-amber-600');
             if (boardText) boardText.textContent = '입 장 중 ...';
-            teacherBubble.innerHTML = `🚪 <strong>앞문과 뒷문</strong>에서 우리 반 친구들이 줄지어 교실로 들어오고 있어요!`;
+            teacherBubble.innerHTML = isLalessUser
+                ? `🚪 <strong>뒷문</strong>에서 우리 반 친구 <strong>${pairs.length}명</strong>이 줄지어 들어와 자기 번호 책상을 찾고 있어요!`
+                : `🚪 <strong>앞문과 뒷문</strong>에서 우리 반 친구 <strong>${pairs.length}명</strong>이 줄지어 교실로 들어오고 있어요!`;
 
             const activeWalkers = pairs.map((pair, i) => {
-                const useFrontDoor = (i % 2 === 0);
+                // laless 모드에서는 뒷문에서 전원 입장, 기본 모드에서는 앞문·뒷문 분산 입장
+                const useFrontDoor = !isLalessUser && (i % 2 === 1);
                 const doorPt = useFrontDoor ? frontPt : backPt;
                 const el = createStudentWalkerElement(pair.student, i);
                 el.style.transform = `translate(${doorPt.x}px, ${doorPt.y}px) translate(-50%, -50%)`;
@@ -1678,7 +1664,9 @@
 
             // [2단계: 복도 배회 및 앉을 듯 말 듯 탐색 + 말풍선 연출]
             if (boardText) boardText.textContent = '두근... 두근두근...';
-            teacherBubble.innerHTML = `💭 친구들이 교실 통로를 돌아다니며 <strong>내 자리가 어디일지</strong> 두근두근 찾고 있어요!`;
+            teacherBubble.innerHTML = isLalessUser
+                ? `💭 친구들이 교실 통로를 돌아다니며 <strong>자기 번호 책상</strong>을 두근두근 찾고 있어요!`
+                : `💭 친구들이 교실 통로를 돌아다니며 <strong>내 자리가 어디일지</strong> 두근두근 찾고 있어요!`;
 
             let speechTimer = setInterval(() => {
                 if (activeWalkers.length === 0) return;
@@ -1716,17 +1704,30 @@
 
                 const targetPt = getStageCenterPoint(cell);
                 const midPt = { x: w.currentPt.x, y: targetPt.y };
-                triggerWalkerSpeech(w.el, '여기다!');
+                const seatNum = deskNumbers[seatIdx];
+                triggerWalkerSpeech(w.el, isLalessUser && seatNum !== undefined ? `${seatNum}번 여기다!` : '여기다!');
                 await moveWalkerSmooth(w.el, [w.currentPt, midPt, targetPt], 340);
 
                 w.el.remove();
                 seatAssignments[seatIdx] = student;
-                cell.innerHTML = `
-                    <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm">
-                        <div class="w-4 h-4 rounded-full bg-amber-300 border border-[#2c1e12] flex items-center justify-center text-[9px] leading-none mb-0.5">😊</div>
-                        <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(student.label)}</span>
-                    </div>
-                `;
+
+                if (isLalessUser) {
+                    cell.innerHTML = `
+                        <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm relative">
+                            <span class="absolute top-0.5 left-1 text-[10px] text-amber-800 leading-none">${seatNum}</span>
+                            <span class="text-[10px] leading-none mb-0.5">🦆</span>
+                            <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(student.label)}</span>
+                        </div>
+                    `;
+                } else {
+                    cell.innerHTML = `
+                        <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm">
+                            <div class="w-4 h-4 rounded-full bg-amber-300 border border-[#2c1e12] flex items-center justify-center text-[9px] leading-none mb-0.5">😊</div>
+                            <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(student.label)}</span>
+                        </div>
+                    `;
+                }
+
                 const seatedDone = Object.keys(seatAssignments).length;
                 progressLabel.textContent = `${seatedDone} / ${pairs.length}명`;
                 playTone(460 + (seatedDone % 8) * 45, 'square', 0.055, 0, 0.04);
@@ -1838,32 +1839,10 @@
                 });
                 renderDesksGrid();
                 progressLabel.textContent = `${pairs.length} / ${pairs.length}명`;
-                if (!isLalessUser && boardText) {
+                if (boardText) {
                     boardText.textContent = '짝꿍한테 인사해 볼까요?';
                 }
                 teacherBubble.innerHTML = `⚡ 단번에 <strong>${pairs.length}명</strong>의 새 자리가 모두 배정되었습니다!`;
-            } else if (isLalessUser) {
-                const stepDelay = pairs.length > 26 ? 95 : 145;
-                for (let i = 0; i < pairs.length; i++) {
-                    const { student, seatIdx } = pairs[i];
-                    seatAssignments[seatIdx] = student;
-                    const cell = document.querySelector(`#desks-grid [data-cell-idx="${seatIdx}"]`);
-                    const seatNum = deskNumbers[seatIdx];
-                    if (cell) {
-                        cell.innerHTML = `
-                            <div class="seated-pop w-full h-full rounded-lg bg-[#fffdf8] border-2 border-[#2c1e12] flex flex-col items-center justify-center px-1 shadow-sm relative">
-                                <span class="absolute top-0.5 left-1 text-[10px] text-amber-800 leading-none">${seatNum}</span>
-                                <span class="text-[10px] leading-none mb-0.5">🦆</span>
-                                <span class="text-xs sm:text-sm text-[#2c1e12] truncate w-full text-center">${escapeHtml(student.label)}</span>
-                            </div>
-                        `;
-                    }
-                    progressLabel.textContent = `${i + 1} / ${pairs.length}명`;
-                    teacherBubble.innerHTML = `🦆 <strong>${escapeHtml(student.label)}</strong> 학생이 <strong>${seatNum}번</strong> 책상에 앉았습니다! (${i + 1}/${pairs.length})`;
-                    playTone(440 + (i % 8) * 45, 'square', 0.06, 0, 0.045);
-                    await sleep(stepDelay);
-                }
-                teacherBubble.innerHTML = `🎉 <strong>우리 반 전원 자리 배정 완료!</strong> [📋 자리표 저장하기]를 눌러 확인해 보세요.`;
             } else {
                 await runBasicClassroomWalkSequence(pairs, progressLabel, teacherBubble);
             }
