@@ -146,7 +146,7 @@
                 </button>
             </div>
             <div class="text-xs sm:text-sm tracking-wider text-slate-400 font-bold">
-                GAMES <span id="total-games-count" class="text-amber-400 text-sm sm:text-base ml-1">6</span>
+                GAMES <span id="total-games-count" class="text-amber-400 text-sm sm:text-base ml-1">7</span>
             </div>
         </div>
     </header>
@@ -191,13 +191,16 @@
         <!-- 레트로 사각 탭 버튼 (카테고리 필터) -->
         <div id="category-filters" class="flex flex-wrap justify-center gap-2 sm:gap-2.5">
             <button data-category="all" class="filter-btn active px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#4ade80] bg-[#4ade80] text-[#121629] shadow-[0_0_12px_rgba(74,222,128,0.4)] transition-all cursor-pointer">
-                전체 <span class="count-badge ml-1 opacity-80">6</span>
+                전체 <span class="count-badge ml-1 opacity-80">7</span>
             </button>
             <button data-category="multi" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
                 멀티 / 파티 <span class="count-badge ml-1 text-slate-400">1</span>
             </button>
             <button data-category="arcade" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
                 아케이드 / 퍼즐 <span class="count-badge ml-1 text-slate-400">3</span>
+            </button>
+            <button data-category="stealth" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
+                몰래 / 스릴 <span class="count-badge ml-1 text-slate-400">1</span>
             </button>
             <button data-category="teacher" class="filter-btn px-4 py-2 text-xs sm:text-sm font-bold border-2 border-[#3b3363] bg-[#1e193b] text-slate-300 hover:border-slate-400 hover:text-white transition-all cursor-pointer">
                 선생님용 <span class="count-badge ml-1 text-slate-400">2</span>
@@ -501,6 +504,23 @@
                 glowColor: 'rgba(251, 113, 133, 0.25)',
                 iconBg: 'from-rose-500 to-red-600',
                 icon: '🕵️',
+                actionLabel: '▶ 게임 시작하기',
+                isReady: true,
+                openAsPopup: true
+            },
+            {
+                id: 'teacher-molrae',
+                gameNumber: 'GAME 05',
+                title: '선생님 몰래',
+                description: '선생님이 칠판을 보거나 돌아서기 전에 눈치껏 딴짓 미션을 완수하세요! 들키지 않고 끝까지 살아남는 스릴 만점 잠입 눈치 게임입니다.',
+                url: 'https://quokka52.github.io/teacher-molrae/',
+                category: 'stealth',
+                subBadge: '★ 신작 출시',
+                tags: ['#눈치게임', '#스릴만점', '#신작'],
+                themeColor: '#fb923c', // 네온 오렌지
+                glowColor: 'rgba(251, 146, 60, 0.25)',
+                iconBg: 'from-amber-500 to-orange-600',
+                icon: '🫣',
                 actionLabel: '▶ 게임 시작하기',
                 isReady: true,
                 openAsPopup: true
@@ -811,6 +831,7 @@
         function getCategoryText(cat) {
             if (cat === 'multi') return '멀티 / 파티';
             if (cat === 'arcade') return '아케이드 / 퍼즐';
+            if (cat === 'stealth') return '몰래 / 스릴';
             if (cat === 'teacher') return '선생님용';
             return '기타';
         }
