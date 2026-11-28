@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>선생님 몰래 - 3D 교실 서바이벌</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Tone.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Galmuri11 Korean Retro Pixel Font -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css">
+    <style>
+        body {
+            font-family: 'Galmuri11', sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #121629;
+        }
+        .font-jua {
+            font-family: 'Galmuri11', sans-serif;
+        }
+        .font-title-block {
+            font-family: 'Galmuri11', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-shadow: 0 5px 0 rgba(10, 14, 32, 0.9), 0 10px 24px rgba(0, 0, 0, 0.65);
+        }
+        .menu-btn-primary {
+            background: #4f46e5;
+            border: 3px solid #a5b4fc;
+            box-shadow: inset -3px -3px 0 #312e81, inset 3px 3px 0 #818cf8, 4px 4px 0 #090d1a;
+            border-radius: 0;
+            transition: transform 0.06s steps(1), box-shadow 0.06s steps(1), filter 0.1s;
+        }
+        .menu-btn-primary:hover {
+            filter: brightness(1.1);
+            border-color: #fde047;
+        }
+        .menu-btn-primary:active {
+            transform: translate(3px, 3px);
+            box-shadow: inset -2px -2px 0 #312e81, inset 2px 2px 0 #818cf8, 1px 1px 0 #090d1a;
+        }
+        .menu-btn-dark {
+            background: #232d52;
+            border: 3px solid #64748b;
+            box-shadow: inset -3px -3px 0 #11162b, inset 3px 3px 0 #3b4b82, 4px 4px 0 #090d1a;
+            border-radius: 0;
+            transition: transform 0.06s steps(1), box-shadow 0.06s steps(1), background 0.1s;
+        }
+        .menu-btn-dark:hover {
+            background: #2f3c6b;
+            border-color: #fde047;
+            color: #fde047;
+        }
+        .menu-btn-dark:active {
+            transform: translate(3px, 3px);
+            box-shadow: inset -2px -2px 0 #11162b, inset 2px 2px 0 #3b4b82, 1px 1px 0 #090d1a;
+        }
+        .pixel-nav-btn {
+            background: #273256;
+            color: #f8fafc;
+            border: 2px solid #94a3b8;
+            box-shadow: inset -2px -2px 0 #141a30, inset 2px 2px 0 #475569, 3px 3px 0 #090d1a;
+            border-radius: 0;
+            transition: transform 0.06s steps(1), box-shadow 0.06s steps(1), background 0.1s;
+        }
+        .pixel-nav-btn:hover {
+            background: #354473;
+            border-color: #fde047;
+            color: #fde047;
+        }
+        .pixel-nav-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: inset -1px -1px 0 #141a30, inset 1px 1px 0 #475569, 1px 1px 0 #090d1a;
+        }
+        .glass-dark-card {
+            background: rgba(20, 26, 48, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        @keyframes pulseDanger {
+            0%, 100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
+            50% { box-shadow: inset 0 0 50px 14px rgba(239, 68, 68, 0.5); }
+        }
+        .danger-vignette {
+            animation: pulseDanger 0.55s infinite;
+        }
+        @keyframes floatScore {
+            0% { opacity: 1; transform: translate(-50%, 0) scale(0.95); }
+            100% { opacity: 0; transform: translate(-50%, -55px) scale(1.2); }
+        }
+        .float-score {
+            animation: floatScore 0.8s ease-out forwards;
+        }
+        @keyframes countPop {
+            0% { transform: scale(1.45); opacity: 0.2; }
+            25% { transform: scale(1.0); opacity: 1; }
+            85% { transform: scale(1.0); opacity: 1; }
+            100% { transform: scale(0.85); opacity: 0; }
+        }
+        .countdown-num {
+            animation: countPop 0.95s ease-out forwards;
+            text-shadow: 0 6px 0 rgba(10, 14, 32, 0.95), 0 12px 30px rgba(0, 0, 0, 0.8);
+        }
+    </style>
+</head>
+<body class="w-screen h-screen relative overflow-hidden text-white">
+
+    <!-- FULL-SCREEN ISOMETRIC 3D VOXEL CLASSROOM DIORAMA -->
+    <div id="threeCanvasHost" class="fixed inset-0 w-full h-full z-0"></div>
+
+    <!-- RED DANGER VIGNETTE OVERLAY -->
+    <div id="dangerOverlay" class="fixed inset-0 pointer-events-none z-10 hidden danger-vignette"></div>
+
+    <!-- TOP NAVIGATION BAR -->
+    <header id="topNavBar" class="fixed top-0 left-0 right-0 z-30 px-4 sm:px-6 py-3 flex items-center justify-between pointer-events-none">
+        <div class="flex items-center gap-2.5 pointer-events-auto text-xs sm:text-sm">
+            <span class="font-bold text-slate-200 tracking-tight">오둥게임즈</span>
+            <span class="text-slate-600">|</span>
+            <a href="https://quokka52.github.io" id="topHomeBtn" class="pixel-nav-btn inline-block px-3 py-1 text-xs font-bold tracking-tight">
+                홈으로
+            </a>
+            <span class="text-slate-400 text-xs font-medium hidden sm:inline">선생님 몰래</span>
+        </div>
+
+        <div id="topRightTitleActions" class="flex items-center gap-2 pointer-events-auto">
+            <span id="activeStudentPill" class="hidden bg-indigo-950/90 border border-indigo-500/40 text-indigo-200 px-3 py-1 rounded-full text-xs font-bold">
+                학급 미등록
+            </span>
+            <button id="soundToggleBtn" class="bg-slate-800/85 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-700 transition">
+                🔊 효과음
+            </button>
+        </div>
+    </header>
+
+    <!-- LAYER 1: MAIN TITLE OVERLAY -->
+    <main id="titleOverlay" class="fixed inset-0 z-20 flex flex-col items-center justify-center px-4 pointer-events-none">
+        <div class="w-full max-w-[330px] sm:max-w-[370px] flex flex-col items-center text-center pointer-events-auto -mt-4">
+            <div class="relative inline-block mb-1.5">
+                <span class="absolute -top-5 -right-3 sm:-right-6 rotate-6 bg-amber-400 text-slate-950 text-[11px] sm:text-xs font-black px-2.5 py-0.5 rounded-md shadow-md whitespace-nowrap">
+                    오늘은 🌶️ 걸리면 2배!
+                </span>
+                <h1 class="font-title-block text-5xl sm:text-6xl leading-none tracking-tight select-none">
+                    <span class="text-white">선생님</span>
+                    <span class="text-amber-300 ml-1">몰래</span>
+                </h1>
+            </div>
+
+            <p class="text-xs sm:text-sm text-slate-200/90 font-medium mb-6 drop-shadow">
+                마라탕부터 춤까지, 들킬 때까지 버텨 보세요
+            </p>
+
+            <div class="w-full space-y-3">
+                <button id="btnStartClass" class="menu-btn-primary w-full py-3.5 font-bold text-base sm:text-lg text-white tracking-wide">
+                    수업 시작
+                </button>
+
+                <button id="btnOpenRanking" class="menu-btn-dark w-full py-3 font-semibold text-sm sm:text-base text-slate-200">
+                    랭킹
+                </button>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="btnOpenSettings" class="menu-btn-dark py-3 font-semibold text-sm text-slate-200">
+                        설정
+                    </button>
+                    <button id="btnOpenHelp" class="menu-btn-dark py-3 font-semibold text-sm text-slate-200">
+                        도움말
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-4 flex items-center justify-center gap-2 text-xs text-slate-300">
+                <span id="titleProfileHint">학급코드 · 반 · 닉네임 입력 후 바로 플레이</span>
+                <button id="btnQuickProfile" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-white px-2.5 py-1 rounded text-[11px] font-bold transition">
+                    학급 입력
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL: NO-LOGIN STUDENT INFO ENTRY -->
+    <div id="entryModal" class="hidden fixed inset-0 z-30 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+        <div class="glass-dark-card w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
+                <div>
+                    <span class="text-[11px] font-bold text-indigo-400 uppercase">로그인 없이 간편 입장</span>
+                    <h2 class="font-jua text-2xl text-white">우리 반 출석 체크</h2>
+                </div>
+                <button id="closeEntryBtn" class="text-slate-400 hover:text-white text-xl px-2">✕</button>
+            </div>
+
+            <form id="entryForm" class="space-y-4">
+                <div>
+                    <label for="classCodeInput" class="block text-xs font-bold text-slate-300 mb-1.5">
+                        🏫 학급코드 <span class="text-rose-400">*</span>
+                    </label>
+                    <input type="text" id="classCodeInput" required maxlength="12" placeholder="예: 2026A 또는 우리반코드"
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-600 focus:border-indigo-400 outline-none font-bold text-white uppercase placeholder-slate-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="classNumInput" class="block text-xs font-bold text-slate-300 mb-1.5">
+                            📛 반 <span class="text-rose-400">*</span>
+                        </label>
+                        <input type="text" id="classNumInput" required maxlength="10" placeholder="예: 3반"
+                            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-600 focus:border-indigo-400 outline-none font-bold text-white placeholder-slate-500">
+                    </div>
+
+                    <div>
+                        <label for="nicknameInput" class="block text-xs font-bold text-slate-300 mb-1.5">
+                            😎 닉네임 <span class="text-rose-400">*</span>
+                        </label>
+                        <input type="text" id="nicknameInput" required maxlength="10" placeholder="예: 마라탕장인"
+                            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-600 focus:border-indigo-400 outline-none font-bold text-white placeholder-slate-500">
+                    </div>
+                </div>
+
+                <div id="formError" class="hidden text-xs font-bold text-rose-400 bg-rose-950/60 border border-rose-500/40 rounded-lg px-3 py-2">
+                    학급코드, 반, 닉네임을 모두 입력해주세요!
+                </div>
+
+                <button type="submit" class="menu-btn-primary w-full py-3.5 font-jua text-xl text-white">
+                    저장하고 바로 수업 시작 🔥
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CLASSROOM RANKING BOARD -->
+    <div id="rankingModal" class="hidden fixed inset-0 z-30 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+        <div class="glass-dark-card w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <div>
+                    <h2 id="rankingHeaderTitle" class="font-jua text-2xl text-amber-300">🏆 학급 실시간 랭킹</h2>
+                    <p class="text-xs text-slate-400">같은 학급코드 친구들과 점수를 겨뤄보세요</p>
+                </div>
+                <button id="closeRankingBtn" class="text-slate-400 hover:text-white text-xl px-2">✕</button>
+            </div>
+
+            <div id="rankingList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+
+            <button id="rankingPlayBtn" class="menu-btn-primary w-full py-3 font-jua text-lg text-white">
+                지금 도전하기
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: SETTINGS -->
+    <div id="settingsModal" class="hidden fixed inset-0 z-30 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+        <div class="glass-dark-card w-full max-w-sm rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <h2 class="font-jua text-2xl text-white">⚙️ 게임 설정</h2>
+                <button id="closeSettingsBtn" class="text-slate-400 hover:text-white text-xl px-2">✕</button>
+            </div>
+
+            <div class="space-y-3 text-sm">
+                <div class="flex items-center justify-between bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                    <span class="font-bold text-slate-200">🔊 효과음 사운드</span>
+                    <button id="settingsSoundBtn" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold">켜짐</button>
+                </div>
+
+                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700 flex items-center justify-between">
+                    <div>
+                        <span class="font-bold text-slate-200 block">🏫 학급/닉네임 수정</span>
+                        <span id="settingsProfileSummary" class="text-xs text-slate-400">미설정</span>
+                    </div>
+                    <button id="settingsEditProfileBtn" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold">수정</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: HELP -->
+    <div id="helpModal" class="hidden fixed inset-0 z-30 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+        <div class="glass-dark-card w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <h2 class="font-jua text-2xl text-amber-300">📖 도움말 & 규칙</h2>
+                <button id="closeHelpBtn" class="text-slate-400 hover:text-white text-xl px-2">✕</button>
+            </div>
+
+            <div class="space-y-2.5 text-xs sm:text-sm text-slate-200 leading-relaxed">
+                <p class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                    <strong class="text-emerald-400">1. 판서할 때 딴짓하기:</strong> 선생님이 칠판에 판서할 때 <kbd class="bg-slate-700 px-1.5 py-0.5 rounded">Space</kbd> 키 또는 하단 바를 꾹 눌러 몰래 딴짓을 하세요. 마우스를 움직이면 고개를 돌려 주변을 볼 수 있습니다!
+                </p>
+                <p class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                    <strong class="text-amber-400">2. 1~7번 딴짓 전환 & 자습 시간:</strong> 숫자키 1~7로 책상 위 음식·아이템을 바꿀 수 있습니다. 가끔 다른 선생님이 불러서 선생님이 앞문으로 나가면 <strong>자습 시간(점수 2배!)</strong>이 됩니다.
+                </p>
+                <p class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                    <strong class="text-rose-400">3. 뒤돌아보면 즉시 정지:</strong> 선생님 머리 위에 <span class="text-amber-300 font-bold">⁉️</span> 표시가 뜨면 즉시 손을 떼세요! 감시 시야나 매운 냄새에 걸리면 교무실행입니다.
+                </p>
+            </div>
+
+            <button id="closeHelpConfirmBtn" class="menu-btn-primary w-full py-3 font-jua text-lg text-white">
+                알겠어요!
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: GAME OVER RESULT -->
+    <div id="resultModal" class="hidden fixed inset-0 z-30 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs">
+        <div class="glass-dark-card w-full max-w-md rounded-2xl p-6 text-center shadow-2xl space-y-4">
+            <span id="resultTag" class="inline-block px-4 py-1 rounded-full text-xs font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                🚨 선생님께 적발!
+            </span>
+            <div id="resultEmoji" class="text-6xl">😱</div>
+            <h2 id="resultTitle" class="font-jua text-3xl text-white">교무실 소환!</h2>
+            <p id="resultDesc" class="text-xs sm:text-sm text-slate-300">선생님이 뒤돌아볼 때 딴짓하다가 딱 걸렸습니다.</p>
+
+            <div class="bg-slate-900/90 rounded-2xl p-4 border border-slate-700 space-y-1">
+                <span class="text-xs font-bold text-slate-400">최종 기록</span>
+                <p id="resultScoreText" class="font-jua text-4xl text-amber-300">0점</p>
+                <p id="resultRankText" class="text-xs font-bold text-indigo-300">우리 반 1위!</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-1">
+                <button id="btnRetry" class="menu-btn-primary py-3 font-jua text-lg text-white">
+                    다시 도전 🔄
+                </button>
+                <button id="btnBackTitle" class="menu-btn-dark py-3 font-jua text-lg text-slate-200">
+                    메인으로 🏠
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3-SECOND COUNTDOWN OVERLAY -->
+    <div id="countdownOverlay" class="hidden fixed inset-0 z-30 pointer-events-none flex flex-col items-center justify-center">
+        <div class="mb-28 bg-white text-slate-900 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg border-2 border-slate-300">
+            자, 수업 시작합니다~
+        </div>
+        <div id="countdownNumber" class="countdown-num text-7xl sm:text-8xl font-bold text-white select-none -mt-12">
+            3
+        </div>
+    </div>
+
+    <!-- LAYER 2: ACTIVE GAMEPLAY HUD -->
+    <div id="gameplayHUD" class="hidden fixed inset-0 z-20 pointer-events-none flex flex-col justify-between p-4">
+        <!-- TOP-LEFT SCORE & DANGER LEVEL CARD -->
+        <div class="fixed top-12 sm:top-14 left-4 z-30 pointer-events-none">
+            <div class="bg-white/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-xl border border-slate-200/80 min-w-[205px] sm:min-w-[225px]">
+                <div id="hudClassSubjectLabel" class="text-[11px] font-bold text-slate-400 mb-0.5">
+                    신곡중 수학 시간
+                </div>
+                <div class="flex items-center justify-between gap-3 mb-2">
+                    <span id="hudScore" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-none">0</span>
+                    <span id="hudDangerBadge" class="bg-indigo-50 text-slate-600 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                        위험도 Lv.1
+                    </span>
+                </div>
+                <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div id="hudLevelProgress" class="h-full bg-amber-400 rounded-full transition-all duration-150" style="width: 15%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOP-RIGHT WIDGET -->
+        <div class="fixed top-3 right-4 z-30 flex flex-col items-end gap-2 pointer-events-auto">
+            <div class="bg-[#1e233a]/95 border border-slate-700/80 text-white px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 font-bold text-sm sm:text-base">
+                <span>⏱️</span>
+                <span id="topRightTimer">0:00</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="btnExitMatch" type="button" class="bg-[#1e233a]/95 hover:bg-slate-700 border border-slate-700/80 text-white px-4 py-1.5 rounded-full shadow-lg text-xs sm:text-sm font-bold transition">
+                    나가기
+                </button>
+                <button id="btnTopRightMute" type="button" class="w-9 h-9 bg-[#1e233a]/95 hover:bg-slate-700 border border-slate-700/80 text-white rounded-full shadow-lg flex items-center justify-center text-sm transition">
+                    🔊
+                </button>
+            </div>
+
+            <div class="bg-[#1e233a]/95 border border-slate-700/80 pl-3.5 pr-1.5 py-1.5 rounded-full shadow-lg flex items-center gap-2.5">
+                <span class="text-xs font-bold text-white flex items-center gap-1 whitespace-nowrap">
+                    <span>🌶️</span>
+                    <span>냄새</span>
+                </span>
+                <div class="w-20 sm:w-24 h-2.5 bg-[#121629] rounded-full overflow-hidden border border-slate-700/70">
+                    <div id="smellGaugeFill" class="h-full bg-gradient-to-r from-amber-400 to-rose-500 rounded-full transition-all duration-100" style="width: 0%"></div>
+                </div>
+                <button id="btnOpenWindow" type="button" class="bg-white hover:bg-amber-200 active:scale-95 text-slate-900 px-3 py-1 rounded-full text-xs font-bold shadow transition whitespace-nowrap">
+                    창문 열기
+                </button>
+            </div>
+        </div>
+
+        <!-- Center Top Teacher Status Pill -->
+        <div class="w-full max-w-xl mx-auto pt-24 sm:pt-2 flex justify-center">
+            <div id="teacherStatePill" class="px-5 py-2 rounded-full font-jua text-sm sm:text-base shadow-xl border border-white/25 bg-emerald-500 text-white transition-all">
+                ✍️ 선생님 판서 중 (지금 딴짓!)
+            </div>
+        </div>
+
+        <!-- Center Floating Popups -->
+        <div id="popupHost" class="relative flex-1 w-full max-w-xl mx-auto"></div>
+
+        <!-- Bottom Compact Hotbar & Key Guide Pill -->
+        <div class="w-full max-w-lg mx-auto pb-2 sm:pb-3 pointer-events-auto flex flex-col items-center gap-2">
+            <div id="holdActionBtn" class="bg-[#1b2038]/90 backdrop-blur-md border border-slate-600/60 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2 text-[11px] sm:text-xs text-slate-200 cursor-pointer select-none">
+                <span class="bg-indigo-500 text-white font-bold px-2 py-0.5 rounded-md">스페이스바</span>
+                <span class="font-medium">꾹 누르면 몰래 하기</span>
+                <span class="text-slate-500">|</span>
+                <span class="bg-indigo-500/80 text-white font-bold px-1.5 py-0.5 rounded">1 ~ 6</span>
+                <span class="font-medium">딴짓 바꾸기</span>
+                <span class="text-slate-500">|</span>
+                <span class="bg-indigo-500/80 text-white font-bold px-1.5 py-0.5 rounded">7</span>
+                <span class="font-medium">비행기</span>
+            </div>
+
+            <div class="w-64 sm:w-72 flex flex-col items-center gap-1">
+                <span id="actionProgressLabel" class="text-[11px] font-bold text-white drop-shadow">연근 한 입까지</span>
+                <div class="w-full h-1.5 bg-slate-900/80 rounded-full overflow-hidden border border-white/20">
+                    <div id="actionProgressFill" class="h-full bg-amber-400 rounded-full transition-all duration-75" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="distractionHotbar" class="w-full bg-[#1b2038]/95 backdrop-blur-md border border-indigo-400/40 rounded-2xl p-2 shadow-2xl grid grid-cols-7 gap-1.5">
+                <button type="button" data-mode="ramen" class="mode-slot relative flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border border-slate-700/80 bg-[#252c4a] hover:border-amber-300 transition">
+                    <span class="absolute top-1 left-1.5 w-3.5 h-3.5 rounded-full bg-slate-700 text-[9px] font-bold text-slate-200 flex items-center justify-center">1</span>
+                    <span class="absolute -top-2 right-0.5 bg-amber-400 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full shadow">2배</span>
+                    <span class="text-lg sm:text-xl leading-tight mt-1">🍜</span>
+                    <span class="text-[10px] font-bold text-slate-200 truncate w-full text-center mt-0.5">컵라면</span>
+                </button>
+                <button type="button" data-mode="youtube" class="mode-slot relative flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border border-slate-700/80 bg-[#252c4a] hover:border-amber-300 transition">
+                    <span class="absolute top-1 left-1.5 w-3.5 h-3.5 rounded-full bg-slate-700 text-[9px] font-bold text-slate-200 flex items-center justify-center">2</span>
+                    <span class="text-lg sm:text-xl leading-tight mt-1">📱</span>
+                    <span class="text-[10px] font-bold text-slate-200 truncate w-full text-center mt-0.5">유튜브</span>
+                </button>
+                <button type="button" data-mode="makeup" class="mode-slot relative flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border border-slate-700/80 bg-[#252c4a] hover:border-amber-300 transition">
+                    <span class="absolute top-1 left-1.5 w-3.5 h-3.5 rounded-full bg-slate-700 text-[9px] font-bold text-slate-200 flex items-center justify-center">3</span>
+                    <span class="text-lg sm:text-xl leading-tight mt-1">💄</span>
+                    <span class="text-[10px] font-bold text-slate-200 truncate w-full text-center mt-0.5">화장하기</span>
+                </button>
+                <button type="button" data-mode="maratang" class="mode-slot relative flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border-2 border-amber-400 bg-amber-500/20 transition">
+                    <span class="absolute top-1 left-1.5 w-3.5 h-3.5 rounded-full bg-amber-400 text-[9px] font-bold text-slate-950 flex items-center justify-center">4</span>
+                    <span class="text-lg sm:text-xl leading-tight mt-1">🍲</span>
+                    <span class="text-[10px] font-bold text-amber-200 truncate w-full text-center mt-0.5">마라탕</span>
+                </button>
+                <button type="button" data-mode="dance" class="mode-slot relative flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border border-slate-700/80 bg-[#252c4a] hover:border-amber-300 transition">
+                    <span class="absolute top-1 left-1.5 w-3.5 h-3.5 rounded-full bg-slate-700 text-[9px] font-bold text-slate-200 flex items-center justify-center">5</span>
+                    <span class="text-lg sm:text-xl leading-tight mt-1">💃</span>
+                    <span class="text-[10px] font-bold text-slate-200 truncate w-full text-center mt-0.5">춤추기</span>
+                </button>
+                <button type="button" data-mode="store" class="mode-slot relative flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border border-slate-700/80 bg-[#252c4a] hover:border-amber-300 transition">
+                    <span class="absolute top-1 left-1.5 w-3.5 h-3.5 rounded-full bg-slate-700 text-[9px] font-bold text-slate-200 flex items-center justify-center">6</span>
+                    <span class="text-lg sm:text-xl leading-tight mt-1">🏃</span>
+                    <span class="text-[10px] font-bold text-slate-200 truncate w-full text-center mt-0.5">매점 가기</span>
+                </button>
+                <button type="button" data-mode="airplane" class="mode-slot relative flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border border-slate-700/80 bg-[#252c4a] hover:border-amber-300 transition">
+                    <span class="absolute top-1 left-1.5 w-3.5 h-3.5 rounded-full bg-slate-700 text-[9px] font-bold text-slate-200 flex items-center justify-center">7</span>
+                    <span class="text-lg sm:text-xl leading-tight mt-1">✈️</span>
+                    <span class="text-[10px] font-bold text-slate-200 truncate w-full text-center mt-0.5">비행기</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Isometric 3D Voxel Classroom Sneak Game
+         * - Complete self-contained single-file implementation.
+         */
+
+        // --- 1. GAME STATE ---
+        const gameState = {
+            classCode: '',
+            classNum: '',
+            nickname: '',
+            mode: 'maratang',
+            soundOn: true,
+
+            countingDown: false,
+            playing: false,
+            score: 0,
+            combo: 1.0,
+            smellGauge: 0.0,
+            elapsedTime: 0.0,
+            actionProgress: 0.0,
+            isSneaking: false,
+
+            // Teacher AI & Random Office Call ("자습 시간 2배") Event
+            teacherPhase: 'WRITING', // 'WRITING' | 'WARNING' | 'LOOKING' | 'CALLED_OUT' | 'SELF_STUDY'
+            phaseElapsed: 0,
+            phaseDuration: 2.8,
+            teacherYaw: Math.PI,
+            targetTeacherYaw: Math.PI,
+            teacherPos: new THREE.Vector3(1.15, 0.04, -3.25),
+            targetTeacherPos: new THREE.Vector3(1.15, 0.04, -3.25),
+            nextOfficeCallTimer: 16.0,
+
+            // Camera & Mouse Free-Look
+            dioramaOrbitY: 0,
+            lookYawOffset: 0,
+            lookPitchOffset: 0,
+            camPos: new THREE.Vector3(-11.2, 11.8, 13.0),
+            camLook: new THREE.Vector3(0, 0.5, 0),
+            targetCamPos: new THREE.Vector3(-11.2, 11.8, 13.0),
+            targetCamLook: new THREE.Vector3(0, 0.5, 0)
+        };
+
+        const MODE_META = {
+            ramen:    { key: '1', label: '컵라면 후루룩!',   sub: '면발 한 젓가락까지', mult: 2.0, smellRate: 8.5, item: 'ramen' },
+            youtube:  { key: '2', label: '몰래 유튜브 시청!', sub: '쇼츠 한 편 끝까지',   mult: 1.2, smellRate: 0.0, item: 'phone' },
+            makeup:   { key: '3', label: '몰래 화장하기!',   sub: '립틴트 바르기까지',   mult: 1.3, smellRate: 1.5, item: 'makeup' },
+            maratang: { key: '4', label: '몰래 마라탕 흡입!', sub: '연근 한 입까지',     mult: 1.8, smellRate: 11.0, item: 'maratang' },
+            dance:    { key: '5', label: '몰래 춤추기!',     sub: '포인트 안무까지',     mult: 1.5, smellRate: 0.0, item: 'none' },
+            store:    { key: '6', label: '매점 간식 먹기!',   sub: '피자빵 한 입까지',   mult: 1.6, smellRate: 5.0, item: 'snack' },
+            airplane: { key: '7', label: '종이비행기 날리기!', sub: '비행기 접기까지',   mult: 1.7, smellRate: 0.0, item: 'plane' }
+        };
+
+        // --- 2. SOUND SYNTH (TONE.JS) ---
+        let synthReady = false;
+        let popSynth = null;
+        let alertSynth = null;
+
+        async function initAudio() {
+            if (synthReady || typeof Tone === 'undefined') return;
+            try {
+                await Tone.start();
+                popSynth = new Tone.Synth({
+                    oscillator: { type: 'triangle' },
+                    envelope: { attack: 0.01, decay: 0.08, sustain: 0.05, release: 0.08 }
+                }).toDestination();
+                alertSynth = new Tone.Synth({
+                    oscillator: { type: 'sawtooth' },
+                    envelope: { attack: 0.01, decay: 0.16, sustain: 0.1, release: 0.12 }
+                }).toDestination();
+                synthReady = true;
+            } catch (e) {
+                console.warn('Audio init skipped:', e);
+            }
+        }
+
+        function sfx(type) {
+            if (!gameState.soundOn || !synthReady) return;
+            try {
+                const now = Tone.now();
+                if (type === 'tick') popSynth.triggerAttackRelease('C6', '32n', now);
+                else if (type === 'warn') alertSynth.triggerAttackRelease('A4', '16n', now);
+                else if (type === 'turn') alertSynth.triggerAttackRelease('F#3', '8n', now);
+                else if (type === 'bite') {
+                    popSynth.triggerAttackRelease('E5', '16n', now);
+                    popSynth.triggerAttackRelease('G5', '16n', now + 0.07);
+                } else if (type === 'office') {
+                    popSynth.triggerAttackRelease('C5', '16n', now);
+                    popSynth.triggerAttackRelease('E5', '16n', now + 0.08);
+                    popSynth.triggerAttackRelease('G5', '8n', now + 0.16);
+                } else if (type === 'caught') {
+                    alertSynth.triggerAttackRelease('D3', '8n', now);
+                    alertSynth.triggerAttackRelease('A2', '4n', now + 0.12);
+                }
+            } catch (e) {}
+        }
+
+        // --- 3. THREE.JS ISOMETRIC VOXEL CLASSROOM DIORAMA ---
+        let scene, camera, renderer;
+        let classroomGroup, ceilingMesh, teacherGroup, teacherRightArm, visionCone, warningBadgeMesh;
+        let guestTeacherGroup, guestRightArm, frontDoorPivot;
+        let deskItems = {};
+        let fpLeftArm, fpRightArm, flyingPlaneMesh;
+        let studentGroups = [];
+        let playerSeatGroup;
+        const PLAYER_SEAT_POS = { x: 0.65, z: 2.35 };
+        const clock = new THREE.Clock();
+
+        function init3DDiorama() {
+            const host = document.getElementById('threeCanvasHost');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x121629);
+
+            camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.08, 120);
+            camera.position.copy(gameState.camPos);
+            camera.lookAt(gameState.camLook);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            host.appendChild(renderer.domElement);
+
+            // Ambient & Sunlight
+            const ambient = new THREE.AmbientLight(0x8fa4d4, 0.72);
+            scene.add(ambient);
+
+            const sunLight = new THREE.DirectionalLight(0xfff1d6, 1.25);
+            sunLight.position.set(-14, 18, 8);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.near = 2;
+            sunLight.shadow.camera.far = 45;
+            const d = 11;
+            sunLight.shadow.camera.left = -d;
+            sunLight.shadow.camera.right = d;
+            sunLight.shadow.camera.top = d;
+            sunLight.shadow.camera.bottom = -d;
+            sunLight.shadow.bias = -0.0005;
+            scene.add(sunLight);
+
+            const fillLight = new THREE.DirectionalLight(0x6366f1, 0.35);
+            fillLight.position.set(10, 8, 12);
+            scene.add(fillLight);
+
+            buildVoxelClassroom();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            setupMouseFreeLook(renderer.domElement);
+        }
+
+        function createVoxelCharacter(shirtColor, hairColor, isTeacher = false) {
+            const group = new THREE.Group();
+
+            // Legs
+            const legMat = new THREE.MeshStandardMaterial({ color: isTeacher ? 0x1e293b : 0x334155, roughness: 0.8 });
+            const legL = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.42, 0.16), legMat);
+            legL.position.set(-0.1, 0.21, 0);
+            legL.castShadow = true;
+            const legR = legL.clone();
+            legR.position.x = 0.1;
+            group.add(legL, legR);
+
+            // Torso
+            const torsoMat = new THREE.MeshStandardMaterial({ color: shirtColor, roughness: 0.7 });
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.52, 0.24), torsoMat);
+            torso.position.set(0, 0.68, 0);
+            torso.castShadow = true;
+            group.add(torso);
+
+            // Head
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xfcd5b5, roughness: 0.6 });
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.38, 0.38), skinMat);
+            head.position.set(0, 1.14, 0);
+            head.castShadow = true;
+            group.add(head);
+
+            // Hair Block
+            const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.9 });
+            const hairTop = new THREE.Mesh(new THREE.BoxGeometry(0.41, 0.14, 0.41), hairMat);
+            hairTop.position.set(0, 1.28, 0);
+            const hairBack = new THREE.Mesh(new THREE.BoxGeometry(0.41, 0.32, 0.14), hairMat);
+            hairBack.position.set(0, 1.16, -0.15);
+            group.add(hairTop, hairBack);
+
+            // Glasses for Teacher
+            if (isTeacher) {
+                const glassMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+                const glass = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.04), glassMat);
+                glass.position.set(0, 1.15, 0.19);
+                group.add(glass);
+            }
+
+            // Arms
+            const armMat = new THREE.MeshStandardMaterial({ color: shirtColor, roughness: 0.7 });
+            const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.44, 0.13), armMat);
+            leftArm.position.set(-0.29, 0.72, 0.08);
+            leftArm.rotation.x = isTeacher ? 0 : -0.7;
+            leftArm.castShadow = true;
+
+            const rightArmPivot = new THREE.Group();
+            rightArmPivot.position.set(0.29, 0.88, 0);
+            const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.44, 0.13), armMat);
+            rightArm.position.set(0, -0.18, 0.06);
+            rightArm.castShadow = true;
+            rightArmPivot.add(rightArm);
+
+            group.add(leftArm, rightArmPivot);
+            return { group, rightArmPivot };
+        }
+
+        function buildVoxelClassroom() {
+            classroomGroup = new THREE.Group();
+            scene.add(classroomGroup);
+
+            const roomW = 9.2;
+            const roomD = 8.4;
+            const wallH = 3.2;
+
+            // Wooden Floor Base
+            const floor = new THREE.Mesh(
+                new THREE.BoxGeometry(roomW + 0.5, 0.25, roomD + 0.5),
+                new THREE.MeshStandardMaterial({ color: 0xa17c5b, roughness: 0.85 })
+            );
+            floor.position.set(0, -0.12, 0);
+            floor.receiveShadow = true;
+            classroomGroup.add(floor);
+
+            // Floor Plank Grid Lines
+            const plankMat = new THREE.MeshBasicMaterial({ color: 0x7c5c40 });
+            for (let x = -roomW / 2; x <= roomW / 2; x += 0.92) {
+                const line = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.01, roomD), plankMat);
+                line.position.set(x, 0.005, 0);
+                classroomGroup.add(line);
+            }
+
+            // Walls
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0xddd4c0, roughness: 0.9 });
+            const lowerTrimMat = new THREE.MeshStandardMaterial({ color: 0xc2b59b, roughness: 0.9 });
+
+            // Back Wall (Chalkboard Wall)
+            const backWall = new THREE.Mesh(new THREE.BoxGeometry(roomW + 0.5, wallH, 0.28), wallMat);
+            backWall.position.set(0, wallH / 2, -roomD / 2 - 0.12);
+            backWall.castShadow = true;
+            backWall.receiveShadow = true;
+            classroomGroup.add(backWall);
+
+            // Front Wall (Behind Player)
+            const frontWall = new THREE.Mesh(new THREE.BoxGeometry(roomW + 0.5, wallH, 0.28), wallMat);
+            frontWall.position.set(0, wallH / 2, roomD / 2 + 0.12);
+            frontWall.receiveShadow = true;
+            classroomGroup.add(frontWall);
+
+            // Right Wall with Front Door Cutout (where guest teacher calls!)
+            const rightWallBack = new THREE.Mesh(new THREE.BoxGeometry(0.28, wallH, roomD - 1.5), wallMat);
+            rightWallBack.position.set(roomW / 2 + 0.12, wallH / 2, 0.75);
+            rightWallBack.receiveShadow = true;
+            classroomGroup.add(rightWallBack);
+
+            const doorHeader = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.85, 1.5), wallMat);
+            doorHeader.position.set(roomW / 2 + 0.12, wallH - 0.425, -roomD / 2 + 0.75);
+            classroomGroup.add(doorHeader);
+
+            // Hinged Classroom Front Door
+            frontDoorPivot = new THREE.Group();
+            frontDoorPivot.position.set(roomW / 2 + 0.02, 0, -roomD / 2 + 1.48);
+            const doorLeaf = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 2.32, 1.42),
+                new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.75 })
+            );
+            doorLeaf.position.set(0, 1.16, -0.71);
+            const doorGlass = new THREE.Mesh(
+                new THREE.BoxGeometry(0.12, 0.75, 0.48),
+                new THREE.MeshBasicMaterial({ color: 0xbae6fd })
+            );
+            doorGlass.position.set(0, 1.65, -0.71);
+            frontDoorPivot.add(doorLeaf, doorGlass);
+            classroomGroup.add(frontDoorPivot);
+
+            // Ceiling (Hidden on Title Screen, Shown in 1st-Person Class)
+            ceilingMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(roomW + 0.5, 0.2, roomD + 0.5),
+                new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.9 })
+            );
+            ceilingMesh.position.set(0, wallH + 0.05, 0);
+            ceilingMesh.visible = false;
+            classroomGroup.add(ceilingMesh);
+
+            // Left Wall with 3 Windows
+            const leftWallLower = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.1, roomD), lowerTrimMat);
+            leftWallLower.position.set(-roomW / 2 - 0.12, 0.55, 0);
+            leftWallLower.castShadow = true;
+            leftWallLower.receiveShadow = true;
+            classroomGroup.add(leftWallLower);
+
+            const leftWallTop = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.55, roomD), wallMat);
+            leftWallTop.position.set(-roomW / 2 - 0.12, wallH - 0.275, 0);
+            leftWallTop.castShadow = true;
+            classroomGroup.add(leftWallTop);
+
+            // Window Pillars & Sunlit Glass Panes
+            [-3.9, -1.3, 1.3, 3.9].forEach(zPos => {
+                const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.55, 0.45), wallMat);
+                pillar.position.set(-roomW / 2 - 0.12, 1.87, zPos);
+                pillar.castShadow = true;
+                classroomGroup.add(pillar);
+            });
+
+            [-2.6, 0, 2.6].forEach(zPos => {
+                const glass = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.06, 1.48, 2.15),
+                    new THREE.MeshBasicMaterial({ color: 0xbfe3f7, transparent: true, opacity: 0.52 })
+                );
+                glass.position.set(-roomW / 2 - 0.12, 1.87, zPos);
+                classroomGroup.add(glass);
+            });
+
+            // Classroom Clock & AC Unit on Back Wall
+            const clockBox = new THREE.Mesh(
+                new THREE.BoxGeometry(0.55, 0.55, 0.1),
+                new THREE.MeshStandardMaterial({ color: 0xf8fafc })
+            );
+            clockBox.position.set(-2.9, 2.65, -roomD / 2 + 0.05);
+            classroomGroup.add(clockBox);
+
+            const acBox = new THREE.Mesh(
+                new THREE.BoxGeometry(1.4, 0.36, 0.28),
+                new THREE.MeshStandardMaterial({ color: 0xf1f5f9 })
+            );
+            acBox.position.set(0, 2.75, -roomD / 2 + 0.14);
+            classroomGroup.add(acBox);
+
+            // Green Chalkboard with Math Text
+            const boardFrame = new THREE.Mesh(
+                new THREE.BoxGeometry(4.2, 1.5, 0.12),
+                new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.8 })
+            );
+            boardFrame.position.set(0, 1.68, -roomD / 2 + 0.06);
+            classroomGroup.add(boardFrame);
+
+            const boardCanvas = document.createElement('canvas');
+            boardCanvas.width = 512;
+            boardCanvas.height = 256;
+            const bctx = boardCanvas.getContext('2d');
+            bctx.fillStyle = '#1e5238';
+            bctx.fillRect(0, 0, 512, 256);
+            bctx.fillStyle = '#f8fafc';
+            bctx.font = 'bold 34px sans-serif';
+            bctx.fillText('경우의 수와 확률', 34, 72);
+            bctx.fillStyle = '#fde047';
+            bctx.font = 'bold 20px sans-serif';
+            bctx.fillText('★ 서술형', 385, 70);
+            bctx.fillStyle = '#e2e8f0';
+            bctx.font = '22px sans-serif';
+            bctx.fillText('확률 = 일어나는 경우의 수 / 모든 경우의 수', 34, 132);
+            bctx.fillText('P(A) = n(A) / n(S)', 34, 185);
+
+            const boardTex = new THREE.CanvasTexture(boardCanvas);
+            const boardSurface = new THREE.Mesh(
+                new THREE.BoxGeometry(3.98, 1.32, 0.04),
+                new THREE.MeshStandardMaterial({ map: boardTex, roughness: 0.7 })
+            );
+            boardSurface.position.set(0, 1.68, -roomD / 2 + 0.12);
+            classroomGroup.add(boardSurface);
+
+            // Teacher Podium
+            const podium = new THREE.Mesh(
+                new THREE.BoxGeometry(1.3, 0.85, 0.75),
+                new THREE.MeshStandardMaterial({ color: 0x8c6239, roughness: 0.8 })
+            );
+            podium.position.set(-1.35, 0.425, -roomD / 2 + 0.9);
+            podium.castShadow = true;
+            podium.receiveShadow = true;
+            classroomGroup.add(podium);
+
+            // Teacher Character
+            const tChar = createVoxelCharacter(0x475569, 0x1e1b18, true);
+            teacherGroup = tChar.group;
+            teacherRightArm = tChar.rightArmPivot;
+            teacherGroup.position.copy(gameState.teacherPos);
+            teacherGroup.rotation.y = Math.PI;
+            classroomGroup.add(teacherGroup);
+
+            // Guest Teacher (Appears at Front Door during Random Self-Study Event)
+            const gChar = createVoxelCharacter(0xbe123c, 0x27272a, true);
+            guestTeacherGroup = gChar.group;
+            guestRightArm = gChar.rightArmPivot;
+            guestTeacherGroup.position.set(roomW / 2 + 0.85, 0.04, -roomD / 2 + 0.75);
+            guestTeacherGroup.rotation.y = -Math.PI / 2;
+            guestTeacherGroup.visible = false;
+            classroomGroup.add(guestTeacherGroup);
+
+            // Teacher Red Vision Cone
+            const coneGeo = new THREE.ConeGeometry(2.6, 5.8, 24, 1, true);
+            coneGeo.translate(0, -2.9, 0);
+            coneGeo.rotateX(-Math.PI / 2);
+            const coneMat = new THREE.MeshBasicMaterial({
+                color: 0xef4444,
+                transparent: true,
+                opacity: 0.2,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            visionCone = new THREE.Mesh(coneGeo, coneMat);
+            visionCone.position.set(0, 1.15, 0.2);
+            visionCone.visible = false;
+            teacherGroup.add(visionCone);
+
+            // Teacher Warning/Status Sprite Above Head
+            const warnCanvas = document.createElement('canvas');
+            warnCanvas.width = 256;
+            warnCanvas.height = 128;
+            const wctx = warnCanvas.getContext('2d');
+            wctx.font = 'bold 72px sans-serif';
+            wctx.textAlign = 'center';
+            wctx.textBaseline = 'middle';
+            wctx.fillText('⁉️', 128, 64);
+            const warnTex = new THREE.CanvasTexture(warnCanvas);
+            warningBadgeMesh = new THREE.Sprite(new THREE.SpriteMaterial({ map: warnTex, transparent: true }));
+            warningBadgeMesh.position.set(0, 1.85, 0);
+            warningBadgeMesh.scale.set(1.1, 0.55, 1);
+            warningBadgeMesh.visible = false;
+            teacherGroup.add(warningBadgeMesh);
+
+            // Student Desks Grid (4 columns x 4 rows)
+            const cols = [-2.55, -0.95, 0.65, 2.25];
+            const rows = [-1.4, -0.15, 1.1, 2.35];
+            const shirtPalette = [0xe2e8f0, 0x1e3a8a, 0xf8fafc, 0x3b82f6, 0xcbd5e1];
+
+            rows.forEach((zPos, rIdx) => {
+                cols.forEach((xPos, cIdx) => {
+                    const isPlayerSeat = (rIdx === 3 && cIdx === 2);
+
+                    const deskTop = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.95, 0.07, 0.62),
+                        new THREE.MeshStandardMaterial({ color: 0xe7c697, roughness: 0.75 })
+                    );
+                    deskTop.position.set(xPos, 0.64, zPos);
+                    deskTop.castShadow = true;
+                    deskTop.receiveShadow = true;
+                    classroomGroup.add(deskTop);
+
+                    const deskLegMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.6 });
+                    [[-0.4, -0.24], [0.4, -0.24], [-0.4, 0.24], [0.4, 0.24]].forEach(([dx, dz]) => {
+                        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.62, 0.05), deskLegMat);
+                        leg.position.set(xPos + dx, 0.31, zPos + dz);
+                        classroomGroup.add(leg);
+                    });
+
+                    const chairSeat = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.5, 0.06, 0.46),
+                        new THREE.MeshStandardMaterial({ color: 0x8b5a2b })
+                    );
+                    chairSeat.position.set(xPos, 0.38, zPos + 0.42);
+                    const chairBack = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.5, 0.44, 0.06),
+                        new THREE.MeshStandardMaterial({ color: 0x8b5a2b })
+                    );
+                    chairBack.position.set(xPos, 0.62, zPos + 0.62);
+                    classroomGroup.add(chairSeat, chairBack);
+
+                    if (isPlayerSeat) {
+                        PLAYER_SEAT_POS.x = xPos;
+                        PLAYER_SEAT_POS.z = zPos;
+
+                        // Open Standing Textbook Shield on Player's Desk
+                        const bookCanvas = document.createElement('canvas');
+                        bookCanvas.width = 256;
+                        bookCanvas.height = 256;
+                        const bk = bookCanvas.getContext('2d');
+                        bk.fillStyle = '#f8fafc';
+                        bk.fillRect(0, 0, 256, 256);
+                        bk.fillStyle = '#1d4ed8';
+                        bk.fillRect(0, 0, 14, 256);
+                        bk.fillRect(28, 22, 160, 14);
+                        bk.fillStyle = '#94a3b8';
+                        for (let ly = 54; ly < 195; ly += 14) {
+                            bk.fillRect(28, ly, 195, 5);
+                        }
+                        const bookTex = new THREE.CanvasTexture(bookCanvas);
+
+                        const openBook = new THREE.Mesh(
+                            new THREE.BoxGeometry(0.48, 0.42, 0.04),
+                            new THREE.MeshStandardMaterial({ map: bookTex, roughness: 0.8 })
+                        );
+                        openBook.position.set(xPos + 0.02, 0.87, zPos - 0.14);
+                        openBook.rotation.x = -0.14;
+                        openBook.castShadow = true;
+                        classroomGroup.add(openBook);
+
+                        // Flat Notebook on Left Side of Desk
+                        const notePad = new THREE.Mesh(
+                            new THREE.BoxGeometry(0.28, 0.015, 0.24),
+                            new THREE.MeshStandardMaterial({ color: 0xf1f5f9 })
+                        );
+                        notePad.position.set(xPos - 0.24, 0.685, zPos + 0.1);
+                        notePad.rotation.y = 0.22;
+                        classroomGroup.add(notePad);
+
+                        // Build Switchable 3D Desk Items for Keys 1~7
+                        buildPlayerDeskProps(xPos, zPos);
+
+                        // 1st-Person Arms & Hands
+                        const armMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.7 });
+                        const handMat = new THREE.MeshStandardMaterial({ color: 0xfcd5b5, roughness: 0.6 });
+
+                        fpLeftArm = new THREE.Group();
+                        fpLeftArm.position.set(xPos - 0.34, 0.82, zPos + 0.44);
+                        const lSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.11, 0.38), armMat);
+                        lSleeve.position.set(0.08, -0.08, -0.18);
+                        lSleeve.rotation.set(0.25, -0.35, 0);
+                        const lHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.12), handMat);
+                        lHand.position.set(0.15, -0.12, -0.34);
+                        fpLeftArm.add(lSleeve, lHand);
+
+                        fpRightArm = new THREE.Group();
+                        fpRightArm.position.set(xPos + 0.36, 0.82, zPos + 0.44);
+                        const rSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.11, 0.38), armMat);
+                        rSleeve.position.set(-0.08, -0.08, -0.18);
+                        rSleeve.rotation.set(0.25, 0.35, 0);
+                        const rHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.12), handMat);
+                        rHand.position.set(-0.15, -0.12, -0.34);
+                        fpRightArm.add(rSleeve, rHand);
+
+                        classroomGroup.add(fpLeftArm, fpRightArm);
+                        playerSeatGroup = { x: xPos, z: zPos };
+                    } else {
+                        const shirt = shirtPalette[(rIdx + cIdx) % shirtPalette.length];
+                        const sChar = createVoxelCharacter(shirt, 0x1c1917, false);
+                        sChar.group.scale.set(0.84, 0.84, 0.84);
+                        sChar.group.position.set(xPos, 0.12, zPos + 0.36);
+                        sChar.group.rotation.y = Math.PI + (Math.random() - 0.5) * 0.12;
+                        classroomGroup.add(sChar.group);
+                        studentGroups.push({
+                            mesh: sChar.group,
+                            baseY: 0.12,
+                            phase: Math.random() * Math.PI * 2
+                        });
+                    }
+                });
+            });
+        }
+
+        function buildPlayerDeskProps(xPos, zPos) {
+            const propX = xPos + 0.12;
+            const propY = 0.685;
+            const propZ = zPos + 0.08;
+
+            // 1. Cup Ramen (컵라면)
+            const ramenGroup = new THREE.Group();
+            const cupBody = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.11, 0.085, 0.14, 16),
+                new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.5 })
+            );
+            cupBody.position.set(propX, propY + 0.07, propZ);
+            const cupNoodle = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.102, 0.102, 0.01, 16),
+                new THREE.MeshStandardMaterial({ color: 0xfde047 })
+            );
+            cupNoodle.position.set(propX, propY + 0.138, propZ);
+            ramenGroup.add(cupBody, cupNoodle);
+            classroomGroup.add(ramenGroup);
+            deskItems.ramen = ramenGroup;
+
+            // 2. YouTube Smartphone (유튜브)
+            const phoneGroup = new THREE.Group();
+            const phoneBody = new THREE.Mesh(
+                new THREE.BoxGeometry(0.15, 0.018, 0.26),
+                new THREE.MeshStandardMaterial({ color: 0x0f172a })
+            );
+            phoneBody.position.set(propX, propY + 0.02, propZ);
+            phoneBody.rotation.set(-0.25, -0.15, 0);
+            const phoneScreen = new THREE.Mesh(
+                new THREE.BoxGeometry(0.13, 0.02, 0.23),
+                new THREE.MeshBasicMaterial({ color: 0xf43f5e })
+            );
+            phoneScreen.position.set(propX, propY + 0.022, propZ);
+            phoneScreen.rotation.set(-0.25, -0.15, 0);
+            phoneGroup.add(phoneBody, phoneScreen);
+            classroomGroup.add(phoneGroup);
+            deskItems.youtube = phoneGroup;
+
+            // 3. Makeup Compact & Lipstick (화장하기)
+            const makeupGroup = new THREE.Group();
+            const compact = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.08, 0.08, 0.025, 16),
+                new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.4 })
+            );
+            compact.position.set(propX - 0.04, propY + 0.015, propZ);
+            const lipstick = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.02, 0.02, 0.11, 12),
+                new THREE.MeshStandardMaterial({ color: 0xe11d48 })
+            );
+            lipstick.position.set(propX + 0.07, propY + 0.055, propZ + 0.02);
+            makeupGroup.add(compact, lipstick);
+            classroomGroup.add(makeupGroup);
+            deskItems.makeup = makeupGroup;
+
+            // 4. Maratang Bowl (마라탕)
+            const maraGroup = new THREE.Group();
+            const bowlOuter = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.16, 0.11, 0.1, 20),
+                new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.4 })
+            );
+            bowlOuter.position.set(propX, propY + 0.05, propZ);
+            const soupCanvas = document.createElement('canvas');
+            soupCanvas.width = 128;
+            soupCanvas.height = 128;
+            const sctx = soupCanvas.getContext('2d');
+            sctx.fillStyle = '#dc2626';
+            sctx.fillRect(0, 0, 128, 128);
+            sctx.fillStyle = '#fef08a';
+            sctx.beginPath(); sctx.arc(46, 52, 14, 0, Math.PI * 2); sctx.fill();
+            sctx.fillStyle = '#ffffff';
+            sctx.beginPath(); sctx.arc(82, 64, 12, 0, Math.PI * 2); sctx.fill();
+            sctx.fillStyle = '#22c55e';
+            sctx.fillRect(50, 80, 26, 12);
+            const soupTex = new THREE.CanvasTexture(soupCanvas);
+            const soupTop = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.15, 0.15, 0.01, 20),
+                new THREE.MeshBasicMaterial({ map: soupTex })
+            );
+            soupTop.position.set(propX, propY + 0.098, propZ);
+            maraGroup.add(bowlOuter, soupTop);
+            classroomGroup.add(maraGroup);
+            deskItems.maratang = maraGroup;
+
+            // 5. Store Snack / Pizza Bread (매점 가기)
+            const snackGroup = new THREE.Group();
+            const snackBag = new THREE.Mesh(
+                new THREE.BoxGeometry(0.22, 0.06, 0.16),
+                new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 })
+            );
+            snackBag.position.set(propX, propY + 0.03, propZ);
+            snackGroup.add(snackBag);
+            classroomGroup.add(snackGroup);
+            deskItems.store = snackGroup;
+
+            // 6. Paper Airplane (종이비행기)
+            const planeGroup = new THREE.Group();
+            const pWingL = new THREE.Mesh(
+                new THREE.BoxGeometry(0.18, 0.01, 0.28),
+                new THREE.MeshStandardMaterial({ color: 0xffffff })
+            );
+            pWingL.position.set(propX, propY + 0.03, propZ);
+            pWingL.rotation.y = 0.25;
+            planeGroup.add(pWingL);
+            classroomGroup.add(planeGroup);
+            deskItems.airplane = planeGroup;
+            flyingPlaneMesh = planeGroup;
+
+            updateVisibleDeskProp();
+        }
+
+        function updateVisibleDeskProp() {
+            Object.keys(deskItems).forEach(k => {
+                if (deskItems[k]) deskItems[k].visible = (k === gameState.mode);
+            });
+        }
+
+        function setupMouseFreeLook(domElement) {
+            window.addEventListener('mousemove', (e) => {
+                if (!gameState.playing && !gameState.countingDown) return;
+                const nx = (e.clientX / window.innerWidth) * 2 - 1;  // -1 (left) to +1 (right)
+                const ny = (e.clientY / window.innerHeight) * 2 - 1; // -1 (top) to +1 (bottom)
+                gameState.lookYawOffset = -nx * 1.15;
+                gameState.lookPitchOffset = -ny * 0.45;
+            });
+
+            let lastTouchX = 0, lastTouchY = 0;
+            domElement.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
+                }
+            }, { passive: true });
+
+            domElement.addEventListener('touchmove', (e) => {
+                if ((!gameState.playing && !gameState.countingDown) || e.touches.length !== 1) return;
+                const dx = e.touches[0].clientX - lastTouchX;
+                const dy = e.touches[0].clientY - lastTouchY;
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+                gameState.lookYawOffset = Math.max(-1.25, Math.min(1.25, gameState.lookYawOffset - dx * 0.005));
+                gameState.lookPitchOffset = Math.max(-0.5, Math.min(0.5, gameState.lookPitchOffset - dy * 0.004));
+            }, { passive: true });
+        }
+
+        // --- 4. STORAGE & CLASSROOM RANKING ---
+        const STORAGE_KEY_PROFILE = 'dowazo_sneak_profile_v2';
+        const STORAGE_KEY_SCORES = 'dowazo_sneak_scores_v2';
+
+        function loadProfile() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_PROFILE);
+                if (!raw) return false;
+                const data = JSON.parse(raw);
+                if (data.classCode && data.classNum && data.nickname) {
+                    gameState.classCode = data.classCode;
+                    gameState.classNum = data.classNum;
+                    gameState.nickname = data.nickname;
+                    updateProfileBadges();
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        function saveProfile() {
+            try {
+                localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify({
+                    classCode: gameState.classCode,
+                    classNum: gameState.classNum,
+                    nickname: gameState.nickname
+                }));
+            } catch (e) {}
+            updateProfileBadges();
+        }
+
+        function updateProfileBadges() {
+            const pill = document.getElementById('activeStudentPill');
+            const hint = document.getElementById('titleProfileHint');
+            const summary = document.getElementById('settingsProfileSummary');
+            const hudSubjectLabel = document.getElementById('hudClassSubjectLabel');
+
+            if (gameState.classCode) {
+                pill.textContent = `🏫 ${gameState.classCode} · ${gameState.classNum} ${gameState.nickname}`;
+                pill.classList.remove('hidden');
+                hint.textContent = `출석 완료: [${gameState.classCode}] ${gameState.classNum} ${gameState.nickname}`;
+                summary.textContent = `${gameState.classCode} / ${gameState.classNum} / ${gameState.nickname}`;
+                if (hudSubjectLabel) {
+                    hudSubjectLabel.textContent = `${gameState.classCode} ${gameState.classNum} 수학 시간`;
+                }
+            } else {
+                pill.classList.add('hidden');
+                hint.textContent = '학급코드 · 반 · 닉네임 입력 후 바로 플레이';
+                summary.textContent = '미설정';
+                if (hudSubjectLabel) {
+                    hudSubjectLabel.textContent = '신곡중 수학 시간';
+                }
+            }
+        }
+
+        function getClassLeaderboard() {
+            const code = (gameState.classCode || 'DEMO').toUpperCase();
+            let allScores = {};
+            try {
+                allScores = JSON.parse(localStorage.getItem(STORAGE_KEY_SCORES) || '{}');
+            } catch (e) {}
+
+            if (!allScores[code] || allScores[code].length === 0) {
+                allScores[code] = [
+                    { nickname: '마라탕매니아', classNum: gameState.classNum || '3반', score: 980, isBot: true },
+                    { nickname: '몰래폰장인',   classNum: gameState.classNum || '3반', score: 650, isBot: true },
+                    { nickname: '뒷자리꿀잠',   classNum: gameState.classNum || '3반', score: 420, isBot: true }
+                ];
+            }
+            return allScores[code].sort((a, b) => b.score - a.score);
+        }
+
+        function recordScore(finalScore) {
+            const code = (gameState.classCode || 'DEMO').toUpperCase();
+            let allScores = {};
+            try {
+                allScores = JSON.parse(localStorage.getItem(STORAGE_KEY_SCORES) || '{}');
+            } catch (e) {}
+
+            const board = getClassLeaderboard();
+            const existingIdx = board.findIndex(item => item.nickname === gameState.nickname && item.classNum === gameState.classNum && !item.isBot);
+
+            if (existingIdx >= 0) {
+                if (finalScore > board[existingIdx].score) board[existingIdx].score = finalScore;
+            } else {
+                board.push({
+                    nickname: gameState.nickname || '익명학생',
+                    classNum: gameState.classNum || '1반',
+                    score: finalScore,
+                    isBot: false
+                });
+            }
+
+            board.sort((a, b) => b.score - a.score);
+            allScores[code] = board;
+            try {
+                localStorage.setItem(STORAGE_KEY_SCORES, JSON.stringify(allScores));
+            } catch (e) {}
+
+            const rank = board.findIndex(item => item.nickname === (gameState.nickname || '익명학생') && item.classNum === (gameState.classNum || '1반')) + 1;
+            return { board, rank };
+        }
+
+        function renderRankingModal() {
+            const code = (gameState.classCode || 'DEMO').toUpperCase();
+            document.getElementById('rankingHeaderTitle').textContent = `🏆 [${code}] 학급 실시간 랭킹`;
+            const board = getClassLeaderboard();
+            const listEl = document.getElementById('rankingList');
+            listEl.innerHTML = '';
+
+            board.slice(0, 10).forEach((entry, idx) => {
+                const isMe = entry.nickname === gameState.nickname && entry.classNum === gameState.classNum && !entry.isBot;
+                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}위`;
+                const row = document.createElement('div');
+                row.className = `flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm ${
+                    isMe ? 'bg-indigo-900/60 border-indigo-400 text-white' : 'bg-slate-900/80 border-slate-700/80 text-slate-200'
+                }`;
+                row.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <span class="font-jua text-base w-7 text-center text-amber-300">${medal}</span>
+                        <div>
+                            <span class="font-bold">${entry.nickname}</span>
+                            <span class="text-[11px] text-slate-400 ml-1">(${entry.classNum})</span>
+                        </div>
+                    </div>
+                    <span class="font-jua text-base text-amber-300">${entry.score.toLocaleString()}점</span>
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        // --- 5. MODAL & NAVIGATION CONTROLLERS ---
+        const modals = {
+            entry: document.getElementById('entryModal'),
+            ranking: document.getElementById('rankingModal'),
+            settings: document.getElementById('settingsModal'),
+            help: document.getElementById('helpModal'),
+            result: document.getElementById('resultModal')
+        };
+
+        const layers = {
+            title: document.getElementById('titleOverlay'),
+            hud: document.getElementById('gameplayHUD')
+        };
+
+        function closeAllModals() {
+            Object.values(modals).forEach(m => m.classList.add('hidden'));
+        }
+
+        function openEntryModal() {
+            closeAllModals();
+            document.getElementById('classCodeInput').value = gameState.classCode;
+            document.getElementById('classNumInput').value = gameState.classNum;
+            document.getElementById('nicknameInput').value = gameState.nickname;
+            modals.entry.classList.remove('hidden');
+        }
+
+        function spawnPopup(text, colorClass = 'text-amber-300') {
+            const host = document.getElementById('popupHost');
+            const el = document.createElement('div');
+            el.className = `float-score absolute left-1/2 top-1/3 font-jua text-xl sm:text-2xl ${colorClass} drop-shadow-md pointer-events-none whitespace-nowrap`;
+            el.textContent = text;
+            host.appendChild(el);
+            setTimeout(() => el.remove(), 820);
+        }
+
+        // --- 6. GAMEPLAY CORE LOOP & 3-SECOND COUNTDOWN ---
+        let countdownTimerId = null;
+
+        function startMatch() {
+            closeAllModals();
+            if (countdownTimerId) {
+                clearInterval(countdownTimerId);
+                countdownTimerId = null;
+            }
+
+            layers.title.classList.add('hidden');
+            document.getElementById('topRightTitleActions').classList.add('hidden');
+            layers.hud.classList.remove('hidden');
+
+            gameState.playing = false;
+            gameState.countingDown = true;
+            gameState.score = 0;
+            gameState.combo = 1.0;
+            gameState.smellGauge = 0.0;
+            gameState.elapsedTime = 0.0;
+            gameState.actionProgress = 0.0;
+            gameState.isSneaking = false;
+            gameState.teacherPhase = 'WRITING';
+            gameState.phaseElapsed = 0;
+            gameState.phaseDuration = 2.8;
+            gameState.teacherYaw = Math.PI;
+            gameState.targetTeacherYaw = Math.PI;
+            gameState.teacherPos.set(1.15, 0.04, -3.25);
+            gameState.targetTeacherPos.set(1.15, 0.04, -3.25);
+            gameState.nextOfficeCallTimer = 15.0 + Math.random() * 6.0;
+            gameState.lookYawOffset = 0;
+            gameState.lookPitchOffset = 0;
+
+            if (guestTeacherGroup) guestTeacherGroup.visible = false;
+            if (frontDoorPivot) frontDoorPivot.rotation.y = 0;
+
+            updateVisibleDeskProp();
+
+            // 1st-Person Seated Camera (0.5x Wide-Angle View)
+            gameState.targetCamPos.set(PLAYER_SEAT_POS.x, 1.38, PLAYER_SEAT_POS.z + 0.62);
+            gameState.targetCamLook.set(0.15, 1.15, -3.5);
+
+            document.getElementById('dangerOverlay').classList.add('hidden');
+            updateHUD();
+
+            const cdOverlay = document.getElementById('countdownOverlay');
+            const cdNum = document.getElementById('countdownNumber');
+            let count = 3;
+
+            cdOverlay.classList.remove('hidden');
+            cdNum.textContent = count;
+            cdNum.classList.remove('countdown-num');
+            void cdNum.offsetWidth;
+            cdNum.classList.add('countdown-num');
+            sfx('tick');
+
+            countdownTimerId = setInterval(() => {
+                count -= 1;
+                if (count > 0) {
+                    cdNum.textContent = count;
+                    cdNum.classList.remove('countdown-num');
+                    void cdNum.offsetWidth;
+                    cdNum.classList.add('countdown-num');
+                    sfx('tick');
+                } else {
+                    clearInterval(countdownTimerId);
+                    countdownTimerId = null;
+                    cdOverlay.classList.add('hidden');
+                    gameState.countingDown = false;
+                    gameState.playing = true;
+                    sfx('bite');
+                }
+            }, 950);
+        }
+
+        function endMatch(reason) {
+            gameState.playing = false;
+            gameState.countingDown = false;
+            gameState.isSneaking = false;
+            document.getElementById('dangerOverlay').classList.add('hidden');
+
+            gameState.targetCamPos.set(-11.2, 11.8, 13.0);
+            gameState.targetCamLook.set(0, 0.5, 0);
+
+            const finalScore = Math.floor(gameState.score);
+            const { rank } = recordScore(finalScore);
+
+            const tag = document.getElementById('resultTag');
+            const emoji = document.getElementById('resultEmoji');
+            const title = document.getElementById('resultTitle');
+            const desc = document.getElementById('resultDesc');
+
+            sfx('caught');
+            tag.className = 'inline-block px-4 py-1 rounded-full text-xs font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/40';
+            emoji.textContent = '😱';
+            if (reason === 'SMELL') {
+                tag.textContent = '🌶️ 매운 냄새 진동!';
+                title.textContent = '냄새로 딱 걸림!';
+                desc.textContent = '교실에 마라탕·라면 냄새가 가득 차서 들켰습니다. 창문을 열어 환기하세요!';
+            } else {
+                tag.textContent = '🚨 선생님께 적발!';
+                title.textContent = '교무실 소환!';
+                desc.textContent = '선생님이 뒤돌아볼 때 딴짓하다가 정면으로 눈이 마주쳤습니다.';
+            }
+
+            document.getElementById('resultScoreText').textContent = `${finalScore.toLocaleString()}점`;
+            document.getElementById('resultRankText').textContent = `[${gameState.classCode || 'DEMO'}] ${gameState.classNum || '우리 반'} ${rank}위 달성!`;
+
+            layers.hud.classList.add('hidden');
+            modals.result.classList.remove('hidden');
+        }
+
+        function updateHUD() {
+            const currentScore = Math.floor(gameState.score);
+            document.getElementById('hudScore').textContent = currentScore.toLocaleString();
+
+            const dangerLv = Math.min(9, 1 + Math.floor(gameState.elapsedTime / 15));
+            document.getElementById('hudDangerBadge').textContent = `위험도 Lv.${dangerLv}`;
+            const levelPct = (currentScore % 250) / 250 * 100;
+            document.getElementById('hudLevelProgress').style.width = `${Math.max(6, levelPct)}%`;
+
+            // Top-Right Elapsed Survival Timer (Endless)
+            const totalSec = Math.floor(gameState.elapsedTime);
+            const mins = Math.floor(totalSec / 60);
+            const secs = String(totalSec % 60).padStart(2, '0');
+            document.getElementById('topRightTimer').textContent = `${mins}:${secs}`;
+
+            // Top-Right Smell Gauge
+            document.getElementById('smellGaugeFill').style.width = `${Math.min(100, gameState.smellGauge)}%`;
+
+            // Bottom Action Progress Bar
+            const meta = MODE_META[gameState.mode] || MODE_META.maratang;
+            document.getElementById('actionProgressLabel').textContent = meta.sub;
+            document.getElementById('actionProgressFill').style.width = `${Math.min(100, gameState.actionProgress)}%`;
+
+            const pill = document.getElementById('teacherStatePill');
+            if (gameState.teacherPhase === 'WRITING') {
+                pill.textContent = '✍️ 선생님 판서 중 (지금 딴짓!)';
+                pill.className = 'px-5 py-2 rounded-full font-jua text-sm sm:text-base shadow-xl border border-white/25 bg-emerald-500 text-white transition-all';
+            } else if (gameState.teacherPhase === 'WARNING') {
+                pill.textContent = '⁉️ 어?! 뒤돌아보려 한다! 정지!';
+                pill.className = 'px-5 py-2 rounded-full font-jua text-sm sm:text-base shadow-xl border border-white/25 bg-amber-500 text-slate-950 animate-bounce';
+            } else if (gameState.teacherPhase === 'LOOKING') {
+                pill.textContent = '👁️ 감시 중! 절대 움직이지 마세요!';
+                pill.className = 'px-5 py-2 rounded-full font-jua text-sm sm:text-base shadow-xl border border-white/25 bg-rose-600 text-white';
+            } else if (gameState.teacherPhase === 'CALLED_OUT') {
+                pill.textContent = '🚪 다른 선생님 호출! 앞문으로 나가는 중...';
+                pill.className = 'px-5 py-2 rounded-full font-jua text-sm sm:text-base shadow-xl border border-white/25 bg-sky-500 text-white';
+            } else if (gameState.teacherPhase === 'SELF_STUDY') {
+                pill.textContent = '🎉 자습 시간! 선생님 부재중 (점수 2배!)';
+                pill.className = 'px-5 py-2 rounded-full font-jua text-sm sm:text-base shadow-xl border border-amber-300 bg-indigo-600 text-amber-200 animate-pulse';
+            }
+        }
+
+        function animateLoop() {
+            requestAnimationFrame(animateLoop);
+            const dt = Math.min(clock.getDelta(), 0.1);
+            const nowSec = clock.elapsedTime;
+
+            // Animate 3D Diorama Camera
+            if (!gameState.playing && !gameState.countingDown) {
+                if (ceilingMesh) ceilingMesh.visible = false;
+                if (Math.abs(camera.fov - 42) > 0.1) {
+                    camera.fov += (42 - camera.fov) * 0.12;
+                    camera.updateProjectionMatrix();
+                }
+                gameState.dioramaOrbitY += dt * 0.14;
+                const radius = 17.2;
+                const baseAngle = -0.72 + Math.sin(gameState.dioramaOrbitY) * 0.35;
+                gameState.targetCamPos.set(
+                    Math.sin(baseAngle) * radius,
+                    11.8,
+                    Math.cos(baseAngle) * radius
+                );
+                gameState.targetCamLook.set(0, 0.5, 0);
+                gameState.camPos.lerp(gameState.targetCamPos, 0.08);
+                gameState.camLook.lerp(gameState.targetCamLook, 0.08);
+                camera.position.copy(gameState.camPos);
+                camera.lookAt(gameState.camLook);
+            } else {
+                if (ceilingMesh) ceilingMesh.visible = true;
+                if (Math.abs(camera.fov - 82) > 0.1) {
+                    camera.fov += (82 - camera.fov) * 0.12;
+                    camera.updateProjectionMatrix();
+                }
+                gameState.camPos.lerp(gameState.targetCamPos, 0.12);
+                camera.position.copy(gameState.camPos);
+
+                // Mouse Free-Look in 1st-Person Classroom
+                const lookDist = 6.0;
+                const yaw = gameState.lookYawOffset;
+                const pitch = gameState.lookPitchOffset;
+                const lx = gameState.camPos.x - Math.sin(yaw) * lookDist;
+                const ly = gameState.camPos.y - 0.25 + Math.sin(pitch) * 3.5;
+                const lz = gameState.camPos.z - Math.cos(yaw) * lookDist;
+                gameState.targetCamLook.set(lx, ly, lz);
+                gameState.camLook.lerp(gameState.targetCamLook, 0.22);
+                camera.lookAt(gameState.camLook);
+            }
+
+            // Subtle Student Breathing
+            studentGroups.forEach(st => {
+                st.mesh.position.y = st.baseY + Math.sin(nowSec * 2.2 + st.phase) * 0.015;
+            });
+
+            // 1st-Person Arms Animation when Sneaking
+            if (fpLeftArm && fpRightArm && playerSeatGroup) {
+                const baseLeftY = 0.82;
+                const baseRightY = 0.82;
+                if (gameState.isSneaking && gameState.playing) {
+                    fpLeftArm.position.y = baseLeftY + Math.sin(nowSec * 16) * 0.025;
+                    fpRightArm.position.y = baseRightY + Math.cos(nowSec * 18) * 0.035;
+                    fpRightArm.rotation.x = Math.sin(nowSec * 18) * 0.18;
+                    if (gameState.mode === 'airplane' && flyingPlaneMesh) {
+                        flyingPlaneMesh.position.y = Math.abs(Math.sin(nowSec * 6)) * 0.45;
+                        flyingPlaneMesh.position.z = -Math.abs(Math.sin(nowSec * 6)) * 1.4;
+                    }
+                } else {
+                    fpLeftArm.position.y += (baseLeftY - fpLeftArm.position.y) * 0.2;
+                    fpRightArm.position.y += (baseRightY - fpRightArm.position.y) * 0.2;
+                    fpRightArm.rotation.x *= 0.8;
+                    if (flyingPlaneMesh) {
+                        flyingPlaneMesh.position.y *= 0.85;
+                        flyingPlaneMesh.position.z *= 0.85;
+                    }
+                }
+            }
+
+            // Teacher State Machine
+            if (gameState.playing) {
+                gameState.elapsedTime += dt;
+                gameState.phaseElapsed += dt;
+                const speedScale = Math.min(1.65, 1 + gameState.elapsedTime / 75);
+
+                // Random Office Call Trigger ("다른 선생님이 교무실로 호출 -> 자습시간 2배")
+                if (gameState.teacherPhase === 'WRITING') {
+                    gameState.nextOfficeCallTimer -= dt;
+                    if (gameState.nextOfficeCallTimer <= 0) {
+                        gameState.teacherPhase = 'CALLED_OUT';
+                        gameState.phaseElapsed = 0;
+                        gameState.phaseDuration = 2.0;
+                        gameState.targetTeacherYaw = Math.PI / 2;
+                        gameState.targetTeacherPos.set(4.1, 0.04, -3.45);
+                        if (guestTeacherGroup) guestTeacherGroup.visible = true;
+                        if (frontDoorPivot) frontDoorPivot.rotation.y = 1.25;
+                        visionCone.visible = false;
+                        warningBadgeMesh.visible = false;
+                        document.getElementById('dangerOverlay').classList.add('hidden');
+                        spawnPopup('🚪 "선생님, 교무실 잠깐 오세요!"', 'text-sky-300');
+                        sfx('office');
+                    }
+                }
+
+                if (gameState.phaseElapsed >= gameState.phaseDuration) {
+                    gameState.phaseElapsed = 0;
+                    if (gameState.teacherPhase === 'WRITING') {
+                        gameState.teacherPhase = 'WARNING';
+                        gameState.phaseDuration = Math.max(0.72, 1.15 / speedScale);
+                        gameState.targetTeacherYaw = Math.PI * 0.62;
+                        warningBadgeMesh.visible = true;
+                        document.getElementById('dangerOverlay').classList.remove('hidden');
+                        sfx('warn');
+                    } else if (gameState.teacherPhase === 'WARNING') {
+                        if (Math.random() < 0.2 && gameState.elapsedTime > 10) {
+                            gameState.teacherPhase = 'WRITING';
+                            gameState.phaseDuration = Math.max(1.8, 3.0 / speedScale);
+                            gameState.targetTeacherYaw = Math.PI;
+                            warningBadgeMesh.visible = false;
+                            document.getElementById('dangerOverlay').classList.add('hidden');
+                            spawnPopup('😅 휴~ 페인트였다!', 'text-emerald-300');
+                        } else {
+                            gameState.teacherPhase = 'LOOKING';
+                            gameState.phaseDuration = 1.65 + Math.random() * 1.15;
+                            gameState.targetTeacherYaw = 0;
+                            visionCone.visible = true;
+                            sfx('turn');
+                        }
+                    } else if (gameState.teacherPhase === 'LOOKING') {
+                        gameState.teacherPhase = 'WRITING';
+                        gameState.phaseDuration = Math.max(1.8, (2.4 + Math.random() * 1.6) / speedScale);
+                        gameState.targetTeacherYaw = Math.PI;
+                        visionCone.visible = false;
+                        warningBadgeMesh.visible = false;
+                        document.getElementById('dangerOverlay').classList.add('hidden');
+                    } else if (gameState.teacherPhase === 'CALLED_OUT') {
+                        // Teacher walks out the front door -> Self-Study 2x Mode!
+                        gameState.teacherPhase = 'SELF_STUDY';
+                        gameState.phaseDuration = 8.5;
+                        teacherGroup.visible = false;
+                        if (guestTeacherGroup) guestTeacherGroup.visible = false;
+                        if (frontDoorPivot) frontDoorPivot.rotation.y = 0;
+                        spawnPopup('🎉 자습 시간! 점수 2배 찬스!', 'text-amber-300');
+                    } else if (gameState.teacherPhase === 'SELF_STUDY') {
+                        // Teacher returns to chalkboard
+                        gameState.teacherPhase = 'WRITING';
+                        gameState.phaseDuration = 2.6;
+                        teacherGroup.visible = true;
+                        gameState.teacherPos.set(3.8, 0.04, -3.35);
+                        gameState.targetTeacherPos.set(1.15, 0.04, -3.25);
+                        gameState.targetTeacherYaw = Math.PI;
+                        gameState.nextOfficeCallTimer = 18.0 + Math.random() * 8.0;
+                        spawnPopup('👨‍🏫 선생님이 교실로 복귀했습니다!', 'text-slate-200');
+                    }
+                }
+
+                // Natural Smell Dissipation
+                const meta = MODE_META[gameState.mode] || MODE_META.maratang;
+                gameState.smellGauge = Math.max(0, gameState.smellGauge - 3.2 * dt);
+
+                if (gameState.isSneaking) {
+                    if (gameState.teacherPhase === 'LOOKING') {
+                        endMatch('CAUGHT');
+                        return;
+                    }
+                    const selfStudyBonus = (gameState.teacherPhase === 'SELF_STUDY') ? 2.0 : 1.0;
+                    gameState.combo = Math.min(2.5, gameState.combo + 0.14 * dt);
+
+                    // Balanced Pacing (Not too fast)
+                    gameState.score += 18 * meta.mult * gameState.combo * selfStudyBonus * dt;
+                    gameState.actionProgress += 32 * dt;
+
+                    // Smell rises slower during Self-Study
+                    const smellFactor = (gameState.teacherPhase === 'SELF_STUDY') ? 0.35 : 1.0;
+                    gameState.smellGauge = Math.min(100, gameState.smellGauge + meta.smellRate * smellFactor * dt);
+
+                    if (gameState.smellGauge >= 100 && gameState.teacherPhase !== 'SELF_STUDY') {
+                        endMatch('SMELL');
+                        return;
+                    }
+
+                    if (gameState.actionProgress >= 100) {
+                        gameState.actionProgress = 0;
+                        const biteBonus = Math.round(300 * selfStudyBonus);
+                        gameState.score += biteBonus;
+                        spawnPopup(`+${biteBonus}점! ${meta.label}`, 'text-amber-300');
+                        sfx('bite');
+                    }
+                } else {
+                    gameState.combo = 1.0;
+                }
+
+                updateHUD();
+            } else {
+                gameState.teacherYaw = Math.PI;
+                if (visionCone) visionCone.visible = false;
+                if (warningBadgeMesh) warningBadgeMesh.visible = false;
+            }
+
+            // Smooth Teacher Position, Rotation & Chalkboard Writing Motion
+            if (teacherGroup) {
+                teacherGroup.position.lerp(gameState.targetTeacherPos, 0.08);
+                gameState.teacherYaw += (gameState.targetTeacherYaw - gameState.teacherYaw) * 0.22;
+                teacherGroup.rotation.y = gameState.teacherYaw;
+
+                if (gameState.teacherPhase === 'WRITING' || !gameState.playing) {
+                    teacherRightArm.rotation.x = Math.PI * 0.72 + Math.sin(nowSec * 9) * 0.16;
+                    teacherRightArm.rotation.z = Math.cos(nowSec * 7) * 0.15;
+                } else {
+                    teacherRightArm.rotation.x *= 0.8;
+                    teacherRightArm.rotation.z *= 0.8;
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // --- 7. EVENT LISTENERS ---
+        document.getElementById('btnStartClass').addEventListener('click', () => {
+            initAudio();
+            if (!gameState.classCode || !gameState.classNum || !gameState.nickname) {
+                openEntryModal();
+            } else {
+                startMatch();
+            }
+        });
+
+        document.getElementById('btnQuickProfile').addEventListener('click', () => {
+            initAudio();
+            openEntryModal();
+        });
+
+        document.getElementById('closeEntryBtn').addEventListener('click', closeAllModals);
+
+        document.getElementById('entryForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            initAudio();
+            const code = document.getElementById('classCodeInput').value.trim().toUpperCase();
+            const cNum = document.getElementById('classNumInput').value.trim();
+            const nick = document.getElementById('nicknameInput').value.trim();
+
+            if (!code || !cNum || !nick) {
+                document.getElementById('formError').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('formError').classList.add('hidden');
+
+            gameState.classCode = code;
+            gameState.classNum = cNum;
+            gameState.nickname = nick;
+            saveProfile();
+            startMatch();
+        });
+
+        // Hotbar Mode Switching (Keys 1-7 & Click)
+        function selectDistractionMode(modeKey) {
+            if (!MODE_META[modeKey]) return;
+            gameState.mode = modeKey;
+            gameState.actionProgress = 0;
+            updateVisibleDeskProp();
+
+            document.querySelectorAll('.mode-slot').forEach(btn => {
+                const active = btn.dataset.mode === modeKey;
+                const badge = btn.querySelector('span:first-child');
+                const label = btn.querySelector('span:last-child');
+                if (active) {
+                    btn.className = 'mode-slot relative flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border-2 border-amber-400 bg-amber-500/20 transition';
+                    if (badge) badge.className = 'absolute top-1 left-1.5 w-3.5 h-3.5 rounded-full bg-amber-400 text-[9px] font-bold text-slate-950 flex items-center justify-center';
+                    if (label) label.className = 'text-[10px] font-bold text-amber-200 truncate w-full text-center mt-0.5';
+                } else {
+                    btn.className = 'mode-slot relative flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border border-slate-700/80 bg-[#252c4a] hover:border-amber-300 transition';
+                    if (badge) badge.className = 'absolute top-1 left-1.5 w-3.5 h-3.5 rounded-full bg-slate-700 text-[9px] font-bold text-slate-200 flex items-center justify-center';
+                    if (label) label.className = 'text-[10px] font-bold text-slate-200 truncate w-full text-center mt-0.5';
+                }
+            });
+            updateHUD();
+        }
+
+        document.querySelectorAll('.mode-slot').forEach(btn => {
+            btn.addEventListener('click', () => {
+                initAudio();
+                selectDistractionMode(btn.dataset.mode);
+                sfx('tick');
+            });
+        });
+
+        // Top-Right "나가기" Button
+        document.getElementById('btnExitMatch').addEventListener('click', () => {
+            if (countdownTimerId) {
+                clearInterval(countdownTimerId);
+                countdownTimerId = null;
+            }
+            closeAllModals();
+            layers.hud.classList.add('hidden');
+            layers.title.classList.remove('hidden');
+            document.getElementById('topRightTitleActions').classList.remove('hidden');
+            document.getElementById('dangerOverlay').classList.add('hidden');
+            document.getElementById('countdownOverlay').classList.add('hidden');
+            gameState.playing = false;
+            gameState.countingDown = false;
+            gameState.isSneaking = false;
+            gameState.targetCamPos.set(-11.2, 11.8, 13.0);
+            gameState.targetCamLook.set(0, 0.5, 0);
+        });
+
+        // Top-Right Mute Button
+        document.getElementById('btnTopRightMute').addEventListener('click', () => {
+            initAudio();
+            syncSoundButtons(!gameState.soundOn);
+        });
+
+        // Top-Right "창문 열기" Button
+        document.getElementById('btnOpenWindow').addEventListener('click', () => {
+            if (!gameState.playing) return;
+            initAudio();
+            if (gameState.teacherPhase === 'LOOKING') {
+                endMatch('CAUGHT');
+                return;
+            }
+            gameState.smellGauge = Math.max(0, gameState.smellGauge - 45);
+            spawnPopup('🌬️ 창문 열기! 냄새 환기!', 'text-sky-300');
+            sfx('tick');
+            updateHUD();
+        });
+
+        // Ranking Modal
+        document.getElementById('btnOpenRanking').addEventListener('click', () => {
+            initAudio();
+            closeAllModals();
+            renderRankingModal();
+            modals.ranking.classList.remove('hidden');
+        });
+        document.getElementById('closeRankingBtn').addEventListener('click', closeAllModals);
+        document.getElementById('rankingPlayBtn').addEventListener('click', () => {
+            if (!gameState.classCode) openEntryModal();
+            else startMatch();
+        });
+
+        // Settings Modal
+        function syncSoundButtons(state) {
+            gameState.soundOn = state;
+            document.getElementById('soundToggleBtn').textContent = state ? '🔊 효과음' : '🔇 음소거';
+            document.getElementById('settingsSoundBtn').textContent = state ? '켜짐' : '꺼짐';
+            document.getElementById('btnTopRightMute').textContent = state ? '🔊' : '🔇';
+        }
+        document.getElementById('soundToggleBtn').addEventListener('click', () => {
+            initAudio();
+            syncSoundButtons(!gameState.soundOn);
+        });
+        document.getElementById('settingsSoundBtn').addEventListener('click', () => {
+            initAudio();
+            syncSoundButtons(!gameState.soundOn);
+        });
+        document.getElementById('btnOpenSettings').addEventListener('click', () => {
+            closeAllModals();
+            modals.settings.classList.remove('hidden');
+        });
+        document.getElementById('closeSettingsBtn').addEventListener('click', closeAllModals);
+        document.getElementById('settingsEditProfileBtn').addEventListener('click', openEntryModal);
+
+        // Help Modal
+        document.getElementById('btnOpenHelp').addEventListener('click', () => {
+            closeAllModals();
+            modals.help.classList.remove('hidden');
+        });
+        document.getElementById('closeHelpBtn').addEventListener('click', closeAllModals);
+        document.getElementById('closeHelpConfirmBtn').addEventListener('click', closeAllModals);
+
+        // Result Modal Actions
+        document.getElementById('btnRetry').addEventListener('click', startMatch);
+        document.getElementById('btnBackTitle').addEventListener('click', () => {
+            closeAllModals();
+            layers.hud.classList.add('hidden');
+            layers.title.classList.remove('hidden');
+            document.getElementById('topRightTitleActions').classList.remove('hidden');
+            gameState.playing = false;
+            gameState.countingDown = false;
+            gameState.targetCamPos.set(-11.2, 11.8, 13.0);
+            gameState.targetCamLook.set(0, 0.5, 0);
+        });
+
+        // Sneak Hold Controls (Touch + Mouse + Spacebar + Keys 1~7)
+        const holdBtn = document.getElementById('holdActionBtn');
+        function setSneaking(active) {
+            if (!gameState.playing) {
+                gameState.isSneaking = false;
+                return;
+            }
+            gameState.isSneaking = active;
+        }
+
+        holdBtn.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            initAudio();
+            setSneaking(true);
+        });
+        window.addEventListener('pointerup', () => setSneaking(false));
+        window.addEventListener('pointercancel', () => setSneaking(false));
+
+        const KEY_TO_MODE = {
+            '1': 'ramen',
+            '2': 'youtube',
+            '3': 'makeup',
+            '4': 'maratang',
+            '5': 'dance',
+            '6': 'store',
+            '7': 'airplane'
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && gameState.playing) {
+                e.preventDefault();
+                if (!e.repeat) {
+                    initAudio();
+                    setSneaking(true);
+                }
+            } else if (KEY_TO_MODE[e.key] && gameState.playing) {
+                initAudio();
+                selectDistractionMode(KEY_TO_MODE[e.key]);
+                sfx('tick');
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'Space') setSneaking(false);
+        });
+
+        // Boot on Window Load
+        window.onload = function () {
+            loadProfile();
+            init3DDiorama();
+            animateLoop();
+        };
+    </script>
+</body>
+</html>
