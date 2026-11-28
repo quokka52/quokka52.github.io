@@ -164,7 +164,7 @@
                 </button>
 
                 <button id="btnOpenRanking" class="menu-btn-dark w-full py-3 font-semibold text-sm sm:text-base text-slate-200">
-                    랭킹
+                    명예의 전당
                 </button>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -214,39 +214,61 @@
                         <input type="text" id="classNumInput" required maxlength="10" placeholder="예: 3반"
                             class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-600 focus:border-indigo-400 outline-none font-bold text-white placeholder-slate-500">
                     </div>
-
                     <div>
                         <label for="nicknameInput" class="block text-xs font-bold text-slate-300 mb-1.5">
                             😎 닉네임 <span class="text-rose-400">*</span>
                         </label>
-                        <input type="text" id="nicknameInput" required maxlength="10" placeholder="예: 마라탕장인"
+                        <input type="text" id="nicknameInput" required maxlength="10" placeholder="예: 몰래왕"
                             class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-600 focus:border-indigo-400 outline-none font-bold text-white placeholder-slate-500">
                     </div>
                 </div>
 
-                <div id="formError" class="hidden text-xs font-bold text-rose-400 bg-rose-950/60 border border-rose-500/40 rounded-lg px-3 py-2">
+                <p id="formError" class="hidden text-xs font-bold text-rose-400 text-center">
                     학급코드, 반, 닉네임을 모두 입력해주세요!
-                </div>
+                </p>
 
                 <button type="submit" class="menu-btn-primary w-full py-3.5 font-jua text-xl text-white">
-                    저장하고 바로 수업 시작 🔥
+                    교실로 입장하기 🚀
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL: CLASSROOM RANKING BOARD -->
+    <!-- MODAL: CLASSROOM RANKING BOARD (HALL OF FAME) -->
     <div id="rankingModal" class="hidden fixed inset-0 z-30 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
         <div class="glass-dark-card w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-700 pb-3">
                 <div>
-                    <h2 id="rankingHeaderTitle" class="font-jua text-2xl text-amber-300">🏆 학급 실시간 랭킹</h2>
-                    <p class="text-xs text-slate-400">같은 학급코드 친구들과 점수를 겨뤄보세요</p>
+                    <h2 id="rankingHeaderTitle" class="font-jua text-2xl text-amber-300">🏆 명예의 전당</h2>
+                    <p id="rankingSubTitle" class="text-xs text-slate-400">전체 학생 및 우리 반 기록을 확인하세요</p>
                 </div>
                 <button id="closeRankingBtn" class="text-slate-400 hover:text-white text-xl px-2">✕</button>
             </div>
 
-            <div id="rankingList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+            <!-- Hall of Fame Tabs: 전체 / 우리반 -->
+            <div class="grid grid-cols-2 gap-2 bg-slate-900/90 p-1 rounded-xl border border-slate-700/80">
+                <button type="button" id="tabRankAll" class="py-2 rounded-lg text-xs sm:text-sm font-bold bg-indigo-600 text-white shadow transition">
+                    🌍 전체
+                </button>
+                <button type="button" id="tabRankClass" class="py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition">
+                    🏫 우리반
+                </button>
+            </div>
+
+            <!-- Our Class Filter Form (Shown when 우리반 tab is active) -->
+            <div id="classFilterBox" class="hidden bg-slate-900/80 p-3 rounded-xl border border-slate-700/80 space-y-2">
+                <div class="grid grid-cols-5 gap-2">
+                    <input type="text" id="rankFilterCodeInput" maxlength="12" placeholder="학급코드"
+                        class="col-span-2 px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-600 focus:border-amber-400 outline-none text-xs font-bold text-white uppercase placeholder-slate-500">
+                    <input type="text" id="rankFilterClassInput" maxlength="10" placeholder="반 (예: 3반)"
+                        class="col-span-2 px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-600 focus:border-amber-400 outline-none text-xs font-bold text-white placeholder-slate-500">
+                    <button type="button" id="btnSearchClassRank" class="col-span-1 bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 rounded-lg text-xs font-extrabold transition">
+                        조회
+                    </button>
+                </div>
+            </div>
+
+            <div id="rankingList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
 
             <button id="rankingPlayBtn" class="menu-btn-primary w-full py-3 font-jua text-lg text-white">
                 지금 도전하기
@@ -1060,63 +1082,68 @@
             );
             compact.position.set(propX - 0.04, propY + 0.015, propZ);
             const lipstick = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.02, 0.02, 0.11, 12),
+                new THREE.CylinderGeometry(0.018, 0.018, 0.09, 12),
                 new THREE.MeshStandardMaterial({ color: 0xe11d48 })
             );
-            lipstick.position.set(propX + 0.07, propY + 0.055, propZ + 0.02);
+            lipstick.position.set(propX + 0.07, propY + 0.045, propZ + 0.02);
             makeupGroup.add(compact, lipstick);
             classroomGroup.add(makeupGroup);
             deskItems.makeup = makeupGroup;
 
-            // 4. Maratang Bowl (마라탕)
+            // 4. Spicy Maratang Bowl (마라탕)
             const maraGroup = new THREE.Group();
-            const bowlOuter = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.16, 0.11, 0.1, 20),
-                new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.4 })
+            const bowl = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.16, 0.1, 0.09, 20),
+                new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 })
             );
-            bowlOuter.position.set(propX, propY + 0.05, propZ);
-            const soupCanvas = document.createElement('canvas');
-            soupCanvas.width = 128;
-            soupCanvas.height = 128;
-            const sctx = soupCanvas.getContext('2d');
-            sctx.fillStyle = '#dc2626';
-            sctx.fillRect(0, 0, 128, 128);
-            sctx.fillStyle = '#fef08a';
-            sctx.beginPath(); sctx.arc(46, 52, 14, 0, Math.PI * 2); sctx.fill();
-            sctx.fillStyle = '#ffffff';
-            sctx.beginPath(); sctx.arc(82, 64, 12, 0, Math.PI * 2); sctx.fill();
-            sctx.fillStyle = '#22c55e';
-            sctx.fillRect(50, 80, 26, 12);
-            const soupTex = new THREE.CanvasTexture(soupCanvas);
-            const soupTop = new THREE.Mesh(
+            bowl.position.set(propX, propY + 0.045, propZ);
+            const soup = new THREE.Mesh(
                 new THREE.CylinderGeometry(0.15, 0.15, 0.01, 20),
-                new THREE.MeshBasicMaterial({ map: soupTex })
+                new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.2 })
             );
-            soupTop.position.set(propX, propY + 0.098, propZ);
-            maraGroup.add(bowlOuter, soupTop);
+            soup.position.set(propX, propY + 0.086, propZ);
+            const lotus = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.032, 0.032, 0.014, 12),
+                new THREE.MeshStandardMaterial({ color: 0xfef3c7 })
+            );
+            lotus.position.set(propX - 0.04, propY + 0.093, propZ + 0.02);
+            const meatball = new THREE.Mesh(
+                new THREE.SphereGeometry(0.026, 10, 10),
+                new THREE.MeshStandardMaterial({ color: 0xf1f5f9 })
+            );
+            meatball.position.set(propX + 0.05, propY + 0.094, propZ - 0.02);
+            maraGroup.add(bowl, soup, lotus, meatball);
             classroomGroup.add(maraGroup);
             deskItems.maratang = maraGroup;
 
-            // 5. Store Snack / Pizza Bread (매점 가기)
+            // 5. Dance Mode (춤추기 - no desk item)
+            deskItems.dance = null;
+
+            // 6. Canteen Pizza Bread (매점 가기)
             const snackGroup = new THREE.Group();
-            const snackBag = new THREE.Mesh(
-                new THREE.BoxGeometry(0.22, 0.06, 0.16),
-                new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 })
+            const bread = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.12, 0.12, 0.035, 16),
+                new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.7 })
             );
-            snackBag.position.set(propX, propY + 0.03, propZ);
-            snackGroup.add(snackBag);
+            bread.position.set(propX, propY + 0.02, propZ);
+            const cheese = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.1, 0.01, 16),
+                new THREE.MeshStandardMaterial({ color: 0xfacc15 })
+            );
+            cheese.position.set(propX, propY + 0.04, propZ);
+            snackGroup.add(bread, cheese);
             classroomGroup.add(snackGroup);
             deskItems.store = snackGroup;
 
-            // 6. Paper Airplane (종이비행기)
+            // 7. Paper Airplane (비행기)
             const planeGroup = new THREE.Group();
-            const pWingL = new THREE.Mesh(
-                new THREE.BoxGeometry(0.18, 0.01, 0.28),
-                new THREE.MeshStandardMaterial({ color: 0xffffff })
+            const planeBody = new THREE.Mesh(
+                new THREE.ConeGeometry(0.08, 0.24, 3),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 })
             );
-            pWingL.position.set(propX, propY + 0.03, propZ);
-            pWingL.rotation.y = 0.25;
-            planeGroup.add(pWingL);
+            planeBody.rotation.x = -Math.PI / 2;
+            planeBody.position.set(propX, propY + 0.04, propZ);
+            planeGroup.add(planeBody);
             classroomGroup.add(planeGroup);
             deskItems.airplane = planeGroup;
             flyingPlaneMesh = planeGroup;
@@ -1125,42 +1152,48 @@
         }
 
         function updateVisibleDeskProp() {
-            Object.keys(deskItems).forEach(k => {
-                if (deskItems[k]) deskItems[k].visible = (k === gameState.mode);
+            Object.entries(deskItems).forEach(([key, group]) => {
+                if (group) group.visible = (key === gameState.mode);
             });
         }
 
-        function setupMouseFreeLook(domElement) {
+        function setupMouseFreeLook(domEl) {
             window.addEventListener('mousemove', (e) => {
                 if (!gameState.playing && !gameState.countingDown) return;
-                const nx = (e.clientX / window.innerWidth) * 2 - 1;  // -1 (left) to +1 (right)
-                const ny = (e.clientY / window.innerHeight) * 2 - 1; // -1 (top) to +1 (bottom)
-                gameState.lookYawOffset = -nx * 1.15;
-                gameState.lookPitchOffset = -ny * 0.45;
+                const nx = (e.clientX / window.innerWidth) * 2 - 1;
+                const ny = (e.clientY / window.innerHeight) * 2 - 1;
+                gameState.lookYawOffset = -nx * 0.95;
+                gameState.lookPitchOffset = -ny * 0.55;
             });
 
-            let lastTouchX = 0, lastTouchY = 0;
-            domElement.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 1) {
-                    lastTouchX = e.touches[0].clientX;
-                    lastTouchY = e.touches[0].clientY;
+            let dragging = false;
+            let prevX = 0;
+            let prevY = 0;
+            domEl.addEventListener('pointerdown', (e) => {
+                dragging = true;
+                prevX = e.clientX;
+                prevY = e.clientY;
+            });
+            window.addEventListener('pointermove', (e) => {
+                if (!dragging) return;
+                const dx = e.clientX - prevX;
+                const dy = e.clientY - prevY;
+                prevX = e.clientX;
+                prevY = e.clientY;
+                if (gameState.playing || gameState.countingDown) {
+                    gameState.lookYawOffset = Math.max(-1.2, Math.min(1.2, gameState.lookYawOffset - dx * 0.004));
+                    gameState.lookPitchOffset = Math.max(-0.65, Math.min(0.65, gameState.lookPitchOffset - dy * 0.004));
                 }
-            }, { passive: true });
-
-            domElement.addEventListener('touchmove', (e) => {
-                if ((!gameState.playing && !gameState.countingDown) || e.touches.length !== 1) return;
-                const dx = e.touches[0].clientX - lastTouchX;
-                const dy = e.touches[0].clientY - lastTouchY;
-                lastTouchX = e.touches[0].clientX;
-                lastTouchY = e.touches[0].clientY;
-                gameState.lookYawOffset = Math.max(-1.25, Math.min(1.25, gameState.lookYawOffset - dx * 0.005));
-                gameState.lookPitchOffset = Math.max(-0.5, Math.min(0.5, gameState.lookPitchOffset - dy * 0.004));
-            }, { passive: true });
+            });
+            window.addEventListener('pointerup', () => { dragging = false; });
         }
 
-        // --- 4. STORAGE & CLASSROOM RANKING ---
+        // --- 4. STORAGE & CLASSROOM RANKING (HALL OF FAME) ---
         const STORAGE_KEY_PROFILE = 'dowazo_sneak_profile_v2';
-        const STORAGE_KEY_SCORES = 'dowazo_sneak_scores_v2';
+        const STORAGE_KEY_SCORES = 'dowazo_sneak_scores_v3';
+        let activeRankingTab = 'ALL'; // 'ALL' | 'CLASS'
+        let searchFilterCode = '';
+        let searchFilterClass = '';
 
         function loadProfile() {
             try {
@@ -1213,77 +1246,175 @@
             }
         }
 
-        function getClassLeaderboard() {
-            const code = (gameState.classCode || 'DEMO').toUpperCase();
-            let allScores = {};
+        function getAllHallOfFameRecords() {
+            let records = [];
             try {
-                allScores = JSON.parse(localStorage.getItem(STORAGE_KEY_SCORES) || '{}');
+                const raw = localStorage.getItem(STORAGE_KEY_SCORES);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) records = parsed;
+                }
             } catch (e) {}
 
-            if (!allScores[code] || allScores[code].length === 0) {
-                allScores[code] = [
-                    { nickname: '마라탕매니아', classNum: gameState.classNum || '3반', score: 980, isBot: true },
-                    { nickname: '몰래폰장인',   classNum: gameState.classNum || '3반', score: 650, isBot: true },
-                    { nickname: '뒷자리꿀잠',   classNum: gameState.classNum || '3반', score: 420, isBot: true }
+            // Seed default Hall of Fame entries once if empty
+            if (records.length === 0) {
+                records = [
+                    { classCode: 'DEMO', classNum: '3반', nickname: '마라탕매니아', score: 1200, playCount: 1, updatedAt: Date.now() - 30000, isBot: true },
+                    { classCode: 'DEMO', classNum: '3반', nickname: '몰래폰장인',   score: 900,  playCount: 1, updatedAt: Date.now() - 20000, isBot: true },
+                    { classCode: 'DEMO', classNum: '2반', nickname: '뒷자리꿀잠',   score: 600,  playCount: 1, updatedAt: Date.now() - 10000, isBot: true }
                 ];
+                try {
+                    localStorage.setItem(STORAGE_KEY_SCORES, JSON.stringify(records));
+                } catch (e) {}
             }
-            return allScores[code].sort((a, b) => b.score - a.score);
+            return records;
         }
 
         function recordScore(finalScore) {
-            const code = (gameState.classCode || 'DEMO').toUpperCase();
-            let allScores = {};
-            try {
-                allScores = JSON.parse(localStorage.getItem(STORAGE_KEY_SCORES) || '{}');
-            } catch (e) {}
+            const code = (gameState.classCode || 'DEMO').trim().toUpperCase();
+            const cNum = (gameState.classNum || '1반').trim();
+            const nick = (gameState.nickname || '익명학생').trim();
 
-            const board = getClassLeaderboard();
-            const existingIdx = board.findIndex(item => item.nickname === gameState.nickname && item.classNum === gameState.classNum && !item.isBot);
+            const records = getAllHallOfFameRecords();
 
-            if (existingIdx >= 0) {
-                if (finalScore > board[existingIdx].score) board[existingIdx].score = finalScore;
+            // Find the student's very first record (same classCode + classNum + nickname)
+            const firstIdx = records.findIndex(
+                item => item.classCode === code && item.classNum === cNum && item.nickname === nick && !item.isBot
+            );
+
+            if (firstIdx >= 0) {
+                // 2nd+ play: update the existing first record in-place!
+                records[firstIdx].score = finalScore;
+                records[firstIdx].playCount = (records[firstIdx].playCount || 1) + 1;
+                records[firstIdx].updatedAt = Date.now();
             } else {
-                board.push({
-                    nickname: gameState.nickname || '익명학생',
-                    classNum: gameState.classNum || '1반',
+                // 1st play: create initial record
+                records.push({
+                    classCode: code,
+                    classNum: cNum,
+                    nickname: nick,
                     score: finalScore,
+                    playCount: 1,
+                    updatedAt: Date.now(),
                     isBot: false
                 });
             }
 
-            board.sort((a, b) => b.score - a.score);
-            allScores[code] = board;
             try {
-                localStorage.setItem(STORAGE_KEY_SCORES, JSON.stringify(allScores));
+                localStorage.setItem(STORAGE_KEY_SCORES, JSON.stringify(records));
             } catch (e) {}
 
-            const rank = board.findIndex(item => item.nickname === (gameState.nickname || '익명학생') && item.classNum === (gameState.classNum || '1반')) + 1;
-            return { board, rank };
+            const classBoard = records
+                .filter(item => item.classCode === code && item.classNum === cNum)
+                .sort((a, b) => b.score - a.score);
+
+            const rank = Math.max(1, classBoard.findIndex(
+                item => item.classCode === code && item.classNum === cNum && item.nickname === nick
+            ) + 1);
+
+            return { board: classBoard, rank };
+        }
+
+        function setRankingTab(tab) {
+            activeRankingTab = tab;
+            const btnAll = document.getElementById('tabRankAll');
+            const btnClass = document.getElementById('tabRankClass');
+            const filterBox = document.getElementById('classFilterBox');
+
+            if (tab === 'ALL') {
+                btnAll.className = 'py-2 rounded-lg text-xs sm:text-sm font-bold bg-indigo-600 text-white shadow transition';
+                btnClass.className = 'py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition';
+                filterBox.classList.add('hidden');
+            } else {
+                btnClass.className = 'py-2 rounded-lg text-xs sm:text-sm font-bold bg-indigo-600 text-white shadow transition';
+                btnAll.className = 'py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition';
+                filterBox.classList.remove('hidden');
+
+                // Pre-fill inputs with current search or logged-in student's class info
+                const codeInput = document.getElementById('rankFilterCodeInput');
+                const classInput = document.getElementById('rankFilterClassInput');
+                if (!codeInput.value && (searchFilterCode || gameState.classCode)) {
+                    codeInput.value = searchFilterCode || gameState.classCode;
+                }
+                if (!classInput.value && (searchFilterClass || gameState.classNum)) {
+                    classInput.value = searchFilterClass || gameState.classNum;
+                }
+                searchFilterCode = codeInput.value.trim().toUpperCase();
+                searchFilterClass = classInput.value.trim();
+            }
+
+            renderRankingModal();
         }
 
         function renderRankingModal() {
-            const code = (gameState.classCode || 'DEMO').toUpperCase();
-            document.getElementById('rankingHeaderTitle').textContent = `🏆 [${code}] 학급 실시간 랭킹`;
-            const board = getClassLeaderboard();
+            const allRecords = getAllHallOfFameRecords();
             const listEl = document.getElementById('rankingList');
+            const headerTitle = document.getElementById('rankingHeaderTitle');
+            const subTitle = document.getElementById('rankingSubTitle');
             listEl.innerHTML = '';
 
-            board.slice(0, 10).forEach((entry, idx) => {
-                const isMe = entry.nickname === gameState.nickname && entry.classNum === gameState.classNum && !entry.isBot;
+            let filtered = [];
+            if (activeRankingTab === 'ALL') {
+                headerTitle.textContent = '🏆 명예의 전당 · 전체';
+                subTitle.textContent = '모든 학급 학생들의 최고 순위입니다';
+                filtered = [...allRecords].sort((a, b) => b.score - a.score);
+            } else {
+                const qCode = searchFilterCode.trim().toUpperCase();
+                const qClass = searchFilterClass.trim();
+                headerTitle.textContent = qCode && qClass
+                    ? `🏆 [${qCode}] ${qClass} 명예의 전당`
+                    : '🏆 명예의 전당 · 우리반';
+                subTitle.textContent = '학급코드와 반을 입력하고 조회를 누르세요';
+
+                if (!qCode || !qClass) {
+                    listEl.innerHTML = `
+                        <div class="text-center py-8 text-xs sm:text-sm text-slate-400 bg-slate-900/60 rounded-xl border border-slate-800">
+                            위 입력칸에 <strong class="text-amber-300">학급코드</strong>와 <strong class="text-amber-300">반</strong>을 적고<br>
+                            <strong class="text-white">[조회]</strong> 버튼을 눌러주세요!
+                        </div>
+                    `;
+                    return;
+                }
+
+                filtered = allRecords
+                    .filter(item => item.classCode === qCode && item.classNum === qClass)
+                    .sort((a, b) => b.score - a.score);
+
+                if (filtered.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="text-center py-8 text-xs sm:text-sm text-slate-400 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <strong class="text-amber-300">[${qCode}] ${qClass}</strong>으로 플레이한 학생 기록이 아직 없습니다.
+                        </div>
+                    `;
+                    return;
+                }
+            }
+
+            filtered.slice(0, 20).forEach((entry, idx) => {
+                const isMe =
+                    entry.classCode === (gameState.classCode || '').toUpperCase() &&
+                    entry.classNum === gameState.classNum &&
+                    entry.nickname === gameState.nickname &&
+                    !entry.isBot;
                 const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}위`;
+                const playBadge = entry.playCount && entry.playCount > 1
+                    ? `<span class="ml-1.5 text-[10px] bg-slate-700/90 text-slate-300 px-1.5 py-0.5 rounded">${entry.playCount}회차 갱신</span>`
+                    : '';
+
                 const row = document.createElement('div');
                 row.className = `flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm ${
                     isMe ? 'bg-indigo-900/60 border-indigo-400 text-white' : 'bg-slate-900/80 border-slate-700/80 text-slate-200'
                 }`;
                 row.innerHTML = `
-                    <div class="flex items-center gap-2.5">
-                        <span class="font-jua text-base w-7 text-center text-amber-300">${medal}</span>
-                        <div>
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="font-jua text-base w-8 text-center text-amber-300 shrink-0">${medal}</span>
+                        <div class="truncate">
                             <span class="font-bold">${entry.nickname}</span>
-                            <span class="text-[11px] text-slate-400 ml-1">(${entry.classNum})</span>
+                            <span class="text-[11px] text-slate-400 ml-1">[${entry.classCode} · ${entry.classNum}]</span>
+                            ${playBadge}
                         </div>
                     </div>
-                    <span class="font-jua text-base text-amber-300">${entry.score.toLocaleString()}점</span>
+                    <span class="font-jua text-base text-amber-300 shrink-0 ml-2">${entry.score.toLocaleString()}점</span>
                 `;
                 listEl.appendChild(row);
             });
@@ -1792,18 +1923,35 @@
                 endMatch('CAUGHT');
                 return;
             }
-            gameState.smellGauge = Math.max(0, gameState.smellGauge - 45);
-            spawnPopup('🌬️ 창문 열기! 냄새 환기!', 'text-sky-300');
+            gameState.smellGauge = Math.max(0, gameState.smellGauge - 42);
+            spawnPopup('🌬️ 창문 환기! 냄새 감소', 'text-sky-300');
             sfx('tick');
             updateHUD();
         });
 
-        // Ranking Modal
+        // Ranking Modal (Hall of Fame)
         document.getElementById('btnOpenRanking').addEventListener('click', () => {
             initAudio();
             closeAllModals();
-            renderRankingModal();
+            setRankingTab('ALL');
             modals.ranking.classList.remove('hidden');
+        });
+        document.getElementById('tabRankAll').addEventListener('click', () => {
+            initAudio();
+            setRankingTab('ALL');
+            sfx('tick');
+        });
+        document.getElementById('tabRankClass').addEventListener('click', () => {
+            initAudio();
+            setRankingTab('CLASS');
+            sfx('tick');
+        });
+        document.getElementById('btnSearchClassRank').addEventListener('click', () => {
+            initAudio();
+            searchFilterCode = document.getElementById('rankFilterCodeInput').value.trim().toUpperCase();
+            searchFilterClass = document.getElementById('rankFilterClassInput').value.trim();
+            renderRankingModal();
+            sfx('tick');
         });
         document.getElementById('closeRankingBtn').addEventListener('click', closeAllModals);
         document.getElementById('rankingPlayBtn').addEventListener('click', () => {
